@@ -61,26 +61,24 @@ export function NavigationDrawer({ isOpen, onClose }: NavigationDrawerProps) {
                 </div>
 
                 {/* Menu Items */}
-                <div className="space-y-1 px-6 py-8">
+                <div className="space-y-1 w-2/3 ml-auto px-6 py-8 mt-28">
                     {menuItems.map((item) => (
                         <button
                             key={item.label}
                             onClick={onClose}
-                            className="group flex w-full items-center justify-between rounded-md px-4 py-4 text-sm font-light tracking-wide text-foreground transition-colors hover:bg-accent/10"
+                            className="group cursor-pointer flex w-full items-center justify-between rounded-md px-4 py-4 text-sm font-light tracking-wide text-foreground transition-colors hover:bg-accent/10"
                         >
                             <span>{item.label}</span>
-                            <ArrowRight className="h-4 w-4" />
+                            <ArrowRight className="h-5 w-5" />
                         </button>
                     ))}
-                </div>
 
-                {/* Bottom Actions */}
-                <div className="absolute bottom-0 left-0 right-0 border-t border-border/40 px-6 py-6">
-                    <div className="flex gap-4">
+                    {/* Bottom Actions */}
+                    <div className="flex gap-4 p-4 pl-1.5">
                         <Button
                             variant="ghost"
                             size="icon"
-                            className="text-foreground hover:bg-accent/10"
+                            className="text-foreground hover:bg-accent/10 [&_svg:not([class*='size-'])]:size-5 cursor-pointer"
                             aria-label="Favorites"
                         >
                             <Heart className="h-5 w-5" />
@@ -88,7 +86,7 @@ export function NavigationDrawer({ isOpen, onClose }: NavigationDrawerProps) {
                         <Button
                             variant="ghost"
                             size="icon"
-                            className="text-foreground hover:bg-accent/10"
+                            className="text-foreground hover:bg-accent/10 [&_svg:not([class*='size-'])]:size-5 cursor-pointer"
                             aria-label="Account"
                         >
                             <User className="h-5 w-5" />
