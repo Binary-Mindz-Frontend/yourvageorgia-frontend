@@ -96,7 +96,7 @@ export function Navbar() {
                         variant="ghost"
                         size="icon"
                         onClick={() => setIsSearchOpen(!isSearchOpen)}
-                        className="text-foreground hover:bg-accent/10 [&_svg:not([class*='size-'])]:size-5"
+                        className="text-foreground hover:bg-accent/10 [&_svg:not([class*='size-'])]:size-5 cursor-pointer"
                         aria-label="Search"
                     >
                         <Search className="h-5 w-5" />
