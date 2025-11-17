@@ -2,9 +2,9 @@ import { Button } from "@/components/ui/button";
 
 export default function HomePage() {
   return (
-    <div className="container bg-amber-50 h-44">
+    <div className="container mx-auto">
       <h2>HomePage</h2>
-      <Button>Hello</Button>
+      <Button size={"sm"} className="cursor-pointer">Hello</Button>
     </div>
   );
 }
