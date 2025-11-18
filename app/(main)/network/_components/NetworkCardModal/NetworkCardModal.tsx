@@ -9,7 +9,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import img5 from "@/public/assets/network/5.svg"; // replace with your real image
+import img5 from "@/public/assets/network/5.svg"; 
 import { Button } from "@/components/ui/button";
 
 export default function NetworkCardModal({ onClose }:any) {
