@@ -47,13 +47,12 @@ export function NavigationDrawer({ isOpen, onClose }: NavigationDrawerProps) {
                 aria-labelledby="drawer-title"
             >
                 {/* Header */}
-                <div className="absolute top-2 -right-16 flex items-center justify-between border-b border-border/40 px-6 py-6">
+                <div className={`absolute top-2 ${isOpen ? '-right-16' : ' right-0 pointer-events-none opacity-0'} flex items-center justify-between border-b border-border/40 m-6`}>
                     <Button
                         variant="ghost"
                         size="icon"
                         onClick={onClose}
-                        className={`text-foreground hover:bg-accent/10 [&_svg:not([class*='size-'])]:size-5 cursor-pointer ${isOpen ? 'opacity-100' : 'pointer-events-none opacity-0'
-                            }`}
+                        className={`text-foreground hover:bg-accent/10 [&_svg:not([class*='size-'])]:size-5 cursor-pointer `}
                         aria-label="Close menu"
                     >
                         <X className="h-5 w-5" />
@@ -61,7 +60,7 @@ export function NavigationDrawer({ isOpen, onClose }: NavigationDrawerProps) {
                 </div>
 
                 {/* Menu Items */}
-                <div className="space-y-1 w-2/3 ml-auto px-6 py-8 mt-28">
+                <div className="space-y-1 md:w-2/3 ml-auto px-6 py-8 mt-28">
                     {menuItems.map((item) => (
                         <button
                             key={item.label}
