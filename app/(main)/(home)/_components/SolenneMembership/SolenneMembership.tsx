@@ -1,30 +1,23 @@
-
-import { ArrowRight, Plus, Minus } from 'lucide-react';
+import { ArrowRight, Plus, Minus } from "lucide-react";
 import img from "@/assets/home/map_bg.svg";
 
 export default function SolenneMembership() {
-
-
   return (
-    <div className="min-h-scree text-white flex items-center justify-center">
+    <div className="text-white flex items-center justify-center my-38">
       <div className="w-full">
         {/* Main Grid Container */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 overflow-hidden">
-          
-          {/* Left Section - Image and Text */}
+        <div className="grid grid-cols-1 lg:grid-cols-[40%_60%] gap-0 overflow-hidden">
+          {/* Left Section */}
           <div className="relative bg-black">
-            {/* Background Image with Mirrors */}
-            <div 
+            <div
               className="absolute inset-0 bg-cover bg-center"
               style={{
-                backgroundImage: `url(img)`
+                backgroundImage: `url(${img})`,
               }}
             >
-              {/* Overlay gradient */}
               <div className="absolute inset-0 bg-linear-to-b from-black/60 via-transparent to-black/80"></div>
             </div>
 
-            {/* Content */}
             <div className="relative z-10 p-12 h-full flex flex-col justify-end min-h-[400px]">
               <h2 className="text-3xl font-light mb-3 tracking-wide">
                 Lumé Aesthetics
@@ -36,7 +29,7 @@ export default function SolenneMembership() {
             </div>
           </div>
 
-          {/* Right Section - Map */}
+          {/* Right Section */}
           <div className="relative bg-gray-100 min-h-[400px]">
             {/* Google Map Embed */}
             <iframe
@@ -53,11 +46,13 @@ export default function SolenneMembership() {
         </div>
 
         {/* Bottom Description */}
-        <div className="mt-12 text-center max-w-4xl mx-auto">
-          <p className="text-gray-300 text-base leading-relaxed font-light">
-            Solenne is a digital lifestyle membership for women in Dubai, connecting members to a curated network of wellness, 
-            beauty and lifestyle destinations across the city. Members exclusively have access to enjoy preferred rates and 
-            experiences designed to elevate everyday living.
+        <div className="mt-12 text-center">
+          <p className="text-gray-300 text-2xl leading-relaxed font-light">
+            Solenne is a digital lifestyle membership for women in Dubai,
+            connecting members to a curated network of wellness, beauty and
+            lifestyle destinations across the city. Members exclusively have
+            access to enjoy preferred rates and experiences designed to elevate
+            everyday living.
           </p>
         </div>
       </div>
