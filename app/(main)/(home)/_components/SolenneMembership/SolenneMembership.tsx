@@ -2,7 +2,7 @@ import { ArrowRight, Plus, Minus } from "lucide-react";
 
 export default function SolenneMembership() {
   return (
-    <div className="text-white flex items-center justify-center my-38 p-6 lg:p-0">
+    <div className="text-white flex items-center justify-center my-16 lg:my-38 p-6 lg:p-0">
       <div className="w-full">
         {/* Main Grid Container */}
         <div className="grid grid-cols-1 lg:grid-cols-[40%_60%] gap-0 overflow-hidden">
