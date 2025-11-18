@@ -1,9 +1,8 @@
 import { ArrowRight, Plus, Minus } from "lucide-react";
-import img from "@/assets/home/map_bg.svg";
 
 export default function SolenneMembership() {
   return (
-    <div className="text-white flex items-center justify-center my-38">
+    <div className="text-white flex items-center justify-center my-38 p-6 lg:p-0">
       <div className="w-full">
         {/* Main Grid Container */}
         <div className="grid grid-cols-1 lg:grid-cols-[40%_60%] gap-0 overflow-hidden">
@@ -12,7 +11,7 @@ export default function SolenneMembership() {
             <div
               className="absolute inset-0 bg-cover bg-center"
               style={{
-                backgroundImage: `url(${img})`,
+                backgroundImage: "url('/assets/home/map_bg.svg')",
               }}
             >
               <div className="absolute inset-0 bg-linear-to-b from-black/60 via-transparent to-black/80"></div>
@@ -46,8 +45,8 @@ export default function SolenneMembership() {
         </div>
 
         {/* Bottom Description */}
-        <div className="mt-12 text-center">
-          <p className="text-gray-300 text-2xl leading-relaxed font-light">
+        <div className="mt-12 lg:mt-38 text-center">
+          <p className="text-gray-300 text-lg lg:text-2xl leading-relaxed font-light">
             Solenne is a digital lifestyle membership for women in Dubai,
             connecting members to a curated network of wellness, beauty and
             lifestyle destinations across the city. Members exclusively have
