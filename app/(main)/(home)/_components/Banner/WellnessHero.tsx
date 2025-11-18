@@ -1,4 +1,4 @@
-import bannerImg from "@/assets/home/banner.svg";
+import bannerImg from "@/public/assets/home/banner.svg";
 import Image from "next/image";
 export default function WellnessHero() {
   return (

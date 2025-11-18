@@ -2,7 +2,7 @@ import { Instagram, Facebook, Linkedin, Mail } from "lucide-react";
 
 const Footer = () => {
   return (
-    <footer className="mt-12 py-8">
+    <footer className="mt-12 md:py-8">
       <div className="flex flex-col items-center gap-6">
         <a
           href="mailto:info@solenneuae.com"

@@ -1,7 +1,7 @@
-import img1 from "@/assets/home/card/CATEGORYMOVEMENT.svg";
-import img2 from "@/assets/home/card/CATEGORYMOVEMENT (1).svg";
-import img3 from "@/assets/home/card/CATEGORYMOVEMENT (2).svg";
-import img4 from "@/assets/home/card/CATEGORYMOVEMENT (3).svg";
+import img1 from "@/public/assets/home/card/CATEGORYMOVEMENT.svg";
+import img2 from "@/public/assets/home/card/CATEGORYMOVEMENT (1).svg";
+import img3 from "@/public/assets/home/card/CATEGORYMOVEMENT (2).svg";
+import img4 from "@/public/assets/home/card/CATEGORYMOVEMENT (3).svg";
 import Image, { StaticImageData } from "next/image";
 
 interface WellnessCard {
