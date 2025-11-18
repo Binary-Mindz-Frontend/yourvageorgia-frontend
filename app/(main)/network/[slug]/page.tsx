@@ -2,10 +2,7 @@
 
 import Image from "next/image";
 import {
-  ArrowLeft,
-  ArrowRight,
   MapPin,
-  Phone,
   Globe,
   Instagram,
   MessageCircle,
