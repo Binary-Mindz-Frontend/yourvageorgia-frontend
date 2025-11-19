@@ -43,7 +43,7 @@ const MembershipRegister = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 antialiased bg-black">
+    <div className="min-h-screen flex items-center justify-center p-4 antialiased">
       <div className="w-full max-w-[516px] mx-auto p-6 lg:p-0">
         <h1 className="text-4xl lg:text-5xl text-[#FFF] font-semibold font-serif text-center mb-10 tracking-wider">
           Join Solenne
