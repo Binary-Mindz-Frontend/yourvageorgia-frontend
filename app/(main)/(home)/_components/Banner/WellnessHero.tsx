@@ -13,11 +13,11 @@ export default function WellnessHero() {
           </h1>
 
           <div className="flex flex-col sm:flex-row sm:flex-wrap justify-center gap-4 sm:gap-6">
-            <Button className="px-8 py-3 w-full sm:w-auto bg-transparent border border-white text-white rounded-full hover:bg-white hover:text-black transition-all duration-300 text-base font-light tracking-wide">
+            <Button className="px-8 cursor-pointer py-3 w-full sm:w-auto bg-transparent border border-white text-white rounded-full hover:bg-white hover:text-black transition-all duration-300 text-base font-light tracking-wide">
               Become a member
             </Button>
 
-            <Button className="px-8 py-3 w-full sm:w-auto bg-transparent border border-white text-white rounded-full hover:bg-white hover:text-black transition-all duration-300 text-base font-light tracking-wide">
+            <Button className="px-8 cursor-pointer py-3 w-full sm:w-auto bg-transparent border border-white text-white rounded-full hover:bg-white hover:text-black transition-all duration-300 text-base font-light tracking-wide">
               Partner with us
             </Button>
           </div>

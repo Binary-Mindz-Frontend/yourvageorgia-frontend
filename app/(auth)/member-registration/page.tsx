@@ -1,5 +1,5 @@
 "use client";
-import { Calendar, EyeOff } from "lucide-react";
+import { EyeOff } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -180,12 +180,14 @@ const MembershipRegister = () => {
 
           {/* Submit Button */}
           <div className="pt-8 flex justify-center">
+            <Link href="/payment">
             <Button
               type="submit"
-              className="bg-black text-white border border-white hover:bg-white hover:text-black transition-colors font-medium py-2 px-8 rounded-full shadow-lg"
+              className="bg-black cursor-pointer text-white border border-white hover:bg-white hover:text-black transition-colors font-medium py-2 px-8 rounded-full shadow-lg"
             >
               Next
             </Button>
+            </Link>
           </div>
         </form>
       </div>

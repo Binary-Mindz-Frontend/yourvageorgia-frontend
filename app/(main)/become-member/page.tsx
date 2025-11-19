@@ -1,5 +1,4 @@
 import img from "@/public/assets/member/become-member.svg";
-import Image from "next/image";
 import TermsAndConditions from "./_components/TermsAndConditions";
 import Link from "next/link";
 
