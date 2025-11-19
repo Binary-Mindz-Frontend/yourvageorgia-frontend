@@ -91,7 +91,7 @@ export function NavigationDrawer({ isOpen, onClose }: NavigationDrawerProps) {
               </Button>
             </Link>
             
-            <Link href="#">
+            <Link href="/profile">
               <Button
                 variant="ghost"
                 size="icon"
