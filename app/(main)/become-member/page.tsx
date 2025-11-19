@@ -36,7 +36,7 @@ const SolenneMembership = () => {
 
         {/* Join Us Button */}
         <div className="flex justify-center mb-24 mt-6">
-          <Link href="/login">
+          <Link href="/member-registration">
             <button
               className="
             border border-white text-base px-7 py-2.5 rounded-full tracking-wider
