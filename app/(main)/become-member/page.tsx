@@ -1,6 +1,7 @@
 import img from "@/public/assets/member/become-member.svg";
 import Image from "next/image";
 import TermsAndConditions from "./_components/TermsAndConditions";
+import Link from "next/link";
 
 const SolenneMembership = () => {
   return (
@@ -24,8 +25,7 @@ const SolenneMembership = () => {
 
             <p className="lg:px-5 text-sm text-center lg:text-lg mb-6 leading-relaxed text-gray-300">
               One year of member access to preferred rates across our curated
-              network of
-             wellness, beauty and lifestyle partners in Dubai.
+              network of wellness, beauty and lifestyle partners in Dubai.
             </p>
 
             <p className="text-sm text-center lg:text-lg text-gray-300">
@@ -36,17 +36,19 @@ const SolenneMembership = () => {
 
         {/* Join Us Button */}
         <div className="flex justify-center mb-24 mt-6">
-          <button
-            className="
+          <Link href="/login">
+            <button
+              className="
             border border-white text-base px-7 py-2.5 rounded-full tracking-wider
             hover:bg-white hover:text-black transition duration-300
           "
-          >
-            Join Us
-          </button>
+            >
+              Join Us
+            </button>
+          </Link>
         </div>
 
-        <TermsAndConditions/>
+        <TermsAndConditions />
       </div>
     </div>
   );
