@@ -1,4 +1,3 @@
-
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Carousel,
@@ -7,12 +6,11 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import img1 from "@/public/assets/home/featured/Screenshot 2025-11-02 at 4.52.10 pm.svg";
-import img2 from "@/public/assets/home/featured/Screenshot 2025-11-02 at 4.54.38 pm.svg";
-import img3 from "@/public/assets/home/featured/Screenshot 2025-11-02 at 4.55.37 pm.svg";
-import img4 from "@/public/assets/home/featured/Screenshot 2025-11-02 at 4.57.42 pm.svg";
+import img1 from "@/public/assets/home/featured/1.svg";
+import img2 from "@/public/assets/home/featured/2.svg";
+import img3 from "@/public/assets/home/featured/2.svg";
+import img4 from "@/public/assets/home/featured/4.svg";
 import Image from "next/image";
-
 
 const partners = [
   {
@@ -64,11 +62,11 @@ export default function FeaturedPartnersCarousel() {
               <div className="p-1">
                 <Card className="border-0 bg-transparent">
                   <CardContent className="p-0">
-                    <div className="aspect-4/3 w-full lg:h-40 overflow-hidden cursor-pointer hover:scale-105 transition-transform duration-300">
+                    <div className="aspect-4/3 w-[320px] lg:h-40 overflow-hidden cursor-pointer hover:scale-105 transition-transform duration-300">
                       <Image
                         src={partner.image}
                         alt={`Partner ${partner.id}`}
-                        className="w-full h-full object-cover"
+                        className="w-[320px] h-full object-contain"
                       />
                     </div>
                   </CardContent>
@@ -78,10 +76,23 @@ export default function FeaturedPartnersCarousel() {
           ))}
         </CarouselContent>
         <div className="absolute left-12 right-12 ">
-        <CarouselPrevious className="text-white hover:bg-white/10 border-white/20">
-        </CarouselPrevious>
-        <CarouselNext className="text-white hover:bg-white/10 border-white/20">
-        </CarouselNext>
+          <CarouselPrevious className="bg-transparent border-none">
+            <Image
+              src="/icons/arrow-left.svg"
+              width={20}
+              height={20}
+              alt="prev"
+            />
+          </CarouselPrevious>
+
+          <CarouselNext className="bg-transparent border-none">
+            <Image
+              src="/icons/arrow-right.svg"
+              width={20}
+              height={20}
+              alt="next"
+            />
+          </CarouselNext>
         </div>
       </Carousel>
     </div>

@@ -28,7 +28,7 @@ const MyEdit = () => {
     // { img: img4, title: "Seva Table", location: "Jumeirah", category: "Taste" },
   ];
   return (
-    <div className="max-w-[872px] mx-auto mt-10 md:mt-25">
+    <div className="max-w-[872px] mx-auto p-4 lg:px-0 mt-10 md:mt-25">
       <div className="space-y-10">
         {data.map((item, index) => (
           <div
