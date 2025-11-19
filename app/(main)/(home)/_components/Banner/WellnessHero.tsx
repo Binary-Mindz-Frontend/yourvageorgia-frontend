@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import bannerImg from "@/public/assets/home/banner.svg";
 import Image from "next/image";
 export default function WellnessHero() {
@@ -12,13 +13,13 @@ export default function WellnessHero() {
           </h1>
 
           <div className="flex flex-col sm:flex-row sm:flex-wrap justify-center gap-4 sm:gap-6">
-            <button className="px-8 py-3 w-full sm:w-auto bg-transparent border border-white text-white rounded-full hover:bg-white hover:text-black transition-all duration-300 text-base font-light tracking-wide">
+            <Button className="px-8 py-3 w-full sm:w-auto bg-transparent border border-white text-white rounded-full hover:bg-white hover:text-black transition-all duration-300 text-base font-light tracking-wide">
               Become a member
-            </button>
+            </Button>
 
-            <button className="px-8 py-3 w-full sm:w-auto bg-transparent border border-white text-white rounded-full hover:bg-white hover:text-black transition-all duration-300 text-base font-light tracking-wide">
+            <Button className="px-8 py-3 w-full sm:w-auto bg-transparent border border-white text-white rounded-full hover:bg-white hover:text-black transition-all duration-300 text-base font-light tracking-wide">
               Partner with us
-            </button>
+            </Button>
           </div>
         </div>
 

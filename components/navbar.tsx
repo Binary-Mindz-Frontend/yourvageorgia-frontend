@@ -5,6 +5,7 @@ import { Menu, Search } from 'lucide-react'
 import { useState } from 'react'
 import { HeaderLogo } from './icons'
 import { NavigationDrawer } from './navigation-drawer'
+import Link from 'next/link'
 
 export function Navbar() {
     const [isOpen, setIsOpen] = useState(false)
@@ -36,7 +37,7 @@ export function Navbar() {
                                 onBlur={() => setIsSearchOpen(false)}
                             />
                         ) : (
-                            <HeaderLogo />
+                            <Link href="/"><HeaderLogo /></Link>
                         )}
                     </div>
 

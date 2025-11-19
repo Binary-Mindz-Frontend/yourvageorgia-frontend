@@ -18,29 +18,28 @@ export default function WellnessCards() {
       id: 1,
       title: "Movement",
       image: img2,
-      hoverText:
-        "Explore wellness destinations that nurture your glow from skin to spirit, beauty that begins in balance.",
+      hoverText:" Beauty lounges, hair salons and advanced skin clinics. Spaces dedicated to providing reliable, trusted services.",
     },
     {
       id: 2,
       title: "Radiance",
       image: img1,
       hoverText:
-        "Explore wellness destinations that nurture your glow from skin to spirit, beauty that begins in balance.",
+        " Padel Clubs, low-impact studios and gyms. Designed to support consistent, effective training",
     },
     {
       id: 3,
       title: "Recovery",
       image: img4,
       hoverText:
-        "Explore wellness destinations that nurture your glow from skin to spirit, beauty that begins in balance.",
+        " Massage, contrast therapy, IV wellness and restorative treatments curated to promote recovery, balance and reset.",
     },
     {
       id: 4,
       title: "Taste",
       image: img3,
       hoverText:
-        "Explore wellness destinations that nurture your glow from skin to spirit, beauty that begins in balance.",
+        " Concept cafes and dining destinations offering thoughtful menus, refined flavours and an elevated culinary approach.",
     },
   ];
 
@@ -74,21 +73,21 @@ export default function WellnessCards() {
               <div className="absolute inset-0 bg-black/50 group-hover:bg-black/50 transition-all duration-500 pointer-events-none"></div>
 
               {/* Title - visible by default, hidden on hover */}
-              <div className="absolute bottom-8 left-8 opacity-100 group-hover:opacity-0 transition-opacity duration-500 pointer-events-none">
-                <h3 className="text-white text-5xl font-serif">
+              <div className="absolute bottom-8 left-0 right-0 opacity-100 group-hover:opacity-0 transition-opacity duration-500 pointer-events-none">
+                <h3 className="text-white text-5xl font-serif text-center">
                   {card.title}
                 </h3>
               </div>
 
               {/* Hover Text - hidden by default, visible on hover */}
               <div
-                className={`absolute inset-0 flex items-end justify-center p-8 transition-opacity duration-500 pointer-events-none ${
+                className={`absolute inset-0 flex items-end justify-center p-6 transition-opacity duration-500 pointer-events-none ${
                   card.showTextByDefault
                     ? "opacity-100"
                     : "opacity-0 group-hover:opacity-100"
                 }`}
               >
-                <p className="text-white font-light italic leading-relaxed max-w-xs text-center">
+                <p className="text-white font-light italic leading-relaxed max-w-md text-left">
                   {card.hoverText}
                 </p>
               </div>
