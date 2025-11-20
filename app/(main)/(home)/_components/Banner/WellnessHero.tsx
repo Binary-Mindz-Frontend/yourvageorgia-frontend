@@ -22,11 +22,11 @@ export default function WellnessHero() {
           </h1>
 
           <div className="flex  sm:flex-row justify-center gap-4 sm:gap-6">
-            <Button className="cursor-pointer py-3  sm:w-auto bg-transparent border border-white text-white rounded-full hover:bg-white hover:text-black transition-all duration-300 text-sm lg:text-base tracking-wide">
+            <Button variant={"outline"} className="cursor-pointer py-3 rounded-full  sm:w-auto text-sm lg:text-base tracking-wide px-6">
               Become a member
             </Button>
 
-            <Button className="cursor-pointer py-3 sm:w-auto bg-transparent border border-white text-white rounded-full hover:bg-white hover:text-black transition-all duration-300 text-sm lg:text-base tracking-wide">
+            <Button variant={"outline"} className="cursor-pointer py-3 rounded-full sm:w-auto text-sm lg:text-base tracking-wide px-6">
               Partner with us
             </Button>
           </div>
