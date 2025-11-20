@@ -18,7 +18,8 @@ export default function WellnessCards() {
       id: 1,
       title: "Movement",
       image: img2,
-      hoverText:" Beauty lounges, hair salons and advanced skin clinics. Spaces dedicated to providing reliable, trusted services.",
+      hoverText:
+        " Beauty lounges, hair salons and advanced skin clinics. Spaces dedicated to providing reliable, trusted services.",
     },
     {
       id: 2,
@@ -43,20 +44,15 @@ export default function WellnessCards() {
     },
   ];
 
-
-
-
-
   return (
-    <section className="px-6 mt-16 md:my-38">
+    <section className="px-4 mt-16 md:my-38">
       <div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {cards.map((card) => (
             <div
               key={card.id}
-              className="group relative aspect-3/4 overflow-hidden rounded-lg cursor-pointer"
+              className="group relative h-[330px] sm:h-auto sm:aspect-3/4 overflow-hidden rounded-lg cursor-pointer"
               role="button"
-             
               aria-label={`${card.title} - ${card.hoverText}`}
             >
               {/* Image */}
@@ -70,7 +66,7 @@ export default function WellnessCards() {
               />
 
               {/* Dark Overlay */}
-              <div className="absolute inset-0 bg-black/50 group-hover:bg-black/50 transition-all duration-500 pointer-events-none"></div>
+              <div className="absolute inset-0 lg:bg-black/50 group-hover:bg-black/50 transition-all duration-500 pointer-events-none"></div>
 
               {/* Title - visible by default, hidden on hover */}
               <div className="absolute bottom-8 left-0 right-0 opacity-100 group-hover:opacity-0 transition-opacity duration-500 pointer-events-none">

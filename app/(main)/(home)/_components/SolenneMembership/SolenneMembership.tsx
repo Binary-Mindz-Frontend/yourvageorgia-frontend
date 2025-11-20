@@ -2,12 +2,12 @@ import { ArrowRight, Plus, Minus } from "lucide-react";
 
 export default function SolenneMembership() {
   return (
-    <div className="text-white flex items-center justify-center my-16 lg:my-38 p-6 lg:p-0">
+    <div className="text-white flex items-center justify-center my-16 lg:my-38 p-4 lg:p-0">
       <div className="w-full">
         {/* Main Grid Container */}
-        <div className="grid grid-cols-1 lg:grid-cols-[40%_60%] gap-0 overflow-hidden">
+        <div className="grid grid-cols-1 lg:grid-cols-[40%_60%] gap-0 overflow-hidden rounded-b-xl lg:rounded-none">
           {/* Left Section */}
-          <div className="relative bg-black">
+          <div className="relative bg-black order-1 lg:order-0 border-t-2 border-black">
             <div
               className="absolute inset-0 bg-cover bg-center"
               style={{
@@ -29,7 +29,7 @@ export default function SolenneMembership() {
           </div>
 
           {/* Right Section */}
-          <div className="relative bg-gray-100 min-h-[400px]">
+          <div className="relative bg-gray-100 min-h-[400px] rounded-xl lg:rounded-none">
             {/* Google Map Embed */}
             <iframe
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d462560.6828568059!2d54.89782139453125!3d25.076022800000015!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3e5f43496ad9c645%3A0xbde66e5084295162!2sDubai%20-%20United%20Arab%20Emirates!5e0!3m2!1sen!2s!4v1234567890123!5m2!1sen!2s"
@@ -39,7 +39,7 @@ export default function SolenneMembership() {
               allowFullScreen
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
-              className="absolute inset-0"
+              className="absolute inset-0 rounded-t-lg"
             ></iframe>
           </div>
         </div>
