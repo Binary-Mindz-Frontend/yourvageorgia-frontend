@@ -1,4 +1,5 @@
 "use client";
+import { Button } from "@/components/ui/button";
 import img1 from "@/public/assets/network/1.svg";
 import img2 from "@/public/assets/network/2.svg";
 import img3 from "@/public/assets/network/3.svg";
@@ -91,34 +92,58 @@ const NetworkFilter = () => {
   return (
     <div className="text-white p-4 max-w-4xl mx-auto">
       <header className="flex justify-end mb-8">
-        <button
-          className="text-white focus:outline-none hover:bg-gray-800 p-2 rounded transition"
+        <Button variant="ghost" size={"lg"}
+          className="text-white focus:outline-none hover:bg-gray-800 p-2 rounded transition cursor-pointer [&_svg:not([class*='size-'])]:size-6"
           onClick={() => setIsFilterOpen(true)}
         >
-          <ListFilter />
-        </button>
+          <ListFilter className="h-6 w-6" />
+        </Button>
       </header>
 
       {/* Filters */}
-      <div className="flex space-x-2 sm:space-x-3 mb-8 overflow-x-auto pb-2">
+      {/* <div className="gap-4 mb-8 overflow-x-auto pb-2">
         {filters.map((filter) => (
-          <button
+          <Button
+            variant="default"
             key={filter}
             onClick={() => {
               setActiveFilter(filter);
               setShowAll(false);
             }}
-            className={`px-4 py-3 w-full text-sm font-medium rounded-lg whitespace-nowrap 
+            className={`text-sm w-full font-medium rounded-lg whitespace-nowrap 
               ${activeFilter === filter && !showAll
                 ? "bg-white text-black"
-                : "border border-gray-700 text-white hover:bg-gray-800"
+                : "text-white"
               }
             `}
           >
             {filter}
-          </button>
+          </Button>
+        ))}
+      </div> */}
+
+      {/* Filters */}
+      <div className="flex gap-4 mb-8 overflow-x-auto pb-2">
+        {filters.map((filter) => (
+          <Button
+            variant="default"
+            key={filter}
+            onClick={() => {
+              setActiveFilter(filter);
+              setShowAll(false);
+            }}
+            className={`text-sm flex-1 min-w-0 font-medium rounded-lg whitespace-nowrap h-10
+        ${activeFilter === filter && !showAll
+                ? "bg-white text-black hover:bg-white"
+                : "text-white"
+              }
+      `}
+          >
+            {filter}
+          </Button>
         ))}
       </div>
+
 
       {/* Cards */}
       <div className="space-y-10">

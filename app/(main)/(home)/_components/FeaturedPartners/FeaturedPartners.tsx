@@ -7,8 +7,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import img1 from "@/public/assets/home/featured/1.svg";
-import img2 from "@/public/assets/home/featured/2.svg";
-import img3 from "@/public/assets/home/featured/2.svg";
+import { default as img2, default as img3 } from "@/public/assets/home/featured/2.svg";
 import img4 from "@/public/assets/home/featured/4.svg";
 import Image from "next/image";
 
@@ -76,7 +75,7 @@ export default function FeaturedPartnersCarousel() {
           ))}
         </CarouselContent>
         <div className="absolute left-12 right-12 ">
-          <CarouselPrevious className="bg-transparent border-none">
+          <CarouselPrevious className="bg-transparent border-none cursor-pointer">
             <Image
               src="/icons/arrow-left.svg"
               width={20}
@@ -85,7 +84,7 @@ export default function FeaturedPartnersCarousel() {
             />
           </CarouselPrevious>
 
-          <CarouselNext className="bg-transparent border-none">
+          <CarouselNext className="bg-transparent border-none cursor-pointer">
             <Image
               src="/icons/arrow-right.svg"
               width={20}
