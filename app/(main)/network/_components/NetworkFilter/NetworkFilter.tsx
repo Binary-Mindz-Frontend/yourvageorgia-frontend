@@ -174,7 +174,7 @@ const NetworkFilter = () => {
         <div className="mt-10 flex justify-center">
           <button
             onClick={() => setShowAll(true)}
-            className="p-3 rounded-full hover:bg-gray-900 transition"
+            className="p-3 rounded-full hover:bg-black/50 cursor-pointer transition"
           >
             <ChevronDown className="lg:w-10 lg:h-10" />
           </button>

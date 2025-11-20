@@ -29,11 +29,14 @@ const MyEdit = () => {
   ];
   return (
     <div className="max-w-[872px] mx-auto p-4 lg:px-0 mt-10 md:mt-25">
-      <div className="space-y-10">
+      <header>
+        <h2 className="font-serif text-3xl lg:text-5xl font-semibold text-center mb-10 lg:mb-20 ">My Edit</h2>
+      </header>
+      <div className="space-y-5 lg:space-y-10">
         {data.map((item, index) => (
           <div
             key={index}
-            className="relative w-full aspect-video rounded-xl overflow-hidden shadow-2xl cursor-pointer"
+            className="relative w-full h-61 md:h-auto aspect-video rounded-xl overflow-hidden shadow-2xl cursor-pointer"
           >
             <div
               className="absolute inset-0 bg-cover bg-center"
@@ -42,7 +45,7 @@ const MyEdit = () => {
                 filter: "brightness(0.9) saturate(1.1)",
               }}
             >
-              <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/30 to-transparent"></div>
+              <div className="absolute inset-0 bg-linear-to-t from-black/10 via-black/10 to-transparent"></div>
 
               <div className="absolute bottom-0 left-0 p-6 text-white">
                 <div className="flex items-center justify-between">
