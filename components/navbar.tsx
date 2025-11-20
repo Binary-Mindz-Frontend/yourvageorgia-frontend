@@ -2,10 +2,10 @@
 
 import { Button } from '@/components/ui/button'
 import { Menu, Search } from 'lucide-react'
+import Link from 'next/link'
 import { useState } from 'react'
 import { HeaderLogo } from './icons'
 import { NavigationDrawer } from './navigation-drawer'
-import Link from 'next/link'
 
 export function Navbar() {
     const [isOpen, setIsOpen] = useState(false)
@@ -20,10 +20,10 @@ export function Navbar() {
                         variant="ghost"
                         size="icon"
                         onClick={() => setIsOpen(true)}
-                        className="text-foreground hover:bg-accent/10 [&_svg:not([class*='size-'])]:size-5 cursor-pointer"
+                        className="text-foreground hover:bg-accent/10 [&_svg:not([class*='size-'])]:size-6 cursor-pointer"
                         aria-label="Open menu"
                     >
-                        <Menu className="h-5 w-5" />
+                        <Menu className="h-6 w-6" />
                     </Button>
 
                     {/* Center: Brand Logo or Search Field */}
@@ -46,10 +46,10 @@ export function Navbar() {
                         variant="ghost"
                         size="icon"
                         onClick={() => setIsSearchOpen(!isSearchOpen)}
-                        className="text-foreground hover:bg-accent/10 [&_svg:not([class*='size-'])]:size-5 cursor-pointer"
+                        className="text-foreground hover:bg-accent/10 [&_svg:not([class*='size-'])]:size-6 cursor-pointer"
                         aria-label="Search"
                     >
-                        <Search className="h-5 w-5" />
+                        <Search className="h-6 w-6" />
                     </Button>
                 </div>
             </nav>

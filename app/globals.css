@@ -45,6 +45,7 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --color-selected-filter: var(--selected-filter)
 }
 
 :root {
@@ -114,7 +115,8 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
-}
+  --selected-filter: oklch(42.67,33.4,270);
+} 
 
 @layer base {
   * {
