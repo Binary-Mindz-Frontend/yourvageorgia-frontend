@@ -41,7 +41,7 @@ const partners = [
 export default function FeaturedPartnersCarousel() {
   return (
     <div className="relative w-full flex flex-col items-center justify-center mb-36 p-4 lg:p-0">
-      <h1 className="text-5xl md:text-6xl font-serif text-white lg:mb-16 tracking-wide">
+      <h1 className="text-3xl md:text-6xl font-serif text-center  text-white lg:mb-16 tracking-wide">
         Featured Partners
       </h1>
 
@@ -61,11 +61,11 @@ export default function FeaturedPartnersCarousel() {
               <div className="p-1">
                 <Card className="border-0 bg-transparent">
                   <CardContent className="p-0">
-                    <div className="aspect-4/3 w-[320px] lg:h-40 overflow-hidden cursor-pointer hover:scale-105 transition-transform duration-300">
+                    <div className=" lg:h-40 overflow-hidden cursor-pointer hover:scale-105 transition-transform duration-300">
                       <Image
                         src={partner.image}
                         alt={`Partner ${partner.id}`}
-                        className="w-[320px] h-full object-contain"
+                        className="w-full  h-full object-contain"
                       />
                     </div>
                   </CardContent>

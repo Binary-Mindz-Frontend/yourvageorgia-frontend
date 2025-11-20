@@ -1,6 +1,4 @@
-
-import membership from "@/public/assets/member/membership-card.svg"
-import Image from "next/image";
+import membership from "@/public/assets/profile/profile.jpg";
 import Link from "next/link";
 
 const ProfilePage = () => {
@@ -26,14 +24,31 @@ const ProfilePage = () => {
       </div>
 
       {/* Membership Card Container */}
-      <div>
-        <Image src={membership} alt="" />
+      <div className="relative w-full">
+        {/* Background Image */}
+        <div
+          className="w-full h-[290px] lg:h-[620px] bg-cover bg-center rounded-xl flex flex-col justify-end items-center p-6"
+          style={{
+            backgroundImage: `url(${membership.src})`,
+          }}
+        >
+          {/* Member Info On Image Bottom */}
+          <h1 className="text-xl lg:text-4xl  text-white font-semibold font-serif tracking-wider">
+            {memberData.name}
+          </h1>
+          <p className="text-sm lg:text-2xl text-[#FFFFFF]/80">ID: {memberData.id}</p>
+          <p className="text-sm lg:text-2xl text-[#FFFFFF]/80">
+           Expiry : {memberData.expiry}
+          </p>
+        </div>
       </div>
 
       {/* Log out Button */}
-      <Link href="/"><button className="mt-12 cursor-pointer text-gray-400 hover:text-white transition-colors duration-200 lg:text-2xl focus:outline-none focus:ring-2 focus:ring-gray-600 rounded-md p-2">
-        Log out
-      </button></Link>
+      <Link href="/">
+        <button className="mt-12 cursor-pointer text-gray-400 hover:text-white transition-colors duration-200 lg:text-2xl focus:outline-none focus:ring-2 focus:ring-gray-600 rounded-md p-2">
+          Log out
+        </button>
+      </Link>
     </div>
   );
 };
