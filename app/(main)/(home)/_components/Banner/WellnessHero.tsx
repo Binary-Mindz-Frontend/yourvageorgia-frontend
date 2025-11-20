@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import bannerImg from "@/public/assets/home/banner.svg";
 import Image from "next/image";
+import Link from "next/link";
 export default function WellnessHero() {
   return (
     <section className="pt-10 md:pt-14 lg:pt-16 px-4 md:px-0">
@@ -22,13 +23,22 @@ export default function WellnessHero() {
           </h1>
 
           <div className="flex sm:flex-row justify-center gap-4 sm:gap-6">
-            <Button variant={"outline"} className="cursor-pointer py-3 rounded-full  sm:w-auto text-sm lg:text-base tracking-wide px-6">
-              Become a member
-            </Button>
-
-            <Button variant={"outline"} className="cursor-pointer py-3 rounded-full sm:w-auto text-sm lg:text-base tracking-wide px-6">
-              Partner with us
-            </Button>
+            <Link href="/become-member">
+              <Button
+                variant={"outline"}
+                className="cursor-pointer py-3 rounded-full  sm:w-auto text-sm lg:text-base tracking-wide px-6"
+              >
+                Become a member
+              </Button>
+            </Link>
+            <Link href="/partnership">
+              <Button
+                variant={"outline"}
+                className="cursor-pointer py-3 rounded-full sm:w-auto text-sm lg:text-base tracking-wide px-6"
+              >
+                Partner with us
+              </Button>
+            </Link>
           </div>
         </div>
       </div>

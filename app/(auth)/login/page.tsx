@@ -113,10 +113,10 @@ const MemberLogin = () => {
             <Link href="/profile"><Button
               type="submit"
               disabled={isLoading}
-              className={`bg-black cursor-pointer text-white border border-white hover:bg-white hover:text-black transition-colors font-medium py-2 px-8 rounded-full shadow-lg${
+              className={`bg-black cursor-pointer text-white border border-white  font-medium py-2 px-8 rounded-full shadow-lg ${
                 isLoading 
                   ? 'border-gray-600 bg-gray-900 cursor-not-allowed' 
-                  : 'border-white hover:bg-white hover:text-black'
+                  : 'border-white'
               }`}
             >
               {isLoading ? 'Processing...' : 'Login'}
