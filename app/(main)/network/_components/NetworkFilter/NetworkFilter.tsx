@@ -4,12 +4,7 @@ import img1 from "@/public/assets/network/1.svg";
 import img2 from "@/public/assets/network/2.svg";
 import img3 from "@/public/assets/network/3.svg";
 import img4 from "@/public/assets/network/4.svg";
-import {
-  ArrowRight,
-  ChevronDown,
-  Heart,
-  ListFilter,
-} from "lucide-react";
+import { ArrowRight, ChevronDown, Heart, ListFilter } from "lucide-react";
 import { useState } from "react";
 import NetworkCardModal from "../NetworkCardModal/NetworkCardModal";
 import { FilterDrawer } from "./FilterDrawer"; // Import the new component
@@ -85,14 +80,24 @@ const NetworkFilter = () => {
 
   const filters = ["All", "Movement", "Recovery", "Radiance", "Taste"];
 
-  const handleFilterChange = (filters: { locations: string[]; activities: string[] }) => {
+  const handleFilterChange = (filters: {
+    locations: string[];
+    activities: string[];
+  }) => {
     setAppliedFilters(filters);
   };
 
   return (
     <div className="text-white p-4 max-w-4xl mx-auto">
+
+      <div>
+        <h2 className="font-serif text-[26px] text-center md:text-5xl lg:my-20">The Network</h2>
+      </div>
+
       <header className="flex justify-end mb-8">
-        <Button variant="ghost" size={"lg"}
+        <Button
+          variant="ghost"
+          size={"lg"}
           className="text-white focus:outline-none hover:bg-gray-800 p-2 rounded transition cursor-pointer [&_svg:not([class*='size-'])]:size-6"
           onClick={() => setIsFilterOpen(true)}
         >
@@ -101,42 +106,20 @@ const NetworkFilter = () => {
       </header>
 
       {/* Filters */}
-      {/* <div className="gap-4 mb-8 overflow-x-auto pb-2">
+      <div className="flex gap-4 mb-8 overflow-x-auto pb-2 sm:grid sm:grid-cols-5 lg:overflow-visible">
         {filters.map((filter) => (
           <Button
-            variant="default"
             key={filter}
             onClick={() => {
               setActiveFilter(filter);
               setShowAll(false);
             }}
-            className={`text-sm w-full font-medium rounded-lg whitespace-nowrap 
-              ${activeFilter === filter && !showAll
-                ? "bg-white text-black"
-                : "text-white"
-              }
-            `}
-          >
-            {filter}
-          </Button>
-        ))}
-      </div> */}
-
-      {/* Filters */}
-      <div className="flex gap-4 mb-8 overflow-x-auto pb-2">
-        {filters.map((filter) => (
-          <Button
-            variant="default"
-            key={filter}
-            onClick={() => {
-              setActiveFilter(filter);
-              setShowAll(false);
-            }}
-            className={`text-sm flex-1 min-w-0 font-medium rounded-lg whitespace-nowrap h-10
-        ${activeFilter === filter && !showAll
-                ? "bg-white text-black hover:bg-white"
-                : "text-white"
-              }
+            className={`md:py-2.5 rounded lg:rounded-lg whitespace-nowrap min-w-max
+        ${
+          activeFilter === filter && !showAll
+            ? "bg-white text-black hover:bg-white"
+            : "text-white"
+        }
       `}
           >
             {filter}
@@ -144,14 +127,13 @@ const NetworkFilter = () => {
         ))}
       </div>
 
-
       {/* Cards */}
       <div className="space-y-10">
         {finalData.map((item, index) => (
           <div
             key={index}
             onClick={() => setIsModalOpen(true)}
-            className="relative w-full aspect-video rounded-xl overflow-hidden shadow-2xl cursor-pointer"
+            className="relative w-full h-61 lg:h-auto aspect-video rounded-xl overflow-hidden shadow-2xl cursor-pointer"
           >
             <div
               className="absolute inset-0 bg-cover bg-center"
