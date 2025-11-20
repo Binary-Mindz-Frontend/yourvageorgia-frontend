@@ -1,23 +1,23 @@
 "use client";
-import { useState } from "react";
 import img1 from "@/public/assets/network/1.svg";
 import img2 from "@/public/assets/network/2.svg";
 import img3 from "@/public/assets/network/3.svg";
 import img4 from "@/public/assets/network/4.svg";
 import {
   ArrowRight,
+  ChevronDown,
   Heart,
   ListFilter,
-  ChevronDown,
-  ChevronLeft,
 } from "lucide-react";
+import { useState } from "react";
 import NetworkCardModal from "../NetworkCardModal/NetworkCardModal";
-// import NetworkCardModal from "./NetworkCardModal"; // <-- IMPORT
+import { FilterDrawer } from "./FilterDrawer"; // Import the new component
 
 const NetworkFilter = () => {
   const [activeFilter, setActiveFilter] = useState("All");
   const [showAll, setShowAll] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false); // <-- MODAL STATE
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isFilterOpen, setIsFilterOpen] = useState(false); // Filter drawer state
 
   const data = [
     {
@@ -25,36 +25,76 @@ const NetworkFilter = () => {
       title: "The Hundred Wellness Centre",
       location: "Jumeirah",
       category: "Movement",
+      activity: "Gym",
     },
     {
       img: img2,
       title: "Reform Studio",
       location: "Al Quoz",
       category: "Recovery",
+      activity: "Reformer Pilates",
     },
     {
       img: img3,
       title: "Urban Yoga",
-      location: "Downtown Dubai",
+      location: "Downtown",
       category: "Radiance",
+      activity: "Spa",
     },
-    { img: img4, title: "Seva Table", location: "Jumeirah", category: "Taste" },
-    { img: img4, title: "New one", location: "Jumeirah", category: "Taste" },
+    {
+      img: img4,
+      title: "Seva Table",
+      location: "Jumeirah",
+      category: "Taste",
+      activity: "Coffee",
+    },
+    {
+      img: img4,
+      title: "New one",
+      location: "Palm Jumeirah",
+      category: "Taste",
+      activity: "Massage",
+    },
   ];
+
+  const [appliedFilters, setAppliedFilters] = useState({
+    locations: [] as string[],
+    activities: [] as string[],
+  });
 
   const filteredData =
     activeFilter === "All"
       ? data
       : data.filter((item) => item.category === activeFilter);
 
-  const finalData = showAll ? data : filteredData;
+  // Apply drawer filters
+  let finalData = showAll ? data : filteredData;
+
+  if (appliedFilters.locations.length > 0) {
+    finalData = finalData.filter((item) =>
+      appliedFilters.locations.includes(item.location)
+    );
+  }
+
+  if (appliedFilters.activities.length > 0) {
+    finalData = finalData.filter((item) =>
+      appliedFilters.activities.includes(item.activity)
+    );
+  }
 
   const filters = ["All", "Movement", "Recovery", "Radiance", "Taste"];
+
+  const handleFilterChange = (filters: { locations: string[]; activities: string[] }) => {
+    setAppliedFilters(filters);
+  };
 
   return (
     <div className="text-white p-4 max-w-4xl mx-auto">
       <header className="flex justify-end mb-8">
-        <button className="text-white focus:outline-none">
+        <button
+          className="text-white focus:outline-none hover:bg-gray-800 p-2 rounded transition"
+          onClick={() => setIsFilterOpen(true)}
+        >
           <ListFilter />
         </button>
       </header>
@@ -69,10 +109,9 @@ const NetworkFilter = () => {
               setShowAll(false);
             }}
             className={`px-4 py-3 w-full text-sm font-medium rounded-lg whitespace-nowrap 
-              ${
-                activeFilter === filter && !showAll
-                  ? "bg-white text-black"
-                  : "border border-gray-700 text-white hover:bg-gray-800"
+              ${activeFilter === filter && !showAll
+                ? "bg-white text-black"
+                : "border border-gray-700 text-white hover:bg-gray-800"
               }
             `}
           >
@@ -86,7 +125,7 @@ const NetworkFilter = () => {
         {finalData.map((item, index) => (
           <div
             key={index}
-            onClick={() => setIsModalOpen(true)} // <-- OPEN MODAL ON CLICK
+            onClick={() => setIsModalOpen(true)}
             className="relative w-full aspect-video rounded-xl overflow-hidden shadow-2xl cursor-pointer"
           >
             <div
@@ -96,7 +135,7 @@ const NetworkFilter = () => {
                 filter: "brightness(0.9) saturate(1.1)",
               }}
             >
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
+              <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/30 to-transparent"></div>
 
               <div className="absolute bottom-0 left-0 p-6 text-white">
                 <div className="flex items-center justify-between">
@@ -134,13 +173,19 @@ const NetworkFilter = () => {
         </div>
       )}
 
-      {/* MODAL RENDER */}
+      {/* Network Card Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[999] overflow-y-auto">
-          {/* Modal Content */}
-            <NetworkCardModal onClose={() => setIsModalOpen(false)} />
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-999 overflow-y-auto">
+          <NetworkCardModal onClose={() => setIsModalOpen(false)} />
         </div>
       )}
+
+      {/* Filter Drawer */}
+      <FilterDrawer
+        isOpen={isFilterOpen}
+        onClose={() => setIsFilterOpen(false)}
+        onFilterChange={handleFilterChange}
+      />
     </div>
   );
 };
