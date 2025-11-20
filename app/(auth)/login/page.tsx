@@ -2,6 +2,7 @@
 import { Button } from '@/components/ui/button';
 // import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import Link from 'next/link';
 import { useState } from 'react';
 
 
@@ -105,17 +106,17 @@ const MemberLogin = () => {
 
           {/* Login Button - Now using the Button component */}
           <div className="pt-1 flex justify-center">
-            <Button
+            <Link href="/profile"><Button
               type="submit"
               disabled={isLoading}
-              className={`${
+              className={`bg-black cursor-pointer text-white border border-white hover:bg-white hover:text-black transition-colors font-medium py-2 px-8 rounded-full shadow-lg${
                 isLoading 
                   ? 'border-gray-600 bg-gray-900 cursor-not-allowed' 
                   : 'border-white hover:bg-white hover:text-black'
               }`}
             >
               {isLoading ? 'Processing...' : 'Login'}
-            </Button>
+            </Button></Link>
           </div>
 
         </form>

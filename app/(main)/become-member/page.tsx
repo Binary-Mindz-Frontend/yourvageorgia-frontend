@@ -1,11 +1,10 @@
 import img from "@/public/assets/member/become-member.svg";
-import Image from "next/image";
 import TermsAndConditions from "./_components/TermsAndConditions";
 import Link from "next/link";
 
 const SolenneMembership = () => {
   return (
-    <div className="min-h-screen text-white mt-28">
+    <div className="min-h-screen text-white mt-10 lg:mt-28 p-4 lg:p-0">
       <div className="container mx-auto">
         {/* === Membership Card Section === */}
         <div
@@ -36,7 +35,7 @@ const SolenneMembership = () => {
 
         {/* Join Us Button */}
         <div className="flex justify-center mb-24 mt-6">
-          <Link href="/login">
+          <Link href="/member-registration">
             <button
               className="
             border border-white text-base px-7 py-2.5 rounded-full tracking-wider
