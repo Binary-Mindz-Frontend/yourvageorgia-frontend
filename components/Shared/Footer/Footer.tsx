@@ -1,4 +1,9 @@
-import { Instagram, Facebook, Linkedin, Mail } from "lucide-react";
+import {
+  FacebookIcon,
+  InstaIcon,
+  LinkdeinIcon,
+} from "@/components/Icons/Icons";
+import { Instagram, Facebook, Linkedin, Mail, MailIcon } from "lucide-react";
 
 const Footer = () => {
   return (
@@ -16,28 +21,28 @@ const Footer = () => {
             className="text-white hover:text-white/80 transition-colors"
             aria-label="Instagram"
           >
-            <Instagram className="h-7 w-7" />
+            <InstaIcon />
           </a>
           <a
             href="#"
             className="text-white hover:text-white/80 transition-colors"
             aria-label="Facebook"
           >
-            <Facebook className="h- w-5" />
+            <FacebookIcon />
           </a>
           <a
             href="#"
             className="text-white hover:text-white/80 transition-colors"
             aria-label="LinkedIn"
           >
-            <Linkedin className="h-7 w-7" />
+            <LinkdeinIcon />
           </a>
           <a
             href="#"
             className="text-white hover:text-white/80 transition-colors"
             aria-label="Email"
           >
-            <Mail className="h-7 w-7" />
+            <MailIcon />
           </a>
         </div>
       </div>

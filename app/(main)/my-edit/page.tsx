@@ -74,7 +74,7 @@ const MyEdit = () => {
       {/* Show All Arrow */}
 
       <div className="mt-10 flex justify-center">
-        <button className="p-3 rounded-full hover:bg-gray-900 transition">
+        <button className="p-3 rounded-full hover:bg-black/50 transition">
           <ChevronDown className="lg:w-10 lg:h-10" />
         </button>
       </div>

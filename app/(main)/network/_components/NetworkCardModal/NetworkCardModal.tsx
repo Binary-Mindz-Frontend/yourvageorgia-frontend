@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import img5 from "@/public/assets/network/5.svg";
 import { Button } from "@/components/ui/button";
+import { WhatsappIcon } from "./Icon/Icons";
 
 export default function NetworkCardModal({ onClose }: any) {
   return (
@@ -74,11 +75,11 @@ export default function NetworkCardModal({ onClose }: any) {
 
           {/* Slider Arrows (Bottom for Desktop) */}
           <div className="hidden lg:flex justify-between items-center mt-3 px-1">
-            <button className="p-2 rounded-full hover:bg-white/20 transition">
-              <ChevronLeft className="w-5 h-5" />
+            <button className="pt-2 rounded-full ">
+              <ChevronLeft className="w-6 h-6" />
             </button>
-            <button className="p-2 rounded-full hover:bg-white/20 transition">
-              <ChevronRight className="w-5 h-5" />
+            <button className="pt-2 rounded-full">
+              <ChevronRight className="w-6 h-6" />
             </button>
           </div>
 
@@ -108,7 +109,7 @@ export default function NetworkCardModal({ onClose }: any) {
           </div>
 
           {/* Contact & Locations */}
-          <div className="mt-10 mb-14">
+          <div className="mt-10 ">
             <h2 className="lg:text-xl mb-6">Contact & Locations</h2>
 
             <div className="space-y-3 text-[#FFFFFFB3] text-sm lg:text-base">
@@ -124,15 +125,15 @@ export default function NetworkCardModal({ onClose }: any) {
             </div>
 
             {/* Social Icons */}
-            <div className="flex justify-center md:justify-start gap-6 mt-6">
+            <div className="flex justify-center md:justify-start gap-6 mt-10">
               <button className="p-3 rounded-full hover:bg-white/10 transition">
                 <Globe className="lg:w-10 lg:h-10" />
               </button>
               <button className="p-3 rounded-full hover:bg-white/10 transition">
                 <Instagram className="lg:w-10 lg:h-10" />
               </button>
-              <button className="p-3 rounded-full hover:bg-white/10 transition">
-                <MessageCircle className="lg:w-10 lg:h-10" />
+              <button>
+                <WhatsappIcon/>
               </button>
             </div>
           </div>
