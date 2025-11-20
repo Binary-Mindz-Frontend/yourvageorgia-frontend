@@ -43,15 +43,15 @@ const MembershipRegister = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 antialiased">
-      <div className="w-full max-w-[516px] mx-auto p-6 lg:p-0">
+    <div className="min-h-screen flex items-center justify-center p-5 antialiased">
+      <div className="w-full max-w-[516px] mx-auto">
         <h1 className="text-4xl lg:text-5xl text-[#FFF] font-semibold font-serif text-center mb-10 tracking-wider">
           Join Solenne
         </h1>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* First Row: First Name and Last Name (2 columns) */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             <Input
               placeholder="First name*"
               name="firstName"
@@ -71,7 +71,7 @@ const MembershipRegister = () => {
           </div>
 
           {/* Second Row: Email and Phone Number (2 columns) */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             <Input
               placeholder="Email*"
               type="email"
@@ -141,7 +141,7 @@ const MembershipRegister = () => {
 
           {/* Checkboxes */}
           <div className="space-y-8 mt-10">  
-            <div className="flex items-start gap-3">
+            <div className="flex items-center gap-3">
               <Checkbox 
                 id="agreeTerms"
                 checked={formData.agreeTerms}
@@ -159,7 +159,7 @@ const MembershipRegister = () => {
               </label>
             </div>
 
-            <div className="flex items-start gap-3">
+            <div className="flex items-center gap-3">
               <Checkbox 
                 id="confirmEligibility"
                 checked={formData.confirmEligibility}
@@ -183,7 +183,7 @@ const MembershipRegister = () => {
             <Link href="/payment">
             <Button
               type="submit"
-              className="bg-black cursor-pointer text-white border border-white hover:bg-white hover:text-black transition-colors font-medium py-2 px-8 rounded-full shadow-lg"
+              className="bg-black cursor-pointer text-white border text-base border-white font-medium py-3.5 px-15 rounded-full shadow-lg"
             >
               Next
             </Button>

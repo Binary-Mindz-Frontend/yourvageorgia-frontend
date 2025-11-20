@@ -149,11 +149,11 @@ const Payment = () => {
   const isCardPayment = formData.paymentMethod === "card";
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 antialiased">
+    <div className="min-h-screen flex items-center justify-center p-5 antialiased">
       <div className="">
         {/* Title and Price Details */}
         <header className="text-center mb-10 space-y-4">
-          <h1 className="text-4xl lg:text-5xl text-[#FFF] font-semibold font-serif text-center mb-8 tracking-wider">
+          <h1 className="text-3xl lg:text-5xl text-[#FFF] font-semibold font-serif text-center mb-4 lg:mb-8 tracking-wider">
             Confirm Your Membership
           </h1>
           <p className="text-xl lg:text-[32px] font-semibold text-[#FFFFFF]/70 font-serif">
@@ -162,7 +162,7 @@ const Payment = () => {
           </p>
         </header>
 
-        <div className="w-full max-w-[516px] mx-auto p-6 md:p-0">
+        <div className="w-full max-w-[516px] mx-auto">
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Payment Method Dropdown (Custom styled) */}
             <DarkSelect
@@ -211,7 +211,7 @@ const Payment = () => {
                   <Input
                     placeholder="CVV"
                     name="cvv"
-                    type="text"
+                    type="number"
                     value={formData.cvv}
                     onChange={handleChange}
                     className=" text-white border-neutral-700 focus:border-neutral-500"
@@ -243,10 +243,10 @@ const Payment = () => {
             </div>
 
             {/* Submit Button */}
-            <div className="pt-8 flex justify-center">
+            <div className="pt-10 flex justify-center">
               <Button
                 type="submit"
-                className="bg-black cursor-pointer text-white border border-white hover:bg-white hover:text-black transition-colors font-medium py-2 px-8 rounded-full shadow-lg"
+                className="bg-black cursor-pointer text-white border border-white font-medium py-3 px-8 rounded-full shadow-lg"
               >
                 Confirm payment
               </Button>
