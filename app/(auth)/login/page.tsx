@@ -60,7 +60,7 @@ const MemberLogin = () => {
 
   return (
     <div className="flex items-center justify-center min-h-screen">
-      <div className="w-full max-w-sm p-8 space-y-8">
+      <div className="w-full md:max-w-sm p-4 md:p-8 space-y-8">
         
         {/* Title */}
         <h1 className="md:text-3xl lg:text-5xl text-center font-serif font-semibold text-white tracking-wider mb-8">
@@ -68,7 +68,7 @@ const MemberLogin = () => {
         </h1>
         
         {/* Login Form - Attached handleSubmit */}
-        <form className="space-y-12" onSubmit={handleSubmit}>
+        <form className="space-y-5 lg:space-y-12" onSubmit={handleSubmit}>
           
           {/* Email Input - Now using the Input component */}
           <div>
@@ -76,14 +76,17 @@ const MemberLogin = () => {
               Email
             </label>
             <Input
+
               id="email"
               name="email"
               type="email"
               required
               placeholder="Email"
               value={email}
+              
               onChange={(e) => setEmail(e.target.value)}
               disabled={isLoading}
+              className='rounded-full px-6'
             />
           </div>
           
@@ -101,6 +104,7 @@ const MemberLogin = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               disabled={isLoading}
+              className='rounded-full px-6'
             />
           </div>
 
