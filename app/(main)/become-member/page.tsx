@@ -4,7 +4,7 @@ import Link from "next/link";
 
 const SolenneMembership = () => {
   return (
-    <div className="min-h-screen text-white mt-28">
+    <div className="min-h-screen text-white mt-10 lg:mt-28 p-4 lg:p-0">
       <div className="container mx-auto">
         {/* === Membership Card Section === */}
         <div

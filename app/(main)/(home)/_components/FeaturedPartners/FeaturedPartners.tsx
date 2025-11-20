@@ -42,7 +42,7 @@ const partners = [
 export default function FeaturedPartnersCarousel() {
   return (
     <div className="relative w-full flex flex-col items-center justify-center mb-36 p-4 lg:p-0">
-      <h1 className="text-5xl md:text-6xl font-serif text-white mb-16 tracking-wide">
+      <h1 className="text-5xl md:text-6xl font-serif text-white lg:mb-16 tracking-wide">
         Featured Partners
       </h1>
 
@@ -57,7 +57,7 @@ export default function FeaturedPartnersCarousel() {
           {partners.map((partner) => (
             <CarouselItem
               key={partner.id}
-              className="pl-4 md:basis-1/2 lg:basis-1/4"
+              className="pl-4  md:basis-1/2 lg:basis-1/4"
             >
               <div className="p-1">
                 <Card className="border-0 bg-transparent">
