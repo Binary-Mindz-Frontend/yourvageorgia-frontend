@@ -33,39 +33,36 @@ export function NavigationDrawer({ isOpen, onClose }: NavigationDrawerProps) {
     <>
       {/* Overlay */}
       <div
-        className={`fixed inset-0 z-40 bg-white/10 transition-opacity backdrop-blur-sm duration-300 ${
-          isOpen ? "opacity-100" : "pointer-events-none opacity-0"
-        }`}
+        className={`fixed inset-0 z-40 bg-white/10 transition-opacity backdrop-blur-sm duration-300 ${isOpen ? "opacity-100" : "pointer-events-none opacity-0"
+          }`}
         onClick={onClose}
         aria-hidden="true"
       />
 
       {/* Drawer */}
       <div
-        className={`fixed inset-y-0 left-0 z-50 w-1/2 bg-background/60 transform transition-transform duration-300 ease-out ${
-          isOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+        className={`fixed inset-y-0 left-0 z-50 w-1/2 bg-background/60 transform transition-transform duration-300 ease-out ${isOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
         role="dialog"
         aria-modal="true"
         aria-labelledby="drawer-title"
       >
         {/* Header */}
-        <div className="absolute top-2 -right-16 flex items-center justify-between border-b border-border/40 px-6 py-6">
+        <div className={`absolute top-4 flex items-center justify-between border-b border-border/40 px-6 py-6 ${isOpen ? "-right-16" : "right-0"}`}>
           <Button
             variant="ghost"
             size="icon"
             onClick={onClose}
-            className={`text-foreground hover:bg-accent/10 [&_svg:not([class*='size-'])]:size-5 cursor-pointer ${
-              isOpen ? "opacity-100" : "pointer-events-none opacity-0"
-            }`}
+            className={`text-foreground hover:bg-accent/10 [&_svg:not([class*='size-'])]:size-6 cursor-pointer ${isOpen ? "opacity-100" : "pointer-events-none opacity-0"
+              }`}
             aria-label="Close menu"
           >
-            <X className="h-5 w-5" />
+            <X className="h-6 w-6" />
           </Button>
         </div>
 
         {/* Menu Items */}
-        <div className="space-y-1 w-2/3 ml-auto px-6 py-8 mt-28">
+        <div className="space-y-1 md:w-2/3 ml-auto sm:px-6 py-8 mt-28">
           {menuItems.map((item) => (
             <Link key={item.label} href={item.href} passHref>
               <button
@@ -90,7 +87,7 @@ export function NavigationDrawer({ isOpen, onClose }: NavigationDrawerProps) {
                 <User className="h-6 w-6" />
               </Button>
             </Link>
-            
+
             <Link href="/my-edit">
               <Button
                 variant="ghost"
