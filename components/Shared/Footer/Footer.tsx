@@ -3,7 +3,7 @@ import {
   InstaIcon,
   LinkdeinIcon,
 } from "@/components/Icons/Icons";
-import { Instagram, Facebook, Linkedin, Mail, MailIcon } from "lucide-react";
+import { MailIcon } from "lucide-react";
 
 const Footer = () => {
   return (
@@ -11,35 +11,35 @@ const Footer = () => {
       <div className="flex flex-col items-center gap-6">
         <a
           href="mailto:info@solenneuae.com"
-          className="text-white text-xl mb-6 hover:text-white/80 transition-colors"
+          className="text-white text-xl mb-6 hover:text-white/80 transition-all"
         >
           info@solenneuae.com
         </a>
         <div className="flex items-center gap-15">
           <a
             href="#"
-            className="text-white hover:text-white/80 transition-colors"
+            className="hover:opacity-80 transition-all"
             aria-label="Instagram"
           >
             <InstaIcon />
           </a>
           <a
             href="#"
-            className="text-white hover:text-white/80 transition-colors"
+            className="hover:opacity-80 transition-all"
             aria-label="Facebook"
           >
             <FacebookIcon />
           </a>
           <a
             href="#"
-            className="text-white hover:text-white/80 transition-colors"
+            className=" hover:opacity-80 transition-all"
             aria-label="LinkedIn"
           >
             <LinkdeinIcon />
           </a>
           <a
             href="#"
-            className="text-white hover:text-white/80 transition-colors"
+            className=" hover:opacity-80 transition-all"
             aria-label="Email"
           >
             <MailIcon />
