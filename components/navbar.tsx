@@ -14,7 +14,7 @@ export function Navbar() {
     return (
         <>
             <nav className="bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/20">
-                <div className="mx-auto flex h-16 container items-center justify-between px-4 sm:px-4 lg:px-4 lg:py-5">
+                <div className="mx-auto flex h-16 container min-w-full items-center justify-between px-4 sm:px-4 lg:px-4 lg:py-5">
                     {/* Left: Hamburger Menu */}
                     <Button
                         variant="ghost"
