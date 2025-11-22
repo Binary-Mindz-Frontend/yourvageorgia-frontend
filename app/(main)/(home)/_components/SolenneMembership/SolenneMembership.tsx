@@ -21,9 +21,9 @@ export default function SolenneMembership() {
               <h2 className="text-3xl font-light mb-3 tracking-wide">
                 Lumé Aesthetics
               </h2>
-              <div className="flex items-center gap-2 text-sm font-light">
+              <div className="flex items-center gap-2 text-sm lg:text-base">
                 <span>15% off facial and rejuvenation treatments</span>
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="w-5 cursor-pointer h-5" />
               </div>
             </div>
           </div>

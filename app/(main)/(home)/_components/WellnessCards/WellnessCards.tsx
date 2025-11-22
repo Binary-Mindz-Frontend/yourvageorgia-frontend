@@ -61,16 +61,16 @@ export default function WellnessCards() {
                 alt={card.title}
                 fill
                 className="object-cover transition-all duration-500 group-hover:blur-sm group-hover:scale-105"
-                sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                priority={card.id <= 2}
+                // sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                // priority={card.id <= 2}
               />
 
               {/* Dark Overlay */}
               <div className="absolute inset-0 lg:bg-black/50 group-hover:bg-black/50 transition-all duration-500 pointer-events-none"></div>
 
               {/* Title - visible by default, hidden on hover */}
-              <div className="absolute bottom-8 left-0 right-0 opacity-100 group-hover:opacity-0 transition-opacity duration-500 pointer-events-none">
-                <h3 className="text-white text-5xl font-serif text-center">
+              <div className="absolute bottom-3 left-0 right-0 opacity-100 group-hover:opacity-0 transition-opacity duration-500 pointer-events-none">
+                <h3 className="text-white text-[32px] font-semibold lg:text-5xl font-serif text-center">
                   {card.title}
                 </h3>
               </div>
