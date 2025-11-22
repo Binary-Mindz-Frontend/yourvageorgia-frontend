@@ -38,7 +38,7 @@ const SolenneMembership = () => {
         <div className="flex justify-center mb-24 mt-6">
           <Link href="/member-registration">
             <Button
-              className="border border-white cursor-pointer text-sm lg:text-base px-10 py-3 lg:px-7 lg:py-2.5 rounded-full tracking-wider">
+              className="border border-white cursor-pointer text-sm lg:text-base px-10 py-3 lg:px-7 lg:py-2.5 rounded-full tracking-wider bg-black text-white hover:bg-white hover:text-black hover:border-black transition-colors duration-200">
               Join Us
             </Button>
           </Link>

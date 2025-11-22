@@ -29,18 +29,18 @@ export default function NetworkCardModal({ onClose }: any) {
         <div className="flex flex-col justify-start order-1">
           <div className="flex lg:py-4 pb-4 md:pb-0">
             <Button
-              variant={"outline"}
-              className="cursor-pointer py-2.5 rounded-sm sm:w-auto text-sm lg:text-base text-white/70 tracking-wide px-10"
+              variant="outline"
+              className="cursor-pointer py-3 border border-white/70 rounded-md sm:w-auto text-sm lg:text-base text-white/70 px-10"
             >
               Movement
             </Button>
           </div>
 
-          <h1 className="text-xl lg:text-4xl font-light font-serif lg:mt-6 mb-2">
+          <h1 className="text-2xl lg:text-4xl font-semibold font-serif lg:mt-6 mb-2">
             The Hundred Wellness Centre
           </h1>
 
-          <p className="text-base lg:text-lg font-light mb-4 lg:mb-6">
+          <p className="lg:text-lg mb-4 lg:mb-6">
             10% Off All Yoga, Pilates, and Wellness Classes
           </p>
 

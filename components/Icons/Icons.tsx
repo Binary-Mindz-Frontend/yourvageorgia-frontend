@@ -2,9 +2,8 @@ export const InstaIcon = () => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width="30"
-      height="30"
       viewBox="0 0 30 30"
+      className="w-6 h-6 md:w-[30px] md:h-[30px]"
       fill="none"
     >
       <g clipPath="url(#clip0_408_314)">
@@ -34,8 +33,7 @@ export const FacebookIcon = () => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width="30"
-      height="30"
+      className="w-6 h-6 md:w-[30px] md:h-[30px]"
       viewBox="0 0 30 30"
       fill="none"
     >
@@ -59,8 +57,7 @@ export const LinkdeinIcon = () => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width="30"
-      height="30"
+      className="w-6 h-6 md:w-[30px] md:h-[30px]"
       viewBox="0 0 30 30"
       fill="none"
     >
@@ -80,28 +77,27 @@ export const LinkdeinIcon = () => {
     </svg>
   );
 };
-export const MailIcon = () => {
+export const FMailIcon = () => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width="30"
-      height="30"
+      className="w-6 h-6 md:w-[30px] md:h-[30px]"
       viewBox="0 0 30 30"
       fill="none"
     >
       <path
         d="M28.25 8.56396L16.4493 16.0807C16.0489 16.3132 15.594 16.4358 15.1309 16.4358C14.6678 16.4358 14.213 16.3132 13.8125 16.0807L2 8.56396"
         stroke="#FFFFF0"
-        stroke-width="1.5"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
       <path
         d="M25.625 4.5H4.625C3.17525 4.5 2 5.67525 2 7.125V22.875C2 24.3247 3.17525 25.5 4.625 25.5H25.625C27.0747 25.5 28.25 24.3247 28.25 22.875V7.125C28.25 5.67525 27.0747 4.5 25.625 4.5Z"
         stroke="#FFFFF0"
-        stroke-width="1.5"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
     </svg>
   );
