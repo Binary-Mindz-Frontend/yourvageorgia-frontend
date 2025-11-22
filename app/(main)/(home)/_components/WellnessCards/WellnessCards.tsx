@@ -1,7 +1,7 @@
-import img1 from "@/public/assets/home/card/CATEGORYMOVEMENT.svg";
 import img2 from "@/public/assets/home/card/CATEGORYMOVEMENT (1).svg";
 import img3 from "@/public/assets/home/card/CATEGORYMOVEMENT (2).svg";
 import img4 from "@/public/assets/home/card/CATEGORYMOVEMENT (3).svg";
+import img1 from "@/public/assets/home/card/CATEGORYMOVEMENT.svg";
 import Image, { StaticImageData } from "next/image";
 
 interface WellnessCard {
@@ -45,7 +45,7 @@ export default function WellnessCards() {
   ];
 
   return (
-    <section className="px-4 mt-16 md:my-38">
+    <section className="px-4 mt-16 md:my-38 md:px-12">
       <div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {cards.map((card) => (
@@ -77,11 +77,10 @@ export default function WellnessCards() {
 
               {/* Hover Text - hidden by default, visible on hover */}
               <div
-                className={`absolute inset-0 flex items-end justify-center p-6 transition-opacity duration-500 pointer-events-none ${
-                  card.showTextByDefault
+                className={`absolute inset-0 flex items-end justify-center p-6 transition-opacity duration-500 pointer-events-none ${card.showTextByDefault
                     ? "opacity-100"
                     : "opacity-0 group-hover:opacity-100"
-                }`}
+                  }`}
               >
                 <p className="text-white font-light italic leading-relaxed max-w-md text-left">
                   {card.hoverText}

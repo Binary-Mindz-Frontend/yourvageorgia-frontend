@@ -40,7 +40,7 @@ const partners = [
 
 export default function FeaturedPartnersCarousel() {
   return (
-    <div className="relative w-full flex flex-col items-center justify-center mb-36 p-4 lg:p-0">
+    <div className="relative w-full flex flex-col items-center justify-center mb-36 p-4 lg:px-12">
       <h1 className="text-3xl md:text-6xl font-serif text-center  text-white lg:mb-16 tracking-wide">
         Featured Partners
       </h1>
