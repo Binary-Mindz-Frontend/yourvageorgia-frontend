@@ -53,11 +53,11 @@ export function NavigationDrawer({ isOpen, onClose }: NavigationDrawerProps) {
             variant="ghost"
             size="icon"
             onClick={onClose}
-            className={`text-foreground hover:bg-accent/10 [&_svg:not([class*='size-'])]:size-6 cursor-pointer ${isOpen ? "opacity-100" : "pointer-events-none opacity-0"
+            className={`text-foreground hover:bg-accent/10 [&_svg:not([class*='size-'])]:size-5 cursor-pointer ${isOpen ? "opacity-100" : "pointer-events-none opacity-0"
               }`}
             aria-label="Close menu"
           >
-            <X className="h-6 w-6" />
+            <X className="h-5 w-5" />
           </Button>
         </div>
 

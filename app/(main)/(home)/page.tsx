@@ -6,7 +6,7 @@ import WellnessCards from "./_components/WellnessCards/WellnessCards";
 
 export default function HomePage() {
   return (
-    <div className="container min-w-full  mx-auto">
+    <div className="container min-w-full mx-auto">
       <WellnessHero />
       <WellnessCards />
       <SolenneMembership />
