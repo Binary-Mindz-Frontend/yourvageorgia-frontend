@@ -33,28 +33,35 @@ export function NavigationDrawer({ isOpen, onClose }: NavigationDrawerProps) {
     <>
       {/* Overlay */}
       <div
-        className={`fixed inset-0 z-40 bg-white/10 transition-opacity backdrop-blur-sm duration-300 ${isOpen ? "opacity-100" : "pointer-events-none opacity-0"
-          }`}
+        className={`fixed inset-0 z-40 bg-white/10 transition-opacity backdrop-blur-sm duration-300 ${
+          isOpen ? "opacity-100" : "pointer-events-none opacity-0"
+        }`}
         onClick={onClose}
         aria-hidden="true"
       />
 
       {/* Drawer */}
       <div
-        className={`fixed inset-y-0 left-0 z-50 w-1/2 bg-background/60 transform transition-transform duration-300 ease-out ${isOpen ? "translate-x-0" : "-translate-x-full"
-          }`}
+        className={`fixed inset-y-0 left-0 z-50 w-1/2 bg-background/60 transform transition-transform duration-300 ease-out ${
+          isOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
         role="dialog"
         aria-modal="true"
         aria-labelledby="drawer-title"
       >
         {/* Header */}
-        <div className={`absolute top-4 flex items-center justify-between border-b border-border/40 px-6 py-6 ${isOpen ? "-right-16" : "right-0"}`}>
+        <div
+          className={`absolute top-4 flex items-center justify-between border-b border-border/40 px-6 py-6 ${
+            isOpen ? "-right-16" : "right-0"
+          }`}
+        >
           <Button
             variant="ghost"
             size="icon"
             onClick={onClose}
-            className={`text-foreground hover:bg-accent/10 [&_svg:not([class*='size-'])]:size-5 cursor-pointer ${isOpen ? "opacity-100" : "pointer-events-none opacity-0"
-              }`}
+            className={`text-foreground hover:bg-accent/10 [&_svg:not([class*='size-'])]:size-5 cursor-pointer ${
+              isOpen ? "opacity-100" : "pointer-events-none opacity-0"
+            }`}
             aria-label="Close menu"
           >
             <X className="h-5 w-5" />
@@ -75,30 +82,27 @@ export function NavigationDrawer({ isOpen, onClose }: NavigationDrawerProps) {
             </Link>
           ))}
 
-          {/* Bottom Actions */}
-          <div className="flex items-center gap-4 p-3 pl-2">
-            <Link href="/login">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-foreground hover:bg-accent/10 [&_svg:not([class*='size-'])]:size-5 cursor-pointer"
-                aria-label="Account"
-              >
-                <User className="h-6 w-6" />
-              </Button>
-            </Link>
+          {/* Icon items as Menu Links */}
+        <div className="flex">
+            <Link href="/login" passHref>
+            <button
+              onClick={onClose}
+              className="group cursor-pointer flex w-full items-center justify-between rounded-md px-4 py-4 text-sm font-light tracking-wide text-foreground transition-colors hover:bg-accent/10"
+            >
+             
+              <User className="h-5 w-5" />
+            </button>
+          </Link>
 
-            <Link href="/my-edit">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-foreground hover:bg-accent/10 [&_svg:not([class*='size-'])]:size-5 cursor-pointer"
-                aria-label="Favorites"
-              >
-                <Heart className="h-6 w-6" />
-              </Button>
-            </Link>
-          </div>
+          <Link href="/my-edit" passHref>
+            <button
+              onClick={onClose}
+              className="group cursor-pointer flex w-full items-center justify-between rounded-md px-4 py-4 text-sm font-light tracking-wide text-foreground transition-colors hover:bg-accent/10"
+            >
+              <Heart className="h-5 w-5" />
+            </button>
+          </Link>
+        </div>
         </div>
       </div>
     </>
