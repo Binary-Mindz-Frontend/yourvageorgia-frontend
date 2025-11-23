@@ -90,7 +90,7 @@ const NetworkFilter = () => {
   return (
     <div className="text-white p-4 max-w-4xl mx-auto">
       <div>
-        <h2 className="font-serif text-[26px] text-center md:text-5xl lg:my-20">
+        <h2 className="font-serif text-3xl lg:text-5xl font-bold lg:font-semibold text-center py-4 lg:py-20">
           The Network
         </h2>
       </div>
@@ -149,7 +149,7 @@ const NetworkFilter = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="flex gap-1">
-                      <h2 className="text-3xl font-light mb-1 font-serif">
+                      <h2 className="text-lg lg:text-3xl font-semibold mb-1 font-serif">
                         {item.title}
                       </h2>
                       <button className="text-white hover:text-red-400 cursor-pointer p-2">
@@ -157,7 +157,7 @@ const NetworkFilter = () => {
                       </button>
                     </div>
 
-                    <div className="flex items-center text-lg font-light gap-2 italic opacity-80">
+                    <div className="flex items-center text-sm lg:text-lg gap-2 italic opacity-80">
                       {item.location}
                       <ArrowRight />
                     </div>

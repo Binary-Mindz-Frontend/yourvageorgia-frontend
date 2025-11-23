@@ -13,7 +13,7 @@ const Footer = () => {
       <div className="flex flex-col items-center gap-6">
         <Link
           href="mailto:info@solenneuae.com"
-          className="text-white text-xl mb-6 hover:text-white/80 transition-all"
+          className="text-[#FFFFF0] text-base lg:text-xl mb-6 hover:text-white/80 transition-all"
         >
           info@solenneuae.com
         </Link>
