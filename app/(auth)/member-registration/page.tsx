@@ -45,7 +45,7 @@ const MembershipRegister = () => {
   return (
     <div className="min-h-screen flex items-center justify-center p-5 antialiased">
       <div className="w-full max-w-[516px] mx-auto">
-        <h1 className="text-4xl lg:text-5xl text-[#FFF] font-semibold font-serif text-center mb-10 tracking-wider">
+        <h1 className="text-4xl lg:text-5xl text-[#FFF] font-semibold font-serif text-center mb-10">
           Join Solenne
         </h1>
 
@@ -183,7 +183,7 @@ const MembershipRegister = () => {
             <Link href="/payment">
             <Button
               type="submit"
-              className="bg-black cursor-pointer text-white border text-base border-white font-medium py-3.5 px-15 rounded-full shadow-lg"
+              className="bg-black cursor-pointer text-white border text-base border-white font-medium py-3.5 px-15 rounded-full shadow-lg hover:bg-white hover:text-black hover:border-black transition-colors duration-200"
             >
               Next
             </Button>

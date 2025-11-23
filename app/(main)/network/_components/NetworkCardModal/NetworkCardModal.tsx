@@ -1,21 +1,29 @@
 "use client";
-
-import Image from "next/image";
-import {
-  MapPin,
-  Globe,
-  Instagram,
-  MessageCircle,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
-import img5 from "@/public/assets/network/5.svg";
+import { MapPin, Globe, Instagram, ChevronLeft } from "lucide-react";
+import img1 from "@/public/assets/network/gallery/1.jpg";
+import img2 from "@/public/assets/network/gallery/2.jpg";
+import img3 from "@/public/assets/network/gallery/3.jpg";
 import { Button } from "@/components/ui/button";
 import { WhatsappIcon } from "./Icon/Icons";
+import ImageGallerySlider from "../ImageGallerySlider/ImageGallerySlider";
+import { useEffect } from "react";
+import Link from "next/link";
 
-export default function NetworkCardModal({ onClose }: any) {
+export default function NetworkCardModal({ onClose, isOpen }: any) {
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isOpen]);
+
+  const galleryImages = [img1, img2, img3];
   return (
-    <div className="min-h-screen container mx-auto text-white px-4 lg:px-0 py-10 overflow-y-auto scrollbar-hide">
+    <div className="min-h-screen container mx-auto text-white px-4 lg:px-0 py-10 overflow-y-auto">
       {/* Back Button */}
       <button
         onClick={onClose}
@@ -29,20 +37,22 @@ export default function NetworkCardModal({ onClose }: any) {
         <div className="flex flex-col justify-start order-1">
           <div className="flex lg:py-4 pb-4 md:pb-0">
             <Button
-              variant={"outline"}
-              className="cursor-pointer py-2.5 rounded-sm sm:w-auto text-sm lg:text-base text-white/70 tracking-wide px-10"
+              variant="outline"
+              className="cursor-pointer py-3 border border-white/70 rounded-md sm:w-auto text-sm lg:text-base text-white/70 px-10"
             >
-              Movement
+              Recovery
             </Button>
           </div>
 
-          <h1 className="text-xl lg:text-4xl font-light font-serif lg:mt-6 mb-2">
-            The Hundred Wellness Centre
+          <h1 className="text-2xl lg:text-4xl font-semibold font-serif lg:mt-6 mb-2">
+            Dr Stretch
           </h1>
 
-          <p className="text-base lg:text-lg font-light mb-4 lg:mb-6">
-            10% Off All Yoga, Pilates, and Wellness Classes
-          </p>
+          <p className="lg:text-lg mb-4 lg:mb-6 text-[#FFFFFFB3]">Offer:</p>
+          <ul className="list-disc list-inside lg:text-lg text-[#FFFFFFB3] space-y-1 mb-4">
+            <li>15% off single sessions</li>
+            <li>20% off packages</li>
+          </ul>
 
           <p className="leading-relaxed text-sm lg:text-base text-[#FFFFFFB3]">
             Present your Solenne member card to enjoy exclusive member rates on
@@ -50,38 +60,13 @@ export default function NetworkCardModal({ onClose }: any) {
           </p>
 
           <p className="lg:mt-4 text-sm lg:text-base text-[#FFFFFFB3]">
-            Offer valid until 01/04/2026
+            Offer valid until 31/12/2026
           </p>
         </div>
 
         {/* Left Section (Image + About + Footer) */}
         <div className="order-2 lg:order-0">
-          <div className="relative w-full h-[242px] lg:h-[435px] overflow-hidden rounded-xl">
-            <Image
-              src={img5}
-              alt="Wellness Centre"
-              fill
-              className="object-cover"
-            />
-
-            {/* Slider Arrows (Centered on Mobile) */}
-            <button className="rounded-full hover:bg-white/20 transition absolute left-3 top-1/2 -translate-y-1/2 lg:static lg:hidden z-20">
-              <ChevronLeft className="w-7 h-7" />
-            </button>
-            <button className="rounded-full hover:bg-white/20 transition absolute right-3 top-1/2 -translate-y-1/2 lg:static lg:hidden z-20">
-              <ChevronRight className="w-7 h-7" />
-            </button>
-          </div>
-
-          {/* Slider Arrows (Bottom for Desktop) */}
-          <div className="hidden lg:flex justify-between items-center mt-3 px-1">
-            <button className="pt-2 rounded-full ">
-              <ChevronLeft className="w-6 h-6" />
-            </button>
-            <button className="pt-2 rounded-full">
-              <ChevronRight className="w-6 h-6" />
-            </button>
-          </div>
+          <ImageGallerySlider images={galleryImages} />
 
           {/* About Section */}
           <div className="mt-10">
@@ -89,12 +74,9 @@ export default function NetworkCardModal({ onClose }: any) {
               About The Hundred Wellness Centre
             </h2>
             <p className="text-[#FFFFFFB3] leading-relaxed text-base">
-              The Hundred Wellness Centre is one of Dubai’s most serene
-              destinations for movement and holistic health. Nestled in
-              Jumeirah, it offers Pilates, Yoga, and functional movement classes
-              designed to restore balance, strength, and mindfulness. Every
-              class combines expert guidance, elegant interiors, and a calm
-              community space, inviting women to reconnect with their rhythm.
+              Dubai’s specialist stretching studio, offering guided one-to-one
+              sessions that enhance flexibility, ease muscle tension, and
+              support long-term physical alignment
             </p>
           </div>
 
@@ -102,9 +84,12 @@ export default function NetworkCardModal({ onClose }: any) {
           <div className="mt-10">
             <h2 className="lg:text-xl mb-6">Terms & Conditions</h2>
             <ul className="space-y-1 text-[#FFFFFFB3] text-sm lg:text-base">
-              <li>1. Valid for Solenne members only.</li>
-              <li>2. Cannot be combined with other offers or promotions.</li>
-              <li>3. Non-transferable and non-refundable.</li>
+              <li>
+                1. Cannot be used in conjunction with any other offer or
+                discounted service.
+              </li>
+              {/* <li>2. Cannot be combined with other offers or promotions.</li>
+              <li>3. Non-transferable and non-refundable.</li> */}
             </ul>
           </div>
 
@@ -112,28 +97,92 @@ export default function NetworkCardModal({ onClose }: any) {
           <div className="mt-10 ">
             <h2 className="lg:text-xl mb-6">Contact & Locations</h2>
 
-            <div className="space-y-3 text-[#FFFFFFB3] text-sm lg:text-base">
-              <p className="flex items-center gap-2">
-                1. Jumeirah 1, Dubai. Phone– 04 344 7333
-                <MapPin className="w-4 h-4" />
-              </p>
+            <div className="space-y-4 text-[#FFFFFFB3] text-sm lg:text-base">
+              {/* Dubai Hills */}
+              <div className="flex items-start gap-2">
+                <div className="space-y-1">
+                  <p className="font-semibold">Dubai Hills</p>
+                  <p className="flex items-center gap-1">
+                    Office:{" "}
+                    <Link
+                      href="https://maps.app.goo.gl/9NYL3ofPRZxysEZM8"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline hover:text-white"
+                    >
+                      Dubai Hills Mall, Al Khail Rd, Hadaeq Sheikh Mohammed Bin
+                      Rashid
+                    </Link>
+                    <Link
+                      href="https://maps.app.goo.gl/9NYL3ofPRZxysEZM8"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <MapPin className="w-5 h-5 mt-1 shrink-0 hover:text-white cursor-pointer" />
+                    </Link>
+                  </p>
+                  <p>
+                    Email:{" "}
+                    <Link
+                      href="mailto:hello@drstretch.ae"
+                      className=" hover:text-white"
+                    >
+                      hello@drstretch.ae
+                    </Link>
+                  </p>
+                  <p>Phone: 04 852 9386 | Mobile: 050 491 6854</p>
+                </div>
 
-              <p className="flex items-center gap-2">
-                2. City Walk, Dubai. Phone– 04 856 9923
-                <MapPin className="w-4 h-4" />
-              </p>
+                {/* 🔗 Clickable Map Pin */}
+              </div>
+
+              {/* Palm Jumeirah */}
+              <div className="flex items-start gap-2">
+                <div className="space-y-1">
+                  <p className="font-semibold">Palm Jumeirah</p>
+                  <p className="flex items-center gap-1">
+                    Office:{" "}
+                    <Link
+                      href="https://maps.app.goo.gl/tXyKNADu8E31eNuM7"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline hover:text-white"
+                    >
+                      Golden Mile 5, Palm Jumeirah
+                    </Link>
+                    {/* 🔗 Clickable Map Pin */}
+                    <Link
+                      href="https://maps.app.goo.gl/tXyKNADu8E31eNuM7"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <MapPin className="w-5 h-5 mt-1 shrink-0 hover:text-white cursor-pointer" />
+                    </Link>
+                  </p>
+                  <p>
+                    Email:{" "}
+                    <a
+                      href="mailto:hello@drstretch.ae"
+                      className="hover:text-white"
+                    >
+                      hello@drstretch.ae
+                    </a>
+                  </p>
+                  <p>Phone: 04 577 0433 | Mobile: 050 315 6707</p>
+                </div>
+              </div>
             </div>
 
             {/* Social Icons */}
             <div className="flex justify-center md:justify-start gap-6 mt-10">
               <button className="p-3 rounded-full hover:bg-white/10 transition">
-                <Globe className="lg:w-10 lg:h-10" />
+                <Globe className="lg:w-8 lg:h-8" />
               </button>
               <button className="p-3 rounded-full hover:bg-white/10 transition">
-                <Instagram className="lg:w-10 lg:h-10" />
+                <Instagram className="lg:w-8 lg:h-8" />
               </button>
-              <button>
-                <WhatsappIcon/>
+              <button className="p-3 rounded-full hover:bg-white/10 transition">
+                <WhatsappIcon />
               </button>
             </div>
           </div>

@@ -1,36 +1,48 @@
+"use client"
+import NetworkCardModal from "@/app/(main)/network/_components/NetworkCardModal/NetworkCardModal";
 import { ArrowRight } from "lucide-react";
+import { useState } from "react";
 
 export default function SolenneMembership() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   return (
     <div className="text-white flex items-center justify-center my-16 lg:my-38 p-4 lg:px-12">
       <div className="w-full">
         {/* Main Grid Container */}
         <div className="grid grid-cols-1 lg:grid-cols-[40%_60%] gap-0 overflow-hidden rounded-b-xl lg:rounded-none">
+          
           {/* Left Section */}
           <div className="relative bg-black order-1 lg:order-0 border-t-2 border-black">
+            {/* Background Image */}
             <div
               className="absolute inset-0 bg-cover bg-center"
-              style={{
-                backgroundImage: "url('/assets/home/map_bg.svg')",
-              }}
+              style={{ backgroundImage: "url('/assets/home/map_bg.svg')" }}
             >
               <div className="absolute inset-0 bg-linear-to-b from-black/60 via-transparent to-black/80"></div>
             </div>
 
             <div className="relative z-10 p-12 h-full flex flex-col justify-end min-h-[400px]">
-              <h2 className="text-3xl font-light mb-3 tracking-wide">
-                Lumé Aesthetics
-              </h2>
-              <div className="flex items-center gap-2 text-sm font-light">
-                <span>15% off facial and rejuvenation treatments</span>
-                <ArrowRight className="w-4 h-4" />
-              </div>
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="group inline-flex flex-col cursor-pointer text-left"
+              >
+                <h2 className="text-3xl font-light mb-3 tracking-wide transition group-hover:text-white/90">
+                  Lumé Aesthetics
+                </h2>
+
+                <div className="flex items-center gap-2 text-sm lg:text-base text-white">
+                  <span className="transition group-hover:text-white/90">
+                    15% off facial and rejuvenation treatments
+                  </span>
+                  <ArrowRight className="w-5 h-5 transition text-white group-hover:text-[#D9A25F]" />
+                </div>
+              </button>
             </div>
           </div>
 
           {/* Right Section */}
           <div className="relative bg-gray-100 min-h-[400px] rounded-xl lg:rounded-none">
-            {/* Google Map Embed */}
             <iframe
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d462560.6828568059!2d54.89782139453125!3d25.076022800000015!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3e5f43496ad9c645%3A0xbde66e5084295162!2sDubai%20-%20United%20Arab%20Emirates!5e0!3m2!1sen!2s!4v1234567890123!5m2!1sen!2s"
               width="100%"
@@ -55,6 +67,16 @@ export default function SolenneMembership() {
           </p>
         </div>
       </div>
+
+      {/* Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-9999  overflow-y-auto">
+          <NetworkCardModal
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+          />
+        </div>
+      )}
     </div>
   );
 }
