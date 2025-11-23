@@ -21,6 +21,7 @@ import img5 from "@/public/assets/home/featured/White.png";
 
 import Image from "next/image";
 import FeaturePartnerModal from "./_components/FeaturePartnerModal";
+import NetworkCardModal from "@/app/(main)/network/_components/NetworkCardModal/NetworkCardModal";
 
 const partners = [
   // { id: 1, image: img2 },
@@ -96,7 +97,7 @@ export default function FeaturedPartnersCarousel() {
       {/*  Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-999 overflow-y-auto scrollbar-hide">
-          <FeaturePartnerModal
+          <NetworkCardModal
             onClose={() => setShowModal(false)}
             image={selectedImage}
           />

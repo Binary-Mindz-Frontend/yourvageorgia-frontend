@@ -6,11 +6,24 @@ import img3 from "@/public/assets/network/gallery/3.jpg";
 import { Button } from "@/components/ui/button";
 import { WhatsappIcon } from "./Icon/Icons";
 import ImageGallerySlider from "../ImageGallerySlider/ImageGallerySlider";
+import { useEffect } from "react";
+import Link from "next/link";
 
-export default function NetworkCardModal({ onClose }: any) {
+export default function NetworkCardModal({ onClose, isOpen }: any) {
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isOpen]);
+
   const galleryImages = [img1, img2, img3];
   return (
-    <div className="min-h-screen container mx-auto text-white px-4 lg:px-0 py-10 overflow-y-auto scrollbar-hide">
+    <div className="min-h-screen container mx-auto text-white px-4 lg:px-0 py-10 overflow-y-auto">
       {/* Back Button */}
       <button
         onClick={onClose}
@@ -89,9 +102,9 @@ export default function NetworkCardModal({ onClose }: any) {
               <div className="flex items-start gap-2">
                 <div className="space-y-1">
                   <p className="font-semibold">Dubai Hills</p>
-                  <p>
+                  <p className="flex items-center gap-1">
                     Office:{" "}
-                    <a
+                    <Link
                       href="https://maps.app.goo.gl/9NYL3ofPRZxysEZM8"
                       target="_blank"
                       rel="noopener noreferrer"
@@ -99,39 +112,52 @@ export default function NetworkCardModal({ onClose }: any) {
                     >
                       Dubai Hills Mall, Al Khail Rd, Hadaeq Sheikh Mohammed Bin
                       Rashid
-                    </a>
+                    </Link>
+                    <Link
+                      href="https://maps.app.goo.gl/9NYL3ofPRZxysEZM8"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <MapPin className="w-5 h-5 mt-1 shrink-0 hover:text-white cursor-pointer" />
+                    </Link>
                   </p>
                   <p>
                     Email:{" "}
-                    <a
+                    <Link
                       href="mailto:hello@drstretch.ae"
                       className=" hover:text-white"
                     >
                       hello@drstretch.ae
-                    </a>
+                    </Link>
                   </p>
-                  <p>
-                    Phone: 04 852 9386 | Mobile:{" "}
-                   050 491 6854
-                  </p>
+                  <p>Phone: 04 852 9386 | Mobile: 050 491 6854</p>
                 </div>
-                 <MapPin className="w-5 h-5 mt-1 shrink-0" />
+
+                {/* 🔗 Clickable Map Pin */}
               </div>
 
               {/* Palm Jumeirah */}
               <div className="flex items-start gap-2">
                 <div className="space-y-1">
                   <p className="font-semibold">Palm Jumeirah</p>
-                  <p>
+                  <p className="flex items-center gap-1">
                     Office:{" "}
-                    <a
+                    <Link
                       href="https://maps.app.goo.gl/tXyKNADu8E31eNuM7"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="underline hover:text-white"
                     >
                       Golden Mile 5, Palm Jumeirah
-                    </a>
+                    </Link>
+                    {/* 🔗 Clickable Map Pin */}
+                    <Link
+                      href="https://maps.app.goo.gl/tXyKNADu8E31eNuM7"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <MapPin className="w-5 h-5 mt-1 shrink-0 hover:text-white cursor-pointer" />
+                    </Link>
                   </p>
                   <p>
                     Email:{" "}
@@ -142,22 +168,18 @@ export default function NetworkCardModal({ onClose }: any) {
                       hello@drstretch.ae
                     </a>
                   </p>
-                  <p>
-                    Phone: 04 577 0433 | Mobile:
-                    050 315 6707
-                  </p>
+                  <p>Phone: 04 577 0433 | Mobile: 050 315 6707</p>
                 </div>
-                 <MapPin className="w-5 h-5 mt-1 shrink-0" />
               </div>
             </div>
 
             {/* Social Icons */}
             <div className="flex justify-center md:justify-start gap-6 mt-10">
               <button className="p-3 rounded-full hover:bg-white/10 transition">
-                <Globe className="lg:w-10 lg:h-10" />
+                <Globe className="lg:w-8 lg:h-8" />
               </button>
               <button className="p-3 rounded-full hover:bg-white/10 transition">
-                <Instagram className="lg:w-10 lg:h-10" />
+                <Instagram className="lg:w-8 lg:h-8" />
               </button>
               <button className="p-3 rounded-full hover:bg-white/10 transition">
                 <WhatsappIcon />

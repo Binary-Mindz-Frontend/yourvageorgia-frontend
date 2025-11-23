@@ -183,8 +183,11 @@ const NetworkFilter = () => {
 
       {/* Network Card Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-999 overflow-y-auto scrollbar-hide">
-          <NetworkCardModal onClose={() => setIsModalOpen(false)} />
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-999 overflow-y-auto">
+          <NetworkCardModal
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+          />
         </div>
       )}
 
