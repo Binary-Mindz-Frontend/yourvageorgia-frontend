@@ -19,28 +19,32 @@ const Footer = () => {
         </Link>
         <div className="flex items-center gap-15">
           <Link
-            href="#"
+            href="https://www.instagram.com/solenneuae/"
+            target="_blank"
             className="hover:opacity-80 transition-all"
             aria-label="Instagram"
           >
             <InstaIcon />
           </Link>
           <Link
-            href="#"
+            href="https://www.facebook.com/profile.php?id=61582334074058"
+            target="_blank"
             className="hover:opacity-80 transition-all"
             aria-label="Facebook"
           >
             <FacebookIcon />
           </Link>
           <Link
-            href="#"
+            href="https://www.linkedin.com/authwall?trk=bf&trkInfo=AQGXqAcWK4wbswAAAZqxpXEoD4mcJnAGmSM1Msx5d99qgkpMKZ--T61iUJSbaOz0iyhwX0F9XEOcp9Rfrte1i6K5tyS_uziDWNIwwPuixdPMebl2xfa3BztRBl6EjTYv2ZUp2J4=&original_referer=&sessionRedirect=https%3A%2F%2Fwww.linkedin.com%2Fcompany%2Fsolenne-uae%2F"
+            target="_blank"
             className=" hover:opacity-80 transition-all"
             aria-label="LinkedIn"
           >
             <LinkdeinIcon />
           </Link>
           <Link
-            href="#"
+
+             href="mailto:info@solenneuae.com"
             className=" hover:opacity-80 transition-all"
             aria-label="Email"
           >
