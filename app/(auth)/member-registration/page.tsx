@@ -1,4 +1,5 @@
 "use client";
+
 import { EyeOff } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
@@ -6,9 +7,15 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { MemberShipDate } from "./_components/MemberShipDate/MemberShipDate";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { registerUser } from "@/services/auth";
+import toast from "react-hot-toast";
 
-// Main Application Component
 const MembershipRegister = () => {
+  const router = useRouter();
+
+  // console.log(process.env.NEXT_PUBLIC_BASE_API);
+
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -21,14 +28,17 @@ const MembershipRegister = () => {
     confirmEligibility: false,
   });
 
+  const [loading, setLoading] = useState(false);
+  const [apiError, setApiError] = useState("");
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({ 
-      ...prev, 
-      [name]: type === 'checkbox' ? checked : value 
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
     }));
   };
 
@@ -36,10 +46,50 @@ const MembershipRegister = () => {
     setFormData((prev) => ({ ...prev, [name]: checked }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Form Data Submitted:", formData);
-    // Add your form submission logic here
+    setApiError("");
+
+    // Basic validation
+    if (formData.password !== formData.confirmPassword) {
+      setApiError("Passwords do not match");
+      return;
+    }
+
+    if (!formData.agreeTerms || !formData.confirmEligibility) {
+      setApiError("You must accept all required conditions");
+      return;
+    }
+
+    if (!formData.dob) {
+      setApiError("Please select a valid date of birth");
+      return;
+    }
+
+    setLoading(true);
+
+    // Payload with backend-friendly snake_case
+    const payload = {
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      email: formData.email,
+      password: formData.password,
+      dateOfBirth: formData.dob,
+      phone: formData.phone,
+    };
+
+    const response = await registerUser(payload);
+    toast.success(response.message);
+    console.log("===============> res in client =========>", response);
+    setLoading(false);
+
+    if (response?.error) {
+      setApiError(response.error);
+      return;
+    }
+
+    // Success → redirect
+    router.push("/payment");
   };
 
   return (
@@ -50,7 +100,11 @@ const MembershipRegister = () => {
         </h1>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* First Row: First Name and Last Name (2 columns) */}
+          {apiError && (
+            <p className="text-red-400 text-center mb-4">{apiError}</p>
+          )}
+
+          {/* Name */}
           <div className="grid grid-cols-2 gap-4">
             <Input
               placeholder="First name*"
@@ -58,7 +112,7 @@ const MembershipRegister = () => {
               value={formData.firstName}
               onChange={handleChange}
               required
-              className=" text-white border-neutral-700 focus:border-neutral-500"
+              className="text-white border-neutral-700"
             />
             <Input
               placeholder="Last name*"
@@ -66,11 +120,11 @@ const MembershipRegister = () => {
               value={formData.lastName}
               onChange={handleChange}
               required
-              className=" text-white border-neutral-700 focus:border-neutral-500"
+              className="text-white border-neutral-700"
             />
           </div>
 
-          {/* Second Row: Email and Phone Number (2 columns) */}
+          {/* Email + Phone */}
           <div className="grid grid-cols-2 gap-4">
             <Input
               placeholder="Email*"
@@ -79,7 +133,7 @@ const MembershipRegister = () => {
               value={formData.email}
               onChange={handleChange}
               required
-              className=" text-white border-neutral-700 focus:border-neutral-500"
+              className="text-white border-neutral-700"
             />
             <Input
               placeholder="Phone number*"
@@ -88,16 +142,20 @@ const MembershipRegister = () => {
               value={formData.phone}
               onChange={handleChange}
               required
-              className=" text-white border-neutral-700 focus:border-neutral-500"
+              className="text-white border-neutral-700"
             />
           </div>
 
-          {/* Third Row: Date of Birth (1 column with Calendar icon) */}
+          {/* Date Picker */}
           <div className="relative">
-            <MemberShipDate/>
+            <MemberShipDate
+              onDateChange={(date) =>
+                setFormData((prev) => ({ ...prev, dob: date }))
+              }
+            />
           </div>
 
-          {/* Fourth Row: Create Password (1 column with Eye icon) */}
+          {/* Password */}
           <div className="relative">
             <Input
               placeholder="Create password*"
@@ -106,19 +164,18 @@ const MembershipRegister = () => {
               value={formData.password}
               onChange={handleChange}
               required
-              className=" text-white border-neutral-700 focus:border-neutral-500 pr-10"
+              className="text-white border-neutral-700 pr-10"
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute inset-y-0 right-0 pr-3 flex items-center text-neutral-500 hover:text-white transition-colors"
-              aria-label={showPassword ? "Hide password" : "Show password"}
+              className="absolute inset-y-0 right-0 pr-3 flex items-center"
             >
-              <EyeOff className="w-5 h-5" />
+              <EyeOff className="w-5 h-5 text-neutral-400" />
             </button>
           </div>
 
-          {/* Fifth Row: Re-enter Password (1 column with Eye icon) */}
+          {/* Confirm Password */}
           <div className="relative">
             <Input
               placeholder="Re-enter password*"
@@ -127,67 +184,66 @@ const MembershipRegister = () => {
               value={formData.confirmPassword}
               onChange={handleChange}
               required
-              className=" text-white border-neutral-700 focus:border-neutral-500 pr-10"
+              className="text-white border-neutral-700 pr-10"
             />
             <button
               type="button"
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="absolute inset-y-0 right-0 pr-3 flex items-center text-neutral-500 hover:text-white transition-colors"
-              aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+              className="absolute inset-y-0 right-0 pr-3 flex items-center"
             >
-              <EyeOff className="w-5 h-5" />
+              <EyeOff className="w-5 h-5 text-neutral-400" />
             </button>
           </div>
 
           {/* Checkboxes */}
-          <div className="space-y-8 mt-10">  
+          <div className="space-y-8 mt-10">
             <div className="flex items-center gap-3">
-              <Checkbox 
+              <Checkbox
                 id="agreeTerms"
                 checked={formData.agreeTerms}
-                onCheckedChange={(checked: boolean) => 
-                  handleCheckboxChange('agreeTerms', checked)
+                onCheckedChange={(checked: boolean) =>
+                  handleCheckboxChange("agreeTerms", checked)
                 }
-                className="border-gray-500 data-[state=checked]:bg-white data-[state=checked]:text-black"
               />
-              <label 
-                htmlFor="agreeTerms" 
+              <label
+                htmlFor="agreeTerms"
                 className="text-[#FFFFFFB3] text-sm cursor-pointer"
               >
-                I have read and agree to Solenne's{" "}
-                <Link href='/become-member' className="underline">Terms & Conditions</Link>.
+                I have read and agree to Solenne’s{" "}
+                <Link href="/become-member" className="underline">
+                  Terms & Conditions
+                </Link>
+                .
               </label>
             </div>
 
             <div className="flex items-center gap-3">
-              <Checkbox 
+              <Checkbox
                 id="confirmEligibility"
                 checked={formData.confirmEligibility}
-                onCheckedChange={(checked: boolean) => 
-                  handleCheckboxChange('confirmEligibility', checked)
+                onCheckedChange={(checked: boolean) =>
+                  handleCheckboxChange("confirmEligibility", checked)
                 }
-                className="border-gray-500 data-[state=checked]:bg-white data-[state=checked]:text-black"
               />
-              <label 
-                htmlFor="confirmEligibility" 
+              <label
+                htmlFor="confirmEligibility"
                 className="text-[#FFFFFFB3] text-sm cursor-pointer"
               >
-                Solenne is a women's-only membership. Please confirm your
+                Solenne is a women’s-only membership. Please confirm your
                 eligibility.
               </label>
             </div>
           </div>
 
-          {/* Submit Button */}
+          {/* Submit */}
           <div className="pt-8 flex justify-center">
-            <Link href="/payment">
             <Button
               type="submit"
-              className="bg-black cursor-pointer text-white border text-base border-white font-medium py-3.5 px-15 rounded-full shadow-lg hover:bg-white hover:text-black hover:border-black transition-colors duration-200"
+              disabled={loading}
+              className="bg-black text-white border text-base border-white font-medium py-3.5 px-10 rounded-full hover:bg-white hover:text-black transition"
             >
-              Next
+              {loading ? "Processing..." : "Next"}
             </Button>
-            </Link>
           </div>
         </form>
       </div>
