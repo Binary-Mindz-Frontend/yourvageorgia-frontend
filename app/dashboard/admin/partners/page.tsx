@@ -4,7 +4,7 @@ import UserTable from "./_components/PartnerTable/PartnerTable";
 
 export default function Partners() {
   return (
-    <div>
+    <div className="bg-black p-5">
       <UsersSummary />
       <UserTable />
     </div>

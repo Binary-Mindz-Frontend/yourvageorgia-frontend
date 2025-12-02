@@ -43,7 +43,7 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
               </div>
             </div>
           </header>
-          <div className="bg-[#F9FAFB] min-h-[calc(100vh)] z-0">
+          <div className="bg-black min-h-[calc(100vh)] z-0">
             <div className="">{children}</div>
           </div>
           {/* <footer className="w-full px-4 py-6 bg-primary-200 text-sm text-white text-center">

@@ -45,15 +45,15 @@ interface DashboardCardProps {
 
 const DashboardCard: FC<DashboardCardProps> = ({ title, icon: Icon, value, status, color}) => {
   return (
-    <Card className="rounded-2xl py-4 shadow-sm border bg-white border-gray-200">
+    <Card className="rounded-2xl py-4 shadow-sm border bg-[#500202] border-[#500202]">
       <CardContent className="flex flex-col gap-2">
         <div className="flex justify-between items-center">
-          <h2 className="text-sm font-medium text-[#0A0A0A]">{title}</h2>
+          <h2 className="text-sm font-medium text-white">{title}</h2>
           <Icon className={`w-5 h-5 ${color}`} />
         </div>
 
-        <p className="text-2xl font-semibold text-[#0A0A0A]">{value}</p>
-        <p className="text-xs text-[#717182]">{status}</p>
+        <p className="text-2xl font-semibold text-white">{value}</p>
+        <p className="text-xs text-gray-400">{status}</p>
       </CardContent>
     </Card>
   );
@@ -61,7 +61,7 @@ const DashboardCard: FC<DashboardCardProps> = ({ title, icon: Icon, value, statu
 
 const UsersSummary: FC = () => {
   return (
-    <div className="grid grid-cols-1 mt-3 mb-6 md:mt-8 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4">
+    <div className="grid grid-cols-1 mt-3 mb-6 md:mt-8 sm:grid-cols-2 md:grid-cols-4 gap-4">
       {dashboardData.map((item, index) => (
         <DashboardCard
           key={index}

@@ -1,17 +1,11 @@
 "use client";
-import { Ban, CircleCheck, CircleX, Eye, Mail, MoreHorizontal, Play, Search, Shield, Star } from "lucide-react";
+import { Ban, CircleCheck, CircleX, Eye, Mail, MoreHorizontal, Play, Shield, Star } from "lucide-react";
 import React, { useState } from "react";
-import CustomTable, { Column } from "@/components/shared/dashboard/CustomTable/CustomTable";
-import CustomPagination from "@/components/shared/dashboard/CustomPagination/CustomPagination";
 import { IPartnerData, PartnerData } from "../../data/usersData";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuGroup } from "@/components/ui/dropdown-menu";
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@/components/ui/select"
+import CustomPagination from "@/components/Shared/dashboard/custompagination/CustomPagination";
+import CustomTable, { Column } from "@/components/Shared/dashboard/customtable/CustomTable";
+
 
 
 const UserTable = () => {
@@ -23,8 +17,8 @@ const UserTable = () => {
             header: "User Info",
             cell: (row) => (
                 <div className="flex flex-col items-left">
-                    <p className="text-sm text-[#0A0A0A]">{row.userName}</p>
-                    <p className="text-sm text-[#717182]">{row.email}</p>
+                    <p className="text-sm text-white">{row.userName}</p>
+                    <p className="text-sm text-white">{row.email}</p>
                 </div>
             ),
         },
@@ -34,8 +28,8 @@ const UserTable = () => {
                 <div className="flex justify-center">
                     <span
                         className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${row.role === "Client"
-                                ? "bg-purple-100 text-purple-700"
-                                : "bg-blue-100 text-blue-800"
+                            ? "bg-purple-100 text-purple-700"
+                            : "bg-blue-100 text-blue-800"
                             }`}
                     >
                         {row.role}
@@ -114,14 +108,14 @@ const UserTable = () => {
             cell: (row) => (
                 <div className="flex justify-center">
                     <div className="flex items-center space-x-2">
-                        <span className="text-xs text-[#0A0A0A]">
+                        <span className="text-xs text-white">
                             Jobs: {row.performance.jobsPosted}
                         </span>
 
                         {row.performance.rating && (
                             <div className="flex items-center">
                                 <Star size={12} className="text-yellow-400 fill-current" />
-                                <span className="ml-1 text-xs text-gray-500">
+                                <span className="ml-1 text-xs text-white">
                                     {row.performance.rating}
                                 </span>
                             </div>
@@ -135,10 +129,10 @@ const UserTable = () => {
             cell: (row) => (
                 <div className="flex justify-center">
                     <div className="flex flex-col items-start">
-                        <span className="text-xs text-[#0A0A0A]">
+                        <span className="text-xs text-white">
                             Held: {row.performance.earned}
                         </span>
-                        <p className="text-gray-400">
+                        <p className="text-white">
                             Pending: {row.performance.pending}
                         </p>
                     </div>
@@ -172,7 +166,7 @@ const UserTable = () => {
                             <DropdownMenuTrigger asChild>
                                 <button
                                     aria-label="Open menu"
-                                    className="p-2 rounded-md border bg-white hover:bg-gray-100"
+                                    className="p-2 rounded-md border"
                                 >
                                     <MoreHorizontal size={18} />
                                 </button>
@@ -242,106 +236,7 @@ const UserTable = () => {
     ];
 
     return (
-        <div>
-            <header className="flex items-center justify-between mb-8 flex-wrap gap-5">
-                <div className="w-full bg-white px-4 pt-2 pb-6 rounded-xl shadow-sm border border-gray-200 flex flex-wrap gap-4 items-center">
-                    {/* Search Input */}
-                    <div className="relative w-full lg:w-1/3 min-w-[250px]">
-                        <Search
-                            size={16}
-                            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                        />
-                        <input
-                            type="text"
-                            placeholder="Search by name, email, job ID, location..."
-                            className="w-full pl-10 pr-4 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring- focus:ring-gray-600"
-                        />
-                    </div>
-
-                    <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-4">
-
-  {/* Role Filter */}
-  <Select>
-    <SelectTrigger
-      className="w-full px-2 py-2 text-sm text-[#0A0A0A]
-                 border border-gray-300 rounded-lg bg-gray-50
-                 focus:outline-none focus:ring-0 focus:ring-offset-0
-                 shadow-none"
-    >
-      <SelectValue placeholder="All Roles" />
-    </SelectTrigger>
-
-    <SelectContent>
-      <SelectItem value="all">All Roles</SelectItem>
-      <SelectItem value="provider">Provider</SelectItem>
-      <SelectItem value="client">Client</SelectItem>
-    </SelectContent>
-  </Select>
-
-  {/* Verification Filter */}
-  <Select>
-    <SelectTrigger
-      className="w-full px-2 py-2 text-sm text-[#0A0A0A]
-                 border border-gray-300 rounded-lg bg-gray-50
-                 focus:outline-none focus:ring-0 focus:ring-offset-0
-                 shadow-none"
-    >
-      <SelectValue placeholder="All Verification" />
-    </SelectTrigger>
-
-    <SelectContent>
-      <SelectItem value="all">All Verification</SelectItem>
-      <SelectItem value="verified">Verified</SelectItem>
-      <SelectItem value="partial">Partially Verified</SelectItem>
-      <SelectItem value="none">Not Verified</SelectItem>
-    </SelectContent>
-  </Select>
-
-  {/* Status Filter */}
-  <Select>
-    <SelectTrigger
-      className="w-full px-2 py-2 text-sm text-[#0A0A0A]
-                 border border-gray-300 rounded-lg bg-gray-50
-                 focus:outline-none focus:ring-0 focus:ring-offset-0
-                 shadow-none"
-    >
-      <SelectValue placeholder="All Status" />
-    </SelectTrigger>
-
-    <SelectContent>
-      <SelectItem value="all">All Status</SelectItem>
-      <SelectItem value="active">Active</SelectItem>
-      <SelectItem value="pending">Pending</SelectItem>
-      <SelectItem value="suspended">Suspended</SelectItem>
-    </SelectContent>
-  </Select>
-
-  {/* Ratings Filter */}
-  <Select>
-    <SelectTrigger
-      className="w-full px-2 py-2 text-sm text-[#0A0A0A]
-                 border border-gray-300 rounded-lg bg-gray-50
-                 focus:outline-none focus:ring-0 focus:ring-offset-0
-                 shadow-none"
-    >
-      <SelectValue placeholder="All Ratings" />
-    </SelectTrigger>
-
-    <SelectContent>
-      <SelectItem value="all">All Ratings</SelectItem>
-      <SelectItem value="5">5⭐</SelectItem>
-      <SelectItem value="4">4⭐</SelectItem>
-      <SelectItem value="3">3⭐</SelectItem>
-      <SelectItem value="2">2⭐</SelectItem>
-      <SelectItem value="1">1⭐</SelectItem>
-    </SelectContent>
-  </Select>
-
-</div>
-
-                </div>
-            </header>
-
+        <div >
             <CustomTable columns={userColumns} data={PartnerData} />
             <CustomPagination
                 totalItems={PartnerData.length}
