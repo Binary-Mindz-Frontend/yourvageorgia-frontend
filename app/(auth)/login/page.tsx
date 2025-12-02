@@ -63,7 +63,7 @@ const MemberLogin = () => {
       <div className="w-full md:max-w-sm p-4 md:p-8 space-y-8">
         
         {/* Title */}
-        <h1 className="md:text-3xl lg:text-5xl text-center font-serif font-semibold text-white tracking-wider mb-8">
+        <h1 className="text-3xl lg:text-5xl text-center font-serif font-semibold text-white tracking-wider mb-10">
           Member Login
         </h1>
         
@@ -113,7 +113,7 @@ const MemberLogin = () => {
             <Link href="/profile"><Button
               type="submit"
               disabled={isLoading}
-              className={`bg-black cursor-pointer px-6 text-white border-white hover:bg-white hover:text-black hover:border-black transition-colors duration-200 ${
+              className={`bg-black cursor-pointer px-10 text-white border-white mt-4 md:mt-0 hover:bg-white hover:text-black hover:border-black transition-colors duration-200 ${
                 isLoading 
                   ? 'border-gray-600 bg-gray-900 cursor-not-allowed' 
                   : 'border-white'
