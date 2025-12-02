@@ -1,44 +1,55 @@
-import { Instagram, Facebook, Linkedin, Mail } from "lucide-react";
+import {
+  FacebookIcon,
+  FMailIcon,
+  InstaIcon,
+  LinkdeinIcon,
+} from "@/components/Icons/Icons";
+import { MailIcon } from "lucide-react";
+import Link from "next/link";
 
 const Footer = () => {
   return (
-    <footer className="mt-12 md:py-8">
+    <footer className="md:mt-12 py-8">
       <div className="flex flex-col items-center gap-6">
-        <a
+        <Link
           href="mailto:info@solenneuae.com"
-          className="text-white text-xl mb-6 hover:text-white/80 transition-colors"
+          className="text-[#FFFFF0] text-base lg:text-xl mb-6 hover:text-white/80 transition-all"
         >
           info@solenneuae.com
-        </a>
+        </Link>
         <div className="flex items-center gap-15">
-          <a
-            href="#"
-            className="text-white hover:text-white/80 transition-colors"
+          <Link
+            href="https://www.instagram.com/solenneuae/"
+            target="_blank"
+            className="hover:opacity-80 transition-all"
             aria-label="Instagram"
           >
-            <Instagram className="h-7 w-7" />
-          </a>
-          <a
-            href="#"
-            className="text-white hover:text-white/80 transition-colors"
+            <InstaIcon />
+          </Link>
+          <Link
+            href="https://www.facebook.com/profile.php?id=61582334074058"
+            target="_blank"
+            className="hover:opacity-80 transition-all"
             aria-label="Facebook"
           >
-            <Facebook className="h- w-5" />
-          </a>
-          <a
-            href="#"
-            className="text-white hover:text-white/80 transition-colors"
+            <FacebookIcon />
+          </Link>
+          <Link
+            href="https://www.linkedin.com/authwall?trk=bf&trkInfo=AQGXqAcWK4wbswAAAZqxpXEoD4mcJnAGmSM1Msx5d99qgkpMKZ--T61iUJSbaOz0iyhwX0F9XEOcp9Rfrte1i6K5tyS_uziDWNIwwPuixdPMebl2xfa3BztRBl6EjTYv2ZUp2J4=&original_referer=&sessionRedirect=https%3A%2F%2Fwww.linkedin.com%2Fcompany%2Fsolenne-uae%2F"
+            target="_blank"
+            className=" hover:opacity-80 transition-all"
             aria-label="LinkedIn"
           >
-            <Linkedin className="h-7 w-7" />
-          </a>
-          <a
-            href="#"
-            className="text-white hover:text-white/80 transition-colors"
+            <LinkdeinIcon />
+          </Link>
+          <Link
+
+             href="mailto:info@solenneuae.com"
+            className=" hover:opacity-80 transition-all"
             aria-label="Email"
           >
-            <Mail className="h-7 w-7" />
-          </a>
+           <FMailIcon/>
+          </Link>
         </div>
       </div>
     </footer>
