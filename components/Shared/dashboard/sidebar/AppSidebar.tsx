@@ -15,14 +15,10 @@ import Link from "next/link";
 import Image from "next/image";
 import {
   BriefcaseBusiness,
-  CopyPlus,
   LayoutGrid,
-  NotepadText,
-  Settings,
-  User,
   Users,
 } from "lucide-react";
-import logo from "@/assets/Logo/logo.png";
+import logo from "@/public/assets/profile/profile.jpg";
 import { NavMain } from "./Nabmain";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -34,53 +30,39 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       show: true,
     },
     {
-      title: "Users Management",
-      Icon: Users,
-      url: "/dashboard/admin/manage-users",
-      show: true,
-    },
-    {
-      title: "Job Management",
-      Icon: BriefcaseBusiness,
-      url: "/dashboard/admin/manage-jobs",
-      show: true,
-    },
-    {
-      title: "Dispute Management",
-      url: "/dashboard/admin/manage-dispute",
-      Icon: User,
-      show: true,
-    },
-    {
       title: "Category",
+      Icon: Users,
       url: "/dashboard/admin/category",
-      Icon: CopyPlus,
       show: true,
     },
     {
-      title: "Blog Management",
-      url: "/dashboard/admin/manage-blog",
-      Icon: NotepadText,
-      show: true,
-    },
-    {
-      title: "Settings",
-      url: "/dashboard/admin/settings",
-      Icon: Settings,
+      title: "Partners",
+      Icon: BriefcaseBusiness,
+      url: "/dashboard/admin/partners",
       show: true,
     },
   ];
 
   return (
-    <Sidebar collapsible="offcanvas" {...props} className="bg-white">
-      <SidebarHeader>
+    <Sidebar
+      collapsible="offcanvas"
+      {...props}
+      className="bg-black text-white"
+    >
+      <SidebarHeader className="bg-black">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <div className="mt-2">
                 <div className="text-2xl font-bold text-white">
                   <Link href="/">
-                    <Image src={logo} alt="logo" width={150} height={40} />
+                    <Image
+                      src={logo}
+                      alt="logo"
+                      width={150}
+                      height={40}
+                      className="w-25 h-25"
+                    />
                   </Link>
                 </div>
               </div>
@@ -88,10 +70,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-      <SidebarContent className="mt-2 bg-white">
+
+      <SidebarContent className="mt-2 bg-black text-white">
         <NavMain items={navMain} />
       </SidebarContent>
-      <SidebarFooter>{/* <NavUser /> */}</SidebarFooter>
+
+      <SidebarFooter className="bg-black" />
     </Sidebar>
   );
 }

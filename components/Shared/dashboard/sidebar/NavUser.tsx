@@ -21,7 +21,7 @@ export function NavUser() {
   const { isMobile } = useSidebar();
 
   return (
-    <SidebarMenu className="rounded-2xl">
+    <SidebarMenu className="rounded-2xl ">
       <SidebarMenuItem className="bg-[#0B1A2A] py-1 focus:ring-0">
         <DropdownMenu>
           <DropdownMenuTrigger
