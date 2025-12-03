@@ -1,60 +1,57 @@
 "use client";
+
 import { Button } from "@/components/ui/button";
-// import { Button } from '@/components/ui/button';
 import { Input } from "@/components/ui/input";
-import Link from "next/link";
 import { useState } from "react";
-
-// const Button = ({ children, className, disabled, style, ...props }) => {
-//   // Apply base styling and merge with custom props
-//   const baseClasses = `w-40 py-2 border text-white text-lg rounded-full transition duration-300 shadow-xl ${className || ''}`;
-
-//   return (
-//     <button
-//       className={baseClasses}
-//       disabled={disabled}
-//       style={style}
-//       {...props}
-//     >
-//       {children}
-//     </button>
-//   );
-// };
+// import { loginUser } from "@/app/actions/auth";
+import { useRouter } from "next/navigation";
+import { loginUser } from "@/services/auth";
+import toast from "react-hot-toast";
+import useUser from "@/hooks/useUser";
 
 const MemberLogin = () => {
-  // 1. State for form data and submission status
+  const router = useRouter();
+
+  // Form States
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [statusMessage, setStatusMessage] = useState({
-    type: "hidden",
-    text: "",
-  });
-  const [isLoading, setIsLoading] = useState(false);
+  
 
-  // 2. Handle form submission
-  const handleSubmit = (e: any) => {
+  // UI States
+ 
+  const [isLoading] = useState(false);
+   const { setUser, setIsLoading } = useUser();
+
+  // Handle submit
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
 
     setIsLoading(true);
-    setStatusMessage({ type: "loading", text: "Logging in..." });
+    toast.loading("Logging in...", { id: "login" });
 
-    // Simulate an API call delay
-    setTimeout(() => {
-      // In a real application, you would send { email, password } to your backend here.
-      console.log("Attempting login with:", { email, password });
+    const payload = {
+      email,
+      password,
+    };
 
-      // Example: Simple validation/mock success
-      if (email === "user@example.com" && password === "password") {
-        setStatusMessage({
-          type: "success",
-          text: "Login successful! Redirecting...",
-        });
-      } else {
-        setStatusMessage({ type: "error", text: "Invalid email or password." });
-      }
+    const res = await loginUser(payload);
 
+    if (res?.success) {
+      toast.success("Login successful! Redirecting...", { id: "login" });
+      setUser(res?.data?.user);
       setIsLoading(false);
-    }, 1500);
+
+      setTimeout(() => {
+        router.push("/profile");
+      }, 500);
+    } else {
+      toast.error(res?.message || "Invalid email or password.", {
+        id: "login",
+      });
+    }
+
+    setIsLoading(false);
   };
 
   return (
@@ -65,45 +62,33 @@ const MemberLogin = () => {
           Member Login
         </h1>
 
-        {/* Login Form - Attached handleSubmit */}
-        <form className="space-y-5 lg:space-y-12" onSubmit={handleSubmit}>
-          {/* Email Input - Now using the Input component */}
-          <div>
-            <label htmlFor="email" className="sr-only">
-              Email
-            </label>
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              required
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              disabled={isLoading}
-              className="rounded-full px-6"
-            />
-          </div>
+        {/* Form */}
+        <form className="space-y-6" onSubmit={handleSubmit}>
+          {/* Email */}
+          <Input
+            id="email"
+            type="email"
+            placeholder="Email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            disabled={isLoading}
+            className="rounded-full px-6"
+          />
 
-          {/* Password Input - Now using the Input component */}
-          <div>
-            <label htmlFor="password" className="sr-only">
-              Password
-            </label>
-            <Input
-              id="password"
-              name="password"
-              type="password"
-              required
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              disabled={isLoading}
-              className="rounded-full px-6"
-            />
-          </div>
+          {/* Password */}
+          <Input
+            id="password"
+            type="password"
+            placeholder="Password"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            disabled={isLoading}
+            className="rounded-full px-6"
+          />
 
-          {/* Login Button - Now using the Button component */}
+          {/* Button */}
           <div className="pt-1 flex justify-center">
             <Button
               type="submit"
@@ -119,8 +104,9 @@ const MemberLogin = () => {
           </div>
         </form>
 
-        {/* Forgot Password Link */}
-        <div className="text-center pt-2">
+
+        {/* Forgot Password */}
+        <div className="text-center pt-3">
           <a
             href="#"
             className="text-sm text-white/70 hover:text-white transition duration-300"

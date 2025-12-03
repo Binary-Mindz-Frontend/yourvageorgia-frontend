@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use server";
 
+import { jwtDecode } from "jwt-decode";
 import { getValidToken } from "@/lib/verifyToken";
 import { cookies } from "next/headers";
 // import { useEffect } from "react";
@@ -37,7 +38,7 @@ export const loginUser = async (userData: FieldValues) => {
   const cookieStore = await cookies();
 
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_API}/auth/login`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_API}/user/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -46,13 +47,21 @@ export const loginUser = async (userData: FieldValues) => {
     });
 
     const result = await res.json();
+    console.log("login user", result);
 
     if (result?.success) {
       // Save token in cookies
-      cookieStore.set("accessToken", result?.data?.token);
+      cookieStore.set("accessToken", result?.data?.accessToken);
 
+    // Save user in cookies
+      const decodedUser: any = jwtDecode(result?.data?.accessToken);
+      cookieStore.set("user", JSON.stringify(decodedUser), {
+        httpOnly: false,
+        secure: true,
+        path: "/",
+      });
       // Save user in cookies
-      cookieStore.set("user", JSON.stringify(result?.data?.user));
+      // cookieStore.set("user", JSON.stringify(result?.data?.user));
     }
 
     return result;
