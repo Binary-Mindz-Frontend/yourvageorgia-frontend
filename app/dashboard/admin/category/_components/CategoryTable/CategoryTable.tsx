@@ -24,6 +24,16 @@ import { getCategories, deleteCategory } from "@/services/category/category";
 import { ICategory } from "@/types/category.types";
 import { toast } from "sonner";
 
+
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogClose,
+} from "@/components/ui/dialog";
+import CategoryView from "../CategoryView/CategoryView";
+
 const CategoryPage = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const pageSize = 10; // 10 rows per page
@@ -34,6 +44,10 @@ const CategoryPage = () => {
     const [categories, setCategories] = useState<ICategory[]>([]);
     const [loading, setLoading] = useState(false);
     const [deleting, setDeleting] = useState<string | null>(null);
+
+    // Dialog state for View
+    const [openView, setOpenView] = useState(false);
+    const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
 
     // Fetch categories from API
     useEffect(() => {
@@ -69,21 +83,14 @@ const CategoryPage = () => {
             const res = await deleteCategory(categoryId);
 
             if ("error" in res) {
-                toast.error(res.error, {
-                    style: { background: "#000", color: "#fff", marginTop: "4rem" }
-                });
+                toast.error(res.error, { style: { background: "#000", color: "#fff", marginTop: "4rem" } });
             } else {
-                toast.success(res.message, {
-                    style: { background: "#000", color: "#fff", marginTop: "4rem" }
-                });
-                // Remove deleted category from state
-                setCategories((prev) => prev.filter((cat) => cat._id !== categoryId));
+                toast.success(res.message, { style: { background: "#000", color: "#fff", marginTop: "4rem" } });
+                setCategories(prev => prev.filter(cat => cat._id !== categoryId));
             }
         } catch (err: unknown) {
             console.error(err);
-            toast.error("Failed to delete category", {
-                style: { background: "#000", color: "#fff", marginTop: "4rem" }
-            });
+            toast.error("Failed to delete category", { style: { background: "#000", color: "#fff", marginTop: "4rem" } });
         } finally {
             setDeleting(null);
         }
@@ -141,18 +148,23 @@ const CategoryPage = () => {
                                 <SquarePen size={16} />
                                 Edit
                             </DropdownMenuItem>
-                            <DropdownMenuItem className="flex items-center gap-2">
+
+                            {/* View Button */}
+                            <DropdownMenuItem
+                                className="flex items-center gap-2 cursor-pointer"
+                                onClick={() => {
+                                    setSelectedCategoryId(row._id ?? null);
+                                    setOpenView(true);
+                                }}
+                            >
                                 <Eye size={16} />
                                 View
                             </DropdownMenuItem>
 
+                            {/* Delete Button */}
                             <DropdownMenuItem
                                 className="flex items-center gap-2 text-red-600"
-                                onClick={() => {
-                                    if (row._id) {
-                                        handleDelete(row._id);
-                                    }
-                                }}
+                                onClick={() => row._id && handleDelete(row._id)}
                                 disabled={deleting === row._id || !row._id}
                             >
                                 <Trash2 size={16} />
@@ -204,15 +216,30 @@ const CategoryPage = () => {
                 onPageChange={setCurrentPage}
             />
 
+            {/* Add Category Modal */}
             <AddCategoryModal
                 open={openAdd}
                 onOpenChange={setOpenAdd}
                 onCategoryAdded={(newCategory) =>
-                    setCategories((prev) => [newCategory, ...prev])
+                    setCategories(prev => [newCategory, ...prev])
                 }
             />
 
+            {/* Edit Category Modal */}
             <AddCategoryModal open={openEdit} onOpenChange={setOpenEdit} isEdit />
+
+            {/* View Category Modal */}
+            <Dialog open={openView} onOpenChange={setOpenView}>
+                <DialogContent className="max-w-md [&>button:first-of-type]:hidden">
+                    <DialogHeader>
+                        <DialogTitle>Category Details</DialogTitle>
+                    </DialogHeader>
+                    {selectedCategoryId && (
+                        <CategoryView categoryId={selectedCategoryId} />
+                    )}
+                    <DialogClose className="absolute top-2 right-2">✕</DialogClose>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 };

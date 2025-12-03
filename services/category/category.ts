@@ -70,3 +70,22 @@ export const deleteCategory = async (
     return { error: error.message };
   }
 };
+
+// get single category by id
+export const getCategoryById = async (
+  categoryId: string
+): Promise<ICategoryResponse["data"] | { error: string }> => {
+  try {
+    const res = await fetch(`${BASE_URL}/category/${categoryId}`);
+    const json = await res.json();
+
+    if (!res.ok) {
+      return { error: json.message || "Failed to fetch category" };
+    }
+
+    return json.data; 
+  } catch (error: any) {
+    return { error: error.message };
+  }
+};
+
