@@ -27,7 +27,7 @@ import { toast } from "sonner";
 
 const CategoryPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 4;
+  const pageSize = 10; // 10 rows per page
 
   const [openAdd, setOpenAdd] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
@@ -42,17 +42,13 @@ const CategoryPage = () => {
       try {
         const res = await getCategories();
         if ("error" in res) {
-          toast.error(res.error, {
-            style: { background: "#000", color: "#fff", marginTop: "5rem" },
-          });
+          toast.error(res.error, { style: { background: "#000", color: "#fff", marginTop: "4rem" } });
         } else {
           setCategories(res.data);
         }
       } catch (err: unknown) {
         console.error(err);
-        toast.error("Failed to fetch categories", {
-          style: { background: "#000", color: "#fff", marginTop: "5rem" },
-        });
+        toast.error("Failed to fetch categories", { style: { background: "#000", color: "#fff", marginTop: "4rem" } });
       } finally {
         setLoading(false);
       }
@@ -61,7 +57,12 @@ const CategoryPage = () => {
     fetchCategories();
   }, []);
 
-  // TABLE COLUMNS
+  // Compute paginated data
+  const indexOfLastItem = currentPage * pageSize;
+  const indexOfFirstItem = indexOfLastItem - pageSize;
+  const currentCategories = categories.slice(indexOfFirstItem, indexOfLastItem);
+
+  // Table columns
   const categoryColumn: Column<ICategory>[] = [
     {
       header: "Image",
@@ -69,7 +70,6 @@ const CategoryPage = () => {
       cell: (row) => {
         const imageUrl = row.image?.trim() || "";
         const isValidUrl = imageUrl.startsWith("http") || imageUrl.startsWith("/");
-
         return (
           <div className="flex justify-center items-center w-12 h-12 rounded overflow-hidden bg-gray-800 text-white text-xs font-medium">
             {isValidUrl ? (
@@ -79,7 +79,7 @@ const CategoryPage = () => {
                 width={48}
                 height={48}
                 className="rounded object-cover"
-                unoptimized // required for external URLs
+                unoptimized
               />
             ) : (
               <span className="text-center px-1 truncate">{imageUrl || "-"}</span>
@@ -139,7 +139,6 @@ const CategoryPage = () => {
         <h1 className="text-base py-2 sm:py-5 text-[#0A0A0A]">Category Management</h1>
 
         <div className="flex justify-between mb-4 items-center w-full flex-wrap gap-5">
-          {/* SEARCH */}
           <div className="relative w-full sm:w-1/3">
             <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
               <Search size={18} className="text-gray-400" />
@@ -151,7 +150,6 @@ const CategoryPage = () => {
             />
           </div>
 
-          {/* ADD CATEGORY */}
           <Button
             className="flex items-center bg-gray-900 hover:bg-[#030213] px-4 py-2"
             onClick={() => setOpenAdd(true)}
@@ -164,7 +162,8 @@ const CategoryPage = () => {
         <p className="text-base py-1">Category Details</p>
       </header>
 
-      <CustomTable columns={categoryColumn} data={categories} loading={loading} />
+      {/* Show paginated data */}
+      <CustomTable columns={categoryColumn} data={currentCategories} loading={loading} />
 
       <CustomPagination
         totalItems={categories.length}
@@ -173,7 +172,6 @@ const CategoryPage = () => {
         onPageChange={setCurrentPage}
       />
 
-      {/* ADD MODAL */}
       <AddCategoryModal
         open={openAdd}
         onOpenChange={setOpenAdd}
@@ -182,7 +180,6 @@ const CategoryPage = () => {
         }
       />
 
-      {/* EDIT MODAL */}
       <AddCategoryModal open={openEdit} onOpenChange={setOpenEdit} isEdit />
     </div>
   );
