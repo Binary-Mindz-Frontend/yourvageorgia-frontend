@@ -16,7 +16,7 @@ const CustomPagination: React.FC<PaginationProps> = ({
 }) => {
   const totalPages = Math.ceil(totalItems / pageSize);
 
-  // Generate visible page numbers (like 1,2,3,...,30)
+  // Generate visible page numbers
   const getPageNumbers = () => {
     const pages: (number | string)[] = [];
     if (totalPages <= 5) {
@@ -59,7 +59,7 @@ const CustomPagination: React.FC<PaginationProps> = ({
         <button
           onClick={() => currentPage > 1 && onPageChange(currentPage - 1)}
           disabled={currentPage === 1}
-          className="px-3 py-1 text-sm border rounded-md hover:bg-gray-100 disabled:opacity-50 flex items-center gap-1.5 cursor-pointer"
+          className="px-3 py-1 text-sm border rounded-md hover:bg-gray-900 disabled:opacity-50 flex items-center gap-1.5 cursor-pointer"
         >
           <BsArrowLeftShort />
           <span>Prev</span>
@@ -74,11 +74,8 @@ const CustomPagination: React.FC<PaginationProps> = ({
             <button
               key={idx}
               onClick={() => onPageChange(Number(page))}
-              className={`px-3 py-1 text-sm border rounded-md cursor-pointer ${
-                currentPage === page
-                  ? "bg-primary text-white border-primary"
-                  : "hover:bg-gray-100"
-              }`}
+              className={`px-3 py-1 text-sm border rounded-md cursor-pointer 
+                ${currentPage === page ? "bg-gray-900 text-white border-gray-900" : "hover:bg-gray-900"}`}
             >
               {page}
             </button>
@@ -91,7 +88,7 @@ const CustomPagination: React.FC<PaginationProps> = ({
             currentPage < totalPages && onPageChange(currentPage + 1)
           }
           disabled={currentPage === totalPages}
-          className="px-3 py-1 text-sm border rounded-md hover:bg-gray-100 disabled:opacity-50 flex items-center gap-1.5 cursor-pointer"
+          className="px-3 py-1 text-sm border rounded-md hover:bg-gray-900 disabled:opacity-50 flex items-center gap-1.5 cursor-pointer"
         >
           <span>Next</span>
           <BsArrowRightShort />
