@@ -1,71 +1,49 @@
 import icon1 from "@/public/assets/dashboard/categories/icon1.png";
 import icon2 from "@/public/assets/dashboard/categories/icon2.png";
-import icon3 from "@/public/assets/dashboard/categories/icon3.png";
 import icon4 from "@/public/assets/dashboard/categories/icon4.png";
 
 export type TCategory = {
-    name: string;
-    slug: string;
-    jobs: string;
-    featured: boolean;
-    type: "Parent" | "Sub";
-    status: "Active" | "Inactive";
+    _id: string;
+    title: string;
     image: string;
+    description: string;
 };
 
 export const categoryData: TCategory[] = [
     {
-        name: "Landscaping",
-        slug: "landscaping",
-        jobs: "350 Jobs",
-        featured: true,
-        type: "Parent",
-        status: "Active",
+        _id: "1",
+        title: "Landscaping",
         image: icon1.src,
+        description: "All landscaping services including garden design and maintenance.",
     },
     {
-        name: "Lawn Care",
-        slug: "lawn-care",
-        jobs: "180 Jobs",
-        featured: false,
-        type: "Sub",
-        status: "Active",
+        _id: "2",
+        title: "Lawn Care",
         image: icon2.src,
+        description: "Professional lawn mowing, trimming, and fertilization services.",
     },
     {
-        name: "Tree Services",
-        slug: "tree-services",
-        jobs: "170 Jobs",
-        featured: false,
-        type: "Parent",
-        status: "Active",
-        image: icon3.src,
-    },
-    {
-        name: "Cleaning",
-        slug: "cleaning",
-        jobs: "290 Jobs",
-        featured: true,
-        type: "Sub",
-        status: "Active",
+        _id: "3",
+        title: "Tree Services",
         image: icon4.src,
+        description: "Tree trimming, pruning, and removal services for residential and commercial properties.",
     },
     {
-        name: "House Cleaning",
-        slug: "house-cleaning",
-        jobs: "150 Jobs",
-        featured: false,
-        type: "Parent",
-        status: "Active",
+        _id: "4",
+        title: "Cleaning",
+        image: icon4.src,
+        description: "House and office cleaning services to keep your spaces spotless.",
+    },
+    {
+        _id: "5",
+        title: "House Cleaning",
         image: icon1.src,
+        description: "Comprehensive cleaning solutions for homes of all sizes.",
     },
     {
-        name: "Commercial Cleaning",
-        slug: "commercial-cleaning",
-        jobs: "140 Jobs",
-        featured: false,
-        type: "Sub",
-        status: "Active",
+        _id: "6",
+        title: "Commercial Cleaning",
         image: icon2.src,
+        description: "Reliable cleaning services for offices and commercial spaces.",
     },
 ];

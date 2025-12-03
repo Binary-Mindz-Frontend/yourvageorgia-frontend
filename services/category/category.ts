@@ -1,0 +1,48 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+"use server";
+
+import { ICategory } from "@/types/category.types";
+
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_API;
+
+
+export interface ICategoryResponse {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  data: ICategory & { _id: string; createdAt: string; updatedAt: string; __v: number };
+}
+
+export const createCategory = async (data: ICategory): Promise<ICategoryResponse | { error: string }> => {
+  try {
+    const res = await fetch(`${BASE_URL}/category`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+
+    const json = await res.json();
+
+    if (!res.ok) {
+      return { error: json.message || "Failed to create category" };
+    }
+
+    return json;
+  } catch (error: any) {
+    return { error: error.message };
+  }
+};
+
+// get all categories
+export const getCategories = async (): Promise<{ data: ICategoryResponse["data"][] } | { error: string }> => {
+  try {
+    const res = await fetch(`${BASE_URL}/category`);
+    const json = await res.json();
+    if (!res.ok) return { error: json.message || "Failed to fetch categories" };
+    return { data: json.data };
+  } catch (error: any) {
+    return { error: error.message };
+  }
+};

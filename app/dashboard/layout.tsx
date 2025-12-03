@@ -11,6 +11,9 @@ import { MdOutlineNotificationsNone } from "react-icons/md";
 import { AppSidebar } from "@/components/Shared/dashboard/sidebar/AppSidebar";
 import useScrollTrigger from "@/hooks/useScrollTrigger";
 import { LogOut } from "lucide-react";
+import { Toaster } from "sonner";
+
+
 const DashboardLayout = ({ children }: { children: ReactNode }) => {
   const { scrolled } = useScrollTrigger();
   const [showLogout, setShowLogout] = useState(false);
@@ -91,6 +94,7 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
           </header>
           <div className="bg-black min-h-[calc(100vh)] z-0">
             <div className="">{children}</div>
+            <Toaster position="top-right" />
           </div>
           {/* <footer className="w-full px-4 py-6 bg-primary-200 text-sm text-white text-center">
             Carbon Engines Admin — Precision in Every Rep, Control in Every

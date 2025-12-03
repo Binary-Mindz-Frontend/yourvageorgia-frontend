@@ -13,6 +13,7 @@ import {
 import AddCategoryModal from "../AddCategory/AddCategory";
 import CustomTable, { Column } from "@/components/Shared/dashboard/customtable/CustomTable";
 import CustomPagination from "@/components/Shared/dashboard/custompagination/CustomPagination";
+import Image from "next/image";
 
 
 const CategoryPage = () => {
@@ -21,77 +22,38 @@ const CategoryPage = () => {
 
     const [openAdd, setOpenAdd] = useState(false);
     const [openEdit, setOpenEdit] = useState(false);
-    const [selectedCategory, setSelectedCategory] = useState<TCategory | null>(null);
 
     // TABLE COLUMNS
     const categoryColumn: Column<TCategory>[] = [
         {
-            header: "Category Name",
-            accessor: "name",
+            header: "Image",
+            accessor: "image",
             cell: (row) => (
-                <div className="w-full flex justify-center">
-                    <span className="text-white text-sm">{row.name}</span>
+                <div className="flex justify-center">
+                    <Image
+                        src={row.image}
+                        alt={row.title}
+                        width={48}      // 12 * 4 = 48px
+                        height={48}
+                        className="rounded object-cover"
+                    />
                 </div>
             ),
         },
         {
-            header: "Slug",
-            cell: (row) => (
-                <div className="w-full flex justify-center">
-                    <span className="text-white">{row.slug}</span>
-                </div>
-            ),
+            header: "Title",
+            accessor: "title",
+            cell: (row) => <span className="text-white">{row.title}</span>,
         },
         {
-            header: "Jobs Count",
-            cell: (row) => (
-                <div className="w-full flex justify-center">
-                    <span className="text-white">{row.jobs}</span>
-                </div>
-            ),
+            header: "Description",
+            accessor: "description",
+            cell: (row) => <span className="text-white">{row.description}</span>,
         },
-        {
-            header: "Featured",
-            cell: (row) => (
-                <div className="w-full flex justify-center">
-                    <div className="flex items-center gap-1">
-                        {row.featured ? (
-                            <>
-                                <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                                <span className="text-white font-medium">Yes</span>
-                            </>
-                        ) : (
-                            <span className="text-white">No</span>
-                        )}
-                    </div>
-                </div>
-            ),
-        },
-        {
-            header: "Type",
-            accessor: "type",
-            cell: (row) => (
-                <div className="w-full flex justify-center">
-                    <span className="text-white">{row.type}</span>
-                </div>
-            ),
-        },
-        {
-            header: "Status",
-            accessor: "status",
-            cell: (row) => (
-                <div className="w-full flex justify-center">
-                    <span className="px-3 py-1 text-xs rounded-full bg-[#500202] text-white">
-                        {row.status}
-                    </span>
-                </div>
-            ),
-        },
-
         // ACTIONS COLUMN
         {
             header: "Action",
-            cell: (row) => (
+            cell: () => (
                 <div className="flex justify-center items-center w-full">
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -105,10 +67,7 @@ const CategoryPage = () => {
                             {/* EDIT BUTTON */}
                             <DropdownMenuItem
                                 className="flex items-center gap-2"
-                                onClick={() => {
-                                    setSelectedCategory(row);
-                                    setOpenEdit(true);
-                                }}
+
                             >
                                 <SquarePen size={16} />
                                 Edit
@@ -185,7 +144,7 @@ const CategoryPage = () => {
                 open={openEdit}
                 onOpenChange={setOpenEdit}
                 isEdit
-                initialData={selectedCategory || undefined}
+
             />
         </div>
     );
