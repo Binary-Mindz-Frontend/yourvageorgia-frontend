@@ -14,7 +14,7 @@ export type Column<T> =
 export interface ITableProps<T> {
   columns: Column<T>[];
   data: T[];
-  loading?: boolean; // ✅ optional loading prop
+  loading?: boolean; 
 }
 
 const CustomTable = <T extends object>({ columns, data, loading = false }: ITableProps<T>) => {
