@@ -148,15 +148,15 @@ const CategoryPage = () => {
 
                         <DropdownMenuContent align="end" className="w-40">
                             <DropdownMenuItem
-  className="flex items-center gap-2 cursor-pointer"
-  onClick={() => {
-    setSelectedCategory(row); // store the category data
-    setOpenEdit(true);        // open the edit modal
-  }}
->
-  <SquarePen size={16} />
-  Edit
-</DropdownMenuItem>
+                                className="flex items-center gap-2 cursor-pointer"
+                                onClick={() => {
+                                    setSelectedCategory(row); // store the category data
+                                    setOpenEdit(true);        // open the edit modal
+                                }}
+                            >
+                                <SquarePen size={16} />
+                                Edit
+                            </DropdownMenuItem>
 
 
                             {/* View Button */}
@@ -237,21 +237,21 @@ const CategoryPage = () => {
 
             {/* Edit Category Modal */}
             <AddCategoryModal
-    open={openEdit}
-    onOpenChange={(open) => {
-        setOpenEdit(open);
-        if (!open) setSelectedCategory(null); // reset after close
-    }}
-    isEdit={true}
-    initialData={selectedCategory || undefined} // pass selected category
-    onCategoryAdded={(updatedCategory) => {
-        setCategories((prev) =>
-            prev.map((cat) =>
-                cat._id === updatedCategory._id ? updatedCategory : cat
-            )
-        );
-    }}
-/>
+                open={openEdit}
+                onOpenChange={(open) => {
+                    setOpenEdit(open);
+                    if (!open) setSelectedCategory(null); // reset after close
+                }}
+                isEdit={true}
+                initialData={selectedCategory || undefined} // pass selected category
+                onCategoryAdded={(updatedCategory) => {
+                    setCategories((prev) =>
+                        prev.map((cat) =>
+                            cat._id === updatedCategory._id ? updatedCategory : cat
+                        )
+                    );
+                }}
+            />
 
             {/* View Category Modal */}
             <Dialog open={openView} onOpenChange={setOpenView}>
