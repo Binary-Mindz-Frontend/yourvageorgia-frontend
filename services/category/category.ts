@@ -46,3 +46,27 @@ export const getCategories = async (): Promise<{ data: ICategoryResponse["data"]
     return { error: error.message };
   }
 };
+
+// delete category by id
+export const deleteCategory = async (
+  categoryId: string
+): Promise<{ success: boolean; message: string } | { error: string }> => {
+  try {
+    const res = await fetch(`${BASE_URL}/category/${categoryId}`, {
+      method: "DELETE",
+    });
+
+    const json = await res.json();
+
+    if (!res.ok) {
+      return { error: json?.message || "Failed to delete category" };
+    }
+
+    return {
+      success: true,
+      message: json?.message || "Category deleted successfully",
+    };
+  } catch (error: any) {
+    return { error: error.message };
+  }
+};
