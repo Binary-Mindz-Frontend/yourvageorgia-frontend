@@ -34,6 +34,7 @@ import {
 } from "@/components/ui/dialog";
 import CategoryView from "../CategoryView/CategoryView";
 
+
 const CategoryPage = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const pageSize = 10; // 10 rows per page
@@ -48,6 +49,8 @@ const CategoryPage = () => {
     // Dialog state for View
     const [openView, setOpenView] = useState(false);
     const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+
+    const [selectedCategory, setSelectedCategory] = useState<ICategory | null>(null);
 
     // Fetch categories from API
     useEffect(() => {
@@ -144,10 +147,17 @@ const CategoryPage = () => {
                         </DropdownMenuTrigger>
 
                         <DropdownMenuContent align="end" className="w-40">
-                            <DropdownMenuItem className="flex items-center gap-2">
-                                <SquarePen size={16} />
-                                Edit
-                            </DropdownMenuItem>
+                            <DropdownMenuItem
+  className="flex items-center gap-2 cursor-pointer"
+  onClick={() => {
+    setSelectedCategory(row); // store the category data
+    setOpenEdit(true);        // open the edit modal
+  }}
+>
+  <SquarePen size={16} />
+  Edit
+</DropdownMenuItem>
+
 
                             {/* View Button */}
                             <DropdownMenuItem
@@ -226,7 +236,22 @@ const CategoryPage = () => {
             />
 
             {/* Edit Category Modal */}
-            <AddCategoryModal open={openEdit} onOpenChange={setOpenEdit} isEdit />
+            <AddCategoryModal
+    open={openEdit}
+    onOpenChange={(open) => {
+        setOpenEdit(open);
+        if (!open) setSelectedCategory(null); // reset after close
+    }}
+    isEdit={true}
+    initialData={selectedCategory || undefined} // pass selected category
+    onCategoryAdded={(updatedCategory) => {
+        setCategories((prev) =>
+            prev.map((cat) =>
+                cat._id === updatedCategory._id ? updatedCategory : cat
+            )
+        );
+    }}
+/>
 
             {/* View Category Modal */}
             <Dialog open={openView} onOpenChange={setOpenView}>

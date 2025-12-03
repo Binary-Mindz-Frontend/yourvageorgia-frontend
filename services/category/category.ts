@@ -89,3 +89,28 @@ export const getCategoryById = async (
   }
 };
 
+// update category by id
+export const updateCategory = async (
+  categoryId: string,
+  data: Partial<ICategory> 
+): Promise<ICategoryResponse | { error: string }> => {
+  try {
+    const res = await fetch(`${BASE_URL}/category/${categoryId}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+
+    const json = await res.json();
+
+    if (!res.ok) {
+      return { error: json.message || "Failed to update category" };
+    }
+
+    return json;
+  } catch (error: any) {
+    return { error: error.message };
+  }
+};
