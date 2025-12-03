@@ -45,7 +45,7 @@ interface DashboardCardProps {
 
 const DashboardCard: FC<DashboardCardProps> = ({ title, icon: Icon, value, status, color}) => {
   return (
-    <Card className="rounded-2xl py-4 shadow-sm border bg-[#500202] border-[#500202]">
+    <Card className="rounded-2xl py-4 shadow-sm border bg-slate-900 border-black">
       <CardContent className="flex flex-col gap-2">
         <div className="flex justify-between items-center">
           <h2 className="text-sm font-medium text-white">{title}</h2>
