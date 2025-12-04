@@ -3,7 +3,7 @@
 
 import { ICategory } from "@/types/category.types";
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_API;
+const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 
 export interface ICategoryResponse {
