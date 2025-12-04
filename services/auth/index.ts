@@ -4,7 +4,6 @@
 import { jwtDecode } from "jwt-decode";
 import { getValidToken } from "@/lib/verifyToken";
 import { cookies } from "next/headers";
-// import { useEffect } from "react";
 import { FieldValues } from "react-hook-form";
 
 export const registerUser = async (userData: Record<string, any>) => {
