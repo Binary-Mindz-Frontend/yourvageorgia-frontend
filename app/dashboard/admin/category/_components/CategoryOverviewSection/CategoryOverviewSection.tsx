@@ -1,4 +1,4 @@
-import { LayoutPanelTop, Star, Briefcase, TrendingUp } from "lucide-react";
+import { LayoutPanelTop  } from "lucide-react";
 import { FC } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -10,27 +10,7 @@ const analyticsData = [
         iconBg: "bg-[#DBEAFE]",
         iconColor: "text-[#155DFC]",
     },
-    {
-        title: "Featured Categories",
-        value: "2",
-        icon: Star,
-        iconBg: "bg-[#FEF9C2]",
-        iconColor: "text-[#D08700]",
-    },
-    {
-        title: "Total Active Jobs",
-        value: "1,730",
-        icon: Briefcase,
-        iconBg: "bg-[#DCFCE7]",
-        iconColor: "text-[#00A63E]",
-    },
-    {
-        title: "Top Performing Category",
-        value: "Home Improvement",
-        icon: TrendingUp,
-        iconBg: "bg-[#F3E8FF]",
-        iconColor: "text-[#9810FA]",
-    },
+
 ];
 
 

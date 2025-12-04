@@ -237,6 +237,9 @@ const UserTable = () => {
 
     return (
         <div >
+            <div className="flex ">
+
+            </div>
             <CustomTable columns={userColumns} data={PartnerData} />
             <CustomPagination
                 totalItems={PartnerData.length}

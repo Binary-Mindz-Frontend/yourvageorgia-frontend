@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { loginUser } from "@/services/auth";
 import toast from "react-hot-toast";
 import useUser from "@/hooks/useUser";
+import Link from "next/link";
 
 const MemberLogin = () => {
   const router = useRouter();
@@ -107,12 +108,12 @@ const MemberLogin = () => {
 
         {/* Forgot Password */}
         <div className="text-center pt-3">
-          <a
-            href="#"
+          <Link
+            href="/forget-password"
             className="text-sm text-white/70 hover:text-white transition duration-300"
           >
             Forgot your password?
-          </a>
+          </Link>
         </div>
       </div>
     </div>
