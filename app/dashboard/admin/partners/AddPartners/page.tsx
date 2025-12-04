@@ -2,44 +2,38 @@
 
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+
+import { getCategories } from "@/services/category/category";
+import { ICategory } from "@/types/category.types";
+import { createPartner } from "@/services/partner/partner";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Upload, X } from "lucide-react";
-
-import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 type CategoryOption = { _id: string; title: string };
+type Contact = { officeName?: string; phone?: string; mobile?: string; email?: string; address?: string; addressUrl?: string; };
+type GalleryItem = { url: string; preview: string | null };
 
-type Contact = {
-  officeName?: string;
-  phone?: string;
-  mobile?: string;
-  email?: string;
-  address?: string;
-  addressUrl?: string;
-};
+interface AddPartnerPageProps {
+  initialCategoryId?: string;
+}
 
-type GalleryItem = {
-  url: string;
-  preview: string | null;
-};
-
-export default function AddPartnerPage() {
+export default function AddPartnerPage({ initialCategoryId }: AddPartnerPageProps) {
   const [categories, setCategories] = useState<CategoryOption[]>([]);
+  const [categoryId, setCategoryId] = useState(initialCategoryId || "");
   const [loadingCategories, setLoadingCategories] = useState(false);
-  const [categoryId, setCategoryId] = useState("");
-  const [name, setName] = useState("");
 
+  const [name, setName] = useState("");
   const [thumbnailUrl, setThumbnailUrl] = useState("");
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
-
   const [logoUrl, setLogoUrl] = useState("");
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
-
   const [address, setAddress] = useState("");
-
   const [gallery, setGallery] = useState<GalleryItem[]>([
     { url: "", preview: null },
     { url: "", preview: null },
@@ -57,46 +51,41 @@ export default function AddPartnerPage() {
 
   const [terms, setTerms] = useState<string[]>([""]);
   const [contacts, setContacts] = useState<Contact[]>([{ officeName: "Head Office" }]);
-
   const [website, setWebsite] = useState("");
   const [instagram, setInstagram] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
 
-  const router = useRouter(); 
+  const router = useRouter();
 
+  // Fetch all categories for the select options
   useEffect(() => {
     const fetchCategories = async () => {
       setLoadingCategories(true);
       try {
-        // Uncomment this when you have the actual API
-        // const res = await getCategories();
-        // if ("error" in res) {
-        //   alert("Failed to load categories");
-        // } else {
-        //   const list = res.data.map((c: any) => ({
-        //     _id: c._id,
-        //     title: c.title,
-        //   }));
-        //   setCategories(list);
-        // }
-
-        // Mock data for demo
-        setTimeout(() => {
-          setCategories([
-            { _id: "1", title: "Restaurant" },
-            { _id: "2", title: "Hotel" },
-            { _id: "3", title: "Retail" },
-          ]);
-          setLoadingCategories(false);
-        }, 100);
-      } catch (error) {
-        console.error("Error loading categories:", error);
+        const res = await getCategories();
+        if ("error" in res) {
+          toast.error(res.error, { style: { background: "#000", color: "#fff" } });
+        } else {
+          const list: CategoryOption[] = res.data
+            .filter((c: ICategory) => c._id) // only keep categories with _id
+            .map((c: ICategory) => ({
+              _id: c._id!, // non-null assertion because we just filtered
+              title: c.title,
+            }));
+          setCategories(list);
+        }
+      } catch (err) {
+        console.error(err);
+        toast.error("Failed to fetch categories", { style: { background: "#000", color: "#fff" } });
+      } finally {
         setLoadingCategories(false);
       }
     };
 
     fetchCategories();
   }, []);
+
+
 
   const previewFile = (file: File, setPreview: (url: string) => void) => {
     const url = URL.createObjectURL(file);
@@ -110,47 +99,62 @@ export default function AddPartnerPage() {
     setGallery(newGallery);
   };
 
-  const handleSubmit = () => {
-    if (!categoryId) {
-      alert("Select category");
-      return;
-    }
-    if (!name) {
-      alert("Enter partner name");
-      return;
-    }
+  const toastStyle = { background: "#000", color: "#fff", marginTop: "4rem" };
 
-    const payload = {
-      category: categoryId,
-      name,
-      thumbnail: thumbnailPreview || thumbnailUrl,
-      address,
-      gallery: gallery.filter((x) => x.url.trim() || x.preview).map(g => g.preview || g.url),
-      logo: logoPreview || logoUrl,
-      isFeatured,
-      offer: {
-        title: offerTitle,
-        description: offerDescription,
-        validUntil: offerValidUntil,
-        offerPercentage: offerPercentage === "" ? undefined : Number(offerPercentage),
-      },
-      about: {
-        title: aboutTitle,
-        description: aboutDescription,
-      },
-      terms: terms.filter((t) => t.trim()),
-      contacts: contacts.filter((c) => Object.values(c).some((v) => v && v.trim())),
-      socials: {
-        website,
-        instagram,
-        whatsapp,
-      },
-    };
+const handleSubmit = async () => {
+  if (!categoryId) {
+    toast.error("Select category", { style: toastStyle });
+    return;
+  }
+  if (!name) {
+    toast.error("Enter partner name", { style: toastStyle });
+    return;
+  }
 
-    console.log("FINAL PAYLOAD:", JSON.stringify(payload, null, 2));
-    alert("Partner data submited!");
-    router.push("/dashboard/admin/partners");
+  const payload = {
+    category: categoryId,
+    name,
+    thumbnail: thumbnailPreview || thumbnailUrl,
+    address,
+    gallery: gallery.filter((x) => x.url.trim() || x.preview).map(g => g.preview || g.url),
+    logo: logoPreview || logoUrl,
+    isFeatured,
+    offer: {
+      title: offerTitle,
+      description: offerDescription,
+      validUntil: offerValidUntil,
+      offerPercentage: offerPercentage === "" ? undefined : Number(offerPercentage),
+    },
+    about: {
+      title: aboutTitle,
+      description: aboutDescription,
+    },
+    terms: terms.filter((t) => t.trim()),
+    contacts: contacts.filter((c) => Object.values(c).some((v) => v && v.trim())),
+    socials: {
+      website,
+      instagram,
+      whatsapp,
+    },
   };
+
+  try {
+    const res = await createPartner(payload);
+
+    if ("error" in res) {
+      toast.error("Failed to create partner: " + res.error, { style: toastStyle });
+      return;
+    }
+
+    toast.success("Partner created successfully!", { style: toastStyle });
+    router.push("/dashboard/admin/partners");
+  } catch (err: unknown) {
+    console.error(err);
+    toast.error("Something went wrong while creating partner.", { style: toastStyle });
+  }
+};
+
+
 
   return (
     <div className="max-w-5xl mx-auto p-6 bg-neutral-950 min-h-screen">
@@ -162,7 +166,7 @@ export default function AddPartnerPage() {
           <div>
             <Label className="text-white mb-1">Category</Label>
             <select
-              className="mt-1 w-full rounded-md bg-neutral-900 border border-neutral-700 text-white p-3 "
+              className="mt-1 w-full rounded-md bg-neutral-900 border border-neutral-700 text-white p-3"
               value={categoryId}
               onChange={(e) => setCategoryId(e.target.value)}
               disabled={loadingCategories}
@@ -176,6 +180,7 @@ export default function AddPartnerPage() {
                 </option>
               ))}
             </select>
+
           </div>
 
           <div className="sm:col-span-2">

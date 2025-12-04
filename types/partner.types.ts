@@ -26,9 +26,15 @@ export interface PartnerSocials {
   instagram?: string;
   whatsapp?: string;
 }
+export interface PartnerCategory {
+  _id: string;
+  title: string;
+}
 
 export interface Partner {
-  category: string; // category ID
+    _id?:string;
+  category: string | PartnerCategory; 
+  title?:string;
   name: string;
   thumbnail?: string;
   address?: string;
