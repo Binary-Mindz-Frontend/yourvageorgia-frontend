@@ -1,10 +1,12 @@
 "use client";
-import { Ban, CircleCheck, CircleX, Eye, Mail, MoreHorizontal, Play, Shield, Star } from "lucide-react";
+import { Ban, CircleCheck, CircleX, Eye, Mail, MoreHorizontal, Play, Plus, Shield, Star } from "lucide-react";
 import React, { useState } from "react";
 import { IPartnerData, PartnerData } from "../../data/usersData";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuGroup } from "@/components/ui/dropdown-menu";
 import CustomPagination from "@/components/Shared/dashboard/custompagination/CustomPagination";
 import CustomTable, { Column } from "@/components/Shared/dashboard/customtable/CustomTable";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 
 
@@ -237,8 +239,13 @@ const UserTable = () => {
 
     return (
         <div >
-            <div className="flex ">
-
+            <div className="flex justify-end mb-6">
+                <Link href="/dashboard/admin/partners/AddPartners">
+      <Button className="flex items-center bg-gray-900 hover:bg-[#030213] px-4 py-2">
+        <Plus size={18} className="mr-2 text-white" />
+        <span className="text-white text-base">Add Partner</span>
+      </Button>
+    </Link>
             </div>
             <CustomTable columns={userColumns} data={PartnerData} />
             <CustomPagination
