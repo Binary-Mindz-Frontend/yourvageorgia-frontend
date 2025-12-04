@@ -22,7 +22,8 @@ import { ICategory } from "@/types/category.types";
 import Image from "next/image";
 
 // Backend base URL
-const BACKEND_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000/api";
+const BACKEND_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://82.25.109.232:5000/api";
+
 
 type AddCategoryProps = {
   open: boolean;
@@ -73,7 +74,7 @@ export default function AddCategoryModal({
       });
 
       const data = await res.json();
-
+      
       if (!res.ok || !data.success) {
         console.error(data.message || "Failed to upload image");
         return;
