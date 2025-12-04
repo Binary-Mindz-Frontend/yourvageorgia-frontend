@@ -11,15 +11,14 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 
-import Link from "next/link";
-import Image from "next/image";
 import {
   BriefcaseBusiness,
   LayoutGrid,
   Users,
 } from "lucide-react";
-import logo from "@/public/assets/profile/profile.jpg";
+
 import { NavMain } from "./Nabmain";
+import { HeaderLogo } from "@/components/icons";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const navMain = [
@@ -52,18 +51,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarHeader className="bg-black">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild>
+            <SidebarMenuButton size="lg" asChild
+            className="hover:bg-transparent focus:bg-transparent active:bg-transparent"
+            >
               <div className="mt-2">
                 <div className="text-2xl font-bold text-white">
-                  <Link href="/">
-                    <Image
-                      src={logo}
-                      alt="logo"
-                      width={150}
-                      height={40}
-                      className="w-25 h-25"
-                    />
-                  </Link>
+            
+                    <HeaderLogo />
+                  
                 </div>
               </div>
             </SidebarMenuButton>
