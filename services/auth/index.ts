@@ -4,7 +4,6 @@
 import { jwtDecode } from "jwt-decode";
 import { getValidToken } from "@/lib/verifyToken";
 import { cookies } from "next/headers";
-// import { useEffect } from "react";
 import { FieldValues } from "react-hook-form";
 
 export const registerUser = async (userData: Record<string, any>) => {
@@ -47,7 +46,7 @@ export const loginUser = async (userData: FieldValues) => {
     });
 
     const result = await res.json();
-    console.log("login user", result);
+    // console.log("login user", result);
 
     if (result?.success) {
       // Save token in cookies
@@ -112,6 +111,84 @@ export const getCurrentUser = async () => {
 
   return null;
 };
+
+
+// Forget Password: Send OTP to Email
+export const forgetPassword = async ({ email }: { email: string }) => {
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_API}/user/forget-password`,
+      {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      }
+   
+    );
+
+    const result = await res.json();
+    console.log(result);
+    return result;
+  } catch (error: any) {
+    console.log("Forget Password Error:", error);
+    return { success: false, message: error.message };
+  }
+};
+
+// Verify OTP
+export const verifyForgetOtp = async ({
+  email,
+  otp,
+}: {
+  email: string;
+  otp: string;
+}) => {
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_API}/user/verify-forget-password-otp`,
+      {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, otp }),
+      }
+    );
+
+    const result = await res.json();
+    return result;
+  } catch (error: any) {
+    console.log("Verify OTP Error:", error);
+    return { success: false, message: error.message };
+  }
+};
+
+
+// Reset Password
+export const resetPassword = async ({
+  email,
+  password,
+}: {
+  email: string;
+  password: string;
+}) => {
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_API}/user/reset-password`,
+      {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      }
+    );
+
+    const result = await res.json();
+    return result;
+  } catch (error: any) {
+    console.log("Reset Password Error:", error);
+    return { success: false, message: error.message };
+  }
+};
+
+
 
 //Logout User
 export const logout = async () => {

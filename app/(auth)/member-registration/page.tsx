@@ -89,7 +89,7 @@ const MembershipRegister = () => {
     }
 
     // Success → redirect
-    router.push("/payment");
+    router.push("/checkout");
   };
 
   return (
@@ -240,7 +240,7 @@ const MembershipRegister = () => {
             <Button
               type="submit"
               disabled={loading}
-              className="bg-black text-white border text-base border-white font-medium py-3.5 px-10 rounded-full hover:bg-white hover:text-black transition"
+              className="bg-black cursor-pointer text-white border text-base border-white font-medium py-3.5 px-10 rounded-full hover:bg-white hover:text-black transition"
             >
               {loading ? "Processing..." : "Next"}
             </Button>
