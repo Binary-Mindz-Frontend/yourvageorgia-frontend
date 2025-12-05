@@ -1,38 +1,9 @@
-import { FC } from "react";
+"use client"
+import { FC, useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { UserCheck, Users, DollarSign, AlertCircle, LucideIcon } from "lucide-react";
-
-// Static dashboard data
-const dashboardData = [
-  {
-    title: "Total Partner",
-    icon: Users,
-    value: 8,
-    status: "Clients + partners",
-    color: "text-[#155DFC]", 
-  },
-  {
-    title: "Active Partner",
-    icon: UserCheck,
-    value: 2,
-    status: "Past 30 days",
-    color: "text-[#9810FA]", 
-  },
-  {
-    title: "Escrow Overview",
-    icon: DollarSign,
-    value: "$16,700",
-    status: "Pending: $2,000 | Released: $10,600",
-    color: "text-[#009966]", 
-  },
-  {
-    title: "Compliance Pending",
-    icon: AlertCircle,
-    value: 7,
-    status: "Incomplete verification",
-    color: "text-[#F54900]", 
-  },
-];
+import { UserCheck, Users, LucideIcon } from "lucide-react";
+import { getPartners } from "@/services/partner/partner";
+import { Partner } from "@/types/partner.types";
 
 // Reusable single card component
 interface DashboardCardProps {
@@ -43,7 +14,7 @@ interface DashboardCardProps {
   color: string;
 }
 
-const DashboardCard: FC<DashboardCardProps> = ({ title, icon: Icon, value, status, color}) => {
+const DashboardCard: FC<DashboardCardProps> = ({ title, icon: Icon, value, status, color }) => {
   return (
     <Card className="rounded-2xl py-4 shadow-sm border bg-slate-900 border-black">
       <CardContent className="flex flex-col gap-2">
@@ -60,18 +31,60 @@ const DashboardCard: FC<DashboardCardProps> = ({ title, icon: Icon, value, statu
 };
 
 const UsersSummary: FC = () => {
+  const [partners, setPartners] = useState<Partner[]>([]); 
+  const [loading, setLoading] = useState(true); 
+
+  
+  useEffect(() => {
+    const fetchPartners = async () => {
+      setLoading(true); 
+      const result = await getPartners();
+      if ("data" in result) {
+        setPartners(result.data); 
+      }
+      setLoading(false); 
+    };
+
+    fetchPartners();
+  }, []); 
+
+  const totalPartners = partners.length;
+  const featuredPartners = partners.filter((partner) => partner.isFeatured).length;
+
+  // Static dashboard data with fetched values
+  const dashboardData = [
+    {
+      title: "Total Partner",
+      icon: Users,
+      value: totalPartners,
+      status: "Clients + partners",
+      color: "text-[#155DFC]",
+    },
+    {
+      title: "Featured Partner",
+      icon: UserCheck,
+      value: featuredPartners,
+      status: "Featured Partners",
+      color: "text-[#9810FA]",
+    },
+  ];
+
   return (
     <div className="grid grid-cols-1 mt-3 mb-6 md:mt-8 sm:grid-cols-2 md:grid-cols-4 gap-4">
-      {dashboardData.map((item, index) => (
-        <DashboardCard
-          key={index}
-          title={item.title}
-          icon={item.icon}
-          value={item.value}
-          status={item.status}
-          color={item.color}
-        />
-      ))}
+      {loading ? (
+        <p className="text-white">Loading...</p>
+      ) : (
+        dashboardData.map((item, index) => (
+          <DashboardCard
+            key={index}
+            title={item.title}
+            icon={item.icon}
+            value={item.value}
+            status={item.status}
+            color={item.color}
+          />
+        ))
+      )}
     </div>
   );
 };
