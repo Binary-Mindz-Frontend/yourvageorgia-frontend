@@ -762,17 +762,22 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
             )}
           </div>
         </div>
-
         {/* FEATURED CHECK */}
         <div className="flex gap-3 items-center">
-          <input
-            type="checkbox"
-            {...register("isFeatured")}
-            className="w-4 h-4"
+          <Controller
+            name="isFeatured"
+            control={control}
+            render={({ field }) => (
+              <input
+                type="checkbox"
+                checked={field.value}
+                onChange={(e) => field.onChange(e.target.checked)}
+                className="w-4 h-4"
+              />
+            )}
           />
           <Label className="text-white mb-1">Mark as Featured</Label>
         </div>
-
         {/* BUTTONS */}
         <div className="flex gap-3">
           <Button type="submit" className="bg-black cursor-pointer hover:bg-black border border-white">
