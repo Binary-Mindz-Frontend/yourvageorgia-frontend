@@ -90,17 +90,24 @@ const PartnerPage = () => {
     },
     {
       header: "Is Featured",
-      cell: (row) => (
-        <div className="flex justify-center">
-          <span
-            className={`px-3 py-1 inline-flex text-xs font-semibold rounded-full ${row.isFeatured ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"
-              }`}
-          >
-            {row.isFeatured ? "Yes" : "No"}
-          </span>
-        </div>
-      ),
-    },
+      cell: (row) => {
+        const isFeatured =
+          row.isFeatured === true ||
+          (typeof row.isFeatured === "string" && row.isFeatured === "true");
+
+        return (
+          <div className="flex justify-center">
+            <span
+              className={`px-3 py-1 inline-flex text-xs font-semibold rounded-full ${isFeatured ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"
+                }`}
+            >
+              {isFeatured ? "Yes" : "No"}
+            </span>
+          </div>
+        );
+      },
+    }
+    ,
     {
       header: "Actions",
       cell: (row) => (

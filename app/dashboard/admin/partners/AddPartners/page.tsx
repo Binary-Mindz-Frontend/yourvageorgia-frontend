@@ -438,7 +438,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
             <Label className="text-white mb-1">Logo (Recommended 300×300 px) *</Label>
             <div className="flex gap-2 mt-1">
               <Input
-                {...register("logoUrl", { required: "Logo is required" })}
+                {...register("logoUrl")}
                 placeholder="https://logo.png"
                 className="bg-neutral-900 text-white border-neutral-700"
               />
