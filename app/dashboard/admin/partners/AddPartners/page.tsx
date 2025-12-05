@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
@@ -14,10 +14,16 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Upload, X } from "lucide-react";
 import { toast } from "sonner";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select"
 
 type CategoryOption = { _id: string; title: string };
 type Contact = { officeName?: string; phone?: string; mobile?: string; email?: string; address?: string; addressUrl?: string; };
-type GalleryItem = { url: string; preview: string | null };
 
 interface AddPartnerPageProps {
   initialCategoryId?: string;
@@ -34,11 +40,18 @@ export default function AddPartnerPage({ initialCategoryId }: AddPartnerPageProp
   const [logoUrl, setLogoUrl] = useState("");
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [address, setAddress] = useState("");
-  const [gallery, setGallery] = useState<GalleryItem[]>([
-    { url: "", preview: null },
-    { url: "", preview: null },
-    { url: "", preview: null },
-  ]);
+  interface GalleryItem {
+    url: string;          // for user input or uploaded URL
+    preview: string | null; // local preview from File
+    file: File | null;     // the actual File object
+  }
+
+  // Update your state - remove the initial empty item
+  const [gallery, setGallery] = useState<GalleryItem[]>([]);
+
+  const galleryInputRef = useRef<HTMLInputElement | null>(null);
+
+
   const [isFeatured, setIsFeatured] = useState(false);
 
   const [offerTitle, setOfferTitle] = useState("");
@@ -56,6 +69,41 @@ export default function AddPartnerPage({ initialCategoryId }: AddPartnerPageProp
   const [whatsapp, setWhatsapp] = useState("");
 
   const router = useRouter();
+  const thumbnailInputRef = useRef<HTMLInputElement | null>(null);
+  const logoInputRef = useRef<HTMLInputElement | null>(null);
+
+
+  const removeThumbnail = () => {
+    setThumbnailPreview("");
+    setThumbnailUrl("");
+    if (thumbnailInputRef.current) thumbnailInputRef.current.value = "";
+  };
+
+  const removeLogo = () => {
+    setLogoPreview("");
+    setLogoUrl("");
+    if (logoInputRef.current) logoInputRef.current.value = "";
+  };
+
+  // Keep this function as is - it's correct
+  const handleGalleryFileChange = (files: FileList) => {
+    const newImages: GalleryItem[] = Array.from(files).map((file) => ({
+      file,
+      preview: URL.createObjectURL(file),
+      url: "",
+    }));
+
+    setGallery((prev) => [...prev, ...newImages]);
+
+    // reset input so same file can be uploaded again
+    if (galleryInputRef.current) galleryInputRef.current.value = "";
+  };
+
+  // FIX: Actually remove the item from array instead of setting it to null
+  const removeGalleryImage = (indexToRemove: number) => {
+    setGallery((prev) => prev.filter((_, index) => index !== indexToRemove));
+  };
+
 
   // Fetch all categories for the select options
   useEffect(() => {
@@ -92,67 +140,64 @@ export default function AddPartnerPage({ initialCategoryId }: AddPartnerPageProp
     setPreview(url);
   };
 
-  const handleGalleryFileChange = (index: number, file: File) => {
-    const url = URL.createObjectURL(file);
-    const newGallery = [...gallery];
-    newGallery[index] = { url: "", preview: url };
-    setGallery(newGallery);
-  };
 
   const toastStyle = { background: "#000", color: "#fff", marginTop: "4rem" };
 
-const handleSubmit = async () => {
-  if (!categoryId) {
-    toast.error("Select category", { style: toastStyle });
-    return;
-  }
-  if (!name) {
-    toast.error("Enter partner name", { style: toastStyle });
-    return;
-  }
-
-  const payload = {
-    category: categoryId,
-    name,
-    thumbnail: thumbnailPreview || thumbnailUrl,
-    address,
-    gallery: gallery.filter((x) => x.url.trim() || x.preview).map(g => g.preview || g.url),
-    logo: logoPreview || logoUrl,
-    isFeatured,
-    offer: {
-      title: offerTitle,
-      description: offerDescription,
-      validUntil: offerValidUntil,
-      offerPercentage: offerPercentage === "" ? undefined : Number(offerPercentage),
-    },
-    about: {
-      title: aboutTitle,
-      description: aboutDescription,
-    },
-    terms: terms.filter((t) => t.trim()),
-    contacts: contacts.filter((c) => Object.values(c).some((v) => v && v.trim())),
-    socials: {
-      website,
-      instagram,
-      whatsapp,
-    },
-  };
-
-  try {
-    const res = await createPartner(payload);
-
-    if ("error" in res) {
-      toast.error("Failed to create partner: " + res.error, { style: toastStyle });
+  const handleSubmit = async () => {
+    if (!categoryId) {
+      toast.error("Select category", { style: toastStyle });
+      return;
+    }
+    if (!name) {
+      toast.error("Enter partner name", { style: toastStyle });
       return;
     }
 
-    toast.success("Partner created successfully!", { style: toastStyle });
-    router.push("/dashboard/admin/partners");
-  } catch (err: unknown) {
-    console.error(err);
-    toast.error("Something went wrong while creating partner.", { style: toastStyle });
-  }
-};
+    const payload = {
+      category: categoryId,
+      name,
+      thumbnail: thumbnailPreview || thumbnailUrl,
+      address,
+      gallery: gallery
+        .filter(g => g.url.trim() || g.preview)
+        .map(g => g.preview || g.url),
+
+      logo: logoPreview || logoUrl,
+      isFeatured,
+      offer: {
+        title: offerTitle,
+        description: offerDescription,
+        validUntil: offerValidUntil,
+        offerPercentage: offerPercentage === "" ? undefined : Number(offerPercentage),
+      },
+      about: {
+        title: aboutTitle,
+        description: aboutDescription,
+      },
+      terms: terms.filter((t) => t.trim()),
+      contacts: contacts.filter((c) => Object.values(c).some((v) => v && v.trim())),
+      socials: {
+        website,
+        instagram,
+        whatsapp,
+      },
+    };
+
+    try {
+      const res = await createPartner(payload);
+
+      if ("error" in res) {
+        toast.error("Failed to create partner: " + res.error, { style: toastStyle });
+        return;
+      }
+
+      toast.success("Partner created successfully!", { style: toastStyle });
+      router.push("/dashboard/admin/partners");
+    } catch (err: unknown) {
+      console.error(err);
+      toast.error("Something went wrong while creating partner.", { style: toastStyle });
+    }
+  };
 
 
 
@@ -162,28 +207,9 @@ const handleSubmit = async () => {
 
       <div className="space-y-8">
         {/* CATEGORY + NAME */}
-        <div className="grid sm:grid-cols-3 gap-4">
+        <div className="grid sm:grid-cols-2 gap-4">
+          {/* Partner Name */}
           <div>
-            <Label className="text-white mb-1">Category</Label>
-            <select
-              className="mt-1 w-full rounded-md bg-neutral-900 border border-neutral-700 text-white p-3"
-              value={categoryId}
-              onChange={(e) => setCategoryId(e.target.value)}
-              disabled={loadingCategories}
-            >
-              <option value="">
-                {loadingCategories ? "Loading..." : "Select category"}
-              </option>
-              {categories.map((c) => (
-                <option key={c._id} value={c._id}>
-                  {c.title}
-                </option>
-              ))}
-            </select>
-
-          </div>
-
-          <div className="sm:col-span-2">
             <Label className="text-white mb-1">Partner Name</Label>
             <Input
               value={name}
@@ -192,10 +218,35 @@ const handleSubmit = async () => {
               placeholder="Partner name"
             />
           </div>
+          {/* Category */}
+          <div>
+            <Label className="text-white mb-1">Category</Label>
+
+            <Select
+              value={categoryId}
+              onValueChange={(value) => setCategoryId(value)}
+              disabled={loadingCategories}
+            >
+              <SelectTrigger className="mt-1 w-full bg-neutral-900 border border-neutral-700 text-white 
+             h-auto min-h-12 py-3 items-start">
+                <SelectValue placeholder={loadingCategories ? "Loading..." : "Select category"} />
+              </SelectTrigger>
+
+              <SelectContent className="bg-neutral-900 text-white border border-neutral-700">
+                {categories.map((c) => (
+                  <SelectItem key={c._id} value={c._id} className="cursor-pointer">
+                    {c.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
+
 
         {/* THUMBNAIL + LOGO */}
         <div className="grid sm:grid-cols-2 gap-4">
+          {/* Thumbnail */}
           <div>
             <Label className="text-white mb-1">Thumbnail Image</Label>
             <div className="flex gap-2 mt-1">
@@ -208,6 +259,7 @@ const handleSubmit = async () => {
               <label className="px-3 py-2 bg-neutral-800 rounded cursor-pointer flex items-center gap-2 text-white hover:bg-neutral-700">
                 <Upload size={16} />
                 <input
+                  ref={thumbnailInputRef}
                   type="file"
                   accept="image/*"
                   className="hidden"
@@ -218,8 +270,17 @@ const handleSubmit = async () => {
                 />
               </label>
             </div>
+
             {(thumbnailPreview || thumbnailUrl) && (
-              <div className="mt-2 w-full h-44 relative rounded overflow-hidden">
+              <div className="mt-2 w-full h-44 relative rounded overflow-hidden border border-neutral-700">
+                {/* Remove Button */}
+                <button
+                  onClick={removeThumbnail}
+                  className="absolute top-2 right-2 bg-red-600 text-white rounded w-7 h-7 flex items-center justify-center hover:bg-red-700 z-10"
+                >
+                  ×
+                </button>
+
                 <Image
                   src={thumbnailPreview || thumbnailUrl}
                   alt="thumb"
@@ -231,6 +292,7 @@ const handleSubmit = async () => {
             )}
           </div>
 
+          {/* Logo */}
           <div>
             <Label className="text-white mb-1">Logo (Recommended 300×300 px)</Label>
             <div className="flex gap-2 mt-1">
@@ -243,6 +305,7 @@ const handleSubmit = async () => {
               <label className="px-3 py-2 bg-neutral-800 rounded cursor-pointer flex items-center gap-2 text-white hover:bg-neutral-700">
                 <Upload size={16} />
                 <input
+                  ref={logoInputRef}
                   type="file"
                   accept="image/*"
                   className="hidden"
@@ -253,8 +316,17 @@ const handleSubmit = async () => {
                 />
               </label>
             </div>
+
             {(logoPreview || logoUrl) && (
               <div className="mt-2 w-24 h-24 relative rounded overflow-hidden border border-neutral-700">
+                {/* Remove Button */}
+                <button
+                  onClick={removeLogo}
+                  className="absolute top-1 right-1 bg-red-600 text-white rounded w-6 h-6 flex items-center justify-center hover:hover:bg-red-700 z-10"
+                >
+                  ×
+                </button>
+
                 <Image
                   src={logoPreview || logoUrl}
                   alt="logo"
@@ -266,7 +338,6 @@ const handleSubmit = async () => {
             )}
           </div>
         </div>
-
         {/* Address */}
         <div>
           <Label className="text-white mb-1">Address</Label>
@@ -278,70 +349,72 @@ const handleSubmit = async () => {
           />
         </div>
 
-        {/* GALLERY with Image Upload */}
-        <div>
+        {/* GALLERY */}
+        <div className="mt-6">
           <Label className="text-white mb-1">Gallery Images</Label>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-2">
-            {gallery.map((g, i) => (
-              <div key={i} className="space-y-2">
-                <div className="flex gap-2">
-                  <Input
-                    value={g.url}
-                    onChange={(e) => {
-                      const list = [...gallery];
-                      list[i] = { ...list[i], url: e.target.value };
-                      setGallery(list);
-                    }}
-                    placeholder={`Gallery URL ${i + 1}`}
-                    className="bg-neutral-900 text-white border-neutral-700"
-                  />
-                  <label className="px-3 py-2 bg-neutral-800 rounded cursor-pointer flex items-center gap-2 text-white hover:bg-neutral-700">
-                    <Upload size={16} />
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) handleGalleryFileChange(i, file);
-                      }}
-                    />
-                  </label>
-                </div>
-                {(g.preview || g.url) && (
-                  <div className="relative w-full h-32 rounded overflow-hidden border border-neutral-700">
+
+          {/* Drop Zone */}
+          <div
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={(e) => {
+              e.preventDefault();
+              if (e.dataTransfer.files.length > 0) {
+                handleGalleryFileChange(e.dataTransfer.files);
+              }
+            }}
+            className="mt-2 border-2 border-dashed rounded-md p-6 text-center text-neutral-300 cursor-pointer hover:bg-neutral-800 transition border-neutral-700"
+          >
+            <input
+              ref={galleryInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              className="hidden"
+              onChange={(e) => {
+                if (e.target.files) handleGalleryFileChange(e.target.files);
+              }}
+            />
+
+            <div
+              className="flex justify-center items-center gap-2"
+              onClick={() => galleryInputRef.current?.click()}
+            >
+              <Upload size={18} />
+              <span>Click or drag & drop images</span>
+            </div>
+          </div>
+
+          {/* Preview Grid - Only show if there are actual images */}
+          {gallery.length > 0 && (
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-4">
+              {gallery.map((item: GalleryItem, index: number) => (
+                <div
+                  key={index}
+                  className="relative w-full h-32 rounded overflow-hidden border border-neutral-700"
+                >
+                  {item.preview && (
                     <Image
-                      src={g.preview || g.url}
-                      alt={`gallery ${i + 1}`}
+                      src={item.preview}
+                      alt={`gallery-${index}`}
                       fill
                       className="object-cover"
                       unoptimized
                     />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const list = [...gallery];
-                        list[i] = { url: "", preview: null };
-                        setGallery(list);
-                      }}
-                      className="absolute top-1 right-1 bg-red-600 text-white p-1 rounded hover:bg-red-700"
-                    >
-                      <X size={16} />
-                    </button>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-          <Button
-            type="button"
-            className="mt-3 bg-neutral-700 hover:bg-neutral-600"
-            onClick={() => setGallery([...gallery, { url: "", preview: null }])}
-          >
-            + Add Gallery Slot
-          </Button>
-        </div>
+                  )}
 
+                  <button
+                    type="button"
+                    onClick={() => removeGalleryImage(index)}
+                    className="absolute top-1 right-1 bg-red-600 text-white p-1 rounded-full hover:bg-red-700"
+                    aria-label="Remove image"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
         {/* OFFER */}
         <div className="grid sm:grid-cols-2 gap-4">
           <div>
