@@ -205,7 +205,7 @@ const CategoryPage = () => {
                     </div>
 
                     <Button
-                        className="flex items-center bg-gray-900 hover:bg-[#030213] px-4 py-2"
+                        className="cursor-pointer flex items-center bg-gray-900 hover:bg-[#030213] px-4 py-2"
                         onClick={() => setOpenAdd(true)}
                     >
                         <Plus size={18} className="mr-2 text-white" />
