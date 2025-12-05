@@ -27,7 +27,7 @@ const PartnerPage = () => {
   const [deleting, setDeleting] = useState<string | null>(null);
   const router = useRouter();
 
-   
+
   useEffect(() => {
     const fetchPartners = async () => {
       setLoading(true);
@@ -93,9 +93,8 @@ const PartnerPage = () => {
       cell: (row) => (
         <div className="flex justify-center">
           <span
-            className={`px-3 py-1 inline-flex text-xs font-semibold rounded-full ${
-              row.isFeatured ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"
-            }`}
+            className={`px-3 py-1 inline-flex text-xs font-semibold rounded-full ${row.isFeatured ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"
+              }`}
           >
             {row.isFeatured ? "Yes" : "No"}
           </span>
@@ -122,14 +121,14 @@ const PartnerPage = () => {
                 View
               </DropdownMenuItem>
 
-             <DropdownMenuItem
-  className="flex items-center gap-2 text-red-600"
-  onClick={() => row._id && handleDelete(row._id)}
-  disabled={deleting === row._id || !row._id}
->
-  <Trash2 size={16} />
-  {deleting === row._id ? "Deleting..." : "Delete"}
-</DropdownMenuItem>
+              <DropdownMenuItem
+                className="flex items-center gap-2 text-red-600"
+                onClick={() => row._id && handleDelete(row._id)}
+                disabled={deleting === row._id || !row._id}
+              >
+                <Trash2 size={16} />
+                {deleting === row._id ? "Deleting..." : "Delete"}
+              </DropdownMenuItem>
 
             </DropdownMenuContent>
           </DropdownMenu>

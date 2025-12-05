@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useForm, Controller } from "react-hook-form";
 
 import { getCategories } from "@/services/category/category";
 import { ICategory } from "@/types/category.types";
@@ -20,10 +21,36 @@ import {
   SelectValue,
   SelectContent,
   SelectItem,
-} from "@/components/ui/select"
+} from "@/components/ui/select";
 
 type CategoryOption = { _id: string; title: string };
 type Contact = { officeName?: string; phone?: string; mobile?: string; email?: string; address?: string; addressUrl?: string; };
+
+interface GalleryItem {
+  url: string;
+  preview: string | null;
+  file: File | null;
+}
+
+interface FormData {
+  categoryId: string;
+  name: string;
+  thumbnailUrl: string;
+  logoUrl: string;
+  address: string;
+  isFeatured: boolean;
+  offerTitle: string;
+  offerDescription: string;
+  offerValidUntil: string;
+  offerPercentage: string;
+  aboutTitle: string;
+  aboutDescription: string;
+  terms: string[];
+  contacts: Contact[];
+  website: string;
+  instagram: string;
+  whatsapp: string;
+}
 
 interface AddPartnerPageProps {
   initialCategoryId?: string;
@@ -31,61 +58,63 @@ interface AddPartnerPageProps {
 
 export default function AddPartnerPage({ initialCategoryId }: AddPartnerPageProps) {
   const [categories, setCategories] = useState<CategoryOption[]>([]);
-  const [categoryId, setCategoryId] = useState(initialCategoryId || "");
   const [loadingCategories, setLoadingCategories] = useState(false);
 
-  const [name, setName] = useState("");
-  const [thumbnailUrl, setThumbnailUrl] = useState("");
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
-  const [logoUrl, setLogoUrl] = useState("");
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
-  const [address, setAddress] = useState("");
-  interface GalleryItem {
-    url: string;          // for user input or uploaded URL
-    preview: string | null; // local preview from File
-    file: File | null;     // the actual File object
-  }
-
-  // Update your state - remove the initial empty item
   const [gallery, setGallery] = useState<GalleryItem[]>([]);
 
   const galleryInputRef = useRef<HTMLInputElement | null>(null);
-
-
-  const [isFeatured, setIsFeatured] = useState(false);
-
-  const [offerTitle, setOfferTitle] = useState("");
-  const [offerDescription, setOfferDescription] = useState("");
-  const [offerValidUntil, setOfferValidUntil] = useState("");
-  const [offerPercentage, setOfferPercentage] = useState("");
-
-  const [aboutTitle, setAboutTitle] = useState("");
-  const [aboutDescription, setAboutDescription] = useState("");
-
-  const [terms, setTerms] = useState<string[]>([""]);
-  const [contacts, setContacts] = useState<Contact[]>([{ officeName: "Head Office" }]);
-  const [website, setWebsite] = useState("");
-  const [instagram, setInstagram] = useState("");
-  const [whatsapp, setWhatsapp] = useState("");
-
-  const router = useRouter();
   const thumbnailInputRef = useRef<HTMLInputElement | null>(null);
   const logoInputRef = useRef<HTMLInputElement | null>(null);
 
+  const router = useRouter();
+
+  const {
+    register,
+    handleSubmit,
+    control,
+    watch,
+    setValue,
+    reset,
+    formState: { errors },
+  } = useForm<FormData>({
+    defaultValues: {
+      categoryId: initialCategoryId || "",
+      name: "",
+      thumbnailUrl: "",
+      logoUrl: "",
+      address: "",
+      isFeatured: false,
+      offerTitle: "",
+      offerDescription: "",
+      offerValidUntil: "",
+      offerPercentage: "",
+      aboutTitle: "",
+      aboutDescription: "",
+      terms: [""],
+      contacts: [{ officeName: "Head Office" }],
+      website: "",
+      instagram: "",
+      whatsapp: "",
+    },
+  });
+
+  const terms = watch("terms");
+  const contacts = watch("contacts");
 
   const removeThumbnail = () => {
     setThumbnailPreview("");
-    setThumbnailUrl("");
+    setValue("thumbnailUrl", "");
     if (thumbnailInputRef.current) thumbnailInputRef.current.value = "";
   };
 
   const removeLogo = () => {
     setLogoPreview("");
-    setLogoUrl("");
+    setValue("logoUrl", "");
     if (logoInputRef.current) logoInputRef.current.value = "";
   };
 
-  // Keep this function as is - it's correct
   const handleGalleryFileChange = (files: FileList) => {
     const newImages: GalleryItem[] = Array.from(files).map((file) => ({
       file,
@@ -95,17 +124,13 @@ export default function AddPartnerPage({ initialCategoryId }: AddPartnerPageProp
 
     setGallery((prev) => [...prev, ...newImages]);
 
-    // reset input so same file can be uploaded again
     if (galleryInputRef.current) galleryInputRef.current.value = "";
   };
 
-  // FIX: Actually remove the item from array instead of setting it to null
   const removeGalleryImage = (indexToRemove: number) => {
     setGallery((prev) => prev.filter((_, index) => index !== indexToRemove));
   };
 
-
-  // Fetch all categories for the select options
   useEffect(() => {
     const fetchCategories = async () => {
       setLoadingCategories(true);
@@ -115,9 +140,9 @@ export default function AddPartnerPage({ initialCategoryId }: AddPartnerPageProp
           toast.error(res.error, { style: { background: "#000", color: "#fff" } });
         } else {
           const list: CategoryOption[] = res.data
-            .filter((c: ICategory) => c._id) // only keep categories with _id
+            .filter((c: ICategory) => c._id)
             .map((c: ICategory) => ({
-              _id: c._id!, // non-null assertion because we just filtered
+              _id: c._id!,
               title: c.title,
             }));
           setCategories(list);
@@ -133,55 +158,44 @@ export default function AddPartnerPage({ initialCategoryId }: AddPartnerPageProp
     fetchCategories();
   }, []);
 
-
-
   const previewFile = (file: File, setPreview: (url: string) => void) => {
     const url = URL.createObjectURL(file);
     setPreview(url);
   };
 
-
   const toastStyle = { background: "#000", color: "#fff", marginTop: "4rem" };
 
-  const handleSubmit = async () => {
-    if (!categoryId) {
-      toast.error("Select category", { style: toastStyle });
-      return;
-    }
-    if (!name) {
-      toast.error("Enter partner name", { style: toastStyle });
-      return;
-    }
-
+  const onSubmit = async (data: FormData) => {
     const payload = {
-      category: categoryId,
-      name,
-      thumbnail: thumbnailPreview || thumbnailUrl,
-      address,
+      category: data.categoryId,
+      name: data.name,
+      thumbnail: thumbnailPreview || data.thumbnailUrl,
+      address: data.address,
       gallery: gallery
         .filter(g => g.url.trim() || g.preview)
         .map(g => g.preview || g.url),
-
-      logo: logoPreview || logoUrl,
-      isFeatured,
+      logo: logoPreview || data.logoUrl,
+      isFeatured: data.isFeatured,
       offer: {
-        title: offerTitle,
-        description: offerDescription,
-        validUntil: offerValidUntil,
-        offerPercentage: offerPercentage === "" ? undefined : Number(offerPercentage),
+        title: data.offerTitle,
+        description: data.offerDescription,
+        validUntil: data.offerValidUntil,
+        offerPercentage: data.offerPercentage === "" ? undefined : Number(data.offerPercentage),
       },
       about: {
-        title: aboutTitle,
-        description: aboutDescription,
+        title: data.aboutTitle,
+        description: data.aboutDescription,
       },
-      terms: terms.filter((t) => t.trim()),
-      contacts: contacts.filter((c) => Object.values(c).some((v) => v && v.trim())),
+      terms: data.terms.filter((t) => t.trim()),
+      contacts: data.contacts.filter((c) => Object.values(c).some((v) => v && v.trim())),
       socials: {
-        website,
-        instagram,
-        whatsapp,
+        website: data.website,
+        instagram: data.instagram,
+        whatsapp: data.whatsapp,
       },
     };
+
+    console.log("Payload Data:", payload);
 
     try {
       const res = await createPartner(payload);
@@ -192,6 +206,7 @@ export default function AddPartnerPage({ initialCategoryId }: AddPartnerPageProp
       }
 
       toast.success("Partner created successfully!", { style: toastStyle });
+      console.log("Partner created successfully:", res);
       router.push("/dashboard/admin/partners");
     } catch (err: unknown) {
       console.error(err);
@@ -199,60 +214,75 @@ export default function AddPartnerPage({ initialCategoryId }: AddPartnerPageProp
     }
   };
 
-
+  const handleReset = () => {
+    reset();
+    setThumbnailPreview(null);
+    setLogoPreview(null);
+    setGallery([]);
+    if (thumbnailInputRef.current) thumbnailInputRef.current.value = "";
+    if (logoInputRef.current) logoInputRef.current.value = "";
+    if (galleryInputRef.current) galleryInputRef.current.value = "";
+  };
 
   return (
     <div className="max-w-5xl mx-auto p-6 bg-neutral-950 min-h-screen">
       <h2 className="text-2xl font-semibold text-white mb-6">Add New Partner</h2>
 
-      <div className="space-y-8">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
         {/* CATEGORY + NAME */}
         <div className="grid sm:grid-cols-2 gap-4">
           {/* Partner Name */}
           <div>
-            <Label className="text-white mb-1">Partner Name</Label>
+            <Label className="text-white mb-1">Partner Name *</Label>
             <Input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              {...register("name", { required: "Partner name is required" })}
               className="bg-neutral-900 text-white border-neutral-700"
               placeholder="Partner name"
             />
+            {errors.name && (
+              <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
+            )}
           </div>
           {/* Category */}
           <div>
-            <Label className="text-white mb-1">Category</Label>
-
-            <Select
-              value={categoryId}
-              onValueChange={(value) => setCategoryId(value)}
-              disabled={loadingCategories}
-            >
-              <SelectTrigger className="mt-1 w-full bg-neutral-900 border border-neutral-700 text-white 
-             h-auto min-h-12 py-3 items-start">
-                <SelectValue placeholder={loadingCategories ? "Loading..." : "Select category"} />
-              </SelectTrigger>
-
-              <SelectContent className="bg-neutral-900 text-white border border-neutral-700">
-                {categories.map((c) => (
-                  <SelectItem key={c._id} value={c._id} className="cursor-pointer">
-                    {c.title}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Label className="text-white mb-1">Category *</Label>
+            <Controller
+              name="categoryId"
+              control={control}
+              rules={{ required: "Category is required" }}
+              render={({ field }) => (
+                <Select
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  disabled={loadingCategories}
+                >
+                  <SelectTrigger className="mt-1 w-full bg-neutral-900 border border-neutral-700 text-white h-auto min-h-12 py-3 items-start">
+                    <SelectValue placeholder={loadingCategories ? "Loading..." : "Select category"} />
+                  </SelectTrigger>
+                  <SelectContent className="bg-neutral-900 text-white border border-neutral-700">
+                    {categories.map((c) => (
+                      <SelectItem key={c._id} value={c._id} className="cursor-pointer">
+                        {c.title}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
+            {errors.categoryId && (
+              <p className="text-red-500 text-sm mt-1">{errors.categoryId.message}</p>
+            )}
           </div>
         </div>
-
 
         {/* THUMBNAIL + LOGO */}
         <div className="grid sm:grid-cols-2 gap-4">
           {/* Thumbnail */}
           <div>
-            <Label className="text-white mb-1">Thumbnail Image</Label>
+            <Label className="text-white mb-1">Thumbnail Image *</Label>
             <div className="flex gap-2 mt-1">
               <Input
-                value={thumbnailUrl}
-                onChange={(e) => setThumbnailUrl(e.target.value)}
+                {...register("thumbnailUrl", { required: "Thumbnail is required" })}
                 placeholder="/uploads/example.jpg or full URL"
                 className="bg-neutral-900 text-white border-neutral-700"
               />
@@ -265,24 +295,29 @@ export default function AddPartnerPage({ initialCategoryId }: AddPartnerPageProp
                   className="hidden"
                   onChange={(e) => {
                     const file = e.target.files?.[0];
-                    if (file) previewFile(file, setThumbnailPreview);
+                    if (file) {
+                      previewFile(file, setThumbnailPreview);
+                      setValue("thumbnailUrl", file.name, { shouldValidate: true });
+                    }
                   }}
                 />
               </label>
             </div>
+            {errors.thumbnailUrl && !thumbnailPreview && (
+              <p className="text-red-500 text-sm mt-1">{errors.thumbnailUrl.message}</p>
+            )}
 
-            {(thumbnailPreview || thumbnailUrl) && (
+            {(thumbnailPreview || watch("thumbnailUrl")) && (
               <div className="mt-2 w-full h-44 relative rounded overflow-hidden border border-neutral-700">
-                {/* Remove Button */}
                 <button
+                  type="button"
                   onClick={removeThumbnail}
                   className="absolute top-2 right-2 bg-red-600 text-white rounded w-7 h-7 flex items-center justify-center hover:bg-red-700 z-10"
                 >
                   ×
                 </button>
-
                 <Image
-                  src={thumbnailPreview || thumbnailUrl}
+                  src={thumbnailPreview || watch("thumbnailUrl")}
                   alt="thumb"
                   fill
                   className="object-cover"
@@ -294,11 +329,10 @@ export default function AddPartnerPage({ initialCategoryId }: AddPartnerPageProp
 
           {/* Logo */}
           <div>
-            <Label className="text-white mb-1">Logo (Recommended 300×300 px)</Label>
+            <Label className="text-white mb-1">Logo (Recommended 300×300 px) *</Label>
             <div className="flex gap-2 mt-1">
               <Input
-                value={logoUrl}
-                onChange={(e) => setLogoUrl(e.target.value)}
+                {...register("logoUrl", { required: "Logo is required" })}
                 placeholder="https://logo.png"
                 className="bg-neutral-900 text-white border-neutral-700"
               />
@@ -311,24 +345,29 @@ export default function AddPartnerPage({ initialCategoryId }: AddPartnerPageProp
                   className="hidden"
                   onChange={(e) => {
                     const file = e.target.files?.[0];
-                    if (file) previewFile(file, setLogoPreview);
+                    if (file) {
+                      previewFile(file, setLogoPreview);
+                      setValue("logoUrl", file.name, { shouldValidate: true });
+                    }
                   }}
                 />
               </label>
             </div>
+            {errors.logoUrl && !logoPreview && (
+              <p className="text-red-500 text-sm mt-1">{errors.logoUrl.message}</p>
+            )}
 
-            {(logoPreview || logoUrl) && (
+            {(logoPreview || watch("logoUrl")) && (
               <div className="mt-2 w-24 h-24 relative rounded overflow-hidden border border-neutral-700">
-                {/* Remove Button */}
                 <button
+                  type="button"
                   onClick={removeLogo}
-                  className="absolute top-1 right-1 bg-red-600 text-white rounded w-6 h-6 flex items-center justify-center hover:hover:bg-red-700 z-10"
+                  className="absolute top-1 right-1 bg-red-600 text-white rounded w-6 h-6 flex items-center justify-center hover:bg-red-700 z-10"
                 >
                   ×
                 </button>
-
                 <Image
-                  src={logoPreview || logoUrl}
+                  src={logoPreview || watch("logoUrl")}
                   alt="logo"
                   fill
                   className="object-cover"
@@ -338,22 +377,23 @@ export default function AddPartnerPage({ initialCategoryId }: AddPartnerPageProp
             )}
           </div>
         </div>
+
         {/* Address */}
         <div>
-          <Label className="text-white mb-1">Address</Label>
+          <Label className="text-white mb-1">Address *</Label>
           <Input
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
+            {...register("address", { required: "Address is required" })}
             className="bg-neutral-900 text-white border-neutral-700"
             placeholder="Full address"
           />
+          {errors.address && (
+            <p className="text-red-500 text-sm mt-1">{errors.address.message}</p>
+          )}
         </div>
 
         {/* GALLERY */}
         <div className="mt-6">
           <Label className="text-white mb-1">Gallery Images</Label>
-
-          {/* Drop Zone */}
           <div
             onDragOver={(e) => e.preventDefault()}
             onDrop={(e) => {
@@ -374,7 +414,6 @@ export default function AddPartnerPage({ initialCategoryId }: AddPartnerPageProp
                 if (e.target.files) handleGalleryFileChange(e.target.files);
               }}
             />
-
             <div
               className="flex justify-center items-center gap-2"
               onClick={() => galleryInputRef.current?.click()}
@@ -384,7 +423,6 @@ export default function AddPartnerPage({ initialCategoryId }: AddPartnerPageProp
             </div>
           </div>
 
-          {/* Preview Grid - Only show if there are actual images */}
           {gallery.length > 0 && (
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-4">
               {gallery.map((item: GalleryItem, index: number) => (
@@ -401,7 +439,6 @@ export default function AddPartnerPage({ initialCategoryId }: AddPartnerPageProp
                       unoptimized
                     />
                   )}
-
                   <button
                     type="button"
                     onClick={() => removeGalleryImage(index)}
@@ -415,92 +452,101 @@ export default function AddPartnerPage({ initialCategoryId }: AddPartnerPageProp
             </div>
           )}
         </div>
+
         {/* OFFER */}
         <div className="grid sm:grid-cols-2 gap-4">
           <div>
-            <Label className="text-white mb-1">Offer Title</Label>
+            <Label className="text-white mb-1">Offer Title *</Label>
             <Input
+              {...register("offerTitle", { required: "Offer title is required" })}
               className="bg-neutral-900 text-white border-neutral-700"
-              value={offerTitle}
-              onChange={(e) => setOfferTitle(e.target.value)}
             />
+            {errors.offerTitle && (
+              <p className="text-red-500 text-sm mt-1">{errors.offerTitle.message}</p>
+            )}
           </div>
           <div>
-            <Label className="text-white mb-1">Offer Percentage</Label>
+            <Label className="text-white mb-1">Offer Percentage *</Label>
             <Input
               type="number"
+              {...register("offerPercentage", { required: "Offer percentage is required" })}
               className="bg-neutral-900 text-white border-neutral-700"
-              value={offerPercentage}
-              onChange={(e) => setOfferPercentage(e.target.value)}
               placeholder="10"
             />
+            {errors.offerPercentage && (
+              <p className="text-red-500 text-sm mt-1">{errors.offerPercentage.message}</p>
+            )}
           </div>
           <div className="sm:col-span-2">
-            <Label className="text-white mb-1">Description</Label>
+            <Label className="text-white mb-1">Description *</Label>
             <Textarea
+              {...register("offerDescription", { required: "Offer description is required" })}
               className="bg-neutral-900 text-white border-neutral-700"
-              value={offerDescription}
-              onChange={(e) => setOfferDescription(e.target.value)}
             />
+            {errors.offerDescription && (
+              <p className="text-red-500 text-sm mt-1">{errors.offerDescription.message}</p>
+            )}
           </div>
           <div>
-            <Label className="text-white mb-1">Valid Until</Label>
+            <Label className="text-white mb-1">Valid Until *</Label>
             <Input
               type="date"
-              value={offerValidUntil}
-              onChange={(e) => setOfferValidUntil(e.target.value)}
+              {...register("offerValidUntil", { required: "Valid until date is required" })}
               className="bg-neutral-900 text-white border-neutral-700"
             />
+            {errors.offerValidUntil && (
+              <p className="text-red-500 text-sm mt-1">{errors.offerValidUntil.message}</p>
+            )}
           </div>
         </div>
 
         {/* ABOUT */}
         <div>
-          <Label className="text-white mb-1">About Title</Label>
+          <Label className="text-white mb-1">About Title *</Label>
           <Input
+            {...register("aboutTitle", { required: "About title is required" })}
             className="bg-neutral-900 text-white border-neutral-700"
-            value={aboutTitle}
-            onChange={(e) => setAboutTitle(e.target.value)}
           />
-          <Label className="mt-2 block text-white mb-1">About Description</Label>
+          {errors.aboutTitle && (
+            <p className="text-red-500 text-sm mt-1">{errors.aboutTitle.message}</p>
+          )}
+          <Label className="mt-2 block text-white mb-1">About Description *</Label>
           <Textarea
+            {...register("aboutDescription", { required: "About description is required" })}
             className="bg-neutral-900 text-white border-neutral-700"
-            value={aboutDescription}
-            onChange={(e) => setAboutDescription(e.target.value)}
           />
+          {errors.aboutDescription && (
+            <p className="text-red-500 text-sm mt-1">{errors.aboutDescription.message}</p>
+          )}
         </div>
 
         {/* TERMS */}
         <div>
-          <Label className="text-white mb-1">Terms & Conditions</Label>
+          <Label className="text-white mb-1">Terms & Conditions *</Label>
           {terms.map((t, i) => (
             <div key={i} className="flex gap-2 mt-2">
               <Input
+                {...register(`terms.${i}`, { required: "Term is required" })}
                 className="bg-neutral-900 text-white border-neutral-700"
-                value={t}
-                onChange={(e) => {
-                  const list = [...terms];
-                  list[i] = e.target.value;
-                  setTerms(list);
-                }}
               />
-              {
-                i > 0 && (
-                  <Button
-                    type="button"
-                    className="bg-neutral-700 hover:bg-neutral-600 text-white"
-                    onClick={() => setTerms(terms.filter((_, idx) => idx !== i))}
-                  >
-                    -
-                  </Button>
-                )
-              }
+              {i > 0 && (
+                <Button
+                  type="button"
+                  className="bg-neutral-700 hover:bg-neutral-600 text-white"
+                  onClick={() => setValue("terms", terms.filter((_, idx) => idx !== i))}
+                >
+                  -
+                </Button>
+              )}
             </div>
           ))}
+          {errors.terms && (
+            <p className="text-red-500 text-sm mt-1">All terms are required</p>
+          )}
           <Button
             type="button"
             className="mt-2 cursor-pointer bg-neutral-700 hover:bg-neutral-600"
-            onClick={() => setTerms([...terms, ""])}
+            onClick={() => setValue("terms", [...terms, ""])}
           >
             + Add Term
           </Button>
@@ -509,7 +555,7 @@ export default function AddPartnerPage({ initialCategoryId }: AddPartnerPageProp
         {/* CONTACTS */}
         <div>
           <div className="flex justify-between">
-            <Label className="text-white">Contacts</Label>
+            <Label className="text-white">Contacts *</Label>
             <Button
               type="button"
               className="bg-neutral-700 hover:bg-neutral-600"
@@ -518,7 +564,7 @@ export default function AddPartnerPage({ initialCategoryId }: AddPartnerPageProp
                   alert("Max 6 contacts allowed");
                   return;
                 }
-                setContacts([...contacts, {}]);
+                setValue("contacts", [...contacts, {}]);
               }}
             >
               + Add Contact
@@ -528,113 +574,86 @@ export default function AddPartnerPage({ initialCategoryId }: AddPartnerPageProp
             <div key={i} className="mt-3 p-4 border bg-neutral-900 text-white border-neutral-700">
               <div className="flex justify-between mb-2">
                 <p>Contact {i + 1}</p>
-                {
-                  i > 0 && (
-                    <Button
-                      type="button"
-                      className="bg-neutral-700 hover:bg-neutral-600 rounded-2xl"
-                      onClick={() => setContacts(contacts.filter((_, idx) => idx !== i))}
-                    >
-                      -
-                    </Button>
-                  )
-                }
+                {i > 0 && (
+                  <Button
+                    type="button"
+                    className="bg-neutral-700 hover:bg-neutral-600 rounded-2xl"
+                    onClick={() => setValue("contacts", contacts.filter((_, idx) => idx !== i))}
+                  >
+                    -
+                  </Button>
+                )}
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
                 <Input
+                  {...register(`contacts.${i}.officeName`, { required: "Office name is required" })}
                   placeholder="Office Name"
                   className="bg-neutral-800 text-white border-neutral-700"
-                  value={c.officeName || ""}
-                  onChange={(e) => {
-                    const list = [...contacts];
-                    list[i] = { ...list[i], officeName: e.target.value };
-                    setContacts(list);
-                  }}
                 />
                 <Input
+                  {...register(`contacts.${i}.phone`, { required: "Phone is required" })}
                   placeholder="Phone"
                   className="bg-neutral-800 text-white border-neutral-700"
-                  value={c.phone || ""}
-                  onChange={(e) => {
-                    const list = [...contacts];
-                    list[i] = { ...list[i], phone: e.target.value };
-                    setContacts(list);
-                  }}
                 />
                 <Input
+                  {...register(`contacts.${i}.mobile`)}
                   placeholder="Mobile"
                   className="bg-neutral-800 text-white border-neutral-700"
-                  value={c.mobile || ""}
-                  onChange={(e) => {
-                    const list = [...contacts];
-                    list[i] = { ...list[i], mobile: e.target.value };
-                    setContacts(list);
-                  }}
                 />
                 <Input
+                  {...register(`contacts.${i}.email`, { required: "Email is required" })}
                   placeholder="Email"
                   className="bg-neutral-800 text-white border-neutral-700"
-                  value={c.email || ""}
-                  onChange={(e) => {
-                    const list = [...contacts];
-                    list[i] = { ...list[i], email: e.target.value };
-                    setContacts(list);
-                  }}
                 />
                 <Input
+                  {...register(`contacts.${i}.address`, { required: "Address is required" })}
                   placeholder="Address"
                   className="bg-neutral-800 text-white md:col-span-2 border-neutral-700"
-                  value={c.address || ""}
-                  onChange={(e) => {
-                    const list = [...contacts];
-                    list[i] = { ...list[i], address: e.target.value };
-                    setContacts(list);
-                  }}
                 />
                 <Input
+                  {...register(`contacts.${i}.addressUrl`)}
                   placeholder="Address URL"
                   className="bg-neutral-800 text-white md:col-span-2 border-neutral-700"
-                  value={c.addressUrl || ""}
-                  onChange={(e) => {
-                    const list = [...contacts];
-                    list[i] = { ...list[i], addressUrl: e.target.value };
-                    setContacts(list);
-                  }}
                 />
               </div>
             </div>
           ))}
         </div>
 
-
         {/* SOCIALS */}
         <div className="grid sm:grid-cols-3 gap-4">
           <div>
-            <Label className="text-white mb-1">Website</Label>
+            <Label className="text-white mb-1">Website *</Label>
             <Input
+              {...register("website", { required: "Website is required" })}
               className="bg-neutral-900 text-white border-neutral-700"
-              value={website}
-              onChange={(e) => setWebsite(e.target.value)}
               placeholder="https://example.com"
             />
+            {errors.website && (
+              <p className="text-red-500 text-sm mt-1">{errors.website.message}</p>
+            )}
           </div>
           <div>
-            <Label className="text-white mb-1">Instagram</Label>
+            <Label className="text-white mb-1">Instagram *</Label>
             <Input
+              {...register("instagram", { required: "Instagram is required" })}
               className="bg-neutral-900 text-white border-neutral-700"
-              value={instagram}
-              onChange={(e) => setInstagram(e.target.value)}
               placeholder="https://instagram.com/..."
             />
+            {errors.instagram && (
+              <p className="text-red-500 text-sm mt-1">{errors.instagram.message}</p>
+            )}
           </div>
           <div>
-            <Label className="text-white mb-1">WhatsApp</Label>
+            <Label className="text-white mb-1">WhatsApp *</Label>
             <Input
+              {...register("whatsapp", { required: "WhatsApp is required" })}
               className="bg-neutral-900 text-white border-neutral-700"
-              value={whatsapp}
-              onChange={(e) => setWhatsapp(e.target.value)}
               placeholder="https://wa.me/..."
             />
+            {errors.whatsapp && (
+              <p className="text-red-500 text-sm mt-1">{errors.whatsapp.message}</p>
+            )}
           </div>
         </div>
 
@@ -642,27 +661,26 @@ export default function AddPartnerPage({ initialCategoryId }: AddPartnerPageProp
         <div className="flex gap-3 items-center">
           <input
             type="checkbox"
-            checked={isFeatured}
-            onChange={(e) => setIsFeatured(e.target.checked)}
+            {...register("isFeatured")}
             className="w-4 h-4"
           />
           <Label className="text-white mb-1">Mark as Featured</Label>
         </div>
 
         {/* BUTTONS */}
-        <div className="flex gap-3 ">
-          <Button onClick={handleSubmit} className="bg-black cursor-pointer hover:bg-black border border-white">
+        <div className="flex gap-3">
+          <Button type="submit" className="bg-black cursor-pointer hover:bg-black border border-white">
             Save Partner
           </Button>
           <Button
             type="button"
             className="bg-neutral-700 cursor-pointer hover:bg-neutral-600"
-            onClick={() => window.location.reload()}
+            onClick={handleReset}
           >
             Reset
           </Button>
         </div>
-      </div>
+      </form>
     </div>
   );
 }
