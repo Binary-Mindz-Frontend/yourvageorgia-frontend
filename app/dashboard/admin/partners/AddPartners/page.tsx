@@ -7,7 +7,7 @@ import { useForm, Controller } from "react-hook-form";
 
 import { getCategories } from "@/services/category/category";
 import { ICategory } from "@/types/category.types";
-import { createPartner } from "@/services/partner/partner";
+import { createPartner, updatePartner } from "@/services/partner/partner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -53,12 +53,16 @@ interface FormData {
 }
 
 interface AddPartnerPageProps {
+  partnerId?: string; // If provided, it's edit mode
   initialCategoryId?: string;
 }
 
-export default function AddPartnerPage({ initialCategoryId }: AddPartnerPageProps) {
+export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPartnerPageProps) {
+  const isEditMode = !!partnerId;
+
   const [categories, setCategories] = useState<CategoryOption[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(false);
+  const [loadingPartner, setLoadingPartner] = useState(false);
 
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
@@ -102,6 +106,76 @@ export default function AddPartnerPage({ initialCategoryId }: AddPartnerPageProp
 
   const terms = watch("terms");
   const contacts = watch("contacts");
+
+  // Fetch partner data if in edit mode
+  useEffect(() => {
+    if (!partnerId) return;
+
+    const fetchPartnerData = async () => {
+      setLoadingPartner(true);
+      try {
+        // Construct the correct API URL
+        const apiUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+        const fetchUrl = `${apiUrl}/partner/${partnerId}`;
+
+        const res = await fetch(fetchUrl);
+
+        const json = await res.json();
+
+        if (!res.ok) {
+          toast.error(json.message || "Failed to fetch partner data", {
+            style: { background: "#000", color: "#fff" },
+          });
+          return;
+        }
+
+        const partner = json.data;
+
+        // Populate form with existing data
+        setValue("categoryId", partner.category?._id || partner.category || "");
+        setValue("name", partner.name || "");
+        setValue("thumbnailUrl", partner.thumbnail || "");
+        setValue("logoUrl", partner.logo || "");
+        setValue("address", partner.address || "");
+        setValue("isFeatured", partner.isFeatured || false);
+        setValue("offerTitle", partner.offer?.title || "");
+        setValue("offerDescription", partner.offer?.description || "");
+        setValue("offerValidUntil", partner.offer?.validUntil ? partner.offer.validUntil.split('T')[0] : "");
+        setValue("offerPercentage", partner.offer?.offerPercentage?.toString() || "");
+        setValue("aboutTitle", partner.about?.title || "");
+        setValue("aboutDescription", partner.about?.description || "");
+        setValue("terms", partner.terms && partner.terms.length > 0 ? partner.terms : [""]);
+        setValue("contacts", partner.contacts && partner.contacts.length > 0 ? partner.contacts : [{ officeName: "Head Office" }]);
+        setValue("website", partner.socials?.website || "");
+        setValue("instagram", partner.socials?.instagram || "");
+        setValue("whatsapp", partner.socials?.whatsapp || "");
+
+        // Set previews for images
+        if (partner.thumbnail) setThumbnailPreview(partner.thumbnail);
+        if (partner.logo) setLogoPreview(partner.logo);
+
+        // Set gallery images
+        if (partner.gallery && partner.gallery.length > 0) {
+          const galleryItems = partner.gallery.map((url: string) => ({
+            url,
+            preview: url,
+            file: null,
+          }));
+          setGallery(galleryItems);
+        }
+
+      } catch (err) {
+        console.error("Error fetching partner:", err);
+        toast.error("Failed to fetch partner data", {
+          style: { background: "#000", color: "#fff" }
+        });
+      } finally {
+        setLoadingPartner(false);
+      }
+    };
+
+    fetchPartnerData();
+  }, [partnerId, setValue]);
 
   const removeThumbnail = () => {
     setThumbnailPreview("");
@@ -198,19 +272,39 @@ export default function AddPartnerPage({ initialCategoryId }: AddPartnerPageProp
     console.log("Payload Data:", payload);
 
     try {
-      const res = await createPartner(payload);
+      let res;
 
-      if ("error" in res) {
-        toast.error("Failed to create partner: " + res.error, { style: toastStyle });
-        return;
+      if (isEditMode) {
+        // Update existing partner
+        res = await updatePartner(partnerId, payload);
+
+        if ("error" in res) {
+          toast.error("Failed to update partner: " + res.error, { style: toastStyle });
+          return;
+        }
+
+        toast.success("Partner updated successfully!", { style: toastStyle });
+        console.log("Partner updated successfully:", res);
+      } else {
+        // Create new partner
+        res = await createPartner(payload);
+
+        if ("error" in res) {
+          toast.error("Failed to create partner: " + res.error, { style: toastStyle });
+          return;
+        }
+
+        toast.success("Partner created successfully!", { style: toastStyle });
+        console.log("Partner created successfully:", res);
       }
 
-      toast.success("Partner created successfully!", { style: toastStyle });
-      console.log("Partner created successfully:", res);
-      router.push("/dashboard/admin/partners");
+      // Navigate back after success
+      setTimeout(() => {
+        router.push("/dashboard/admin/partners");
+      }, 1500);
     } catch (err: unknown) {
       console.error(err);
-      toast.error("Something went wrong while creating partner.", { style: toastStyle });
+      toast.error(`Something went wrong while ${isEditMode ? 'updating' : 'creating'} partner.`, { style: toastStyle });
     }
   };
 
@@ -224,9 +318,21 @@ export default function AddPartnerPage({ initialCategoryId }: AddPartnerPageProp
     if (galleryInputRef.current) galleryInputRef.current.value = "";
   };
 
+  if (loadingPartner) {
+    return (
+      <div className="max-w-5xl mx-auto p-6 bg-neutral-950 min-h-screen">
+        <div className="flex items-center justify-center h-64">
+          <p className="text-white text-xl">Loading partner data...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-5xl mx-auto p-6 bg-neutral-950 min-h-screen">
-      <h2 className="text-2xl font-semibold text-white mb-6">Add New Partner</h2>
+      <h2 className="text-2xl font-semibold text-white mb-6">
+        {isEditMode ? "Edit Partner" : "Add New Partner"}
+      </h2>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
         {/* CATEGORY + NAME */}
@@ -670,15 +776,17 @@ export default function AddPartnerPage({ initialCategoryId }: AddPartnerPageProp
         {/* BUTTONS */}
         <div className="flex gap-3">
           <Button type="submit" className="bg-black cursor-pointer hover:bg-black border border-white">
-            Save Partner
+            {isEditMode ? "Update Partner" : "Save Partner"}
           </Button>
-          <Button
-            type="button"
-            className="bg-neutral-700 cursor-pointer hover:bg-neutral-600"
-            onClick={handleReset}
-          >
-            Reset
-          </Button>
+          {
+            isEditMode ? " " : (<Button
+              type="button"
+              className="bg-neutral-700 cursor-pointer hover:bg-neutral-600"
+              onClick={handleReset}
+            >
+              Reset
+            </Button>)
+          }
         </div>
       </form>
     </div>

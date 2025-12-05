@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Eye, MoreHorizontal, Plus, Trash2 } from "lucide-react";
+import { Eye, MoreHorizontal, Pen, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -80,7 +80,7 @@ const PartnerPage = () => {
       header: "Category",
       cell: (row) => (
         <span className="text-white">
-          {typeof row.category === "string" ? row.category : row.category.title}
+          {typeof row.category === "string" ? row.category : row.category?.title}
         </span>
       ),
     },
@@ -121,6 +121,13 @@ const PartnerPage = () => {
                 View
               </DropdownMenuItem>
 
+             <DropdownMenuItem
+            className="flex items-center gap-2 cursor-pointer"
+            onClick={() => router.push(`/dashboard/admin/partners/AddPartners/edit/${row._id}`)}
+          >
+            <Pen size={16} />
+            Edit
+          </DropdownMenuItem>
               <DropdownMenuItem
                 className="flex items-center gap-2 text-red-600"
                 onClick={() => row._id && handleDelete(row._id)}
