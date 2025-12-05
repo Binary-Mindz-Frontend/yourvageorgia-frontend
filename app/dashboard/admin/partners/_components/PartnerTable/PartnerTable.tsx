@@ -115,19 +115,19 @@ const PartnerPage = () => {
             <DropdownMenuContent align="end" className="w-40">
               <DropdownMenuItem
                 className="flex items-center gap-2 cursor-pointer"
-                onClick={() => console.log("View", row._id)}
+                onClick={() => router.push(`/dashboard/admin/partners/view/${row._id}`)}
               >
                 <Eye size={16} />
                 View
               </DropdownMenuItem>
 
-             <DropdownMenuItem
-            className="flex items-center gap-2 cursor-pointer"
-            onClick={() => router.push(`/dashboard/admin/partners/AddPartners/edit/${row._id}`)}
-          >
-            <Pen size={16} />
-            Edit
-          </DropdownMenuItem>
+              <DropdownMenuItem
+                className="flex items-center gap-2 cursor-pointer"
+                onClick={() => router.push(`/dashboard/admin/partners/AddPartners/edit/${row._id}`)}
+              >
+                <Pen size={16} />
+                Edit
+              </DropdownMenuItem>
               <DropdownMenuItem
                 className="flex items-center gap-2 text-red-600"
                 onClick={() => row._id && handleDelete(row._id)}
