@@ -484,18 +484,22 @@ export default function AddPartnerPage({ initialCategoryId }: AddPartnerPageProp
                   setTerms(list);
                 }}
               />
-              <Button
-                type="button"
-                className="bg-neutral-700 hover:bg-neutral-600 text-white"
-                onClick={() => setTerms(terms.filter((_, idx) => idx !== i))}
-              >
-                -
-              </Button>
+              {
+                i > 0 && (
+                  <Button
+                    type="button"
+                    className="bg-neutral-700 hover:bg-neutral-600 text-white"
+                    onClick={() => setTerms(terms.filter((_, idx) => idx !== i))}
+                  >
+                    -
+                  </Button>
+                )
+              }
             </div>
           ))}
           <Button
             type="button"
-            className="mt-2 bg-neutral-700 hover:bg-neutral-600"
+            className="mt-2 cursor-pointer bg-neutral-700 hover:bg-neutral-600"
             onClick={() => setTerms([...terms, ""])}
           >
             + Add Term
@@ -524,13 +528,17 @@ export default function AddPartnerPage({ initialCategoryId }: AddPartnerPageProp
             <div key={i} className="mt-3 p-4 border bg-neutral-900 text-white border-neutral-700">
               <div className="flex justify-between mb-2">
                 <p>Contact {i + 1}</p>
-                <Button
-                  type="button"
-                  className="bg-neutral-700 hover:bg-neutral-600 rounded-2xl"
-                  onClick={() => setContacts(contacts.filter((_, idx) => idx !== i))}
-                >
-                  -
-                </Button>
+                {
+                  i > 0 && (
+                    <Button
+                      type="button"
+                      className="bg-neutral-700 hover:bg-neutral-600 rounded-2xl"
+                      onClick={() => setContacts(contacts.filter((_, idx) => idx !== i))}
+                    >
+                      -
+                    </Button>
+                  )
+                }
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
                 <Input
@@ -642,13 +650,13 @@ export default function AddPartnerPage({ initialCategoryId }: AddPartnerPageProp
         </div>
 
         {/* BUTTONS */}
-        <div className="flex gap-3">
-          <Button onClick={handleSubmit} className="bg-black hover:bg-black border border-white">
+        <div className="flex gap-3 ">
+          <Button onClick={handleSubmit} className="bg-black cursor-pointer hover:bg-black border border-white">
             Save Partner
           </Button>
           <Button
             type="button"
-            className="bg-neutral-700 hover:bg-neutral-600"
+            className="bg-neutral-700 cursor-pointer hover:bg-neutral-600"
             onClick={() => window.location.reload()}
           >
             Reset
