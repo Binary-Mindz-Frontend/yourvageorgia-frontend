@@ -14,6 +14,7 @@ import CustomPagination from "@/components/Shared/dashboard/custompagination/Cus
 import { toast } from "sonner";
 import { getPartners, deletePartner } from "@/services/partner/partner";
 import { Partner } from "@/types/partner.types";
+import { useRouter } from "next/navigation";
 
 const toastStyle = { background: "#000", color: "#fff", marginTop: "4rem" };
 
@@ -24,7 +25,9 @@ const PartnerPage = () => {
   const [partners, setPartners] = useState<Partner[]>([]);
   const [loading, setLoading] = useState(false);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const router = useRouter();
 
+   
   useEffect(() => {
     const fetchPartners = async () => {
       setLoading(true);
@@ -140,8 +143,8 @@ const PartnerPage = () => {
       <header className="flex justify-between items-center mb-4 flex-wrap gap-5">
         <h1 className="text-base py-2 sm:py-5 text-[#0A0A0A]">Partners Management</h1>
         <Button
-          className="flex items-center bg-gray-900 hover:bg-[#030213] px-4 py-2"
-          onClick={() => console.log("Open Add Partner Modal")}
+          className="flex cursor-pointer items-center bg-gray-900 hover:bg-[#030213] px-4 py-2"
+          onClick={() => router.push("/dashboard/admin/partners/AddPartners")}
         >
           <Plus size={18} className="mr-2 text-white" />
           <span className="text-white text-base">Add Partner</span>
