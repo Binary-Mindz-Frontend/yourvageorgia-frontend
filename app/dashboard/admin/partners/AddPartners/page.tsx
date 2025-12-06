@@ -232,6 +232,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
     fetchCategories();
   }, []);
 
+
   const previewFile = (file: File, setPreview: (url: string) => void) => {
     const url = URL.createObjectURL(file);
     setPreview(url);
