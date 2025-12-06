@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Eye, MoreHorizontal, Plus, Trash2 } from "lucide-react";
+import { Eye, MoreHorizontal, Pen, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { getPartners, deletePartner } from "@/services/partner/partner";
 import { Partner } from "@/types/partner.types";
 import { useRouter } from "next/navigation";
+import UsersSummary from "../UsersSummarySection/UsersSummary";
 
 const toastStyle = { background: "#000", color: "#fff", marginTop: "4rem" };
 
@@ -27,7 +28,7 @@ const PartnerPage = () => {
   const [deleting, setDeleting] = useState<string | null>(null);
   const router = useRouter();
 
-   
+
   useEffect(() => {
     const fetchPartners = async () => {
       setLoading(true);
@@ -80,7 +81,7 @@ const PartnerPage = () => {
       header: "Category",
       cell: (row) => (
         <span className="text-white">
-          {typeof row.category === "string" ? row.category : row.category.title}
+          {typeof row.category === "string" ? row.category : row.category?.title}
         </span>
       ),
     },
@@ -90,18 +91,24 @@ const PartnerPage = () => {
     },
     {
       header: "Is Featured",
-      cell: (row) => (
-        <div className="flex justify-center">
-          <span
-            className={`px-3 py-1 inline-flex text-xs font-semibold rounded-full ${
-              row.isFeatured ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"
-            }`}
-          >
-            {row.isFeatured ? "Yes" : "No"}
-          </span>
-        </div>
-      ),
-    },
+      cell: (row) => {
+        const isFeatured =
+          row.isFeatured === true ||
+          (typeof row.isFeatured === "string" && row.isFeatured === "true");
+
+        return (
+          <div className="flex justify-center">
+            <span
+              className={`px-3 py-1 inline-flex text-xs font-semibold rounded-full ${isFeatured ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"
+                }`}
+            >
+              {isFeatured ? "Yes" : "No"}
+            </span>
+          </div>
+        );
+      },
+    }
+    ,
     {
       header: "Actions",
       cell: (row) => (
@@ -116,20 +123,27 @@ const PartnerPage = () => {
             <DropdownMenuContent align="end" className="w-40">
               <DropdownMenuItem
                 className="flex items-center gap-2 cursor-pointer"
-                onClick={() => console.log("View", row._id)}
+                onClick={() => router.push(`/dashboard/admin/partners/view/${row._id}`)}
               >
                 <Eye size={16} />
                 View
               </DropdownMenuItem>
 
-             <DropdownMenuItem
-  className="flex items-center gap-2 text-red-600"
-  onClick={() => row._id && handleDelete(row._id)}
-  disabled={deleting === row._id || !row._id}
->
-  <Trash2 size={16} />
-  {deleting === row._id ? "Deleting..." : "Delete"}
-</DropdownMenuItem>
+              <DropdownMenuItem
+                className="flex items-center gap-2 cursor-pointer"
+                onClick={() => router.push(`/dashboard/admin/partners/AddPartners/edit/${row._id}`)}
+              >
+                <Pen size={16} />
+                Edit
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="flex items-center gap-2 text-red-600"
+                onClick={() => row._id && handleDelete(row._id)}
+                disabled={deleting === row._id || !row._id}
+              >
+                <Trash2 size={16} />
+                {deleting === row._id ? "Deleting..." : "Delete"}
+              </DropdownMenuItem>
 
             </DropdownMenuContent>
           </DropdownMenu>
@@ -138,8 +152,19 @@ const PartnerPage = () => {
     },
   ];
 
+  const totalPartners = partners.length;
+  const featuredPartners = partners.filter((partner) =>
+    partner.isFeatured === true ||
+    (typeof partner.isFeatured === "string" && partner.isFeatured === "true")
+  ).length;
+
   return (
     <div>
+      <UsersSummary
+        totalPartners={totalPartners}
+        featuredPartners={featuredPartners}
+        loading={loading}
+      />
       <header className="flex justify-between items-center mb-4 flex-wrap gap-5">
         <h1 className="text-base py-2 sm:py-5 text-[#0A0A0A]">Partners Management</h1>
         <Button

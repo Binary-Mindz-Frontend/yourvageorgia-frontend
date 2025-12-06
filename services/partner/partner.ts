@@ -57,6 +57,20 @@ export const getPartners = async (): Promise<
 };
 
 // GET SINGLE PARTNER BY ID
+// export const getPartnerById = async (
+//   partnerId: string
+// ): Promise<IPartnerResponse["data"] | { error: string }> => {
+//   try {
+//     const res = await fetch(`${BASE_URL}/partner/${partnerId}`);
+//     const json = await res.json();
+//     if (!res.ok) return { error: json.message || "Failed to fetch partner" };
+//     return json.data;
+//   } catch (error: any) {
+//     return { error: error.message };
+//   }
+// };
+
+// GET SINGLE PARTNER BY ID
 export const getPartnerById = async (
   partnerId: string
 ): Promise<IPartnerResponse["data"] | { error: string }> => {
@@ -64,7 +78,14 @@ export const getPartnerById = async (
     const res = await fetch(`${BASE_URL}/partner/${partnerId}`);
     const json = await res.json();
     if (!res.ok) return { error: json.message || "Failed to fetch partner" };
-    return json.data;
+    
+    // Convert isFeatured from string to boolean
+    const data = {
+      ...json.data,
+      isFeatured: json.data.isFeatured === "true" || json.data.isFeatured === true
+    };
+    
+    return data;
   } catch (error: any) {
     return { error: error.message };
   }

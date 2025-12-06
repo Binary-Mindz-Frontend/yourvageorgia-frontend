@@ -33,6 +33,7 @@ import {
     DialogClose,
 } from "@/components/ui/dialog";
 import CategoryView from "../CategoryView/CategoryView";
+import AnalyticsOverviewSection from "../CategoryOverviewSection/CategoryOverviewSection";
 
 
 const CategoryPage = () => {
@@ -187,8 +188,14 @@ const CategoryPage = () => {
         },
     ];
 
+    const totalCategory = categories.length;
+
     return (
         <div>
+            <AnalyticsOverviewSection 
+            totalCategory={totalCategory} 
+            loading={loading}
+            />
             <header>
                 <h1 className="text-base py-2 sm:py-5 text-[#0A0A0A]">Category Management</h1>
 
@@ -205,7 +212,7 @@ const CategoryPage = () => {
                     </div>
 
                     <Button
-                        className="flex items-center bg-gray-900 hover:bg-[#030213] px-4 py-2"
+                        className="cursor-pointer flex items-center bg-gray-900 hover:bg-[#030213] px-4 py-2"
                         onClick={() => setOpenAdd(true)}
                     >
                         <Plus size={18} className="mr-2 text-white" />
