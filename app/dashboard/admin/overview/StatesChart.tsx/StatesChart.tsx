@@ -81,7 +81,7 @@ const StatesChart = () => {
 		<div className="space-y-6 mt-2 bg-black text-white min-h-screen p-4">
 			<div className="grid grid-cols-1 lg:grid-cols-3 gap-7">
 				<div className="lg:col-span-2 space-y-7.5">
-					<div className="flex justify-between items-center mb-5 flex-wrap bg-gray-900 py-3 px-4 rounded-lg">
+					<div className="flex justify-between items-center mb-5 flex-wrap bg-[#1a1a1a] py-3 px-4 rounded-lg">
 						<div className="relative w-full sm:w-auto flex items-center space-x-2">
 							<Filter size={40} className="text-white" />
 							<span className="text-white font-medium text-lg">Filters:</span>
@@ -89,22 +89,24 @@ const StatesChart = () => {
 							<Select defaultValue="today">
 								<SelectTrigger
 									className="
-                    w-full sm:min-w-[140px]
-                    pl-4 pr-10 py-2.5
-                    bg-gray-800
-                    border-0
-                    rounded-lg
-                    text-sm text-white
-                    cursor-pointer
-                    focus:outline-none
-                    focus:ring-0
-                    [&>svg]:hidden
-                  "
-								>
+										w-full sm:min-w-[140px]
+										pl-4 pr-10 py-2.5
+										bg-gray-800
+										border-0
+										rounded-lg
+										text-sm text-white
+										cursor-pointer
+										focus:outline-none
+										focus:ring-0
+										focus-visible:ring-0
+										focus-visible:ring-offset-0
+										[&>svg]:hidden
+									"
+									>
 									<SelectValue placeholder="Today" />
 								</SelectTrigger>
 
-								<SelectContent className="bg-gray-800 border-none shadow-lg rounded-md text-white">
+								<SelectContent className="bg-[#1a1a1a] border-none shadow-lg rounded-md text-white">
 									<SelectItem value="today">Today</SelectItem>
 									<SelectItem value="week">This Week</SelectItem>
 									<SelectItem value="month">This Month</SelectItem>

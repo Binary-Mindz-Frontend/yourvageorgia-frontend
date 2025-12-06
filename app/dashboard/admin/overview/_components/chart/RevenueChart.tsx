@@ -41,7 +41,7 @@ type FixedTooltipProps = TooltipProps<ValueType, NameType> & {
 const CustomTooltip: React.FC<FixedTooltipProps> = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-gray-900 border border-gray-200 rounded-lg shadow-lg p-3">
+      <div className="bg-[#1a1a1a] border border-gray-200 rounded-lg shadow-lg p-3">
         <p className="text-xs text-gray-500 mb-1 font-semibold">{label}</p>
         {payload.map((item, i) => (
           <div key={i} className="flex items-center gap-2 mb-1">
@@ -85,7 +85,7 @@ const RevenueChart = ({
   const chartData = data && data.length > 0 ? data : defaultData;
 
   return (
-    <div className="bg-gray-900 rounded-2xl p-6 shadow-sm border border-gray-100">
+    <div className="bg-[#1a1a1a] rounded-2xl p-6 shadow-sm border border-gray-100">
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <h2 className="text-2xl font-bold text-white">{title}</h2>
