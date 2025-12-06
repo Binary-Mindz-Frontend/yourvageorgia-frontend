@@ -696,12 +696,20 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
                 <Input
-                  {...register(`contacts.${i}.officeName`, { required: "Office name is required" })}
+                  {...register(`contacts.${i}.officeName`, {
+                    required: "Office name is required",
+                    minLength: {
+                      value: 2,
+                      message: "Office name must be at least 2 characters"
+                    }
+                  })}
                   placeholder="Office Name"
                   className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
                 />
                 <Input
-                  {...register(`contacts.${i}.phone`, { required: "Phone is required" })}
+                  {...register(`contacts.${i}.phone`, {
+                    required: "Phone is required"
+                    })}
                   placeholder="Phone"
                   className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
                 />
@@ -711,12 +719,21 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
                   className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
                 />
                 <Input
-                  {...register(`contacts.${i}.email`, { required: "Email is required" })}
+                  {...register(`contacts.${i}.email`, {
+                    required: "Email is required",
+                    pattern: {
+                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                      message: "Please enter a valid email address"
+                    }
+                  })}
                   placeholder="Email"
+                  type="email"
                   className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
                 />
                 <Input
-                  {...register(`contacts.${i}.address`, { required: "Address is required" })}
+                  {...register(`contacts.${i}.address`, {
+                    required: "Address is required"
+                  })}
                   placeholder="Address"
                   className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
                 />
