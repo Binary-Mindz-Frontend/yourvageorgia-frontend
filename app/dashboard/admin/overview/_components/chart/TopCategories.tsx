@@ -36,7 +36,7 @@ const TopCategories = ({
   const categoryList = categories || defaultCategories;
 
   return (
-    <div className="bg-gray-900 rounded-xl p-4 shadow-sm border border-gray-100">
+    <div className="bg-[#1a1a1a] rounded-xl p-4 shadow-sm border border-gray-100">
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <h2 className="text-xl font-semibold ">{title}</h2>
@@ -53,14 +53,14 @@ const TopCategories = ({
             
             {/* Category Name */}
             <div className="w-40 xs:w-60 sm:w-68 md:w-90 lg:w-44">
-              <p className="text-sm font-medium text-[#2D2D2D]">
+              <p className="text-sm font-medium text-gray-300">
                 {category.name}
               </p>
             </div>
 
             {/* Jobs Count */}
             <div className="text-right">
-              <p className="text-xs text-[#716E6E]">{category.jobs} jobs</p>
+              <p className="text-xs text-gray-300">{category.jobs} jobs</p>
             </div>
 
             {/* Progress Bar */}
@@ -79,9 +79,9 @@ const TopCategories = ({
       {/* Footer */}
       <div className="mt-6 pt-4 border-t border-gray-100">
         <div className="flex items-center justify-between">
-          <p className="text-sm text-[#2D2D2D]">
+          <p className="text-sm text-gray-300">
             Total Categories{" "}
-            <span className="ml-1 font-semibold text-[#2D2D2D]">
+            <span className="ml-1 font-semibold text-gray-300">
               {totalCategories}
             </span>
           </p>

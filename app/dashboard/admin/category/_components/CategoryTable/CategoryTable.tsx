@@ -8,6 +8,7 @@ import {
     Search,
     SquarePen,
     Trash2,
+    X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -30,9 +31,9 @@ import {
     DialogContent,
     DialogHeader,
     DialogTitle,
-    DialogClose,
 } from "@/components/ui/dialog";
 import CategoryView from "../CategoryView/CategoryView";
+import AnalyticsOverviewSection from "../CategoryOverviewSection/CategoryOverviewSection";
 
 
 const CategoryPage = () => {
@@ -187,25 +188,32 @@ const CategoryPage = () => {
         },
     ];
 
+    const totalCategory = categories.length;
+
     return (
         <div>
+            <AnalyticsOverviewSection
+                totalCategory={totalCategory}
+                loading={loading}
+            />
             <header>
                 <h1 className="text-base py-2 sm:py-5 text-[#0A0A0A]">Category Management</h1>
 
                 <div className="flex justify-between mb-4 items-center w-full flex-wrap gap-5">
                     <div className="relative w-full sm:w-1/3">
                         <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                            <Search size={18} className="text-gray-400" />
+                            <Search size={18} className="text-gray-400 group-focus:text-primary" />
                         </div>
                         <input
                             type="text"
-                            className="block w-full p-2 pl-10 text-sm bg-gray-900 border border-gray-300 rounded-lg"
-                            placeholder="Search Project..."
+                            placeholder="Search..."
+                            autoFocus
+                            className="w-full px-4 pl-10 py-2 rounded-full bg-accent/10 border border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 text-sm transition-all group"
                         />
                     </div>
 
                     <Button
-                        className="flex items-center bg-gray-900 hover:bg-[#030213] px-4 py-2"
+                        className="cursor-pointer flex items-center bg-[#1a1a1a] hover:bg-[#1a1a1a] px-4 py-2"
                         onClick={() => setOpenAdd(true)}
                     >
                         <Plus size={18} className="mr-2 text-white" />
@@ -255,14 +263,17 @@ const CategoryPage = () => {
 
             {/* View Category Modal */}
             <Dialog open={openView} onOpenChange={setOpenView}>
-                <DialogContent className="max-w-md [&>button:first-of-type]:hidden">
+                <DialogContent className="max-w-md bg-[#1a1a1a] [&>button:first-of-type]:hidden">
                     <DialogHeader>
                         <DialogTitle>Category Details</DialogTitle>
                     </DialogHeader>
                     {selectedCategoryId && (
                         <CategoryView categoryId={selectedCategoryId} />
                     )}
-                    <DialogClose className="absolute top-2 right-2">✕</DialogClose>
+                    <X
+                        className="h-5 w-5 text-white cursor-pointer absolute top-4 right-3"
+                        onClick={() => setOpenView(false)}
+                    />
                 </DialogContent>
             </Dialog>
         </div>

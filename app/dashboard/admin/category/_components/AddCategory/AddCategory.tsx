@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useEffect } from "react";
 import {
   Dialog,
@@ -21,9 +19,9 @@ import {
 import { ICategory } from "@/types/category.types";
 import Image from "next/image";
 
-// Backend base URL
-const BACKEND_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://82.25.109.232:5000/api";
 
+// Backend base URL
+const BACKEND_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 type AddCategoryProps = {
   open: boolean;
@@ -74,7 +72,7 @@ export default function AddCategoryModal({
       });
 
       const data = await res.json();
-      
+
       if (!res.ok || !data.success) {
         console.error(data.message || "Failed to upload image");
         return;
@@ -87,6 +85,10 @@ export default function AddCategoryModal({
     } finally {
       setUploading(false);
     }
+  };
+
+  const handleImageRemove = () => {
+    setImage(""); // Remove the image
   };
 
   const handleSubmit = async () => {
@@ -140,7 +142,7 @@ export default function AddCategoryModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg p-6 rounded-2xl [&>button]:hidden bg-gray-900 text-white">
+      <DialogContent className="sm:max-w-lg p-6 rounded-2xl [&>button]:hidden bg-[#1a1a1a] text-white">
         <DialogHeader>
           <div className="flex items-center justify-between w-full">
             <DialogTitle className="text-sm font-semibold text-white">
@@ -148,9 +150,9 @@ export default function AddCategoryModal({
             </DialogTitle>
             <button
               onClick={() => onOpenChange(false)}
-              className="p-2 rounded hover:bg-gray-800 transition-colors"
+              className="p-2 rounded hover:bg-black transition-colors"
             >
-              <X className="h-5 w-5 text-white" />
+              <X className="h-5 w-5 text-white cursor-pointer" />
             </button>
           </div>
         </DialogHeader>
@@ -160,12 +162,12 @@ export default function AddCategoryModal({
           <div className="space-y-1">
             <Label className="text-[18px] text-white">Title</Label>
             <Input
-              placeholder="Enter category title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="h-12 bg-black text-white placeholder-gray-400 border-gray-700"
-              disabled={loading || uploading}
-            />
+  placeholder="Enter category title"
+  value={title}
+  onChange={(e) => setTitle(e.target.value)}
+  className="h-12 text-white placeholder-gray-400 bg-accent/10 border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
+  disabled={loading || uploading}
+/>
           </div>
 
           {/* Image */}
@@ -175,7 +177,7 @@ export default function AddCategoryModal({
               placeholder="Enter image URL or upload below"
               value={image}
               onChange={(e) => setImage(e.target.value.trim())}
-              className="h-12 bg-black text-white placeholder-gray-400 border-gray-700"
+              className="h-12 text-white placeholder-gray-400 bg-accent/10 border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
               disabled={loading || uploading}
             />
 
@@ -189,17 +191,23 @@ export default function AddCategoryModal({
                   className="object-cover"
                   unoptimized
                 />
+                {/* Cross Icon */}
+                <button
+                  className="absolute top-2 right-2 bg-red-600 text-white p-1 rounded-md"
+                  onClick={handleImageRemove}
+                >
+                  <X className="h-5 w-5" />
+                </button>
               </div>
             )}
 
             <label
               htmlFor="featureImage"
-              className={`border border-gray-700 rounded-md p-6 text-center bg-black cursor-pointer block mt-2 hover:bg-gray-800 transition-colors ${
-                uploading ? "opacity-50 pointer-events-none" : ""
-              }`}
+              className={`border border-primary/50 rounded-md p-6 text-center bg-[#1a1a1a] cursor-pointer block mt-2 hover:bg-accent/10 transition-colors ${uploading ? "opacity-50 pointer-events-none" : ""
+                }`}
             >
               <Upload className="mx-auto mb-2 text-gray-400" />
-              <p className="text-sm text-gray-300">
+              <p className="text-sm text-gray-400">
                 {uploading ? "Uploading..." : "Click to upload or drag and drop"}
               </p>
               <p className="text-xs text-gray-500">PNG, JPG up to 10MB</p>
@@ -221,11 +229,11 @@ export default function AddCategoryModal({
           {/* Description */}
           <div className="space-y-1">
             <Label className="text-[18px] text-white">Description</Label>
-            <Input
+            <textarea
               placeholder="Enter description (optional)"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="h-12 bg-black text-white placeholder-gray-400 border-gray-700"
+              className="w-full text-white border placeholder-gray-400 bg-accent/10 border-primary/50 focus:outline-none resize-none h-24 p-2 rounded-md "
               disabled={loading || uploading}
             />
           </div>
@@ -234,7 +242,7 @@ export default function AddCategoryModal({
         <DialogFooter className="mt-4 flex justify-end gap-2">
           <Button
             variant="outline"
-            className="px-6 text-white border-gray-600 hover:bg-gray-800"
+            className="px-6 text-white border-gray-600 hover:bg-acent/10 cursor-pointer"
             onClick={() => onOpenChange(false)}
             disabled={loading || uploading}
           >
@@ -243,7 +251,7 @@ export default function AddCategoryModal({
 
           <Button
             variant="outline"
-            className="px-6 bg-white hover:bg-white text-black hover:text-black"
+            className="px-6 bg-white text-black hover:text-black hover:bg-white cursor-pointer border-primary/50"
             onClick={handleSubmit}
             disabled={loading || uploading}
           >
@@ -252,10 +260,10 @@ export default function AddCategoryModal({
                 ? "Updating..."
                 : "Adding..."
               : uploading
-              ? "Uploading..."
-              : isEdit
-              ? "Update"
-              : "Add"}
+                ? "Uploading..."
+                : isEdit
+                  ? "Update"
+                  : "Add"}
           </Button>
         </DialogFooter>
       </DialogContent>

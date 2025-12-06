@@ -79,7 +79,7 @@ const ServiceChart: React.FC<ServiceChartProps> = ({
   const chartData = data && data.length > 0 ? data : defaultData;
 
   return (
-    <div className="bg-gray-900 rounded-2xl p-4 shadow-sm border border-gray-100">
+    <div className="bg-[#1a1a1a] rounded-2xl p-4 shadow-sm border border-gray-100">
       {/* Header */}
       <h2 className="text-xl font-semibold mb-4 text-white">{title}</h2>
 

@@ -33,7 +33,7 @@ const CategoryView: React.FC<CategoryViewProps> = ({ categoryId }) => {
   if (!category) return <p className="text-white">No category found.</p>;
 
   return (
-    <div className="p-4 bg-gray-900 text-white rounded flex flex-col gap-4 w-full">
+    <div className="p-4 bg-[#1a1a1a] text-white rounded flex flex-col gap-4 w-full">
       <h2 className="text-xl font-bold">{category.title}</h2>
       <p>{category.description || "-"}</p>
       {category.image && (
@@ -42,7 +42,7 @@ const CategoryView: React.FC<CategoryViewProps> = ({ categoryId }) => {
             src={category.image}
             alt={category.title}
             fill
-            className="object-cover bg-gray-900 rounded"
+            className="object-cover bg-[#1a1a1a] rounded"
             unoptimized
           />
         </div>

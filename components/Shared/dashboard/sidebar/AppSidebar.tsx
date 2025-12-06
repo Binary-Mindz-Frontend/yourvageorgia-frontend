@@ -19,6 +19,7 @@ import {
 
 import { NavMain } from "./Nabmain";
 import { HeaderLogo } from "@/components/icons";
+import Link from "next/link";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const navMain = [
@@ -56,9 +57,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             >
               <div className="mt-2">
                 <div className="text-2xl font-bold text-white">
-            
-                    <HeaderLogo />
-                  
+                    <Link href={"/"}><HeaderLogo /></Link>
                 </div>
               </div>
             </SidebarMenuButton>
@@ -66,7 +65,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
 
-      <SidebarContent className="mt-2 bg-black text-white">
+      <SidebarContent className="pt-2 bg-black text-white">
         <NavMain items={navMain} />
       </SidebarContent>
 

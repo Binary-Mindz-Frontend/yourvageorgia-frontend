@@ -1,254 +1,191 @@
 "use client";
-import { Ban, CircleCheck, CircleX, Eye, Mail, MoreHorizontal, Play, Shield, Star } from "lucide-react";
-import React, { useState } from "react";
-import { IPartnerData, PartnerData } from "../../data/usersData";
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuGroup } from "@/components/ui/dropdown-menu";
-import CustomPagination from "@/components/Shared/dashboard/custompagination/CustomPagination";
+
+import React, { useState, useEffect } from "react";
+import { Eye, MoreHorizontal, Pen, Plus, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 import CustomTable, { Column } from "@/components/Shared/dashboard/customtable/CustomTable";
+import CustomPagination from "@/components/Shared/dashboard/custompagination/CustomPagination";
+import { toast } from "sonner";
+import { getPartners, deletePartner } from "@/services/partner/partner";
+import { Partner } from "@/types/partner.types";
+import { useRouter } from "next/navigation";
+import UsersSummary from "../UsersSummarySection/UsersSummary";
+
+const toastStyle = { background: "#000", color: "#fff", marginTop: "4rem" };
+
+const PartnerPage = () => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
+
+  const [partners, setPartners] = useState<Partner[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [deleting, setDeleting] = useState<string | null>(null);
+  const router = useRouter();
 
 
-
-const UserTable = () => {
-    const [currentPage, setCurrentPage] = useState(1);
-    const pageSize = 4;
-
-    const userColumns: Column<IPartnerData>[] = [
-        {
-            header: "User Info",
-            cell: (row) => (
-                <div className="flex flex-col items-left">
-                    <p className="text-sm text-white">{row.userName}</p>
-                    <p className="text-sm text-white">{row.email}</p>
-                </div>
-            ),
-        },
-        {
-            header: "Role",
-            cell: (row) => (
-                <div className="flex justify-center">
-                    <span
-                        className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${row.role === "Client"
-                            ? "bg-purple-100 text-purple-700"
-                            : "bg-blue-100 text-blue-800"
-                            }`}
-                    >
-                        {row.role}
-                    </span>
-                </div>
-            ),
-        },
-        {
-            header: "Status",
-            cell: (row) => {
-                let colorClass = "";
-
-                switch (row.status) {
-                    case "Active":
-                        colorClass = "bg-green-100 text-green-800";
-                        break;
-                    case "Suspended":
-                        colorClass = "bg-red-100 text-red-800";
-                        break;
-                    case "Pending":
-                        colorClass = "bg-violet-100 text-violet-600";
-                        break;
-                    default:
-                        colorClass = "bg-gray-100 text-gray-800";
-                }
-
-                return (
-                    <div className="flex justify-center">
-                        <span
-                            className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${colorClass}`}
-                        >
-                            {row.status}
-                        </span>
-                    </div>
-                );
-            },
-        },
-        {
-            header: "Compliance",
-            cell: (row) => {
-                const items = row.compliance;
-
-                return (
-                    <div className="flex justify-center">
-                        <div className="flex items-center gap-2">
-                            {items.idVerification ? (
-                                <CircleCheck size={16} className="text-green-500" />
-                            ) : (
-                                <CircleX size={16} className="text-red-500" />
-                            )}
-
-                            {items.addressVerification ? (
-                                <CircleCheck size={16} className="text-green-500" />
-                            ) : (
-                                <CircleX size={16} className="text-red-500" />
-                            )}
-
-                            {items.bankVerification ? (
-                                <CircleCheck size={16} className="text-green-500" />
-                            ) : (
-                                <CircleX size={16} className="text-red-500" />
-                            )}
-
-                            {items.portfolioCheck ? (
-                                <CircleCheck size={16} className="text-green-500" />
-                            ) : (
-                                <CircleX size={16} className="text-red-500" />
-                            )}
-                        </div>
-                    </div>
-                );
-            },
-        },
-        {
-            header: "Performance",
-            cell: (row) => (
-                <div className="flex justify-center">
-                    <div className="flex items-center space-x-2">
-                        <span className="text-xs text-white">
-                            Jobs: {row.performance.jobsPosted}
-                        </span>
-
-                        {row.performance.rating && (
-                            <div className="flex items-center">
-                                <Star size={12} className="text-yellow-400 fill-current" />
-                                <span className="ml-1 text-xs text-white">
-                                    {row.performance.rating}
-                                </span>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            ),
-        },
-        {
-            header: "Escrow",
-            cell: (row) => (
-                <div className="flex justify-center">
-                    <div className="flex flex-col items-start">
-                        <span className="text-xs text-white">
-                            Held: {row.performance.earned}
-                        </span>
-                        <p className="text-white">
-                            Pending: {row.performance.pending}
-                        </p>
-                    </div>
-                </div>
-            ),
-        },
-        {
-            header: "Joined",
-            accessor: "joined",
-            cell: (row) => (
-                <div className="flex justify-center">{row.joined}</div>
-            ),
-        },
-        {
-            header: "Location",
-            accessor: "location",
-            cell: (row) => (
-                <div className="flex justify-center">{row.location}</div>
-            ),
-        },
-
-        {
-            header: "Actions",
-            cell: (row) => {
-                const isActive = row.status === "Active";
-                const isSuspended = row.status === "Suspended";
-
-                return (
-                    <div className="w-full flex justify-center">
-                        <DropdownMenu modal={false}>
-                            <DropdownMenuTrigger asChild>
-                                <button
-                                    aria-label="Open menu"
-                                    className="p-2 rounded-md border"
-                                >
-                                    <MoreHorizontal size={18} />
-                                </button>
-                            </DropdownMenuTrigger>
-
-                            <DropdownMenuContent className="w-48" align="end">
-                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-
-                                <DropdownMenuGroup>
-                                    {/* Active → Suspend */}
-                                    {isActive && (
-                                        <DropdownMenuItem
-                                            className="flex items-center gap-2 cursor-pointer"
-                                            onClick={() => console.log("Suspend user")}
-                                        >
-                                            <Ban size={14} className="text-red-600" />
-                                            <span>Suspend</span>
-                                        </DropdownMenuItem>
-                                    )}
-
-                                    {/* Suspended → Activate */}
-                                    {isSuspended && (
-                                        <DropdownMenuItem
-                                            className="flex items-center gap-2 cursor-pointer"
-                                            onClick={() => console.log("Activate user")}
-                                        >
-                                            <Play size={14} className="text-green-700" />
-                                            <span>Activate</span>
-                                        </DropdownMenuItem>
-                                    )}
-
-                                    {/* Email */}
-                                    <DropdownMenuItem
-                                        className="flex items-center gap-2 cursor-pointer"
-                                        onClick={() => console.log("Email user")}
-                                    >
-                                        <Mail size={14} className="text-[#0A0A0A]" />
-                                        <span>Email</span>
-                                    </DropdownMenuItem>
-
-                                    {/* Escrow */}
-                                    <DropdownMenuItem
-                                        className="flex items-center gap-2 cursor-pointer"
-                                        onClick={() => console.log("Escrow")}
-                                    >
-                                        <Eye size={14} className="text-[#0A0A0A]" />
-                                        <span>Escrow</span>
-                                    </DropdownMenuItem>
-
-                                    {/* Verify */}
-                                    <DropdownMenuItem
-                                        className="flex items-center gap-2 cursor-pointer"
-                                        onClick={() => console.log("Verify")}
-                                    >
-                                        <Shield size={14} className="text-blue-600" />
-                                        <span>Verify</span>
-                                    </DropdownMenuItem>
-                                </DropdownMenuGroup>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                    </div>
-                );
-            },
+  useEffect(() => {
+    const fetchPartners = async () => {
+      setLoading(true);
+      try {
+        const res = await getPartners();
+        if ("error" in res) {
+          toast.error(res.error, { style: toastStyle });
+        } else {
+          setPartners(res.data);
         }
+      } catch (err) {
+        console.error(err);
+        toast.error("Failed to fetch partners", { style: toastStyle });
+      } finally {
+        setLoading(false);
+      }
+    };
 
+    fetchPartners();
+  }, []);
 
-    ];
+  const indexOfLastItem = currentPage * pageSize;
+  const indexOfFirstItem = indexOfLastItem - pageSize;
+  const currentPartners = partners.slice(indexOfFirstItem, indexOfLastItem);
 
-    return (
-        <div >
-            <div className="flex ">
+  const handleDelete = async (partnerId: string) => {
+    setDeleting(partnerId);
+    try {
+      const res = await deletePartner(partnerId);
+      if ("error" in res) {
+        toast.error(res.error, { style: toastStyle });
+      } else {
+        toast.success(res.message, { style: toastStyle });
+        setPartners(prev => prev.filter(p => p._id === partnerId ? false : true));
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to delete partner", { style: toastStyle });
+    } finally {
+      setDeleting(null);
+    }
+  };
 
-            </div>
-            <CustomTable columns={userColumns} data={PartnerData} />
-            <CustomPagination
-                totalItems={PartnerData.length}
-                pageSize={pageSize}
-                currentPage={currentPage}
-                onPageChange={setCurrentPage}
-            />
+  const columns: Column<Partner>[] = [
+    {
+      header: "Name",
+      cell: (row) => <span className="text-white">{row.name}</span>,
+    },
+    {
+      header: "Category",
+      cell: (row) => (
+        <span className="text-white">
+          {typeof row.category === "string" ? row.category : row.category?.title}
+        </span>
+      ),
+    },
+    {
+      header: "Address",
+      cell: (row) => <span className="text-white">{row.address}</span>,
+    },
+    {
+      header: "Is Featured",
+      cell: (row) => {
+        const isFeatured =
+          row.isFeatured === true ||
+          (typeof row.isFeatured === "string" && row.isFeatured === "true");
+
+        return (
+          <div className="flex justify-center">
+            <span
+              className={`px-3 py-1 inline-flex text-xs font-semibold rounded-full ${isFeatured ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"
+                }`}
+            >
+              {isFeatured ? "Yes" : "No"}
+            </span>
+          </div>
+        );
+      },
+    }
+    ,
+    {
+      header: "Actions",
+      cell: (row) => (
+        <div className="flex justify-center w-full">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="p-2 hover:bg-gray-100 rounded-md">
+                <MoreHorizontal className="w-5 h-5 text-gray-600" />
+              </button>
+            </DropdownMenuTrigger>
+
+            <DropdownMenuContent align="end" className="w-40">
+              <DropdownMenuItem
+                className="flex items-center gap-2 cursor-pointer"
+                onClick={() => router.push(`/dashboard/admin/partners/view/${row._id}`)}
+              >
+                <Eye size={16} />
+                View
+              </DropdownMenuItem>
+
+              <DropdownMenuItem
+                className="flex items-center gap-2 cursor-pointer"
+                onClick={() => router.push(`/dashboard/admin/partners/AddPartners/edit/${row._id}`)}
+              >
+                <Pen size={16} />
+                Edit
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="flex items-center gap-2 text-red-600"
+                onClick={() => row._id && handleDelete(row._id)}
+                disabled={deleting === row._id || !row._id}
+              >
+                <Trash2 size={16} />
+                {deleting === row._id ? "Deleting..." : "Delete"}
+              </DropdownMenuItem>
+
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
-    );
+      ),
+    },
+  ];
+
+  const totalPartners = partners.length;
+  const featuredPartners = partners.filter((partner) =>
+    partner.isFeatured === true ||
+    (typeof partner.isFeatured === "string" && partner.isFeatured === "true")
+  ).length;
+
+  return (
+    <div>
+      <UsersSummary
+        totalPartners={totalPartners}
+        featuredPartners={featuredPartners}
+        loading={loading}
+      />
+      <header className="flex justify-between items-center mb-4 flex-wrap gap-5">
+        <h1 className="text-base py-2 sm:py-5 text-[#0A0A0A]">Partners Management</h1>
+        <Button
+          className="flex cursor-pointer items-center bg-[#1a1a1a] hover:bg-[#1a1a1a] px-4 py-2"
+          onClick={() => router.push("/dashboard/admin/partners/AddPartners")}
+        >
+          <Plus size={18} className="mr-2 text-white" />
+          <span className="text-white text-base">Add Partner</span>
+        </Button>
+      </header>
+
+      <CustomTable columns={columns} data={currentPartners} loading={loading} />
+
+      <CustomPagination
+        totalItems={partners.length}
+        pageSize={pageSize}
+        currentPage={currentPage}
+        onPageChange={setCurrentPage}
+      />
+    </div>
+  );
 };
 
-export default UserTable;
+export default PartnerPage;
