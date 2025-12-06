@@ -22,6 +22,7 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
+import LogoUploadWithCrop from "../_components/LogoUploadWithCrop/LogoUploadWithCrop";
 
 type CategoryOption = { _id: string; title: string };
 type Contact = { officeName?: string; phone?: string; mobile?: string; email?: string; address?: string; addressUrl?: string; };
@@ -183,11 +184,11 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
     if (thumbnailInputRef.current) thumbnailInputRef.current.value = "";
   };
 
-  const removeLogo = () => {
-    setLogoPreview("");
-    setValue("logoUrl", "");
-    if (logoInputRef.current) logoInputRef.current.value = "";
-  };
+  // const removeLogo = () => {
+  //   setLogoPreview("");
+  //   setValue("logoUrl", "");
+  //   if (logoInputRef.current) logoInputRef.current.value = "";
+  // };
 
   const handleGalleryFileChange = (files: FileList) => {
     const newImages: GalleryItem[] = Array.from(files).map((file) => ({
@@ -382,110 +383,66 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
           </div>
         </div>
 
-        {/* THUMBNAIL + LOGO */}
-        <div className="grid sm:grid-cols-2 gap-4">
-          {/* Thumbnail */}
-          <div>
-            <Label className="text-white mb-1">Thumbnail Image *</Label>
-            <div className="flex gap-2 mt-1">
-              <Input
-                {...register("thumbnailUrl", { required: "Thumbnail is required" })}
-                placeholder="/uploads/example.jpg or full URL"
-                className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
-              />
-              <label className="px-3 py-2 bg-neutral-800 rounded cursor-pointer flex items-center gap-2 text-white hover:bg-neutral-700">
-                <Upload size={16} />
-                <input
-                  ref={thumbnailInputRef}
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      previewFile(file, setThumbnailPreview);
-                      setValue("thumbnailUrl", file.name, { shouldValidate: true });
-                    }
-                  }}
-                />
-              </label>
-            </div>
-            {errors.thumbnailUrl && !thumbnailPreview && (
-              <p className="text-red-500 text-sm mt-1">{errors.thumbnailUrl.message}</p>
-            )}
+{/* THUMBNAIL + LOGO */}
+<div className="grid sm:grid-cols-2 gap-4">
+  {/* Thumbnail - keep as is */}
+  <div>
+    <Label className="text-white mb-1">Thumbnail Image *</Label>
+    <div className="flex gap-2 mt-1">
+      <Input
+        {...register("thumbnailUrl", { required: "Thumbnail is required" })}
+        placeholder="/uploads/example.jpg or full URL"
+        className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
+      />
+      <label className="px-3 py-2 bg-neutral-800 rounded cursor-pointer flex items-center gap-2 text-white hover:bg-neutral-700">
+        <Upload size={16} />
+        <input
+          ref={thumbnailInputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) {
+              previewFile(file, setThumbnailPreview);
+              setValue("thumbnailUrl", file.name, { shouldValidate: true });
+            }
+          }}
+        />
+      </label>
+    </div>
+    {errors.thumbnailUrl && !thumbnailPreview && (
+      <p className="text-red-500 text-sm mt-1">{errors.thumbnailUrl.message}</p>
+    )}
 
-            {(thumbnailPreview || watch("thumbnailUrl")) && (
-              <div className="mt-2 w-full h-44 relative rounded overflow-hidden border border-neutral-700">
-                <button
-                  type="button"
-                  onClick={removeThumbnail}
-                  className="absolute top-2 right-2 bg-red-600 text-white rounded w-7 h-7 flex items-center justify-center hover:bg-red-700 z-10"
-                >
-                  ×
-                </button>
-                <Image
-                  src={thumbnailPreview || watch("thumbnailUrl")}
-                  alt="thumb"
-                  fill
-                  className="object-cover"
-                  unoptimized
-                />
-              </div>
-            )}
-          </div>
+    {(thumbnailPreview || watch("thumbnailUrl")) && (
+      <div className="mt-2 w-full h-44 relative rounded overflow-hidden border border-neutral-700">
+        <button
+          type="button"
+          onClick={removeThumbnail}
+          className="absolute top-2 right-2 bg-red-600 text-white rounded w-7 h-7 flex items-center justify-center hover:bg-red-700 z-10"
+        >
+          ×
+        </button>
+        <Image
+          src={thumbnailPreview || watch("thumbnailUrl")}
+          alt="thumb"
+          fill
+          className="object-cover"
+          unoptimized
+        />
+      </div>
+    )}
+  </div>
 
-          {/* Logo Section (Visible and required only if isFeatured is true) */}
-          <div>
-            <Label className="text-white mb-1">Logo (Recommended 300×300 px)</Label>
-            <div className="flex gap-2 mt-1">
-              <Input
-                {...register("logoUrl", {
-                  required: watch("isFeatured") ? "Logo is required when marked as featured" : false, // Conditional required validation
-                })}
-                placeholder="https://logo.png"
-                className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
-              />
-              <label className="px-3 py-2 bg-neutral-800 rounded cursor-pointer flex items-center gap-2 text-white hover:bg-neutral-700">
-                <Upload size={16} />
-                <input
-                  ref={logoInputRef}
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      previewFile(file, setLogoPreview);
-                      setValue("logoUrl", file.name, { shouldValidate: true });
-                    }
-                  }}
-                />
-              </label>
-            </div>
-            {errors.logoUrl && !logoPreview && (
-              <p className="text-red-500 text-sm mt-1">{errors.logoUrl.message}</p>
-            )}
-
-            {(logoPreview || watch("logoUrl")) && (
-              <div className="mt-2 w-24 h-24 relative rounded overflow-hidden border border-neutral-700">
-                <button
-                  type="button"
-                  onClick={removeLogo}
-                  className="absolute top-1 right-1 bg-red-600 text-white rounded w-6 h-6 flex items-center justify-center hover:bg-red-700 z-10"
-                >
-                  ×
-                </button>
-                <Image
-                  src={logoPreview || watch("logoUrl")}
-                  alt="logo"
-                  fill
-                  className="object-cover"
-                  unoptimized
-                />
-              </div>
-            )}
-          </div>
-        </div>
+  {/* Logo Section - Now using the component */}
+  <LogoUploadWithCrop
+    value={watch("logoUrl") || ""}
+    onChange={(value) => setValue("logoUrl", value, { shouldValidate: true })}
+    error={errors.logoUrl?.message}
+    required={watch("isFeatured")}
+  />
+</div>
 
         {/* Address */}
         <div>
