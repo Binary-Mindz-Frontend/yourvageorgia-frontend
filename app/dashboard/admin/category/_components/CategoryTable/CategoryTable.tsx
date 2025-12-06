@@ -33,6 +33,7 @@ import {
     DialogClose,
 } from "@/components/ui/dialog";
 import CategoryView from "../CategoryView/CategoryView";
+import AnalyticsOverviewSection from "../CategoryOverviewSection/CategoryOverviewSection";
 
 
 const CategoryPage = () => {
@@ -187,8 +188,14 @@ const CategoryPage = () => {
         },
     ];
 
+    const totalCategory = categories.length;
+
     return (
         <div>
+            <AnalyticsOverviewSection 
+            totalCategory={totalCategory} 
+            loading={loading}
+            />
             <header>
                 <h1 className="text-base py-2 sm:py-5 text-[#0A0A0A]">Category Management</h1>
 

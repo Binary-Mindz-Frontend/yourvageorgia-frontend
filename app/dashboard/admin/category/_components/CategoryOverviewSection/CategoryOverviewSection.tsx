@@ -2,17 +2,18 @@ import { LayoutPanelTop  } from "lucide-react";
 import { FC } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 
-const analyticsData = [
-    {
-        title: "Total Categories",
-        value: "7",
-        icon: LayoutPanelTop,
-        iconBg: "bg-[#DBEAFE]",
-        iconColor: "text-[#155DFC]",
-    },
 
-];
+const baseAnalyticsData = {
+    title: "Total Categories",
+    icon: LayoutPanelTop,
+    iconBg: "bg-[#DBEAFE]",
+    iconColor: "text-[#155DFC]",
+};
 
+interface AnalyticsOverviewProps {
+    totalCategory: number;
+    loading: boolean;
+}
 
 interface AnalyticsCardProps {
     title: string;
@@ -54,15 +55,35 @@ const AnalyticsCard: FC<AnalyticsCardProps> = ({
     );
 };
 
-const AnalyticsOverviewSection: FC = () => {
+const AnalyticsOverviewSection: FC<AnalyticsOverviewProps> = ({ totalCategory, loading }) => {
+
+    const analyticsData = [
+        {
+            ...baseAnalyticsData,
+            value: totalCategory, 
+        },
+    ];
+
+
     return (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4 mb-6">
-            {analyticsData.map((item, idx) => (
-                <AnalyticsCard key={idx} {...item} />
-            ))}
+            {loading ? (
+                // Display loading state when the data is being fetched
+                <p className="text-white">Loading analytics...</p>
+            ) : (
+                // Map over the data and pass the values to the card
+                analyticsData.map((item, idx) => (
+                    <AnalyticsCard 
+                        key={idx} 
+                        title={item.title}
+                        value={item.value}
+                        icon={item.icon}
+                        iconBg={item.iconBg}
+                        iconColor={item.iconColor}
+                    />
+                ))
+            )}
         </div>
     );
 };
-
 export default AnalyticsOverviewSection;
-
