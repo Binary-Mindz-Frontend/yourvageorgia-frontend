@@ -19,9 +19,9 @@ export interface ITableProps<T> {
 
 const CustomTable = <T extends object>({ columns, data, loading = false }: ITableProps<T>) => {
   return (
-    <div className="w-full overflow-x-auto bg-gray-900 rounded-lg">
+    <div className="w-full overflow-x-auto bg-[#1a1a1a] rounded-lg">
       <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-gray-900">
+        <thead className="bg-[#1a1a1a]">
           <tr>
             {columns.map((column, index) => (
               <th
@@ -52,7 +52,7 @@ const CustomTable = <T extends object>({ columns, data, loading = false }: ITabl
             data.map((row, rowIndex) => (
               <tr
                 key={rowIndex}
-                className={`${rowIndex % 2 === 1 ? "bg-gray-900" : "bg-black"}`}
+                className={`${rowIndex % 2 === 1 ? "bg-[#1a1a1a]" : "bg-black"}`}
               >
                 {columns.map((column, colIndex) => (
                   <td
