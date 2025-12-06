@@ -1,10 +1,11 @@
-"use client"
-import { FC, useState, useEffect } from "react";
+// UsersSummary.tsx
+"use client";
+
+import { FC } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { UserCheck, Users, LucideIcon } from "lucide-react";
-import { getPartners } from "@/services/partner/partner";
-import { Partner } from "@/types/partner.types";
 
+// --- DashboardCard Component ---
 // Reusable single card component
 interface DashboardCardProps {
   title: string;
@@ -30,28 +31,28 @@ const DashboardCard: FC<DashboardCardProps> = ({ title, icon: Icon, value, statu
   );
 };
 
-const UsersSummary: FC = () => {
-  const [partners, setPartners] = useState<Partner[]>([]); 
-  const [loading, setLoading] = useState(true); 
+// --- UsersSummary Component ---
 
+/**
+ * 1. Defines the props expected from the parent component (PartnerPage).
+ * This component no longer manages state or fetches data internally.
+ */
+interface UsersSummaryProps {
+  totalPartners: number;
+  featuredPartners: number;
+  loading: boolean;
+}
+
+/**
+ * 2. Accepts the calculated data and loading status as props.
+ */
+const UsersSummary: FC<UsersSummaryProps> = ({ 
+  totalPartners, 
+  featuredPartners, 
+  loading 
+}) => {
   
-  useEffect(() => {
-    const fetchPartners = async () => {
-      setLoading(true); 
-      const result = await getPartners();
-      if ("data" in result) {
-        setPartners(result.data); 
-      }
-      setLoading(false); 
-    };
-
-    fetchPartners();
-  }, []); 
-
-  const totalPartners = partners.length;
-  const featuredPartners = partners.filter((partner) => partner.isFeatured).length;
-
-  // Static dashboard data with fetched values
+  // Static dashboard data with values passed via props
   const dashboardData = [
     {
       title: "Total Partner",

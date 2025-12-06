@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { getPartners, deletePartner } from "@/services/partner/partner";
 import { Partner } from "@/types/partner.types";
 import { useRouter } from "next/navigation";
+import UsersSummary from "../UsersSummarySection/UsersSummary";
 
 const toastStyle = { background: "#000", color: "#fff", marginTop: "4rem" };
 
@@ -151,8 +152,16 @@ const PartnerPage = () => {
     },
   ];
 
+  const totalPartners = partners.length;
+  const featuredPartners = partners.filter((partner) => partner.isFeatured).length;
+
   return (
     <div>
+      <UsersSummary
+        totalPartners={totalPartners}
+        featuredPartners={featuredPartners}
+        loading={loading}
+      />
       <header className="flex justify-between items-center mb-4 flex-wrap gap-5">
         <h1 className="text-base py-2 sm:py-5 text-[#0A0A0A]">Partners Management</h1>
         <Button
