@@ -153,7 +153,10 @@ const PartnerPage = () => {
   ];
 
   const totalPartners = partners.length;
-  const featuredPartners = partners.filter((partner) => partner.isFeatured).length;
+  const featuredPartners = partners.filter((partner) =>
+    partner.isFeatured === true ||
+    (typeof partner.isFeatured === "string" && partner.isFeatured === "true")
+  ).length;
 
   return (
     <div>
