@@ -343,7 +343,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
             <Label className="text-white mb-1">Partner Name *</Label>
             <Input
               {...register("name", { required: "Partner name is required" })}
-              className="bg-neutral-900 text-white border-neutral-700"
+              className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
               placeholder="Partner name"
             />
             {errors.name && (
@@ -363,10 +363,10 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
                   onValueChange={field.onChange}
                   disabled={loadingCategories}
                 >
-                  <SelectTrigger className="mt-1 w-full bg-neutral-900 border border-neutral-700 text-white h-auto min-h-12 py-3 items-start">
+                  <SelectTrigger className="mt-1 w-full bg-neutral-900 border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50 text-white h-auto min-h-12 py-3 items-start">
                     <SelectValue placeholder={loadingCategories ? "Loading..." : "Select category"} />
                   </SelectTrigger>
-                  <SelectContent className="bg-neutral-900 text-white border border-neutral-700">
+                  <SelectContent className="bg-neutral-900 text-white border  ">
                     {categories.map((c) => (
                       <SelectItem key={c._id} value={c._id} className="cursor-pointer">
                         {c.title}
@@ -391,7 +391,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
               <Input
                 {...register("thumbnailUrl", { required: "Thumbnail is required" })}
                 placeholder="/uploads/example.jpg or full URL"
-                className="bg-neutral-900 text-white border-neutral-700"
+                className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
               />
               <label className="px-3 py-2 bg-neutral-800 rounded cursor-pointer flex items-center gap-2 text-white hover:bg-neutral-700">
                 <Upload size={16} />
@@ -443,7 +443,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
                   required: watch("isFeatured") ? "Logo is required when marked as featured" : false, // Conditional required validation
                 })}
                 placeholder="https://logo.png"
-                className="bg-neutral-900 text-white border-neutral-700"
+                className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
               />
               <label className="px-3 py-2 bg-neutral-800 rounded cursor-pointer flex items-center gap-2 text-white hover:bg-neutral-700">
                 <Upload size={16} />
@@ -492,7 +492,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
           <Label className="text-white mb-1">Address *</Label>
           <Input
             {...register("address", { required: "Address is required" })}
-            className="bg-neutral-900 text-white border-neutral-700"
+            className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
             placeholder="Full address"
           />
           {errors.address && (
@@ -568,7 +568,8 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
             <Label className="text-white mb-1">Offer Title *</Label>
             <Input
               {...register("offerTitle", { required: "Offer title is required" })}
-              className="bg-neutral-900 text-white border-neutral-700"
+              className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
+              placeholder="Offer title"
             />
             {errors.offerTitle && (
               <p className="text-red-500 text-sm mt-1">{errors.offerTitle.message}</p>
@@ -579,7 +580,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
             <Input
               type="number"
               {...register("offerPercentage", { required: "Offer percentage is required" })}
-              className="bg-neutral-900 text-white border-neutral-700"
+              className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
               placeholder="10"
             />
             {errors.offerPercentage && (
@@ -590,7 +591,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
             <Label className="text-white mb-1">Description *</Label>
             <Textarea
               {...register("offerDescription", { required: "Offer description is required" })}
-              className="bg-neutral-900 text-white border-neutral-700"
+              className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
             />
             {errors.offerDescription && (
               <p className="text-red-500 text-sm mt-1">{errors.offerDescription.message}</p>
@@ -601,7 +602,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
             <Input
               type="date"
               {...register("offerValidUntil", { required: "Valid until date is required" })}
-              className="bg-neutral-900 text-white border-neutral-700"
+              className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
             />
             {errors.offerValidUntil && (
               <p className="text-red-500 text-sm mt-1">{errors.offerValidUntil.message}</p>
@@ -614,7 +615,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
           <Label className="text-white mb-1">About Title *</Label>
           <Input
             {...register("aboutTitle", { required: "About title is required" })}
-            className="bg-neutral-900 text-white border-neutral-700"
+            className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
           />
           {errors.aboutTitle && (
             <p className="text-red-500 text-sm mt-1">{errors.aboutTitle.message}</p>
@@ -622,7 +623,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
           <Label className="mt-2 block text-white mb-1">About Description *</Label>
           <Textarea
             {...register("aboutDescription", { required: "About description is required" })}
-            className="bg-neutral-900 text-white border-neutral-700"
+            className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
           />
           {errors.aboutDescription && (
             <p className="text-red-500 text-sm mt-1">{errors.aboutDescription.message}</p>
@@ -636,7 +637,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
             <div key={i} className="flex gap-2 mt-2">
               <Input
                 {...register(`terms.${i}`, { required: "Term is required" })}
-                className="bg-neutral-900 text-white border-neutral-700"
+                className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
               />
               {i > 0 && (
                 <Button
@@ -697,32 +698,32 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
                 <Input
                   {...register(`contacts.${i}.officeName`, { required: "Office name is required" })}
                   placeholder="Office Name"
-                  className="bg-neutral-800 text-white border-neutral-700"
+                  className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
                 />
                 <Input
                   {...register(`contacts.${i}.phone`, { required: "Phone is required" })}
                   placeholder="Phone"
-                  className="bg-neutral-800 text-white border-neutral-700"
+                  className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
                 />
                 <Input
                   {...register(`contacts.${i}.mobile`)}
                   placeholder="Mobile"
-                  className="bg-neutral-800 text-white border-neutral-700"
+                  className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
                 />
                 <Input
                   {...register(`contacts.${i}.email`, { required: "Email is required" })}
                   placeholder="Email"
-                  className="bg-neutral-800 text-white border-neutral-700"
+                  className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
                 />
                 <Input
                   {...register(`contacts.${i}.address`, { required: "Address is required" })}
                   placeholder="Address"
-                  className="bg-neutral-800 text-white md:col-span-2 border-neutral-700"
+                  className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
                 />
                 <Input
                   {...register(`contacts.${i}.addressUrl`)}
                   placeholder="Address URL"
-                  className="bg-neutral-800 text-white md:col-span-2 border-neutral-700"
+                  className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
                 />
               </div>
             </div>
@@ -735,7 +736,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
             <Label className="text-white mb-1">Website *</Label>
             <Input
               {...register("website", { required: "Website is required" })}
-              className="bg-neutral-900 text-white border-neutral-700"
+              className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
               placeholder="https://example.com"
             />
             {errors.website && (
@@ -746,7 +747,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
             <Label className="text-white mb-1">Instagram *</Label>
             <Input
               {...register("instagram", { required: "Instagram is required" })}
-              className="bg-neutral-900 text-white border-neutral-700"
+              className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
               placeholder="https://instagram.com/..."
             />
             {errors.instagram && (
@@ -757,7 +758,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
             <Label className="text-white mb-1">WhatsApp *</Label>
             <Input
               {...register("whatsapp", { required: "WhatsApp is required" })}
-              className="bg-neutral-900 text-white border-neutral-700"
+              className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
               placeholder="https://wa.me/..."
             />
             {errors.whatsapp && (
@@ -783,13 +784,13 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
         </div>
         {/* BUTTONS */}
         <div className="flex gap-3">
-          <Button type="submit" className="bg-black cursor-pointer hover:bg-black border border-white">
+          <Button type="submit" className=" bg-neutral-700 hover:bg-neutral-600 border-primary/50 cursor-pointer font-normal hover:bg-acent border ">
             {isEditMode ? "Update Partner" : "Save Partner"}
           </Button>
           {
             isEditMode ? " " : (<Button
               type="button"
-              className="bg-neutral-700 cursor-pointer hover:bg-neutral-600"
+              className="bg-white cursor-pointer font-normal text-black hover:bg-black"
               onClick={handleReset}
             >
               Reset
