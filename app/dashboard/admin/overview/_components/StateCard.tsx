@@ -21,11 +21,11 @@ const StateCard: React.FC<StateCardProps> = ({
   changeType = "increase",
 }) => {
   const isIncrease = changeType === "increase";
-  const changeColor = isIncrease ? "text-green-100" : "text-red-100"; // softer for orange
+  const changeColor = isIncrease ? "text-green-100" : "text-red-100";  
   const TrendIcon = isIncrease ? TrendingUp : TrendingDown;
 
   return (
-    <div className="space-y-3 bg-slate-900 rounded-xl p-6 border border-transparent shadow-sm hover:shadow-md transition-shadow">
+    <div className="space-y-3 bg-[#1a1a1a] rounded-xl p-6 border border-transparent shadow-sm hover:shadow-md transition-shadow">
       <div className="flex items-start justify-between">
         <div className={`${iconBgColor} rounded-xl w-12 h-12 flex items-center justify-center`}>
           <IconComponent size={20} className={iconColor} />

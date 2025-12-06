@@ -8,6 +8,7 @@ import {
     Search,
     SquarePen,
     Trash2,
+    X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -30,7 +31,6 @@ import {
     DialogContent,
     DialogHeader,
     DialogTitle,
-    DialogClose,
 } from "@/components/ui/dialog";
 import CategoryView from "../CategoryView/CategoryView";
 import AnalyticsOverviewSection from "../CategoryOverviewSection/CategoryOverviewSection";
@@ -263,14 +263,17 @@ const CategoryPage = () => {
 
             {/* View Category Modal */}
             <Dialog open={openView} onOpenChange={setOpenView}>
-                <DialogContent className="max-w-md [&>button:first-of-type]:hidden">
+                <DialogContent className="max-w-md bg-[#1a1a1a] [&>button:first-of-type]:hidden">
                     <DialogHeader>
                         <DialogTitle>Category Details</DialogTitle>
                     </DialogHeader>
                     {selectedCategoryId && (
                         <CategoryView categoryId={selectedCategoryId} />
                     )}
-                    <DialogClose className="absolute top-2 right-2">✕</DialogClose>
+                    <X
+                        className="h-5 w-5 text-white cursor-pointer absolute top-4 right-3"
+                        onClick={() => setOpenView(false)}
+                    />
                 </DialogContent>
             </Dialog>
         </div>
