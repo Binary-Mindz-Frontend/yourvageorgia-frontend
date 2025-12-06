@@ -433,12 +433,14 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
             )}
           </div>
 
-          {/* Logo */}
+          {/* Logo Section (Visible and required only if isFeatured is true) */}
           <div>
-            <Label className="text-white mb-1">Logo (Recommended 300×300 px) *</Label>
+            <Label className="text-white mb-1">Logo (Recommended 300×300 px)</Label>
             <div className="flex gap-2 mt-1">
               <Input
-                {...register("logoUrl")}
+                {...register("logoUrl", {
+                  required: watch("isFeatured") ? "Logo is required when marked as featured" : false, // Conditional required validation
+                })}
                 placeholder="https://logo.png"
                 className="bg-neutral-900 text-white border-neutral-700"
               />
