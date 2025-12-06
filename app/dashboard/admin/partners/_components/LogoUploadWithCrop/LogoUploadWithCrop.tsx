@@ -19,7 +19,7 @@ export default function LogoUploadWithCrop({
   onChange,
   error,
   required = false,
-  label = "Logo (Recommended 300×300 px)"
+  label = "Logo (Recommended 433×160 px)"
 }: LogoUploadWithCropProps) {
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [cropImage, setCropImage] = useState<string | null>(null);
@@ -54,8 +54,8 @@ export default function LogoUploadWithCrop({
     }
 
     // Set canvas size to 300x300
-    canvas.width = 300;
-    canvas.height = 300;
+    canvas.width = 433;
+    canvas.height = 160;
 
     ctx.drawImage(
       image,
@@ -65,8 +65,8 @@ export default function LogoUploadWithCrop({
       pixelCrop.height,
       0,
       0,
-      300,
-      300
+      433,
+      160
     );
 
     return new Promise((resolve, reject) => {
@@ -146,7 +146,7 @@ export default function LogoUploadWithCrop({
       )}
 
       {(logoPreview || value) && (
-        <div className="mt-2 w-24 h-24 relative rounded overflow-hidden border border-neutral-700">
+        <div className="mt-2 h-44 w-full relative rounded overflow-hidden border border-neutral-700">
           <button
             type="button"
             onClick={removeLogo}
@@ -169,7 +169,7 @@ export default function LogoUploadWithCrop({
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
           <div className="bg-[#1a1a1a] rounded-lg p-6 max-w-2xl w-full mx-4">
             <h3 className="text-white text-lg font-semibold mb-4">
-              Crop Logo to 300×300
+              Crop Logo to 433×160
             </h3>
 
             <div className="relative w-full h-96 bg-black rounded overflow-hidden">
@@ -177,7 +177,7 @@ export default function LogoUploadWithCrop({
                 image={cropImage}
                 crop={crop}
                 zoom={zoom}
-                aspect={1}
+                aspect={433 / 160}
                 onCropChange={setCrop}
                 onZoomChange={setZoom}
                 onCropComplete={onCropComplete}
