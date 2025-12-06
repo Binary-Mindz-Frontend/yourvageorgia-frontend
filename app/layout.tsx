@@ -1,10 +1,9 @@
 
-import { Navbar } from "@/components/navbar";
-import { ThemeProvider } from "@/components/theme-provider";
+
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Inter } from "next/font/google";
 import "./globals.css";
-import Footer from "@/components/Shared/Footer/Footer";
+import Providers from "@/providers/Providers";
 
 const inter = Inter({
   variable: "--font-sans",
@@ -33,16 +32,7 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${cormorant.variable} font-sans antialiased`}
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem={false}
-          disableTransitionOnChange
-        >
-          <Navbar />
-          {children}
-        </ThemeProvider>
-        <Footer/>
+         <Providers>{children}</Providers>
       </body>
     </html>
   );

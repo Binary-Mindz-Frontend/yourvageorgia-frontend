@@ -1,4 +1,5 @@
-
+"use client";
+import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Carousel,
@@ -7,54 +8,42 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import img1 from "@/public/assets/home/featured/Screenshot 2025-11-02 at 4.52.10 pm.svg";
-import img2 from "@/public/assets/home/featured/Screenshot 2025-11-02 at 4.54.38 pm.svg";
-import img3 from "@/public/assets/home/featured/Screenshot 2025-11-02 at 4.55.37 pm.svg";
-import img4 from "@/public/assets/home/featured/Screenshot 2025-11-02 at 4.57.42 pm.svg";
-import Image from "next/image";
+import img1 from "@/public/assets/home/featured/1.svg";
+import {
+  default as img2,
+  default as img3,
+} from "@/public/assets/home/featured/2.svg";
+import img4 from "@/public/assets/home/featured/4.svg";
+import img5 from "@/public/assets/home/featured/White.png";
 
+
+
+
+import Image from "next/image";
+import FeaturePartnerModal from "./_components/FeaturePartnerModal";
+import NetworkCardModal from "@/app/(main)/network/_components/NetworkCardModal/NetworkCardModal";
 
 const partners = [
-  {
-    id: 1,
-    image: img2,
-  },
-  {
-    id: 2,
-    image: img1,
-  },
-  {
-    id: 3,
-    image: img3,
-  },
-  {
-    id: 4,
-    image: img4,
-  },
-  {
-    id: 5,
-    image: img1,
-  },
-  {
-    id: 6,
-    image: img2,
-  },
+  // { id: 1, image: img2 },
+  { id: 6, image: img5 },
+  { id: 2, image: img1 },
+  { id: 3, image: img3 },
+  { id: 4, image: img4 },
+  { id: 5, image: img1 },
 ];
 
 export default function FeaturedPartnersCarousel() {
+  //  FIXED STATES
+  const [showModal, setShowModal] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
+
   return (
-    <div className="relative w-full flex flex-col items-center justify-center mb-36 p-4 lg:p-0">
-      <h1 className="text-5xl md:text-6xl font-serif text-white mb-16 tracking-wide">
+    <div className="relative w-full flex flex-col items-center justify-center mb-36 p-4 lg:px-12">
+      <h1 className="text-3xl md:text-6xl font-serif text-center  text-white lg:mb-16 tracking-wide">
         Featured Partners
       </h1>
 
-      <Carousel
-        opts={{
-          align: "start",
-          loop: false,
-        }}
-        className="w-full"
-      >
+      <Carousel opts={{ align: "start", loop: false }} className="w-full">
         <CarouselContent className="-ml-4">
           {partners.map((partner) => (
             <CarouselItem
@@ -64,7 +53,13 @@ export default function FeaturedPartnersCarousel() {
               <div className="p-1">
                 <Card className="border-0 bg-transparent">
                   <CardContent className="p-0">
-                    <div className="aspect-4/3 w-full lg:h-40 overflow-hidden cursor-pointer hover:scale-105 transition-transform duration-300">
+                    <div
+                      className="w-full h-32 md:h-40 overflow-hidden cursor-pointer hover:scale-105 transition-transform duration-300 flex items-center justify-center"
+                      onClick={() => {
+                        setSelectedImage(partner.image);
+                        setShowModal(true);
+                      }}
+                    >
                       <Image
                         src={partner.image}
                         alt={`Partner ${partner.id}`}
@@ -77,13 +72,37 @@ export default function FeaturedPartnersCarousel() {
             </CarouselItem>
           ))}
         </CarouselContent>
-        <div className="absolute left-12 right-12 ">
-        <CarouselPrevious className="text-white hover:bg-white/10 border-white/20">
-        </CarouselPrevious>
-        <CarouselNext className="text-white hover:bg-white/10 border-white/20">
-        </CarouselNext>
+       
+
+        <div className="absolute left-12 right-12">
+          <CarouselPrevious className="bg-transparent border-none cursor-pointer">
+            <Image
+              src="/icons/arrow-left.svg"
+              width={20}
+              height={20}
+              alt="prev"
+            />
+          </CarouselPrevious>
+          <CarouselNext className="bg-transparent border-none cursor-pointer">
+            <Image
+              src="/icons/arrow-right.svg"
+              width={20}
+              height={20}
+              alt="next"
+            />
+          </CarouselNext>
         </div>
       </Carousel>
+
+      {/*  Modal */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-999 overflow-y-auto scrollbar-hide">
+          <NetworkCardModal
+            onClose={() => setShowModal(false)}
+            image={selectedImage}
+          />
+        </div>
+      )}
     </div>
   );
 }

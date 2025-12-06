@@ -1,0 +1,272 @@
+import { useState, useEffect } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Upload, X } from "lucide-react";
+import { toast } from "sonner";
+import {
+  createCategory,
+  updateCategory,
+  ICategoryResponse,
+} from "@/services/category/category";
+import { ICategory } from "@/types/category.types";
+import Image from "next/image";
+
+
+// Backend base URL
+const BACKEND_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
+type AddCategoryProps = {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  isEdit?: boolean;
+  initialData?: ICategory;
+  onCategoryAdded?: (newCategory: ICategory) => void;
+};
+
+export default function AddCategoryModal({
+  open,
+  onOpenChange,
+  isEdit = false,
+  initialData,
+  onCategoryAdded,
+}: AddCategoryProps) {
+  const [title, setTitle] = useState("");
+  const [image, setImage] = useState("");
+  const [description, setDescription] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
+
+  const toastStyle = { background: "#000", color: "#fff", marginTop: "4rem" };
+
+  // Reset fields when modal opens or initialData changes
+  useEffect(() => {
+    if (isEdit && initialData) {
+      setTitle(initialData.title || "");
+      setImage(initialData.image || "");
+      setDescription(initialData.description || "");
+    } else {
+      setTitle("");
+      setImage("");
+      setDescription("");
+    }
+  }, [isEdit, initialData, open]);
+
+  // Handle file selection and upload
+  const handleFileChange = async (file: File) => {
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch(`${BACKEND_BASE_URL}/upload`, {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        console.error(data.message || "Failed to upload image");
+        return;
+      }
+
+      // Set image preview immediately
+      setImage(data.data.url);
+    } catch (err) {
+      console.error("Upload error:", err);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleImageRemove = () => {
+    setImage(""); // Remove the image
+  };
+
+  const handleSubmit = async () => {
+    if (!title || !image) {
+      toast.error("Title and Image are required", { style: toastStyle });
+      return;
+    }
+
+    const data: ICategory = { title, image, description };
+    setLoading(true);
+
+    try {
+      let res: ICategoryResponse | { error: string };
+
+      if (isEdit && initialData?._id) {
+        // Update category
+        res = await updateCategory(initialData._id, data);
+      } else {
+        // Create new category
+        res = await createCategory(data);
+      }
+
+      if ("error" in res) {
+        toast.error(res.error, { style: toastStyle });
+        setLoading(false);
+        return;
+      }
+
+      if (onCategoryAdded) onCategoryAdded(res.data);
+
+      toast.success(
+        `${res.data.title} ${isEdit ? "updated" : "added"} successfully!`,
+        { style: toastStyle }
+      );
+
+      onOpenChange(false);
+
+      // Reset only on Add
+      if (!isEdit) {
+        setTitle("");
+        setImage("");
+        setDescription("");
+      }
+    } catch (err: unknown) {
+      console.error("Category error:", err);
+      toast.error("Something went wrong", { style: toastStyle });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-lg p-6 rounded-2xl [&>button]:hidden bg-[#1a1a1a] text-white">
+        <DialogHeader>
+          <div className="flex items-center justify-between w-full">
+            <DialogTitle className="text-sm font-semibold text-white">
+              {isEdit ? "Edit Category" : "Add New Category"}
+            </DialogTitle>
+            <button
+              onClick={() => onOpenChange(false)}
+              className="p-2 rounded hover:bg-black transition-colors"
+            >
+              <X className="h-5 w-5 text-white cursor-pointer" />
+            </button>
+          </div>
+        </DialogHeader>
+
+        <div className="space-y-4 mt-2">
+          {/* Title */}
+          <div className="space-y-1">
+            <Label className="text-[18px] text-white">Title</Label>
+            <Input
+  placeholder="Enter category title"
+  value={title}
+  onChange={(e) => setTitle(e.target.value)}
+  className="h-12 text-white placeholder-gray-400 bg-accent/10 border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
+  disabled={loading || uploading}
+/>
+          </div>
+
+          {/* Image */}
+          <div className="space-y-1">
+            <Label className="text-[18px] text-white">Image</Label>
+            <Input
+              placeholder="Enter image URL or upload below"
+              value={image}
+              onChange={(e) => setImage(e.target.value.trim())}
+              className="h-12 text-white placeholder-gray-400 bg-accent/10 border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
+              disabled={loading || uploading}
+            />
+
+            {/* Preview */}
+            {image && (
+              <div className="mt-2 w-full h-60 relative rounded border border-gray-700 overflow-hidden">
+                <Image
+                  src={image}
+                  alt="Preview"
+                  fill
+                  className="object-cover"
+                  unoptimized
+                />
+                {/* Cross Icon */}
+                <button
+                  className="absolute top-2 right-2 bg-red-600 text-white p-1 rounded-md"
+                  onClick={handleImageRemove}
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+            )}
+
+            <label
+              htmlFor="featureImage"
+              className={`border border-primary/50 rounded-md p-6 text-center bg-[#1a1a1a] cursor-pointer block mt-2 hover:bg-accent/10 transition-colors ${uploading ? "opacity-50 pointer-events-none" : ""
+                }`}
+            >
+              <Upload className="mx-auto mb-2 text-gray-400" />
+              <p className="text-sm text-gray-400">
+                {uploading ? "Uploading..." : "Click to upload or drag and drop"}
+              </p>
+              <p className="text-xs text-gray-500">PNG, JPG up to 10MB</p>
+
+              <input
+                id="featureImage"
+                type="file"
+                accept="image/*"
+                className="hidden"
+                disabled={uploading}
+                onChange={(e) => {
+                  if (e.target.files && e.target.files[0])
+                    handleFileChange(e.target.files[0]);
+                }}
+              />
+            </label>
+          </div>
+
+          {/* Description */}
+          <div className="space-y-1">
+            <Label className="text-[18px] text-white">Description</Label>
+            <textarea
+              placeholder="Enter description (optional)"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="w-full text-white border placeholder-gray-400 bg-accent/10 border-primary/50 focus:outline-none resize-none h-24 p-2 rounded-md "
+              disabled={loading || uploading}
+            />
+          </div>
+        </div>
+
+        <DialogFooter className="mt-4 flex justify-end gap-2">
+          <Button
+            variant="outline"
+            className="px-6 text-white border-gray-600 hover:bg-acent/10 cursor-pointer"
+            onClick={() => onOpenChange(false)}
+            disabled={loading || uploading}
+          >
+            Cancel
+          </Button>
+
+          <Button
+            variant="outline"
+            className="px-6 bg-white text-black hover:text-black hover:bg-white cursor-pointer border-primary/50"
+            onClick={handleSubmit}
+            disabled={loading || uploading}
+          >
+            {loading
+              ? isEdit
+                ? "Updating..."
+                : "Adding..."
+              : uploading
+                ? "Uploading..."
+                : isEdit
+                  ? "Update"
+                  : "Add"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
