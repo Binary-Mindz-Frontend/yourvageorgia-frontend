@@ -192,9 +192,9 @@ const CategoryPage = () => {
 
     return (
         <div>
-            <AnalyticsOverviewSection 
-            totalCategory={totalCategory} 
-            loading={loading}
+            <AnalyticsOverviewSection
+                totalCategory={totalCategory}
+                loading={loading}
             />
             <header>
                 <h1 className="text-base py-2 sm:py-5 text-[#0A0A0A]">Category Management</h1>
@@ -202,17 +202,18 @@ const CategoryPage = () => {
                 <div className="flex justify-between mb-4 items-center w-full flex-wrap gap-5">
                     <div className="relative w-full sm:w-1/3">
                         <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                            <Search size={18} className="text-gray-400" />
+                            <Search size={18} className="text-gray-400 group-focus:text-primary" />
                         </div>
                         <input
                             type="text"
-                            className="block w-full p-2 pl-10 text-sm bg-gray-900 border border-gray-300 rounded-lg"
-                            placeholder="Search Project..."
+                            placeholder="Search..."
+                            autoFocus
+                            className="w-full px-4 pl-10 py-2 rounded-full bg-accent/10 border border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 text-sm transition-all group"
                         />
                     </div>
 
                     <Button
-                        className="cursor-pointer flex items-center bg-gray-900 hover:bg-[#030213] px-4 py-2"
+                        className="cursor-pointer flex items-center bg-[#1a1a1a] hover:bg-[#1a1a1a] px-4 py-2"
                         onClick={() => setOpenAdd(true)}
                     >
                         <Plus size={18} className="mr-2 text-white" />

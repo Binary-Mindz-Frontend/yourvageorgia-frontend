@@ -32,7 +32,7 @@ const AnalyticsCard: FC<AnalyticsCardProps> = ({
     iconColor
 }) => {
     return (
-        <Card className="rounded-2xl shadow-sm border bg-slate-900 border-black p-5">
+        <Card className="rounded-2xl shadow-sm border bg-[#1a1a1a] border-black p-5">
             <CardContent className="p-0">
                 <div className="flex justify-between items-start">
                     {/* Left Text Section */}
