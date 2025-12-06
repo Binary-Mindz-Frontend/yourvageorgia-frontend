@@ -150,7 +150,7 @@ export default function AddCategoryModal({
             </DialogTitle>
             <button
               onClick={() => onOpenChange(false)}
-              className="p-2 rounded hover:bg-black transition-colors"
+              className="p-2 rounded hover:bg-bl transition-colors"
             >
               <X className="h-5 w-5 text-white cursor-pointer" />
             </button>
@@ -162,12 +162,12 @@ export default function AddCategoryModal({
           <div className="space-y-1">
             <Label className="text-[18px] text-white">Title</Label>
             <Input
-  placeholder="Enter category title"
-  value={title}
-  onChange={(e) => setTitle(e.target.value)}
-  className="h-12 text-white placeholder-gray-400 bg-accent/10 border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
-  disabled={loading || uploading}
-/>
+              placeholder="Enter category title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="h-12 text-white placeholder-gray-400 bg-accent/10 border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
+              disabled={loading || uploading}
+            />
           </div>
 
           {/* Image */}
