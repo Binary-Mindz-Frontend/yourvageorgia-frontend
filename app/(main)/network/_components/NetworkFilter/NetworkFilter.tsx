@@ -6,14 +6,25 @@ import img3 from "@/public/assets/network/3.svg";
 import img4 from "@/public/assets/network/4.svg";
 import { ArrowRight, ChevronDown, Heart, ListFilter } from "lucide-react";
 import { useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import NetworkCardModal from "../NetworkCardModal/NetworkCardModal";
-import { FilterDrawer } from "./FilterDrawer"; // Import the new component
+import { FilterDrawer } from "./FilterDrawer";
 
 const NetworkFilter = () => {
-  const [activeFilter, setActiveFilter] = useState("All");
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const filterFromUrl = searchParams.get("filter");
+  
+  // Initialize activeFilter from URL or default to "All"
+  const validFilters = ["All", "Movement", "Recovery", "Radiance", "Taste"];
+  const initialFilter = filterFromUrl && validFilters.includes(filterFromUrl) 
+    ? filterFromUrl 
+    : "All";
+  
+  const [activeFilter, setActiveFilter] = useState(initialFilter);
   const [showAll, setShowAll] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isFilterOpen, setIsFilterOpen] = useState(false); // Filter drawer state
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   const data = [
     {
@@ -87,6 +98,18 @@ const NetworkFilter = () => {
     setAppliedFilters(filters);
   };
 
+  const handleFilterClick = (filter: string) => {
+    setActiveFilter(filter);
+    setShowAll(false);
+    
+    // Update URL with the selected filter
+    if (filter === "All") {
+      router.push("/network");
+    } else {
+      router.push(`/network?filter=${encodeURIComponent(filter)}`);
+    }
+  };
+
   return (
     <div className="text-white p-4 max-w-4xl mx-auto">
       <div>
@@ -111,10 +134,7 @@ const NetworkFilter = () => {
         {filters.map((filter) => (
           <Button
             key={filter}
-            onClick={() => {
-              setActiveFilter(filter);
-              setShowAll(false);
-            }}
+            onClick={() => handleFilterClick(filter)}
             className={`md:py-2.5 rounded lg:rounded-lg whitespace-nowrap min-w-max
         ${
           activeFilter === filter && !showAll
@@ -140,7 +160,7 @@ const NetworkFilter = () => {
               className="absolute inset-0 bg-cover bg-center"
               style={{
                 backgroundImage: `url(${item.img.src})`,
-                filter: "brightness(1.05) saturate(1.2)", // 🔥 brighter + more vivid
+                filter: "brightness(1.05) saturate(1.2)",
               }}
             >
               <div className="absolute inset-0 bg-linear-to-t from-black/10 via-black/10 to-transparent"></div>
