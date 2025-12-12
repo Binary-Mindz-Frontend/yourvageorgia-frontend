@@ -1,144 +1,198 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { MoreHorizontal, Ban, CircleCheck } from "lucide-react";
-
 import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
+    DropdownMenu,
+    DropdownMenuTrigger,
+    DropdownMenuContent,
+    DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import CustomTable, { Column } from "@/components/Shared/dashboard/customtable/CustomTable";
 import CustomPagination from "@/components/Shared/dashboard/custompagination/CustomPagination";
-
 import toast from "react-hot-toast";
-import { IPartnerData, PartnerData } from "../data/membersData";
+import { getAllUsers, IFilters, IUserResponse } from "@/services/users/users";
+import FilterSection from "../MemberFilter/MemberFilter"; // Correct path for the filter section
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 const MemberPage = () => {
-  const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 10;
-  const [isBlockDialogOpen, setBlockDialogOpen] = useState(false);
-  const [ , setSelectedUser] = useState<IPartnerData | null>(null); // Use IPartnerData type
+    const pageSize = 10;
+    const [isBlockDialogOpen, setBlockDialogOpen] = useState(false);
+    const [, setSelectedUser] = useState<IUserResponse["data"] | null>(null);
 
-  const indexOfLastItem = currentPage * pageSize;
-  const indexOfFirstItem = indexOfLastItem - pageSize;
-  const currentPartners = PartnerData.slice(indexOfFirstItem, indexOfLastItem); // Paginate PartnerData
 
-  const handleBlockClick = (user: IPartnerData) => {
-    setSelectedUser(user);
-    setBlockDialogOpen(true);
-  };
+    // State for storing fetched users and the filters
+    const [users, setUsers] = useState<IUserResponse["data"][]>([]);
+    const [totalItems, setTotalItems] = useState(0);
+    // 1. REMOVE currentPage state. Use filters.page instead.
+    const [filters, setFilters] = useState<IFilters>({
+        search: "",
+        role: "",
+        isMembership: "",
+        isBlocked: "",
+        limit: pageSize,
+        page: 1,
+    });
 
-  const columns: Column<typeof PartnerData[0]>[] = [
+    useEffect(() => {
+        const fetchUsers = async () => {
+            // Setting loading state could go here
+            const response = await getAllUsers(filters);
+            if ("data" in response && "meta" in response) { // <-- Check for both data and meta
+                setUsers(response.data);
+                setTotalItems(response.meta.total); // <-- Set the total count
+            } else if ("error" in response) {
+                toast.error(response.error);
+            }
+        };
+
+        fetchUsers();
+    }, [filters]);
+
+    const tableData = users;
+
+    const handleBlockClick = (user: IUserResponse["data"]) => {
+        setSelectedUser(user);
+        setBlockDialogOpen(true);
+    };
+
+    // console.log("Users data:", users);
+
+const columns: Column<typeof users[0]>[] = [
     {
-      header: "Name",
-      cell: (row) => <span className="text-white">{row.userName}</span>,
+        header: "Name",
+        cell: (row) => (
+            <div className="flex justify-center items-center w-full">
+                <span className="text-white">{`${row.firstName} ${row.lastName}`}</span>
+            </div>
+        ),
     },
     {
-      header: "Email",
-      cell: (row) => <span className="text-white">{row.email}</span>,
+        header: "Email",
+        cell: (row) => (
+            <div className="flex justify-center items-center w-full">
+                <span className="text-white">{row.email}</span>
+            </div>
+        ),
     },
     {
-      header: "Location",
-      cell: (row) => <span className="text-white">{row.location}</span>,
+        header: "Role",
+        cell: (row) => (
+            <div className="flex justify-center items-center w-full">
+                <span className="text-white">{row.role === "user" ? "User" : "Admin"}</span>
+            </div>
+        ),
     },
     {
-      header: "Role",
-      cell: (row) => (
-        <span className="text-white">{row.role === "Provider" ? "Provider" : "Client"}</span>
-      ),
+        header: "Status",
+        cell: (row) => (
+            <div className="flex justify-center items-center w-full">
+                <span
+                    className={`px-3 py-1 inline-flex text-xs font-semibold rounded-full ${row.isBlocked
+                            ? "bg-red-100 text-red-800"
+                            : row.isMembership
+                                ? "bg-green-100 text-green-800"
+                                : "bg-yellow-100 text-yellow-800"
+                        }`}
+                >
+                    {row.isBlocked ? "Blocked" : row.isMembership ? "Member" : "Inactive"}
+                </span>
+            </div>
+        ),
     },
     {
-      header: "Status",
-      cell: (row) => (
-        <span
-          className={`px-3 py-1 inline-flex text-xs font-semibold rounded-full ${
-            row.status === "Active"
-              ? "bg-green-100 text-green-800"
-              : row.status === "Suspended"
-              ? "bg-red-100 text-red-800"
-              : "bg-yellow-100 text-yellow-800"
-          }`}
-        >
-          {row.status}
-        </span>
-      ),
-    },
-    {
-      header: "Actions",
-      cell: (row) => (
-        <div className="flex justify-center w-full">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className="p-2 hover:bg-gray-100 rounded-md">
-                <MoreHorizontal className="w-5 h-5 text-gray-600" />
-              </button>
-            </DropdownMenuTrigger>
+        header: "Actions",
+        cell: (row) => (
+            <div className="flex justify-center w-full">
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <button className="p-2 hover:bg-gray-100 rounded-md">
+                            <MoreHorizontal className="w-5 h-5 text-gray-600" />
+                        </button>
+                    </DropdownMenuTrigger>
 
-            <DropdownMenuContent align="end" className="w-40">
-              <DropdownMenuItem
-                className="flex items-center gap-2 cursor-pointer"
-                onClick={() => handleBlockClick(row)}
-              >
-                <Ban size={16} className="text-red-600" />
-                Block
-              </DropdownMenuItem>
+                    <DropdownMenuContent align="end" className="w-40">
+                        <DropdownMenuItem
+                            className="flex items-center gap-2 cursor-pointer"
+                            onClick={() => handleBlockClick(row)}
+                        >
+                            <Ban size={16} className="text-red-600" />
+                            Block
+                        </DropdownMenuItem>
 
-              <DropdownMenuItem
-                className="flex items-center gap-2 cursor-pointer"
-                onClick={() => handleBlockClick(row)}
-              >
-                <CircleCheck size={16} className="text-green-500" />
-                Unblock
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+                        <DropdownMenuItem
+                            className="flex items-center gap-2 cursor-pointer"
+                            onClick={() => handleBlockClick(row)}
+                        >
+                            <CircleCheck size={16} className="text-green-500" />
+                            Unblock
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            </div>
+        ),
+    },
+];
+
+    // Handle changes to filters (called from FilterSection)
+    const handleFilterChange = useCallback(
+        (newFilters: Partial<IFilters>) => { // Use Partial<IFilters> as you don't pass all fields
+            setFilters((prev) => ({
+                ...prev,
+                ...newFilters,
+                page: 1, // Reset to first page when filters change
+            }));
+        },
+        []
+    );
+
+    const handlePageChange = (newPage: number) => {
+        setFilters((prev) => ({
+            ...prev,
+            page: newPage, // Update page number in filters
+        }));
+    };
+
+    return (
+        <div>
+            <header className="flex justify-between items-center mb-4 flex-wrap gap-5">
+                <h1 className="text-base py-2 sm:py-5 text-white">User Management</h1>
+                <FilterSection onFilterChange={handleFilterChange} />
+            </header>
+
+            <CustomTable columns={columns} data={tableData} loading={false} />
+
+            <CustomPagination
+                totalItems={totalItems} // <-- FIX: Use the total count from the API
+                pageSize={pageSize}
+                currentPage={filters.page}
+                onPageChange={handlePageChange}
+            />
+
+            {/* Block Confirmation Dialog */}
+            <AlertDialog open={isBlockDialogOpen} onOpenChange={setBlockDialogOpen}>
+                <AlertDialogTrigger />
+                <AlertDialogContent>
+                    <AlertDialogHeader>Are you sure you want to block this user?</AlertDialogHeader>
+                    <AlertDialogDescription>
+                        Blocking this user will restrict their access to the platform.
+                    </AlertDialogDescription>
+                    <div className="flex justify-end space-x-2">
+                        <AlertDialogCancel onClick={() => setBlockDialogOpen(false)}>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={() => {
+                                // Add logic to block the user here
+                                toast.success("User blocked successfully!");
+                                setBlockDialogOpen(false);
+                            }}
+                        >
+                            Block
+                        </AlertDialogAction>
+                    </div>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
-      ),
-    },
-  ];
-
-  return (
-    <div>
-      <header className="flex justify-between items-center mb-4 flex-wrap gap-5">
-        <h1 className="text-base py-2 sm:py-5 text-white">Partners Management</h1>
-      </header>
-
-      <CustomTable columns={columns} data={currentPartners} loading={false} />
-
-      <CustomPagination
-        totalItems={PartnerData.length}
-        pageSize={pageSize}
-        currentPage={currentPage}
-        onPageChange={setCurrentPage}
-      />
-
-      {/* Block Confirmation Dialog */}
-      <AlertDialog open={isBlockDialogOpen} onOpenChange={setBlockDialogOpen}>
-        <AlertDialogTrigger />
-        <AlertDialogContent>
-          <AlertDialogHeader>Are you sure you want to block this user?</AlertDialogHeader>
-          <AlertDialogDescription>
-            Blocking this user will restrict their access to the platform.
-          </AlertDialogDescription>
-          <div className="flex justify-end space-x-2">
-            <AlertDialogCancel onClick={() => setBlockDialogOpen(false)}>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => {
-                // Here you can add logic to block the user
-                toast.success("User blocked successfully!");
-                setBlockDialogOpen(false);
-              }}
-            >
-              Block
-            </AlertDialogAction>
-          </div>
-        </AlertDialogContent>
-      </AlertDialog>
-    </div>
-  );
+    );
 };
 
 export default MemberPage;
