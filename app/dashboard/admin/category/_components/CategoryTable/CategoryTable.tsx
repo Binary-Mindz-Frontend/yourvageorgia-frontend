@@ -197,7 +197,7 @@ const CategoryPage = () => {
                 loading={loading}
             />
             <header>
-                <h1 className="text-base py-2 sm:py-5 text-[#0A0A0A]">Category Management</h1>
+                <h1 className="text-base py-2 sm:py-5 text-white">Category Management</h1>
 
                 <div className="flex justify-between mb-4 items-center w-full flex-wrap gap-5">
                     <div className="relative w-full sm:w-1/3">
