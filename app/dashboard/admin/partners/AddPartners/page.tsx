@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
@@ -32,6 +33,12 @@ interface GalleryItem {
   preview: string | null;
   file: File | null;
 }
+type Offer = {
+  title: string;
+  percentage: string;
+  description: string;
+  validUntil: string;
+};
 
 interface FormData {
   categoryId: string;
@@ -40,10 +47,7 @@ interface FormData {
   logoUrl: string;
   address: string;
   isFeatured: boolean;
-  offerTitle: string;
-  offerDescription: string;
-  offerValidUntil: string;
-  offerPercentage: string;
+  offers: Offer[]; // Array of offers
   aboutTitle: string;
   aboutDescription: string;
   terms: string[];
@@ -91,10 +95,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
       logoUrl: "",
       address: "",
       isFeatured: false,
-      offerTitle: "",
-      offerDescription: "",
-      offerValidUntil: "",
-      offerPercentage: "",
+      offers: [{ title: "", percentage: "", description: "", validUntil: "" }], // Changed
       aboutTitle: "",
       aboutDescription: "",
       terms: [""],
@@ -107,6 +108,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
 
   const terms = watch("terms");
   const contacts = watch("contacts");
+  const offers = watch("offers");
 
   // Fetch partner data if in edit mode
   useEffect(() => {
@@ -120,7 +122,6 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
         const fetchUrl = `${apiUrl}/partner/${partnerId}`;
 
         const res = await fetch(fetchUrl);
-
         const json = await res.json();
 
         if (!res.ok) {
@@ -139,10 +140,6 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
         setValue("logoUrl", partner.logo || "");
         setValue("address", partner.address || "");
         setValue("isFeatured", partner.isFeatured || false);
-        setValue("offerTitle", partner.offer?.title || "");
-        setValue("offerDescription", partner.offer?.description || "");
-        setValue("offerValidUntil", partner.offer?.validUntil ? partner.offer.validUntil.split('T')[0] : "");
-        setValue("offerPercentage", partner.offer?.offerPercentage?.toString() || "");
         setValue("aboutTitle", partner.about?.title || "");
         setValue("aboutDescription", partner.about?.description || "");
         setValue("terms", partner.terms && partner.terms.length > 0 ? partner.terms : [""]);
@@ -150,6 +147,18 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
         setValue("website", partner.socials?.website || "");
         setValue("instagram", partner.socials?.instagram || "");
         setValue("whatsapp", partner.socials?.whatsapp || "");
+
+        // Set offers data, ensuring proper default values
+        if (partner.offer && partner.offer.length > 0) {  // Changed from offers to offer
+          setValue("offers", partner.offer.map((o: any) => ({  // Changed from offers to offer
+            title: o.title || "",
+            percentage: o.offerPercentage?.toString() || "",
+            description: o.description || "",
+            validUntil: o.validUntil ? o.validUntil.split('T')[0] : "",
+          })));
+        } else {
+          setValue("offers", [{ title: "", percentage: "", description: "", validUntil: "" }]);
+        }
 
         // Set previews for images
         if (partner.thumbnail) setThumbnailPreview(partner.thumbnail);
@@ -178,17 +187,13 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
     fetchPartnerData();
   }, [partnerId, setValue]);
 
+
   const removeThumbnail = () => {
     setThumbnailPreview("");
     setValue("thumbnailUrl", "");
     if (thumbnailInputRef.current) thumbnailInputRef.current.value = "";
   };
 
-  // const removeLogo = () => {
-  //   setLogoPreview("");
-  //   setValue("logoUrl", "");
-  //   if (logoInputRef.current) logoInputRef.current.value = "";
-  // };
 
   const handleGalleryFileChange = (files: FileList) => {
     const newImages: GalleryItem[] = Array.from(files).map((file) => ({
@@ -242,6 +247,8 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
   const toastStyle = { background: "#000", color: "#fff", marginTop: "4rem" };
 
   const onSubmit = async (data: FormData) => {
+    console.log("Form Data before mapping:", data.offers); // ADD THIS LINE
+
     const payload = {
       category: data.categoryId,
       name: data.name,
@@ -252,12 +259,12 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
         .map(g => g.preview || g.url),
       logo: logoPreview || data.logoUrl,
       isFeatured: data.isFeatured,
-      offer: {
-        title: data.offerTitle,
-        description: data.offerDescription,
-        validUntil: data.offerValidUntil,
-        offerPercentage: data.offerPercentage === "" ? undefined : Number(data.offerPercentage),
-      },
+      offer: data.offers.map(o => ({  // Changed from offers to offer
+        title: o.title,
+        description: o.description,
+        validUntil: o.validUntil,
+        offerPercentage: o.percentage === "" ? undefined : Number(o.percentage)
+      })),
       about: {
         title: data.aboutTitle,
         description: data.aboutDescription,
@@ -271,13 +278,13 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
       },
     };
 
-    console.log("Payload Data:", payload);
+    console.log("Mapped offers in payload:", payload.offer); // ADD THIS LINE
+    console.log("Full Payload Data:", JSON.stringify(payload, null, 2)); // ADD THIS LINE
 
     try {
       let res;
 
       if (isEditMode) {
-        // Update existing partner
         res = await updatePartner(partnerId, payload);
 
         if ("error" in res) {
@@ -287,8 +294,8 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
 
         toast.success("Partner updated successfully!", { style: toastStyle });
         console.log("Partner updated successfully:", res);
+        // console.log("Response offers:", res.data?.offer); // ADD THIS LINE
       } else {
-        // Create new partner
         res = await createPartner(payload);
 
         if ("error" in res) {
@@ -297,10 +304,10 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
         }
 
         toast.success("Partner created successfully!", { style: toastStyle });
-        console.log("Partner created successfully:", res);
+        // console.log("Partner created successfully:", res);
+        // console.log("Response offers:", res.data?.offer); // ADD THIS LINE
       }
 
-      // Navigate back after success
       setTimeout(() => {
         router.push("/dashboard/admin/partners");
       }, 1500);
@@ -318,7 +325,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
     if (thumbnailInputRef.current) thumbnailInputRef.current.value = "";
     if (logoInputRef.current) logoInputRef.current.value = "";
     if (galleryInputRef.current) galleryInputRef.current.value = "";
-  };
+  }
 
   if (loadingPartner) {
     return (
@@ -383,66 +390,66 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
           </div>
         </div>
 
-{/* THUMBNAIL + LOGO */}
-<div className="grid sm:grid-cols-2 gap-4">
-  {/* Thumbnail - keep as is */}
-  <div>
-    <Label className="text-white mb-1">Thumbnail Image *</Label>
-    <div className="flex gap-2 mt-1">
-      <Input
-        {...register("thumbnailUrl", { required: "Thumbnail is required" })}
-        placeholder="/uploads/example.jpg or full URL"
-        className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
-      />
-      <label className="px-3 py-2 bg-neutral-800 rounded cursor-pointer flex items-center gap-2 text-white hover:bg-neutral-700">
-        <Upload size={16} />
-        <input
-          ref={thumbnailInputRef}
-          type="file"
-          accept="image/*"
-          className="hidden"
-          onChange={(e) => {
-            const file = e.target.files?.[0];
-            if (file) {
-              previewFile(file, setThumbnailPreview);
-              setValue("thumbnailUrl", file.name, { shouldValidate: true });
-            }
-          }}
-        />
-      </label>
-    </div>
-    {errors.thumbnailUrl && !thumbnailPreview && (
-      <p className="text-red-500 text-sm mt-1">{errors.thumbnailUrl.message}</p>
-    )}
+        {/* THUMBNAIL + LOGO */}
+        <div className="grid sm:grid-cols-2 gap-4">
+          {/* Thumbnail - keep as is */}
+          <div>
+            <Label className="text-white mb-1">Thumbnail Image *</Label>
+            <div className="flex gap-2 mt-1">
+              <Input
+                {...register("thumbnailUrl", { required: "Thumbnail is required" })}
+                placeholder="/uploads/example.jpg or full URL"
+                className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
+              />
+              <label className="px-3 py-2 bg-neutral-800 rounded cursor-pointer flex items-center gap-2 text-white hover:bg-neutral-700">
+                <Upload size={16} />
+                <input
+                  ref={thumbnailInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      previewFile(file, setThumbnailPreview);
+                      setValue("thumbnailUrl", file.name, { shouldValidate: true });
+                    }
+                  }}
+                />
+              </label>
+            </div>
+            {errors.thumbnailUrl && !thumbnailPreview && (
+              <p className="text-red-500 text-sm mt-1">{errors.thumbnailUrl.message}</p>
+            )}
 
-    {(thumbnailPreview || watch("thumbnailUrl")) && (
-      <div className="mt-2 w-full h-44 relative rounded overflow-hidden border border-neutral-700">
-        <button
-          type="button"
-          onClick={removeThumbnail}
-          className="absolute top-2 right-2 bg-red-600 text-white rounded w-7 h-7 flex items-center justify-center hover:bg-red-700 z-10"
-        >
-          ×
-        </button>
-        <Image
-          src={thumbnailPreview || watch("thumbnailUrl")}
-          alt="thumb"
-          fill
-          className="object-cover"
-          unoptimized
-        />
-      </div>
-    )}
-  </div>
+            {(thumbnailPreview || watch("thumbnailUrl")) && (
+              <div className="mt-2 w-full h-44 relative rounded overflow-hidden border border-neutral-700">
+                <button
+                  type="button"
+                  onClick={removeThumbnail}
+                  className="absolute top-2 right-2 bg-red-600 text-white rounded w-7 h-7 flex items-center justify-center hover:bg-red-700 z-10"
+                >
+                  ×
+                </button>
+                <Image
+                  src={thumbnailPreview || watch("thumbnailUrl")}
+                  alt="thumb"
+                  fill
+                  className="object-cover"
+                  unoptimized
+                />
+              </div>
+            )}
+          </div>
 
-  {/* Logo Section - Now using the component */}
-  <LogoUploadWithCrop
-    value={watch("logoUrl") || ""}
-    onChange={(value) => setValue("logoUrl", value, { shouldValidate: true })}
-    error={errors.logoUrl?.message}
-    required={watch("isFeatured")}
-  />
-</div>
+          {/* Logo Section - Now using the component */}
+          <LogoUploadWithCrop
+            value={watch("logoUrl") || ""}
+            onChange={(value) => setValue("logoUrl", value, { shouldValidate: true })}
+            error={errors.logoUrl?.message}
+            required={watch("isFeatured")}
+          />
+        </div>
 
         {/* Address */}
         <div>
@@ -519,52 +526,114 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
           )}
         </div>
 
-        {/* OFFER */}
-        <div className="grid sm:grid-cols-2 gap-4">
-          <div>
-            <Label className="text-white mb-1">Offer Title *</Label>
-            <Input
-              {...register("offerTitle", { required: "Offer title is required" })}
-              className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
-              placeholder="Offer title"
-            />
-            {errors.offerTitle && (
-              <p className="text-red-500 text-sm mt-1">{errors.offerTitle.message}</p>
-            )}
+        {/* OFFERS */}
+        <div>
+          <div className="flex justify-between mb-2">
+            <Label className="text-white">Offers *</Label>
+            <Button
+              type="button"
+              className="bg-neutral-700 hover:bg-neutral-600 cursor-pointer"
+              onClick={() => {
+                // Get common description and validUntil from first offer
+                const commonDesc = offers.length > 0 ? offers[0].description : "";
+                const commonValid = offers.length > 0 ? offers[0].validUntil : "";
+                setValue("offers", [...offers, { title: "", percentage: "", description: commonDesc, validUntil: commonValid }]);
+              }}
+            >
+              + Add Offer
+            </Button>
           </div>
-          <div>
-            <Label className="text-white mb-1">Offer Percentage *</Label>
-            <Input
-              type="number"
-              {...register("offerPercentage", { required: "Offer percentage is required" })}
-              className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
-              placeholder="10"
-            />
-            {errors.offerPercentage && (
-              <p className="text-red-500 text-sm mt-1">{errors.offerPercentage.message}</p>
-            )}
-          </div>
-          <div className="sm:col-span-2">
-            <Label className="text-white mb-1">Description *</Label>
-            <Textarea
-              {...register("offerDescription", { required: "Offer description is required" })}
-              className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
-            />
-            {errors.offerDescription && (
-              <p className="text-red-500 text-sm mt-1">{errors.offerDescription.message}</p>
-            )}
-          </div>
-          <div>
-            <Label className="text-white mb-1">Valid Until *</Label>
-            <Input
-              type="date"
-              {...register("offerValidUntil", { required: "Valid until date is required" })}
-              className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
-            />
-            {errors.offerValidUntil && (
-              <p className="text-red-500 text-sm mt-1">{errors.offerValidUntil.message}</p>
-            )}
-          </div>
+
+          {offers.map((offer, i) => (
+            <div key={i} className="mt-3 p-4 border bg-neutral-900 border-neutral-700 rounded-md">
+              <div className="flex justify-between mb-2">
+                <p className="text-white">Offer {i + 1}</p>
+                {i > 0 && (
+                  <Button
+                    type="button"
+                    className="bg-neutral-700 hover:bg-neutral-600 text-white"
+                    onClick={() => setValue("offers", offers.filter((_, idx) => idx !== i))}
+                  >
+                    -
+                  </Button>
+                )}
+              </div>
+
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-white mb-1">Offer Title *</Label>
+                  <Input
+                    {...register(`offers.${i}.title`, { required: "Offer title is required" })}
+                    className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
+                    placeholder="Offer title"
+                  />
+                  {errors.offers?.[i]?.title && (
+                    <p className="text-red-500 text-sm mt-1">{errors.offers[i]?.title?.message}</p>
+                  )}
+                </div>
+                <div>
+                  <Label className="text-white mb-1">Offer Percentage *</Label>
+                  <Input
+                    type="number"
+                    {...register(`offers.${i}.percentage`, { required: "Offer percentage is required" })}
+                    className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
+                    placeholder="10"
+                  />
+                  {errors.offers?.[i]?.percentage && (
+                    <p className="text-red-500 text-sm mt-1">{errors.offers[i]?.percentage?.message}</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="mt-4">
+                <Label className="text-white mb-1">Description *</Label>
+                <Controller
+                  name={`offers.${i}.description`}
+                  control={control}
+                  rules={{ required: "Offer description is required" }}
+                  render={({ field }) => (
+                    <Textarea
+                      value={field.value}
+                      onChange={(e) => {
+                        const newDesc = e.target.value;
+                        const updatedOffers = offers.map(o => ({ ...o, description: newDesc }));
+                        setValue("offers", updatedOffers, { shouldValidate: false });
+                      }}
+                      className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
+                      placeholder="Offer description"
+                    />
+                  )}
+                />
+                {errors.offers?.[i]?.description && (
+                  <p className="text-red-500 text-sm mt-1">{errors.offers[i]?.description?.message}</p>
+                )}
+              </div>
+
+              <div className="mt-4">
+                <Label className="text-white mb-1">Valid Until *</Label>
+                <Controller
+                  name={`offers.${i}.validUntil`}
+                  control={control}
+                  rules={{ required: "Valid until date is required" }}
+                  render={({ field }) => (
+                    <Input
+                      type="date"
+                      value={field.value}
+                      onChange={(e) => {
+                        const newDate = e.target.value;
+                        const updatedOffers = offers.map(o => ({ ...o, validUntil: newDate }));
+                        setValue("offers", updatedOffers, { shouldValidate: false });
+                      }}
+                      className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
+                    />
+                  )}
+                />
+                {errors.offers?.[i]?.validUntil && (
+                  <p className="text-red-500 text-sm mt-1">{errors.offers[i]?.validUntil?.message}</p>
+                )}
+              </div>
+            </div>
+          ))}
         </div>
 
         {/* ABOUT */}
@@ -638,7 +707,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
             </Button>
           </div>
           {contacts.map((c, i) => (
-            <div key={i} className="mt-3 p-4 border bg-neutral-900 text-white border-neutral-700">
+            <div key={i} className="mt-3 p-4 border bg-neutral-900 text-white border-neutral-700 rounded-md">
               <div className="flex justify-between mb-2">
                 <p>Contact {i + 1}</p>
                 {i > 0 && (
@@ -666,7 +735,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
                 <Input
                   {...register(`contacts.${i}.phone`, {
                     required: "Phone is required"
-                    })}
+                  })}
                   placeholder="Phone"
                   className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
                 />
@@ -764,7 +833,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
           {
             isEditMode ? " " : (<Button
               type="button"
-              className="bg-white cursor-pointer font-normal text-black hover:bg-black"
+              className="bg-white cursor-pointer font-normal text-black hover:bg-white"
               onClick={handleReset}
             >
               Reset

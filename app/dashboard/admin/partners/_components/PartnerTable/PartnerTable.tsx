@@ -166,7 +166,7 @@ const PartnerPage = () => {
         loading={loading}
       />
       <header className="flex justify-between items-center mb-4 flex-wrap gap-5">
-        <h1 className="text-base py-2 sm:py-5 text-[#0A0A0A]">Partners Management</h1>
+        <h1 className="text-base py-2 sm:py-5 text-white">Partners Management</h1>
         <Button
           className="flex cursor-pointer items-center bg-[#1a1a1a] hover:bg-[#1a1a1a] px-4 py-2"
           onClick={() => router.push("/dashboard/admin/partners/AddPartners")}
