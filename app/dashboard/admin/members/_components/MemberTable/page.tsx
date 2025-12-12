@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import { MoreHorizontal, Ban, CircleCheck } from "lucide-react";
+import { MoreHorizontal, Ban, CircleCheck, Eye } from "lucide-react";
 import {
     DropdownMenu,
     DropdownMenuTrigger,
@@ -14,12 +14,15 @@ import toast from "react-hot-toast";
 import { getAllUsers, IFilters, IUserResponse } from "@/services/users/users";
 import FilterSection from "../MemberFilter/MemberFilter"; // Correct path for the filter section
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import UserDetailModal from "../userModal/userModal";
 
 const MemberPage = () => {
     const pageSize = 10;
     const [isBlockDialogOpen, setBlockDialogOpen] = useState(false);
     const [, setSelectedUser] = useState<IUserResponse["data"] | null>(null);
-
+// NEW STATE for Modal
+    const [isUserDetailModalOpen, setUserDetailModalOpen] = useState(false);
+    const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
 
     // State for storing fetched users and the filters
     const [users, setUsers] = useState<IUserResponse["data"][]>([]);
@@ -55,84 +58,99 @@ const MemberPage = () => {
         setSelectedUser(user);
         setBlockDialogOpen(true);
     };
+const handleViewClick = (userId: string) => {
+        setSelectedUserId(userId);
+        setUserDetailModalOpen(true);
+    };
 
+    const handleCloseModal = () => {
+        setUserDetailModalOpen(false);
+        setSelectedUserId(null); // Clear selected user ID on close
+    };
     // console.log("Users data:", users);
 
-const columns: Column<typeof users[0]>[] = [
-    {
-        header: "Name",
-        cell: (row) => (
-            <div className="flex justify-center items-center w-full">
-                <span className="text-white">{`${row.firstName} ${row.lastName}`}</span>
-            </div>
-        ),
-    },
-    {
-        header: "Email",
-        cell: (row) => (
-            <div className="flex justify-center items-center w-full">
-                <span className="text-white">{row.email}</span>
-            </div>
-        ),
-    },
-    {
-        header: "Role",
-        cell: (row) => (
-            <div className="flex justify-center items-center w-full">
-                <span className="text-white">{row.role === "user" ? "User" : "Admin"}</span>
-            </div>
-        ),
-    },
-    {
-        header: "Status",
-        cell: (row) => (
-            <div className="flex justify-center items-center w-full">
-                <span
-                    className={`px-3 py-1 inline-flex text-xs font-semibold rounded-full ${row.isBlocked
+    const columns: Column<typeof users[0]>[] = [
+        {
+            header: "Name",
+            cell: (row) => (
+                <div className="flex justify-center items-center w-full">
+                    <span className="text-white">{`${row.firstName} ${row.lastName}`}</span>
+                </div>
+            ),
+        },
+        {
+            header: "Email",
+            cell: (row) => (
+                <div className="flex justify-center items-center w-full">
+                    <span className="text-white">{row.email}</span>
+                </div>
+            ),
+        },
+        {
+            header: "Role",
+            cell: (row) => (
+                <div className="flex justify-center items-center w-full">
+                    <span className="text-white">{row.role === "user" ? "User" : "Admin"}</span>
+                </div>
+            ),
+        },
+        {
+            header: "Status",
+            cell: (row) => (
+                <div className="flex justify-center items-center w-full">
+                    <span
+                        className={`px-3 py-1 inline-flex text-xs font-semibold rounded-full ${row.isBlocked
                             ? "bg-red-100 text-red-800"
                             : row.isMembership
                                 ? "bg-green-100 text-green-800"
                                 : "bg-yellow-100 text-yellow-800"
-                        }`}
-                >
-                    {row.isBlocked ? "Blocked" : row.isMembership ? "Member" : "Inactive"}
-                </span>
-            </div>
-        ),
-    },
-    {
-        header: "Actions",
-        cell: (row) => (
-            <div className="flex justify-center w-full">
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <button className="p-2 hover:bg-gray-100 rounded-md">
-                            <MoreHorizontal className="w-5 h-5 text-gray-600" />
-                        </button>
-                    </DropdownMenuTrigger>
+                            }`}
+                    >
+                        {row.isBlocked ? "Blocked" : row.isMembership ? "Member" : "Inactive"}
+                    </span>
+                </div>
+            ),
+        },
+        {
+            header: "Actions",
+            cell: (row) => (
+                <div className="flex justify-center w-full">
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <button className="p-2 hover:bg-gray-100 rounded-md">
+                                <MoreHorizontal className="w-5 h-5 text-gray-600" />
+                            </button>
+                        </DropdownMenuTrigger>
 
-                    <DropdownMenuContent align="end" className="w-40">
-                        <DropdownMenuItem
-                            className="flex items-center gap-2 cursor-pointer"
-                            onClick={() => handleBlockClick(row)}
-                        >
-                            <Ban size={16} className="text-red-600" />
-                            Block
-                        </DropdownMenuItem>
+                        <DropdownMenuContent align="end" className="w-40">
+                          <DropdownMenuItem
+                                className="flex items-center gap-2 cursor-pointer"
+                                onClick={() => handleViewClick(row._id)} // Pass the user's ID
+                            >
+                                <Eye size={16} className="text-blue-500" />
+                                View Details
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                                className="flex items-center gap-2 cursor-pointer"
+                                onClick={() => handleBlockClick(row)}
+                            >
+                                <Ban size={16} className="text-red-600" />
+                                Block
+                            </DropdownMenuItem>
 
-                        <DropdownMenuItem
-                            className="flex items-center gap-2 cursor-pointer"
-                            onClick={() => handleBlockClick(row)}
-                        >
-                            <CircleCheck size={16} className="text-green-500" />
-                            Unblock
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-            </div>
-        ),
-    },
-];
+                            <DropdownMenuItem
+                                className="flex items-center gap-2 cursor-pointer"
+                                onClick={() => handleBlockClick(row)}
+                            >
+                                <CircleCheck size={16} className="text-green-500" />
+                                Unblock
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
+            ),
+        },
+    ];
 
     // Handle changes to filters (called from FilterSection)
     const handleFilterChange = useCallback(
@@ -168,7 +186,12 @@ const columns: Column<typeof users[0]>[] = [
                 currentPage={filters.page}
                 onPageChange={handlePageChange}
             />
-
+            {/* User Details Modal (Add this at the end of the component return) */}
+            <UserDetailModal
+                userId={selectedUserId}
+                isOpen={isUserDetailModalOpen}
+                onClose={handleCloseModal}
+            />
             {/* Block Confirmation Dialog */}
             <AlertDialog open={isBlockDialogOpen} onOpenChange={setBlockDialogOpen}>
                 <AlertDialogTrigger />
