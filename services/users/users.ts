@@ -48,10 +48,13 @@ export interface IUserUpdatePayload {
     firstName?: string;
     lastName?: string;
     email?: string;
-phone?: string | null; 
+    phone?: string | null; 
     dateOfBirth?: string | null;
     role?: 'user' | 'admin';
-    // Add other fields you want to make editable
+    // NEW: Boolean fields for user status
+    isVerified?: boolean;
+    isMembership?: boolean;
+    isPartner?: boolean;
 }
 
 
@@ -106,7 +109,7 @@ export const updateUserById = async (
 ): Promise<IUserResponse["data"] | { error: string }> => {
     try {
         const res = await fetch(`${BASE_URL}/user/update-user/${userId}`, {
-            method: 'PATCH', // CHANGED FROM 'PUT' to 'PATCH'
+            method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
                 // Include authorization header if needed

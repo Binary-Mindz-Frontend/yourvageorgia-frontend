@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import { MoreHorizontal, Ban, CircleCheck, Eye, Pen } from "lucide-react";
+import { MoreHorizontal, Ban, CircleCheck, Eye, Trash2, CirclePlus, CircleMinus, Verified, ShieldBan } from "lucide-react";
 import {
     DropdownMenu,
     DropdownMenuTrigger,
@@ -11,26 +11,30 @@ import {
 import CustomTable, { Column } from "@/components/Shared/dashboard/customtable/CustomTable";
 import CustomPagination from "@/components/Shared/dashboard/custompagination/CustomPagination";
 import toast from "react-hot-toast";
-import { getAllUsers, IFilters, IUserResponse } from "@/services/users/users";
-import FilterSection from "../MemberFilter/MemberFilter"; // Correct path for the filter section
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { getAllUsers, IFilters, IUserResponse, updateUserById } from "@/services/users/users";
+import FilterSection from "../MemberFilter/MemberFilter";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import UserDetailModal from "../userModal/userModal";
-import UserUpdateModal from "../userModal/UserUpdateModal";
+
+// Define all possible action types in one place for better management
+type ActionType = 'block' | 'unblock' | 'delete' | 'restore' | 'addPartner' | 'removePartner' | 'verify' | 'unverify';
 
 const MemberPage = () => {
     const pageSize = 10;
-    const [isBlockDialogOpen, setBlockDialogOpen] = useState(false);
-    const [, setSelectedUser] = useState<IUserResponse["data"] | null>(null);
+    
+    // FIX 1: Update actionType state definition to include 'restore'
+    const [isActionDialogOpen, setActionDialogOpen] = useState(false);
+    const [actionType, setActionType] = useState<ActionType | null>(null);
+    const [selectedUser, setSelectedUser] = useState<IUserResponse["data"] | null>(null);
+    const [isProcessing, setIsProcessing] = useState(false);
+    
     // NEW STATE for Modal
     const [isUserDetailModalOpen, setUserDetailModalOpen] = useState(false);
     const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
-    // NEW UPDATE MODAL STATE
-    const [isUserUpdateModalOpen, setUserUpdateModalOpen] = useState(false);
-    const [selectedUpdateUserId, setSelectedUpdateUserId] = useState<string | null>(null);
+    
     // State for storing fetched users and the filters
     const [users, setUsers] = useState<IUserResponse["data"][]>([]);
     const [totalItems, setTotalItems] = useState(0);
-    // 1. REMOVE currentPage state. Use filters.page instead.
     const [filters, setFilters] = useState<IFilters>({
         search: "",
         role: "",
@@ -40,27 +44,99 @@ const MemberPage = () => {
         page: 1,
     });
 
-    // Function to re-fetch users based on current filters (useful for updates)
-    const fetchUsers = useCallback(async (currentFilters: IFilters) => {
-        const response = await getAllUsers(currentFilters);
+    // PROPER FIX: Move the fetch logic inside useEffect
+    useEffect(() => {
+        const fetchUsers = async () => {
+            const response = await getAllUsers(filters);
+            if ("data" in response && "meta" in response) {
+                setUsers(response.data);
+                setTotalItems(response.meta.total);
+            } else if ("error" in response) {
+                toast.error(response.error);
+            }
+        };
+
+        fetchUsers();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [filters.search, filters.role, filters.isMembership, filters.isBlocked, filters.page, filters.limit]);
+
+    const tableData = users;
+
+    // Separate function for manual refresh (used in handleUpdateSuccess)
+    const refetchUsers = async () => {
+        const response = await getAllUsers(filters);
         if ("data" in response && "meta" in response) {
             setUsers(response.data);
             setTotalItems(response.meta.total);
         } else if ("error" in response) {
             toast.error(response.error);
         }
-    }, []);
-
-    useEffect(() => {
-        fetchUsers(filters);
-    }, [filters, fetchUsers]); // Dependency on fetchUsers and filters
-
-    const tableData = users;
-
-    const handleBlockClick = (user: IUserResponse["data"]) => {
-        setSelectedUser(user);
-        setBlockDialogOpen(true);
     };
+
+    // Handle action clicks (Block, Unblock, Delete, Partner, Verified)
+    // FIX 2: Update the action parameter type to include 'restore'
+    const handleActionClick = (user: IUserResponse["data"], action: ActionType) => {
+        setSelectedUser(user);
+        setActionType(action);
+        setActionDialogOpen(true);
+    };
+
+    // Execute the action (Block, Unblock, Delete, Restore, Partner, or Verified)
+    const executeAction = async () => {
+        if (!selectedUser || !actionType) return;
+
+        setIsProcessing(true);
+        
+        let payload = {};
+        
+        // Block/Unblock/Delete/Restore logic
+        if (actionType === 'block') {
+            payload = { isBlocked: true };
+        } else if (actionType === 'unblock') {
+            payload = { isBlocked: false };
+        } else if (actionType === 'delete') {
+            payload = { isDeleted: true };
+        } else if (actionType === 'restore') { // Added restore logic
+            payload = { isDeleted: false };
+        // Partner logic
+        } else if (actionType === 'addPartner') {
+            payload = { isPartner: true };
+        } else if (actionType === 'removePartner') {
+            payload = { isPartner: false };
+        // Verified logic
+        } else if (actionType === 'verify') {
+            payload = { isVerified: true };
+        } else if (actionType === 'unverify') {
+            payload = { isVerified: false };
+        } else {
+            // Should not happen if actionType is strictly one of the allowed values
+            setIsProcessing(false);
+            return;
+        }
+
+        const result = await updateUserById(selectedUser._id, payload);
+        setIsProcessing(false);
+
+        if ("error" in result) {
+            toast.error(result.error);
+        } else {
+            // Note: actionType is safe to use as index here because we check it above
+            const actionMessages: Record<ActionType, string> = {
+                block: "User blocked successfully!",
+                unblock: "User unblocked successfully!",
+                delete: "User deleted successfully!",
+                restore: "User restored successfully!", // Added restore message
+                addPartner: "User added as partner successfully!",
+                removePartner: "User removed as partner successfully!",
+                verify: "User verified successfully!",
+                unverify: "User unverified successfully!",
+            };
+            toast.success(actionMessages[actionType]);
+            setActionDialogOpen(false);
+            refetchUsers(); // Refresh the table
+        }
+    };
+
     const handleViewClick = (userId: string) => {
         setSelectedUserId(userId);
         setUserDetailModalOpen(true);
@@ -68,26 +144,10 @@ const MemberPage = () => {
 
     const handleCloseModal = () => {
         setUserDetailModalOpen(false);
-        setSelectedUserId(null); // Clear selected user ID on close
+        setSelectedUserId(null);
     };
 
-    // NEW HANDLER FOR UPDATE MODAL
-    const handleUpdateClick = (userId: string) => {
-        setSelectedUpdateUserId(userId);
-        setUserUpdateModalOpen(true);
-    };
 
-    const handleCloseUpdateModal = () => {
-        setUserUpdateModalOpen(false);
-        setSelectedUpdateUserId(null);
-    };
-
-    // HANDLER TO REFRESH DATA AFTER A SUCCESSFUL UPDATE
-    const handleUpdateSuccess = () => {
-        // Re-fetch the current page to see the updated user data
-        fetchUsers(filters);
-    };
-    // console.log("Users data:", users);
 
     const columns: Column<typeof users[0]>[] = [
         {
@@ -115,18 +175,81 @@ const MemberPage = () => {
             ),
         },
         {
-            header: "Status",
+            header: "Verified",
             cell: (row) => (
                 <div className="flex justify-center items-center w-full">
                     <span
-                        className={`px-3 py-1 inline-flex text-xs font-semibold rounded-full ${row.isBlocked
-                            ? "bg-red-100 text-red-800"
-                            : row.isMembership
+                        className={`px-3 py-1 inline-flex text-xs font-semibold rounded-full ${
+                            row.isVerified
                                 ? "bg-green-100 text-green-800"
-                                : "bg-yellow-100 text-yellow-800"
-                            }`}
+                                : "bg-gray-100 text-gray-800"
+                        }`}
                     >
-                        {row.isBlocked ? "Blocked" : row.isMembership ? "Member" : "Inactive"}
+                        {row.isVerified ? "Verified" : "Not Verified"}
+                    </span>
+                </div>
+            ),
+        },
+        {
+            header: "Membership",
+            cell: (row) => (
+                <div className="flex justify-center items-center w-full">
+                    <span
+                        className={`px-3 py-1 inline-flex text-xs font-semibold rounded-full ${
+                            row.isMembership
+                                ? "bg-blue-100 text-blue-800"
+                                : "bg-yellow-100 text-yellow-800"
+                        }`}
+                    >
+                        {row.isMembership ? "Member" : "Inactive"}
+                    </span>
+                </div>
+            ),
+        },
+        {
+            header: "Partner",
+            cell: (row) => (
+                <div className="flex justify-center items-center w-full">
+                    <span
+                        className={`px-3 py-1 inline-flex text-xs font-semibold rounded-full ${
+                            row.isPartner
+                                ? "bg-purple-100 text-purple-800"
+                                : "bg-gray-100 text-gray-800"
+                        }`}
+                    >
+                        {row.isPartner ? "Partner" : "Not Partner"}
+                    </span>
+                </div>
+            ),
+        },
+        {
+            header: "Blocked",
+            cell: (row) => (
+                <div className="flex justify-center items-center w-full">
+                    <span
+                        className={`px-3 py-1 inline-flex text-xs font-semibold rounded-full ${
+                            row.isBlocked
+                                ? "bg-red-100 text-red-800"
+                                : "bg-green-100 text-green-800"
+                        }`}
+                    >
+                        {row.isBlocked ? "Blocked" : "Active"}
+                    </span>
+                </div>
+            ),
+        },
+        {
+            header: "Deleted",
+            cell: (row) => (
+                <div className="flex justify-center items-center w-full">
+                    <span
+                        className={`px-3 py-1 inline-flex text-xs font-semibold rounded-full ${
+                            row.isDeleted
+                                ? "bg-red-100 text-red-800"
+                                : "bg-green-100 text-green-800"
+                        }`}
+                    >
+                        {row.isDeleted ? "Deleted" : "Active"}
                     </span>
                 </div>
             ),
@@ -145,33 +268,88 @@ const MemberPage = () => {
                         <DropdownMenuContent align="end" className="w-40">
                             <DropdownMenuItem
                                 className="flex items-center gap-2 cursor-pointer"
-                                onClick={() => handleViewClick(row._id)} // Pass the user's ID
+                                onClick={() => handleViewClick(row._id)}
                             >
                                 <Eye size={16} className="text-blue-500" />
                                 View Details
                             </DropdownMenuItem>
-                            <DropdownMenuItem
-                                className="flex items-center gap-2 cursor-pointer"
-                                onClick={() => handleUpdateClick(row._id)} // <-- NEW HANDLER
-                            >
-                                <Pen size={16} className="text-orange-500" />
-                                Update
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                                className="flex items-center gap-2 cursor-pointer"
-                                onClick={() => handleBlockClick(row)}
-                            >
-                                <Ban size={16} className="text-red-600" />
-                                Block
-                            </DropdownMenuItem>
+                        
+                            
+                            {/* Show Block or Unblock based on current status */}
+                            {!row.isBlocked ? (
+                                <DropdownMenuItem
+                                    className="flex items-center gap-2 cursor-pointer"
+                                    onClick={() => handleActionClick(row, 'block')}
+                                >
+                                    <Ban size={16} className="text-red-600" />
+                                    Block
+                                </DropdownMenuItem>
+                            ) : (
+                                <DropdownMenuItem
+                                    className="flex items-center gap-2 cursor-pointer"
+                                    onClick={() => handleActionClick(row, 'unblock')}
+                                >
+                                    <CircleCheck size={16} className="text-green-500" />
+                                    Unblock
+                                </DropdownMenuItem>
+                            )}
+                            
+                            {/* Show partner status: Add Partner if !isPartner, Remove Partner if isPartner */}
+                            {!row.isPartner ? (
+                                <DropdownMenuItem
+                                    className="flex items-center gap-2 cursor-pointer"
+                                    onClick={() => handleActionClick(row, 'addPartner')}
+                                >
+                                    <CirclePlus size={16} className="text-green-500" />
+                                    Add Partner
+                                </DropdownMenuItem>
+                            ) : (
+                                <DropdownMenuItem
+                                    className="flex items-center gap-2 cursor-pointer"
+                                    onClick={() => handleActionClick(row, 'removePartner')}
+                                >
+                                    <CircleMinus size={16} className="text-red-600" />
+                                    Remove Partner
+                                </DropdownMenuItem>
+                            )}
+                            
+                            {/* Show verified status: Verify if !isVerified, Unverify if isVerified */}
+                            {/* NOTE: I've corrected the check to use row.isVerified */}
+                            {!row.isVerified ? (
+                                <DropdownMenuItem
+                                    className="flex items-center gap-2 cursor-pointer"
+                                    onClick={() => handleActionClick(row, 'verify')} // Corrected action type
+                                >
+                                    <Verified size={16} className="text-green-500" />
+                                    Verify
+                                </DropdownMenuItem>
+                            ) : (
+                                <DropdownMenuItem
+                                    className="flex items-center gap-2 cursor-pointer"
+                                    onClick={() => handleActionClick(row, 'unverify')} // Corrected action type
+                                >
+                                    <ShieldBan size={16} className="text-red-600" />
+                                    Unverify
+                                </DropdownMenuItem>
+                            )}
 
-                            <DropdownMenuItem
-                                className="flex items-center gap-2 cursor-pointer"
-                                onClick={() => handleBlockClick(row)}
-                            >
-                                <CircleCheck size={16} className="text-green-500" />
-                                Unblock
-                            </DropdownMenuItem>
+                            {!row.isDeleted ? (
+                                <DropdownMenuItem
+                                    className="flex items-center gap-2 cursor-pointer"
+                                    onClick={() => handleActionClick(row, 'delete')}
+                                >
+                                    <Trash2 size={16} className="text-red-600" />
+                                    Delete
+                                </DropdownMenuItem>
+                            ) : (
+                                <DropdownMenuItem
+                                    className="flex items-center gap-2 cursor-pointer"
+                                    onClick={() => handleActionClick(row, 'restore')} // New Restore Action
+                                >
+                                    <CircleCheck size={16} className="text-green-500" /> 
+                                    Restore
+                                </DropdownMenuItem>
+                            )}
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </div>
@@ -181,24 +359,84 @@ const MemberPage = () => {
 
     // Handle changes to filters (called from FilterSection)
     const handleFilterChange = useCallback(
-        (newFilters: Partial<IFilters>) => { // Use Partial<IFilters> as you don't pass all fields
+        (newFilters: Partial<IFilters>) => {
             setFilters((prev) => ({
                 ...prev,
                 ...newFilters,
-                page: 1, // Reset to first page when filters change
+                page: 1,
             }));
         },
         []
     );
 
-
     const handlePageChange = (newPage: number) => {
         setFilters((prev) => ({
             ...prev,
-            page: newPage, // Update page number in filters
+            page: newPage,
         }));
     };
 
+    // Get dialog content based on action type
+    // Updated to include partner/verify dialog content
+    const getDialogContent = () => {
+        // It's safe to use ActionType as key here because actionType is of type ActionType | null
+        if (!actionType) return { title: "", description: "", buttonText: "", buttonClass: "" };
+        
+        const content: Record<ActionType, { title: string, description: string, buttonText: string, buttonClass: string }> = {
+            block: {
+                title: "Block User",
+                description: `Are you sure you want to block ${selectedUser?.firstName} ${selectedUser?.lastName}? This will restrict their access to the platform.`,
+                buttonText: "Block User",
+                buttonClass: "bg-red-600 rounded-md hover:bg-red-700"
+            },
+            unblock: {
+                title: "Unblock User",
+                description: `Are you sure you want to unblock ${selectedUser?.firstName} ${selectedUser?.lastName}? This will restore their access to the platform.`,
+                buttonText: "Unblock User",
+                buttonClass: "bg-green-600 rounded-md hover:bg-green-700"
+            },
+            delete: {
+                title: "Delete User",
+                description: `Are you sure you want to delete ${selectedUser?.firstName} ${selectedUser?.lastName}? This action will mark the user as deleted.`,
+                buttonText: "Delete User",
+                buttonClass: "bg-red-600 rounded-md hover:bg-red-700"
+            },
+            restore: { // Added restore content
+                title: "Restore User",
+                description: `Are you sure you want to restore ${selectedUser?.firstName} ${selectedUser?.lastName}? This action will return the user to active status.`,
+                buttonText: "Restore User",
+                buttonClass: "bg-green-600 rounded-md hover:bg-green-700"
+            },
+            addPartner: {
+                title: "Add Partner Status",
+                description: `Are you sure you want to grant partner status to ${selectedUser?.firstName} ${selectedUser?.lastName}?`,
+                buttonText: "Add Partner",
+                buttonClass: "bg-purple-600 rounded-md hover:bg-purple-700"
+            },
+            removePartner: {
+                title: "Remove Partner Status",
+                description: `Are you sure you want to revoke partner status from ${selectedUser?.firstName} ${selectedUser?.lastName}?`,
+                buttonText: "Remove Partner",
+                buttonClass: "bg-red-600 rounded-md hover:bg-red-700"
+            },
+            verify: {
+                title: "Verify User",
+                description: `Are you sure you want to verify ${selectedUser?.firstName} ${selectedUser?.lastName}?`,
+                buttonText: "Verify User",
+                buttonClass: "bg-green-600 rounded-md hover:bg-green-700"
+            },
+            unverify: {
+                title: "Unverify User",
+                description: `Are you sure you want to unverify ${selectedUser?.firstName} ${selectedUser?.lastName}?`,
+                buttonText: "Unverify User",
+                buttonClass: "bg-red-600 rounded-md hover:bg-red-700"
+            }
+        };
+        
+        return content[actionType];
+    };
+
+    const dialogContent = getDialogContent();
 
     return (
         <div>
@@ -210,41 +448,42 @@ const MemberPage = () => {
             <CustomTable columns={columns} data={tableData} loading={false} />
 
             <CustomPagination
-                totalItems={totalItems} // <-- FIX: Use the total count from the API
+                totalItems={totalItems}
                 pageSize={pageSize}
                 currentPage={filters.page}
                 onPageChange={handlePageChange}
             />
-            {/* User Details Modal (Add this at the end of the component return) */}
+
+            {/* User Details Modal */}
             <UserDetailModal
                 userId={selectedUserId}
                 isOpen={isUserDetailModalOpen}
                 onClose={handleCloseModal}
             />
-            <UserUpdateModal
-                userId={selectedUpdateUserId}
-                isOpen={isUserUpdateModalOpen}
-                onClose={handleCloseUpdateModal}
-                onUpdateSuccess={handleUpdateSuccess} // Pass the refresh function
-            />
-            {/* Block Confirmation Dialog */}
-            <AlertDialog open={isBlockDialogOpen} onOpenChange={setBlockDialogOpen}>
-                <AlertDialogTrigger />
-                <AlertDialogContent>
-                    <AlertDialogHeader>Are you sure you want to block this user?</AlertDialogHeader>
-                    <AlertDialogDescription>
-                        Blocking this user will restrict their access to the platform.
-                    </AlertDialogDescription>
+
+
+            {/* Action Confirmation Dialog (Block/Unblock/Delete/Partner/Verify) */}
+            <AlertDialog open={isActionDialogOpen} onOpenChange={setActionDialogOpen} >
+                <AlertDialogContent className="bg-[#1a1a1a]">
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>{dialogContent.title}</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            {dialogContent.description}
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
                     <div className="flex justify-end space-x-2">
-                        <AlertDialogCancel onClick={() => setBlockDialogOpen(false)}>Cancel</AlertDialogCancel>
-                        <AlertDialogAction
-                            onClick={() => {
-                                // Add logic to block the user here
-                                toast.success("User blocked successfully!");
-                                setBlockDialogOpen(false);
-                            }}
+                        <AlertDialogCancel 
+                            onClick={() => setActionDialogOpen(false)}
+                            disabled={isProcessing}
                         >
-                            Block
+                            Cancel
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={executeAction}
+                            disabled={isProcessing}
+                            className={dialogContent.buttonClass}
+                        >
+                            {isProcessing ? "Processing..." : dialogContent.buttonText}
                         </AlertDialogAction>
                     </div>
                 </AlertDialogContent>

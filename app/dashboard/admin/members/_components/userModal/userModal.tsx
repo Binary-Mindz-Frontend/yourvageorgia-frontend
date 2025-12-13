@@ -85,7 +85,7 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({ userId, isOpen, onClo
 
     return (
         <Dialog open={isOpen} onOpenChange={handleDialogClose}>
-            <DialogContent className="bg-gray-900 border-gray-700 text-white sm:max-w-md md:max-w-lg">
+            <DialogContent className="bg-[#1a1a1a] border-gray-700 text-white sm:max-w-md md:max-w-lg">
                 <DialogHeader className="border-b border-gray-700 pb-3">
                     <DialogTitle className="text-xl font-bold">User Details</DialogTitle>
                     <DialogDescription className="text-gray-400">
@@ -99,7 +99,7 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({ userId, isOpen, onClo
                     <div className="grid gap-4 pt-4 text-sm">
                         <DetailRow label="Name" value={`${user.firstName} ${user.lastName}`} />
                         <DetailRow label="Email" value={user.email} />
-                        <DetailRow label="Role" value={user.role.toUpperCase()} />
+                        <DetailRow label="Role" value={user.role} />
                         <DetailRow label="Phone" value={user.phone} />
                         <DetailRow label="Date of Birth" value={user.dateOfBirth} />
                         
