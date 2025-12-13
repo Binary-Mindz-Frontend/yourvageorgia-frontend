@@ -23,6 +23,8 @@ import { Partner } from "@/types/partner.types";
 import { useRouter } from "next/navigation";
 import UsersSummary from "../UsersSummarySection/UsersSummary";
 import PartnerFilterSection from "../PartnerFilterSection/PartnerFilterSection";
+import PartnerPositionDialog from "../PartnerPositionDialog/PartnerPositionDialog";
+
 
 // --- Type Definitions ---
 type Category = ICategoryResponse["data"];
@@ -65,14 +67,18 @@ const PartnerPage = () => {
     const [tableLoading, setTableLoading] = useState(false);
     const [deleting, setDeleting] = useState<string | null>(null);
 
+    // --- 2. NEW STATE FOR POSITION DIALOG ---
+    const [isPositionDialogOpen, setIsPositionDialogOpen] = useState(false);
+    const [partnerToUpdatePosition, setPartnerToUpdatePosition] = useState<PartnerRow | null>(null);
+    // ----------------------------------------
+
     // --- Data Fetching Functions ---
 
     // Function to get the GLOBAL, UNFILTERED COUNTS (Runs once on mount)
     const fetchGlobalCounts = useCallback(async () => {
         setGlobalLoading(true);
         try {
-            // Fetch all partners (or use an endpoint that returns summary stats)
-            // Assuming your getPartners API can handle a call with no filters/pagination to get totals:
+            
             const params: IGetPartnersParams = { limit: 10000 }; // Get a large enough limit or use a dedicated stats endpoint
 
             const res = await getPartners(params);
@@ -172,6 +178,19 @@ const PartnerPage = () => {
         }));
     };
 
+    // --- 3. NEW DIALOG HANDLERS ---
+    const handleOpenPositionDialog = (partner: PartnerRow) => {
+        setPartnerToUpdatePosition(partner);
+        setIsPositionDialogOpen(true);
+    };
+
+    const handlePositionUpdateSuccess = () => {
+        // Refetch the table data to show the updated position
+        fetchPartners(); 
+        // We generally don't need to refetch global counts unless position affects them.
+    };
+    // ----------------------------
+
 
     const handleDelete = async (partnerId: string) => {
         setDeleting(partnerId);
@@ -193,12 +212,15 @@ const PartnerPage = () => {
         }
     };
 
-    // Columns Definition (Unchanged)
+    // Columns Definition
     const columns: Column<PartnerRow>[] = [
-        // ... (columns are unchanged)
         {
             header: "Name",
             cell: (row) => <span className="text-white">{row.name}</span>,
+        },
+        {
+            header: "Position",
+            cell: (row) => <span className="text-white">{row.position}</span>,
         },
         {
             header: "Category",
@@ -266,6 +288,16 @@ const PartnerPage = () => {
                                 View
                             </DropdownMenuItem>
 
+                            {/* --- 4. UPDATED: CHANGE POSITION MENU ITEM --- */}
+                            <DropdownMenuItem
+                                className="flex items-center gap-2 cursor-pointer"
+                                onClick={() => handleOpenPositionDialog(row)}
+                            >
+                                <Pen size={16} /> 
+                                Change Position
+                            </DropdownMenuItem>
+                            {/* ---------------------------------------------- */}
+
                             <DropdownMenuItem
                                 className="flex items-center gap-2 cursor-pointer"
                                 onClick={() => router.push(`/dashboard/admin/partners/AddPartners/edit/${row._id}`)}
@@ -292,7 +324,7 @@ const PartnerPage = () => {
     return (
         <div>
             <UsersSummary
-                // 💡 USE THE NEW GLOBAL STATE HERE
+                // USE THE NEW GLOBAL STATE HERE
                 totalPartners={globalTotalPartners} 
                 featuredPartners={globalFeaturedPartners}
                 loading={globalLoading} // Use the loading state for the summary section
@@ -320,12 +352,20 @@ const PartnerPage = () => {
             <CustomTable columns={columns} data={partners} loading={tableLoading} />
 
             <CustomPagination
-                // 💡 USE THE FILTERED TOTAL HERE (total count for the current table view)
                 totalItems={filteredTotalItems} 
                 pageSize={pageSize}
                 currentPage={filters.page}
                 onPageChange={handlePageChange}
             />
+
+            {/* --- 5. RENDER THE DIALOG COMPONENT --- */}
+            <PartnerPositionDialog
+                partner={partnerToUpdatePosition}
+                open={isPositionDialogOpen}
+                onOpenChange={setIsPositionDialogOpen}
+                onUpdateSuccess={handlePositionUpdateSuccess}
+            />
+            {/* -------------------------------------- */}
         </div>
     );
 };

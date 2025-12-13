@@ -29,6 +29,10 @@ export interface IPartnerResponse {
   };
 }
 
+export interface IPositionUpdateData {
+    position: number; // Assuming 'position' is a number
+}
+
 export interface IGetAllPartnersResponse {
   success: boolean;
   statusCode: number;
@@ -178,4 +182,32 @@ export const deletePartner = async (
   } catch (error: any) {
     return { error: error.message };
   }
+};
+
+export const updatePartnerPosition = async (
+    partnerId: string,
+    data: IPositionUpdateData
+): Promise<IPartnerResponse | { error: string }> => {
+    try {
+        const res = await fetch(`${BASE_URL}/partner/change-position/${partnerId}`, {
+            method: "PATCH", // Use PATCH method
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+        });
+
+        const json = await res.json();
+        
+        // Handle non-2xx response
+        if (!res.ok) {
+            return { error: json.message || "Failed to update partner position" };
+        }
+
+        // Return success response
+        return json;
+    } catch (error: any) {
+        // Handle network or other unexpected errors
+        return { error: error.message || "An unexpected error occurred during position update" };
+    }
 };
