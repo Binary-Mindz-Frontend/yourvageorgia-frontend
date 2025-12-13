@@ -34,8 +34,6 @@ const DetailRow: React.FC<{ label: string, value: string | boolean | null }> = (
         </div>
     );
 };
-// =======================================================
-
 
 const UserDetailModal: React.FC<UserDetailModalProps> = ({ userId, isOpen, onClose }) => {
     const [user, setUser] = useState<UserDetail | null>(null);
