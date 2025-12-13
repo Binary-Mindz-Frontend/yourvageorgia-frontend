@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import { MoreHorizontal, Ban, CircleCheck, Eye } from "lucide-react";
+import { MoreHorizontal, Ban, CircleCheck, Eye, Pen } from "lucide-react";
 import {
     DropdownMenu,
     DropdownMenuTrigger,
@@ -15,15 +15,18 @@ import { getAllUsers, IFilters, IUserResponse } from "@/services/users/users";
 import FilterSection from "../MemberFilter/MemberFilter"; // Correct path for the filter section
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import UserDetailModal from "../userModal/userModal";
+import UserUpdateModal from "../userModal/UserUpdateModal";
 
 const MemberPage = () => {
     const pageSize = 10;
     const [isBlockDialogOpen, setBlockDialogOpen] = useState(false);
     const [, setSelectedUser] = useState<IUserResponse["data"] | null>(null);
-// NEW STATE for Modal
+    // NEW STATE for Modal
     const [isUserDetailModalOpen, setUserDetailModalOpen] = useState(false);
     const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
-
+    // NEW UPDATE MODAL STATE
+    const [isUserUpdateModalOpen, setUserUpdateModalOpen] = useState(false);
+    const [selectedUpdateUserId, setSelectedUpdateUserId] = useState<string | null>(null);
     // State for storing fetched users and the filters
     const [users, setUsers] = useState<IUserResponse["data"][]>([]);
     const [totalItems, setTotalItems] = useState(0);
@@ -37,20 +40,20 @@ const MemberPage = () => {
         page: 1,
     });
 
-    useEffect(() => {
-        const fetchUsers = async () => {
-            // Setting loading state could go here
-            const response = await getAllUsers(filters);
-            if ("data" in response && "meta" in response) { // <-- Check for both data and meta
-                setUsers(response.data);
-                setTotalItems(response.meta.total); // <-- Set the total count
-            } else if ("error" in response) {
-                toast.error(response.error);
-            }
-        };
+    // Function to re-fetch users based on current filters (useful for updates)
+    const fetchUsers = useCallback(async (currentFilters: IFilters) => {
+        const response = await getAllUsers(currentFilters);
+        if ("data" in response && "meta" in response) {
+            setUsers(response.data);
+            setTotalItems(response.meta.total);
+        } else if ("error" in response) {
+            toast.error(response.error);
+        }
+    }, []);
 
-        fetchUsers();
-    }, [filters]);
+    useEffect(() => {
+        fetchUsers(filters);
+    }, [filters, fetchUsers]); // Dependency on fetchUsers and filters
 
     const tableData = users;
 
@@ -58,7 +61,7 @@ const MemberPage = () => {
         setSelectedUser(user);
         setBlockDialogOpen(true);
     };
-const handleViewClick = (userId: string) => {
+    const handleViewClick = (userId: string) => {
         setSelectedUserId(userId);
         setUserDetailModalOpen(true);
     };
@@ -66,6 +69,23 @@ const handleViewClick = (userId: string) => {
     const handleCloseModal = () => {
         setUserDetailModalOpen(false);
         setSelectedUserId(null); // Clear selected user ID on close
+    };
+
+    // NEW HANDLER FOR UPDATE MODAL
+    const handleUpdateClick = (userId: string) => {
+        setSelectedUpdateUserId(userId);
+        setUserUpdateModalOpen(true);
+    };
+
+    const handleCloseUpdateModal = () => {
+        setUserUpdateModalOpen(false);
+        setSelectedUpdateUserId(null);
+    };
+
+    // HANDLER TO REFRESH DATA AFTER A SUCCESSFUL UPDATE
+    const handleUpdateSuccess = () => {
+        // Re-fetch the current page to see the updated user data
+        fetchUsers(filters);
     };
     // console.log("Users data:", users);
 
@@ -123,12 +143,19 @@ const handleViewClick = (userId: string) => {
                         </DropdownMenuTrigger>
 
                         <DropdownMenuContent align="end" className="w-40">
-                          <DropdownMenuItem
+                            <DropdownMenuItem
                                 className="flex items-center gap-2 cursor-pointer"
                                 onClick={() => handleViewClick(row._id)} // Pass the user's ID
                             >
                                 <Eye size={16} className="text-blue-500" />
                                 View Details
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                                className="flex items-center gap-2 cursor-pointer"
+                                onClick={() => handleUpdateClick(row._id)} // <-- NEW HANDLER
+                            >
+                                <Pen size={16} className="text-orange-500" />
+                                Update
                             </DropdownMenuItem>
                             <DropdownMenuItem
                                 className="flex items-center gap-2 cursor-pointer"
@@ -164,12 +191,14 @@ const handleViewClick = (userId: string) => {
         []
     );
 
+
     const handlePageChange = (newPage: number) => {
         setFilters((prev) => ({
             ...prev,
             page: newPage, // Update page number in filters
         }));
     };
+
 
     return (
         <div>
@@ -191,6 +220,12 @@ const handleViewClick = (userId: string) => {
                 userId={selectedUserId}
                 isOpen={isUserDetailModalOpen}
                 onClose={handleCloseModal}
+            />
+            <UserUpdateModal
+                userId={selectedUpdateUserId}
+                isOpen={isUserUpdateModalOpen}
+                onClose={handleCloseUpdateModal}
+                onUpdateSuccess={handleUpdateSuccess} // Pass the refresh function
             />
             {/* Block Confirmation Dialog */}
             <AlertDialog open={isBlockDialogOpen} onOpenChange={setBlockDialogOpen}>

@@ -44,6 +44,15 @@ export interface IUserResponse {
     meta: IMeta; // <-- Now correctly typed
 }
 
+export interface IUserUpdatePayload {
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+phone?: string | null; 
+    dateOfBirth?: string | null;
+    role?: 'user' | 'admin';
+    // Add other fields you want to make editable
+}
 
 
 export const getAllUsers = async (filters: IFilters): Promise<
@@ -90,16 +99,25 @@ export const getUserById = async (
     }
 };
 
-// VIEW SINGLE USER DETAILS (if needed for a separate view page)
-export const viewUser = async (
-    userId: string
+// Service to update a user by ID
+export const updateUserById = async (
+    userId: string,
+    payload: IUserUpdatePayload
 ): Promise<IUserResponse["data"] | { error: string }> => {
     try {
-        const res = await fetch(`${BASE_URL}/user/${userId}`);
+        const res = await fetch(`${BASE_URL}/user/update-user/${userId}`, {
+            method: 'PATCH', // CHANGED FROM 'PUT' to 'PATCH'
+            headers: {
+                'Content-Type': 'application/json',
+                // Include authorization header if needed
+            },
+            body: JSON.stringify(payload),
+        });
         const json = await res.json();
-        if (!res.ok) return { error: json.message || "Failed to fetch user details" };
+        
+        if (!res.ok) return { error: json.message || "Failed to update user" };
 
-        return json.data;
+        return json.data; // Return updated user data
     } catch (error: any) {
         return { error: error.message };
     }
