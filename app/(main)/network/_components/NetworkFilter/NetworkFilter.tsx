@@ -7,20 +7,22 @@ import img4 from "@/public/assets/network/4.svg";
 import { ArrowRight, ChevronDown, Heart, ListFilter } from "lucide-react";
 import { useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import NetworkCardModal from "../NetworkCardModal/NetworkCardModal";
+import NetworkCardModal from "../NetworkCardModal/PartnerDetailsModal";
 import { FilterDrawer } from "./FilterDrawer";
+import PartnerDetailsModal from "../NetworkCardModal/PartnerDetailsModal";
 
 const NetworkFilter = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const filterFromUrl = searchParams.get("filter");
-  
+
   // Initialize activeFilter from URL or default to "All"
   const validFilters = ["All", "Movement", "Recovery", "Radiance", "Taste"];
-  const initialFilter = filterFromUrl && validFilters.includes(filterFromUrl) 
-    ? filterFromUrl 
-    : "All";
-  
+  const initialFilter =
+    filterFromUrl && validFilters.includes(filterFromUrl)
+      ? filterFromUrl
+      : "All";
+
   const [activeFilter, setActiveFilter] = useState(initialFilter);
   const [showAll, setShowAll] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -101,7 +103,7 @@ const NetworkFilter = () => {
   const handleFilterClick = (filter: string) => {
     setActiveFilter(filter);
     setShowAll(false);
-    
+
     // Update URL with the selected filter
     if (filter === "All") {
       router.push("/network");
@@ -204,7 +206,7 @@ const NetworkFilter = () => {
       {/* Network Card Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-999 overflow-y-auto">
-          <NetworkCardModal
+          <PartnerDetailsModal
             isOpen={isModalOpen}
             onClose={() => setIsModalOpen(false)}
           />

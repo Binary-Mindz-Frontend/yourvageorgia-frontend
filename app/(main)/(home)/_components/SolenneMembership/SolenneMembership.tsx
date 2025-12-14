@@ -1,5 +1,5 @@
-"use client"
-import NetworkCardModal from "@/app/(main)/network/_components/NetworkCardModal/NetworkCardModal";
+"use client";
+import NetworkCardModal from "@/app/(main)/network/_components/NetworkCardModal/PartnerDetailsModal";
 import { ArrowRight } from "lucide-react";
 import { useState } from "react";
 
@@ -11,7 +11,6 @@ export default function SolenneMembership() {
       <div className="w-full">
         {/* Main Grid Container */}
         <div className="grid grid-cols-1 lg:grid-cols-[40%_60%] gap-0 overflow-hidden rounded-b-xl lg:rounded-none">
-          
           {/* Left Section */}
           <div className="relative bg-black order-1 lg:order-0 border-t-2 border-black">
             {/* Background Image */}
