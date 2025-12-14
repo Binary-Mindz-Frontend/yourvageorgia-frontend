@@ -38,6 +38,7 @@ export interface Partner {
   name: string;
   thumbnail?: string;
   address?: string;
+  position?: number;
   gallery?: string[];
   logo?: string;
   isFeatured?: boolean;

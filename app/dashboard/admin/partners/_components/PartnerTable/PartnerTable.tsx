@@ -1,191 +1,373 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Eye, MoreHorizontal, Pen, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
+    DropdownMenu,
+    DropdownMenuTrigger,
+    DropdownMenuContent,
+    DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import CustomTable, { Column } from "@/components/Shared/dashboard/customtable/CustomTable";
 import CustomPagination from "@/components/Shared/dashboard/custompagination/CustomPagination";
 import { toast } from "sonner";
-import { getPartners, deletePartner } from "@/services/partner/partner";
+import {
+    getPartners,
+    deletePartner,
+    IGetPartnersParams,
+} from "@/services/partner/partner";
+
+import { getCategories, ICategoryResponse } from "@/services/category/category";
 import { Partner } from "@/types/partner.types";
 import { useRouter } from "next/navigation";
 import UsersSummary from "../UsersSummarySection/UsersSummary";
+import PartnerFilterSection from "../PartnerFilterSection/PartnerFilterSection";
+import PartnerPositionDialog from "../PartnerPositionDialog/PartnerPositionDialog";
+
+
+// --- Type Definitions ---
+type Category = ICategoryResponse["data"];
+
+type PartnerRow = Partner & {
+    category?: Category | string;
+    _id: string;
+}
+
+export interface IPartnerFilters {
+    search: string;
+    category: string | undefined;
+    limit: number;
+    page: number;
+}
+// -----------------------------------------------------
 
 const toastStyle = { background: "#000", color: "#fff", marginTop: "4rem" };
+const pageSize = 10;
 
 const PartnerPage = () => {
-  const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 10;
+    const router = useRouter();
 
-  const [partners, setPartners] = useState<Partner[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [deleting, setDeleting] = useState<string | null>(null);
-  const router = useRouter();
+    // 1. 💡 NEW STATE: Global Total Counts (UNFILTERED)
+    const [globalTotalPartners, setGlobalTotalPartners] = useState(0);
+    const [globalFeaturedPartners, setGlobalFeaturedPartners] = useState(0);
+    const [globalLoading, setGlobalLoading] = useState(true); // Loading state for the summary
 
+    // Centralized state for all filtering and pagination parameters (FOR THE TABLE)
+    const [filters, setFilters] = useState<IPartnerFilters>({
+        search: "",
+        category: undefined,
+        limit: pageSize,
+        page: 1,
+    });
 
-  useEffect(() => {
-    const fetchPartners = async () => {
-      setLoading(true);
-      try {
-        const res = await getPartners();
-        if ("error" in res) {
-          toast.error(res.error, { style: toastStyle });
-        } else {
-          setPartners(res.data);
+    const [partners, setPartners] = useState<PartnerRow[]>([]);
+    const [categories, setCategories] = useState<Category[]>([]);
+    const [filteredTotalItems, setFilteredTotalItems] = useState(0); // Total items for the CURRENTLY FILTERED TABLE
+    const [tableLoading, setTableLoading] = useState(false);
+    const [deleting, setDeleting] = useState<string | null>(null);
+
+    // --- 2. NEW STATE FOR POSITION DIALOG ---
+    const [isPositionDialogOpen, setIsPositionDialogOpen] = useState(false);
+    const [partnerToUpdatePosition, setPartnerToUpdatePosition] = useState<PartnerRow | null>(null);
+    // ----------------------------------------
+
+    // --- Data Fetching Functions ---
+
+    // Function to get the GLOBAL, UNFILTERED COUNTS (Runs once on mount)
+    const fetchGlobalCounts = useCallback(async () => {
+        setGlobalLoading(true);
+        try {
+            
+            const params: IGetPartnersParams = { limit: 10000 }; // Get a large enough limit or use a dedicated stats endpoint
+
+            const res = await getPartners(params);
+
+            if ("error" in res) {
+                toast.error(res.error, { style: toastStyle });
+            } else {
+                const allPartners = res.data as PartnerRow[];
+                setGlobalTotalPartners(res.meta.total || allPartners.length);
+                
+                const featuredCount = allPartners.filter((p) =>
+                    p.isFeatured === true ||
+                    (typeof p.isFeatured === "string" && p.isFeatured === "true")
+                ).length;
+                setGlobalFeaturedPartners(featuredCount);
+            }
+        } catch (err) {
+            console.error(err);
+            toast.error("Failed to fetch summary stats", { style: toastStyle });
+        } finally {
+            setGlobalLoading(false);
         }
-      } catch (err) {
-        console.error(err);
-        toast.error("Failed to fetch partners", { style: toastStyle });
-      } finally {
-        setLoading(false);
-      }
+    }, []);
+
+    // 1. Fetch Categories and Global Counts on Mount
+    useEffect(() => {
+        fetchCategoriesList();
+        fetchGlobalCounts(); // 💡 TRIGGER GLOBAL FETCH
+    }, [fetchGlobalCounts]);
+
+    const fetchCategoriesList = async () => {
+        try {
+            const res = await getCategories();
+            if ("error" in res) {
+                toast.error(res.error, { style: toastStyle });
+            } else {
+                setCategories(res.data);
+            }
+        } catch (err) {
+            console.error(err);
+            toast.error("Failed to fetch categories list", { style: toastStyle });
+        }
     };
 
-    fetchPartners();
-  }, []);
+    // 2. Filtered Partner Data Fetching (Uses `filters` state for the table)
+    const fetchPartners = useCallback(async () => {
+        setTableLoading(true);
+        try {
+            const params: IGetPartnersParams = {
+                limit: filters.limit,
+                page: filters.page,
+                search: filters.search,
+                category: filters.category,
+            };
 
-  const indexOfLastItem = currentPage * pageSize;
-  const indexOfFirstItem = indexOfLastItem - pageSize;
-  const currentPartners = partners.slice(indexOfFirstItem, indexOfLastItem);
+            const res = await getPartners(params);
 
-  const handleDelete = async (partnerId: string) => {
-    setDeleting(partnerId);
-    try {
-      const res = await deletePartner(partnerId);
-      if ("error" in res) {
-        toast.error(res.error, { style: toastStyle });
-      } else {
-        toast.success(res.message, { style: toastStyle });
-        setPartners(prev => prev.filter(p => p._id === partnerId ? false : true));
-      }
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to delete partner", { style: toastStyle });
-    } finally {
-      setDeleting(null);
-    }
-  };
+            if ("error" in res) {
+                toast.error(res.error, { style: toastStyle });
+            } else {
+                setPartners(res.data as PartnerRow[]);
+                setFilteredTotalItems(res.meta.total || 0); // 💡 RENAME state for clarity
+            }
+        } catch (err) {
+            console.error(err);
+            toast.error("Failed to fetch partners", { style: toastStyle });
+        } finally {
+            setTableLoading(false);
+        }
+    }, [filters]);
 
-  const columns: Column<Partner>[] = [
-    {
-      header: "Name",
-      cell: (row) => <span className="text-white">{row.name}</span>,
-    },
-    {
-      header: "Category",
-      cell: (row) => (
-        <span className="text-white">
-          {typeof row.category === "string" ? row.category : row.category?.title}
-        </span>
-      ),
-    },
-    {
-      header: "Address",
-      cell: (row) => <span className="text-white">{row.address}</span>,
-    },
-    {
-      header: "Is Featured",
-      cell: (row) => {
-        const isFeatured =
-          row.isFeatured === true ||
-          (typeof row.isFeatured === "string" && row.isFeatured === "true");
+    // Data Fetch Trigger: Runs whenever 'filters' changes (for the table)
+    useEffect(() => {
+        fetchPartners();
+    }, [fetchPartners]);
 
-        return (
-          <div className="flex justify-center">
-            <span
-              className={`px-3 py-1 inline-flex text-xs font-semibold rounded-full ${isFeatured ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"
-                }`}
-            >
-              {isFeatured ? "Yes" : "No"}
-            </span>
-          </div>
-        );
-      },
-    }
-    ,
-    {
-      header: "Actions",
-      cell: (row) => (
-        <div className="flex justify-center w-full">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className="p-2 hover:bg-gray-100 rounded-md">
-                <MoreHorizontal className="w-5 h-5 text-gray-600" />
-              </button>
-            </DropdownMenuTrigger>
 
-            <DropdownMenuContent align="end" className="w-40">
-              <DropdownMenuItem
-                className="flex items-center gap-2 cursor-pointer"
-                onClick={() => router.push(`/dashboard/admin/partners/view/${row._id}`)}
-              >
-                <Eye size={16} />
-                View
-              </DropdownMenuItem>
+    // --- Handlers ---
 
-              <DropdownMenuItem
-                className="flex items-center gap-2 cursor-pointer"
-                onClick={() => router.push(`/dashboard/admin/partners/AddPartners/edit/${row._id}`)}
-              >
-                <Pen size={16} />
-                Edit
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                className="flex items-center gap-2 text-red-600"
-                onClick={() => row._id && handleDelete(row._id)}
-                disabled={deleting === row._id || !row._id}
-              >
-                <Trash2 size={16} />
-                {deleting === row._id ? "Deleting..." : "Delete"}
-              </DropdownMenuItem>
+    // Handler for general filter changes (from the FilterSection)
+    const handleFilterChange = useCallback(
+        (newFilters: Partial<IPartnerFilters>) => {
+            setFilters((prev) => ({
+                ...prev,
+                ...newFilters,
+                page: 1, // Reset page on search or category change
+            }));
+        },
+        []
+    );
 
-            </DropdownMenuContent>
-          </DropdownMenu>
+    // Handler for Pagination change (updates only page in `filters` state)
+    const handlePageChange = (newPage: number) => {
+        setFilters(prev => ({
+            ...prev,
+            page: newPage,
+        }));
+    };
+
+    // --- 3. NEW DIALOG HANDLERS ---
+    const handleOpenPositionDialog = (partner: PartnerRow) => {
+        setPartnerToUpdatePosition(partner);
+        setIsPositionDialogOpen(true);
+    };
+
+    const handlePositionUpdateSuccess = () => {
+        // Refetch the table data to show the updated position
+        fetchPartners(); 
+        // We generally don't need to refetch global counts unless position affects them.
+    };
+    // ----------------------------
+
+
+    const handleDelete = async (partnerId: string) => {
+        setDeleting(partnerId);
+        try {
+            const res = await deletePartner(partnerId);
+            if ("error" in res) {
+                toast.error(res.error, { style: toastStyle });
+            } else {
+                toast.success(res.message, { style: toastStyle });
+                // Refetch both table and global counts after deletion
+                fetchPartners(); 
+                fetchGlobalCounts(); // 💡 RE-FETCH GLOBAL COUNTS
+            }
+        } catch (err) {
+            console.error(err);
+            toast.error("Failed to delete partner", { style: toastStyle });
+        } finally {
+            setDeleting(null);
+        }
+    };
+
+    // Columns Definition
+    const columns: Column<PartnerRow>[] = [
+        {
+            header: "Name",
+            cell: (row) => <span className="text-white">{row.name}</span>,
+        },
+        {
+            header: "Position",
+            cell: (row) => <span className="text-white">{row.position}</span>,
+        },
+        {
+            header: "Category",
+            cell: (row) => {
+                let categoryTitle = "N/A";
+
+                const categoryData = row.category;
+
+                if (typeof categoryData === "object" && categoryData !== null && 'title' in categoryData) {
+                    categoryTitle = categoryData.title;
+                } else if (typeof categoryData === "string") {
+                    const foundCategory = categories.find(c => c._id === categoryData);
+                    if (foundCategory) {
+                        categoryTitle = foundCategory.title;
+                    }
+                }
+
+                return (
+                    <span className="text-white">
+                        {categoryTitle}
+                    </span>
+                );
+            },
+        },
+        {
+            header: "Address",
+            cell: (row) => <span className="text-white">{row.address}</span>,
+        },
+        {
+            header: "Is Featured",
+            cell: (row) => {
+                const isFeatured =
+                    row.isFeatured === true ||
+                    (typeof row.isFeatured === "string" && row.isFeatured === "true");
+
+                return (
+                    <div className="flex justify-center">
+                        <span
+                            className={`px-3 py-1 inline-flex text-xs font-semibold rounded-full ${isFeatured ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"
+                                }`}
+                        >
+                            {isFeatured ? "Yes" : "No"}
+                        </span>
+                    </div>
+                );
+            },
+        },
+        {
+            header: "Actions",
+            cell: (row) => (
+                <div className="flex justify-center w-full">
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <button className="p-2 hover:bg-gray-100 rounded-md">
+                                <MoreHorizontal className="w-5 h-5 text-gray-600" />
+                            </button>
+                        </DropdownMenuTrigger>
+
+                        <DropdownMenuContent align="end" className="w-40">
+                            <DropdownMenuItem
+                                className="flex items-center gap-2 cursor-pointer"
+                                onClick={() => router.push(`/dashboard/admin/partners/view/${row._id}`)}
+                            >
+                                <Eye size={16} />
+                                View
+                            </DropdownMenuItem>
+
+                            {/* --- 4. UPDATED: CHANGE POSITION MENU ITEM --- */}
+                            <DropdownMenuItem
+                                className="flex items-center gap-2 cursor-pointer"
+                                onClick={() => handleOpenPositionDialog(row)}
+                            >
+                                <Pen size={16} /> 
+                                Change Position
+                            </DropdownMenuItem>
+                            {/* ---------------------------------------------- */}
+
+                            <DropdownMenuItem
+                                className="flex items-center gap-2 cursor-pointer"
+                                onClick={() => router.push(`/dashboard/admin/partners/AddPartners/edit/${row._id}`)}
+                            >
+                                <Pen size={16} />
+                                Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                                className="flex items-center gap-2 text-red-600"
+                                onClick={() => row._id && handleDelete(row._id)}
+                                disabled={deleting === row._id || !row._id}
+                            >
+                                <Trash2 size={16} />
+                                {deleting === row._id ? "Deleting..." : "Delete"}
+                            </DropdownMenuItem>
+
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
+            ),
+        },
+    ];
+
+    return (
+        <div>
+            <UsersSummary
+                // USE THE NEW GLOBAL STATE HERE
+                totalPartners={globalTotalPartners} 
+                featuredPartners={globalFeaturedPartners}
+                loading={globalLoading} // Use the loading state for the summary section
+            />
+
+            <header className="flex justify-between items-center mb-4 flex-wrap gap-5">
+                <h1 className="text-base py-2 sm:py-5 text-white">Partners Management</h1>
+                <Button
+                    className="flex cursor-pointer items-center bg-[#1a1a1a] hover:bg-[#1a1a1a] px-4 py-2"
+                    onClick={() => router.push("/dashboard/admin/partners/AddPartners")}
+                >
+                    <Plus size={18} className="mr-2 text-white" />
+                    <span className="text-white text-base">Add Partner</span>
+                </Button>
+            </header>
+
+            <div className="mb-6 flex flex-wrap justify-end gap-4">
+                <PartnerFilterSection
+                    categories={categories}
+                    currentFilters={filters}
+                    onFilterChange={handleFilterChange}
+                />
+            </div>
+
+            <CustomTable columns={columns} data={partners} loading={tableLoading} />
+
+            <CustomPagination
+                totalItems={filteredTotalItems} 
+                pageSize={pageSize}
+                currentPage={filters.page}
+                onPageChange={handlePageChange}
+            />
+
+            {/* --- 5. RENDER THE DIALOG COMPONENT --- */}
+            <PartnerPositionDialog
+                partner={partnerToUpdatePosition}
+                open={isPositionDialogOpen}
+                onOpenChange={setIsPositionDialogOpen}
+                onUpdateSuccess={handlePositionUpdateSuccess}
+            />
+            {/* -------------------------------------- */}
         </div>
-      ),
-    },
-  ];
-
-  const totalPartners = partners.length;
-  const featuredPartners = partners.filter((partner) =>
-    partner.isFeatured === true ||
-    (typeof partner.isFeatured === "string" && partner.isFeatured === "true")
-  ).length;
-
-  return (
-    <div>
-      <UsersSummary
-        totalPartners={totalPartners}
-        featuredPartners={featuredPartners}
-        loading={loading}
-      />
-      <header className="flex justify-between items-center mb-4 flex-wrap gap-5">
-        <h1 className="text-base py-2 sm:py-5 text-white">Partners Management</h1>
-        <Button
-          className="flex cursor-pointer items-center bg-[#1a1a1a] hover:bg-[#1a1a1a] px-4 py-2"
-          onClick={() => router.push("/dashboard/admin/partners/AddPartners")}
-        >
-          <Plus size={18} className="mr-2 text-white" />
-          <span className="text-white text-base">Add Partner</span>
-        </Button>
-      </header>
-
-      <CustomTable columns={columns} data={currentPartners} loading={loading} />
-
-      <CustomPagination
-        totalItems={partners.length}
-        pageSize={pageSize}
-        currentPage={currentPage}
-        onPageChange={setCurrentPage}
-      />
-    </div>
-  );
+    );
 };
 
 export default PartnerPage;

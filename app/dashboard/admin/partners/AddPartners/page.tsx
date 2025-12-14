@@ -39,6 +39,18 @@ type Offer = {
   description: string;
   validUntil: string;
 };
+// Add this constant near the top of your file
+const ACTIVITY_OPTIONS = [
+  "REFORMER_PILATES",
+  "SAUNA",
+  "MASSAGE",
+  "COFFEE",
+  "GYM",
+  "SPA",
+  "PADEL",
+] as const;
+
+type ActivityOption = typeof ACTIVITY_OPTIONS[number];
 
 interface FormData {
   categoryId: string;
@@ -46,8 +58,9 @@ interface FormData {
   thumbnailUrl: string;
   logoUrl: string;
   address: string;
+  activity: ActivityOption | ""; // <-- ADD THIS LINE
   isFeatured: boolean;
-  offers: Offer[]; // Array of offers
+  offers: Offer[];
   aboutTitle: string;
   aboutDescription: string;
   terms: string[];
@@ -94,6 +107,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
       thumbnailUrl: "",
       logoUrl: "",
       address: "",
+      activity: "",   
       isFeatured: false,
       offers: [{ title: "", percentage: "", description: "", validUntil: "" }], // Changed
       aboutTitle: "",
@@ -139,7 +153,10 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
         setValue("thumbnailUrl", partner.thumbnail || "");
         setValue("logoUrl", partner.logo || "");
         setValue("address", partner.address || "");
-        setValue("isFeatured", partner.isFeatured || false);
+        setValue("activity", partner.activity || "", { shouldValidate: true });
+        const isFeaturedValue = partner.isFeatured === true || partner.isFeatured === "true";
+
+setValue("isFeatured", isFeaturedValue, { shouldValidate: true });
         setValue("aboutTitle", partner.about?.title || "");
         setValue("aboutDescription", partner.about?.description || "");
         setValue("terms", partner.terms && partner.terms.length > 0 ? partner.terms : [""]);
@@ -254,6 +271,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
       name: data.name,
       thumbnail: thumbnailPreview || data.thumbnailUrl,
       address: data.address,
+      activity: data.activity || undefined,
       gallery: gallery
         .filter(g => g.url.trim() || g.preview)
         .map(g => g.preview || g.url),
@@ -451,19 +469,53 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
           />
         </div>
 
-        {/* Address */}
-        <div>
-          <Label className="text-white mb-1">Address *</Label>
-          <Input
-            {...register("address", { required: "Address is required" })}
-            className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
-            placeholder="Full address"
-          />
-          {errors.address && (
-            <p className="text-red-500 text-sm mt-1">{errors.address.message}</p>
-          )}
-        </div>
+        {/* ADDRESS + ACTIVITY */}
+<div className="grid sm:grid-cols-2 gap-4">
+  {/* Address Field (First Column) */}
+  <div>
+    <Label className="text-white mb-1">Address *</Label>
+    <Input
+      {...register("address", { required: "Address is required" })}
+      className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
+      placeholder="Full address"
+    />
+    {errors.address && (
+      <p className="text-red-500 text-sm mt-1">{errors.address.message}</p>
+    )}
+  </div>
 
+  {/* Activity Select Option (Second Column) */}
+  <div>
+    <Label className="text-white mb-1">Activity *</Label>
+    <Controller
+      name="activity"
+      control={control}
+      rules={{ required: "Activity is required" }}
+      render={({ field }) => (
+        <Select
+          value={field.value}
+          onValueChange={field.onChange}
+          // disabled={loadingActivities} // No loading needed for static list
+        >
+          {/* Note: Use the same SelectTrigger classnames for matching style */}
+          <SelectTrigger className="mt-1 w-full bg-neutral-900 border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50 text-white h-auto min-h-12 py-3 items-start">
+            <SelectValue placeholder="Select activity" />
+          </SelectTrigger>
+          <SelectContent className="bg-neutral-900 text-white border">
+            {ACTIVITY_OPTIONS.map((activity) => (
+              <SelectItem key={activity} value={activity} className="cursor-pointer">
+                {activity.replace(/_/g, " ")} {/* Optional: Display "REFORMER PILATES" */}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      )}
+    />
+    {errors.activity && (
+      <p className="text-red-500 text-sm mt-1">{errors.activity.message}</p>
+    )}
+  </div>
+</div>
         {/* GALLERY */}
         <div className="mt-6">
           <Label className="text-white mb-1">Gallery Images</Label>

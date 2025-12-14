@@ -29,13 +29,11 @@ const DetailRow: React.FC<{ label: string, value: string | boolean | null }> = (
     const displayValue = typeof value === 'boolean' ? formatBoolean(value) : (value || 'N/A');
     return (
         <div className="flex justify-between py-2 border-b border-gray-700 last:border-b-0">
-            <span className="font-semibold text-gray-400">{label}:</span>
+            <span className="font-semibold text-white">{label}:</span>
             <span className="text-white font-medium">{displayValue}</span>
         </div>
     );
 };
-// =======================================================
-
 
 const UserDetailModal: React.FC<UserDetailModalProps> = ({ userId, isOpen, onClose }) => {
     const [user, setUser] = useState<UserDetail | null>(null);

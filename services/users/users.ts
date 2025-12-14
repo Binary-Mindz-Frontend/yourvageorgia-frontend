@@ -25,23 +25,23 @@ export interface IUserResponse {
         phone: string | null;
         username: string; // I'm keeping 'username' but using 'firstName' and 'lastName' below
         name: string;
-        firstName: string; // Used in your columns
-        lastName: string; // <-- New field
-        dateOfBirth: string; // <-- New field (assuming string, adjust if date)
-        isDeleted: boolean; // <-- New field
-        isVerified: boolean; // <-- New field
-        isPartner: boolean; // <-- New field
+        firstName: string; //  
+        lastName: string; //  
+        dateOfBirth: string; //  
+        isDeleted: boolean; //  
+        isVerified: boolean; //  
+        isPartner: boolean; //  
         isMembership: boolean;
         isBlocked: boolean;
-        isResettingPassword: boolean; // <-- New field
+        isResettingPassword: boolean;  
         avatarUrl: string;
-        role: 'user' | 'admin'; // <-- Changed to lowercase
+        role: 'user' | 'admin';  
         signUpMethod: 'EMAIL' | 'GOOGLE' | 'GITHUB' | 'FACEBOOK';
         createdAt: string;
         updatedAt: string;
-        __v: number; // <-- New field
+        __v: number;  
     };
-    meta: IMeta; // <-- Now correctly typed
+    meta: IMeta;  
 }
 
 export interface IUserUpdatePayload {
@@ -123,5 +123,35 @@ export const updateUserById = async (
         return json.data; // Return updated user data
     } catch (error: any) {
         return { error: error.message };
+    }
+};
+export interface IAdminStats {
+    totalCategory: number;
+    totalMemberShippedUser: any[];
+    totalPartner: number;
+    totalUser: number;
+}
+
+export interface IAdminStatsResponse {
+    success: boolean;
+    statusCode: number;
+    message: string;
+    data: IAdminStats;
+}
+// GET ADMIN STATS
+export const getAdminStats = async (): Promise<IAdminStats | { error: string }> => {
+    try {
+        const res = await fetch(`${BASE_URL}/user/admin-stat`);
+        const json: IAdminStatsResponse = await res.json();
+        
+        if (!res.ok) {
+            // Use 'json.message' or a default error message
+            return { error: json.message || "Failed to fetch admin stats" };
+        }
+
+        return json.data;
+    } catch (error: any) {
+        // Handle network errors or other exceptions
+        return { error: error.message || "An unexpected error occurred" };
     }
 };
