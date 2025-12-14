@@ -154,7 +154,9 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
         setValue("logoUrl", partner.logo || "");
         setValue("address", partner.address || "");
         setValue("activity", partner.activity || "", { shouldValidate: true });
-        setValue("isFeatured", partner.isFeatured || false);
+        const isFeaturedValue = partner.isFeatured === true || partner.isFeatured === "true";
+
+setValue("isFeatured", isFeaturedValue, { shouldValidate: true });
         setValue("aboutTitle", partner.about?.title || "");
         setValue("aboutDescription", partner.about?.description || "");
         setValue("terms", partner.terms && partner.terms.length > 0 ? partner.terms : [""]);
