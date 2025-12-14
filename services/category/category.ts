@@ -3,17 +3,23 @@
 
 import { ICategory } from "@/types/category.types";
 
-const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
-
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_API;
 
 export interface ICategoryResponse {
   success: boolean;
   statusCode: number;
   message: string;
-  data: ICategory & { _id: string; createdAt: string; updatedAt: string; __v: number };
+  data: ICategory & {
+    _id: string;
+    createdAt: string;
+    updatedAt: string;
+    __v: number;
+  };
 }
 
-export const createCategory = async (data: ICategory): Promise<ICategoryResponse | { error: string }> => {
+export const createCategory = async (
+  data: ICategory
+): Promise<ICategoryResponse | { error: string }> => {
   try {
     const res = await fetch(`${BASE_URL}/category`, {
       method: "POST",
@@ -36,7 +42,9 @@ export const createCategory = async (data: ICategory): Promise<ICategoryResponse
 };
 
 // get all categories
-export const getCategories = async (): Promise<{ data: ICategoryResponse["data"][] } | { error: string }> => {
+export const getCategories = async (): Promise<
+  { data: ICategoryResponse["data"][] } | { error: string }
+> => {
   try {
     const res = await fetch(`${BASE_URL}/category`);
     const json = await res.json();
@@ -83,7 +91,7 @@ export const getCategoryById = async (
       return { error: json.message || "Failed to fetch category" };
     }
 
-    return json.data; 
+    return json.data;
   } catch (error: any) {
     return { error: error.message };
   }
@@ -92,7 +100,7 @@ export const getCategoryById = async (
 // update category by id
 export const updateCategory = async (
   categoryId: string,
-  data: Partial<ICategory> 
+  data: Partial<ICategory>
 ): Promise<ICategoryResponse | { error: string }> => {
   try {
     const res = await fetch(`${BASE_URL}/category/${categoryId}`, {
