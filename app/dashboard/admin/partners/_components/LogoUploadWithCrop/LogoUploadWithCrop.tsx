@@ -53,7 +53,7 @@ export default function LogoUploadWithCrop({
       throw new Error('No 2d context');
     }
 
-    // Set canvas size to 300x300
+    // Set canvas size to 433x160
     canvas.width = 433;
     canvas.height = 160;
 
@@ -86,7 +86,7 @@ export default function LogoUploadWithCrop({
         const croppedBlob = await getCroppedImg(cropImage, croppedAreaPixels);
         const croppedImageUrl = URL.createObjectURL(croppedBlob);
         setLogoPreview(croppedImageUrl);
-        onChange(croppedImageUrl);
+        onChange(croppedImageUrl); // ✅ This correctly passes the blob URL
         setShowCropModal(false);
         setCropImage(null);
         setCrop({ x: 0, y: 0 });
@@ -125,10 +125,16 @@ export default function LogoUploadWithCrop({
       </Label>
       <div className="flex gap-2 mt-1">
         <Input
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder="https://logo.png"
+          value={logoPreview ? 'Cropped logo uploaded ✓' : value}
+          onChange={(e) => {
+            // Only allow manual URL input if there's no cropped image
+            if (!logoPreview) {
+              onChange(e.target.value);
+            }
+          }}
+          placeholder="https://logo.png or upload image"
           className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
+          readOnly={!!logoPreview}
         />
         <label className="px-3 py-2 bg-neutral-800 rounded cursor-pointer flex items-center gap-2 text-white hover:bg-neutral-700">
           <Upload size={16} />

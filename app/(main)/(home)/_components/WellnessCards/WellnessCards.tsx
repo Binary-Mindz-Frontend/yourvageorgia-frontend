@@ -4,7 +4,7 @@ import WellnessCardsClient from "./WellnessCardsClient";
 
 export default async function WellnessCards() {
   const res = await getCategories();
-  console.log(res);
+  // console.log(res);
 
   if ("error" in res) {
     return null; // or error UI

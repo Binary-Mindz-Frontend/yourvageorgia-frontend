@@ -1,22 +1,27 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
- images: {
-    domains: [
-      "localhost",
-      "127.0.0.1",
-      "api.solenneuae.com",
+images: {
+    remotePatterns: [
+      {
+        protocol: "http",
+        hostname: "localhost",
+        port: "3000", // optional if using default
+        pathname: "/**", // allow all paths
+      },
+      {
+        protocol: "http",
+        hostname: "127.0.0.1",
+        port: "3000",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "api.solenneuae.com",
+        pathname: "/**",
+      },
     ],
- remotePatterns: [
-      { protocol: "https", hostname: "d1csarkz8obe9u.cloudfront.net" },
-      { protocol: "https", hostname: "i.ibb.co.com" },
-      { protocol: "https", hostname: "static.vecteezy.com" },
-      { protocol: "https", hostname: "i.pinimg.com" },
-      { protocol: "https", hostname: "img.freepik.com" },
-      { protocol: "https", hostname: "media.istockphoto.com" },
-      
-    ],
-},
+  },
 
 
 };

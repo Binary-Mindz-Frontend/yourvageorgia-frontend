@@ -9,7 +9,7 @@ interface ImageGallerySliderProps {
 }
 
 export default function ImageGallerySlider({ images }: ImageGallerySliderProps) {
-  console.log(images)
+  // console.log(images)
   const [index, setIndex] = useState(0);
   const [fade, setFade] = useState(false);
 

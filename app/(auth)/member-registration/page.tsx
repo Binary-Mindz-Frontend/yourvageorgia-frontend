@@ -78,7 +78,7 @@ const MembershipRegister = () => {
 
     const response = await registerUser(payload);
     toast.success(response.message);
-    console.log("===============> res in client =========>", response);
+    // console.log("===============> res in client =========>", response);
     setLoading(false);
 
     if (response?.error) {

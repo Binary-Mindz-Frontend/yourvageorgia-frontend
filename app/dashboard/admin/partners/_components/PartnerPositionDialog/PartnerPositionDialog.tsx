@@ -92,8 +92,8 @@ const PartnerPositionDialog: React.FC<PartnerPositionDialogProps> = ({
             <DialogContent className="sm:max-w-[425px] bg-[#1a1a1a] border-gray-700 text-white">
                 <DialogHeader>
                     <DialogTitle>Update Partner Position</DialogTitle>
-                    <DialogDescription>
-                        Set a new position number for **{partner?.name || "the partner"}**.
+                    <DialogDescription className="text-white">
+                        Set a new position number for <span className="font-bold">{partner?.name || "the partner"}.</span>
                     </DialogDescription>
                 </DialogHeader>
 
@@ -113,7 +113,7 @@ const PartnerPositionDialog: React.FC<PartnerPositionDialogProps> = ({
                     </div>
                     
                     <div className="flex justify-end pt-4">
-                        <Button type="submit" disabled={loading}>
+                        <Button className="cursor-pointer" type="submit" disabled={loading}>
                             {loading ? "Saving..." : "Save changes"}
                         </Button>
                     </div>

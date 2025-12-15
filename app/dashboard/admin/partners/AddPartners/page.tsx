@@ -83,7 +83,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
   const [loadingPartner, setLoadingPartner] = useState(false);
 
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
-  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [ , setLogoPreview] = useState<string | null>(null);
   const [gallery, setGallery] = useState<GalleryItem[]>([]);
 
   const galleryInputRef = useRef<HTMLInputElement | null>(null);
@@ -107,7 +107,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
       thumbnailUrl: "",
       logoUrl: "",
       address: "",
-      activity: "",   
+      activity: "",
       isFeatured: false,
       offers: [{ title: "", percentage: "", description: "", validUntil: "" }], // Changed
       aboutTitle: "",
@@ -124,6 +124,43 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
   const contacts = watch("contacts");
   const offers = watch("offers");
 
+  // Add this function near the top of your component, after the imports
+const uploadImageToServer = async (file: File | Blob, originalFileName?: string): Promise<string> => {
+  const formData = new FormData();
+  
+  // If it's a Blob (from cropping), create a File object with proper extension
+  if (file instanceof Blob && !(file instanceof File)) {
+    // Get extension from original filename or default to jpg
+    const extension = originalFileName 
+      ? originalFileName.split('.').pop() 
+      : 'jpg';
+    
+    // Create a File object with proper name and extension
+    const newFile = new File([file], `image.${extension}`, { type: file.type || 'image/jpeg' });
+    formData.append('file', newFile);
+  } else {
+    // It's already a File object, use it directly
+    formData.append('file', file);
+  }
+
+  try {
+    const apiUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+    const response = await fetch(`${apiUrl}/upload`, {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error('Upload failed');
+    }
+
+    const data = await response.json();
+    return data.url || data.data?.url;
+  } catch (error) {
+    console.error('Error uploading image:', error);
+    throw error;
+  }
+};
   // Fetch partner data if in edit mode
   useEffect(() => {
     if (!partnerId) return;
@@ -156,7 +193,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
         setValue("activity", partner.activity || "", { shouldValidate: true });
         const isFeaturedValue = partner.isFeatured === true || partner.isFeatured === "true";
 
-setValue("isFeatured", isFeaturedValue, { shouldValidate: true });
+        setValue("isFeatured", isFeaturedValue, { shouldValidate: true });
         setValue("aboutTitle", partner.about?.title || "");
         setValue("aboutDescription", partner.about?.description || "");
         setValue("terms", partner.terms && partner.terms.length > 0 ? partner.terms : [""]);
@@ -263,21 +300,56 @@ setValue("isFeatured", isFeaturedValue, { shouldValidate: true });
 
   const toastStyle = { background: "#000", color: "#fff", marginTop: "4rem" };
 
-  const onSubmit = async (data: FormData) => {
-    console.log("Form Data before mapping:", data.offers); // ADD THIS LINE
+const onSubmit = async (data: FormData) => {
+  try {
+    toast.loading("Uploading images...", { id: "upload-images", style: toastStyle });
+
+    // Upload thumbnail if it's a blob URL
+    let thumbnailUrl = data.thumbnailUrl;
+    if (thumbnailPreview && thumbnailPreview.startsWith('blob:')) {
+      const blob = await fetch(thumbnailPreview).then(r => r.blob());
+      // Determine file extension from blob type
+      const extension = blob.type.split('/')[1] || 'jpg';
+      const file = new File([blob], `thumbnail.${extension}`, { type: blob.type });
+      thumbnailUrl = await uploadImageToServer(file);
+    }
+
+    // Upload logo if it's a blob URL
+    let logoUrl = data.logoUrl;
+    if (logoUrl && logoUrl.startsWith('blob:')) {
+      const blob = await fetch(logoUrl).then(r => r.blob());
+      const extension = blob.type.split('/')[1] || 'jpg';
+      const file = new File([blob], `logo.${extension}`, { type: blob.type });
+      logoUrl = await uploadImageToServer(file);
+    }
+
+    // Upload gallery images
+    const uploadedGalleryUrls: string[] = [];
+    for (let i = 0; i < gallery.length; i++) {
+      const item = gallery[i];
+      if (item.preview && item.preview.startsWith('blob:')) {
+        const blob = await fetch(item.preview).then(r => r.blob());
+        const extension = blob.type.split('/')[1] || 'jpg';
+        const file = new File([blob], `gallery-${i}.${extension}`, { type: blob.type });
+        const uploadedUrl = await uploadImageToServer(file);
+        uploadedGalleryUrls.push(uploadedUrl);
+      } else if (item.url) {
+        uploadedGalleryUrls.push(item.url);
+      }
+    }
+
+    toast.dismiss("upload-images");
 
     const payload = {
       category: data.categoryId,
       name: data.name,
-      thumbnail: thumbnailPreview || data.thumbnailUrl,
+      thumbnail: thumbnailUrl,
       address: data.address,
       activity: data.activity || undefined,
-      gallery: gallery
-        .filter(g => g.url.trim() || g.preview)
-        .map(g => g.preview || g.url),
-      logo: logoPreview || data.logoUrl,
+      gallery: uploadedGalleryUrls,
+      logo: logoUrl,
       isFeatured: data.isFeatured,
-      offer: data.offers.map(o => ({  // Changed from offers to offer
+      offer: data.offers.map(o => ({
         title: o.title,
         description: o.description,
         validUntil: o.validUntil,
@@ -296,44 +368,39 @@ setValue("isFeatured", isFeaturedValue, { shouldValidate: true });
       },
     };
 
-    console.log("Mapped offers in payload:", payload.offer); // ADD THIS LINE
-    console.log("Full Payload Data:", JSON.stringify(payload, null, 2)); // ADD THIS LINE
+    console.log("Full Payload Data:", JSON.stringify(payload, null, 2));
 
-    try {
-      let res;
+    let res;
 
-      if (isEditMode) {
-        res = await updatePartner(partnerId, payload);
+    if (isEditMode) {
+      res = await updatePartner(partnerId, payload);
 
-        if ("error" in res) {
-          toast.error("Failed to update partner: " + res.error, { style: toastStyle });
-          return;
-        }
-
-        toast.success("Partner updated successfully!", { style: toastStyle });
-        console.log("Partner updated successfully:", res);
-        // console.log("Response offers:", res.data?.offer); // ADD THIS LINE
-      } else {
-        res = await createPartner(payload);
-
-        if ("error" in res) {
-          toast.error("Failed to create partner: " + res.error, { style: toastStyle });
-          return;
-        }
-
-        toast.success("Partner created successfully!", { style: toastStyle });
-        // console.log("Partner created successfully:", res);
-        // console.log("Response offers:", res.data?.offer); // ADD THIS LINE
+      if ("error" in res) {
+        toast.error("Failed to update partner: " + res.error, { style: toastStyle });
+        return;
       }
 
-      setTimeout(() => {
-        router.push("/dashboard/admin/partners");
-      }, 1500);
-    } catch (err: unknown) {
-      console.error(err);
-      toast.error(`Something went wrong while ${isEditMode ? 'updating' : 'creating'} partner.`, { style: toastStyle });
+      toast.success("Partner updated successfully!", { style: toastStyle });
+    } else {
+      res = await createPartner(payload);
+
+      if ("error" in res) {
+        toast.error("Failed to create partner: " + res.error, { style: toastStyle });
+        return;
+      }
+
+      toast.success("Partner created successfully!", { style: toastStyle });
     }
-  };
+
+    setTimeout(() => {
+      router.push("/dashboard/admin/partners");
+    }, 1500);
+  } catch (err: unknown) {
+    console.error(err);
+    toast.dismiss("upload-images");
+    toast.error(`Something went wrong while ${isEditMode ? 'updating' : 'creating'} partner.`, { style: toastStyle });
+  }
+};
 
   const handleReset = () => {
     reset();
@@ -470,52 +537,52 @@ setValue("isFeatured", isFeaturedValue, { shouldValidate: true });
         </div>
 
         {/* ADDRESS + ACTIVITY */}
-<div className="grid sm:grid-cols-2 gap-4">
-  {/* Address Field (First Column) */}
-  <div>
-    <Label className="text-white mb-1">Address *</Label>
-    <Input
-      {...register("address", { required: "Address is required" })}
-      className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
-      placeholder="Full address"
-    />
-    {errors.address && (
-      <p className="text-red-500 text-sm mt-1">{errors.address.message}</p>
-    )}
-  </div>
+        <div className="grid sm:grid-cols-2 gap-4">
+          {/* Address Field (First Column) */}
+          <div>
+            <Label className="text-white mb-1">Address *</Label>
+            <Input
+              {...register("address", { required: "Address is required" })}
+              className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
+              placeholder="Full address"
+            />
+            {errors.address && (
+              <p className="text-red-500 text-sm mt-1">{errors.address.message}</p>
+            )}
+          </div>
 
-  {/* Activity Select Option (Second Column) */}
-  <div>
-    <Label className="text-white mb-1">Activity *</Label>
-    <Controller
-      name="activity"
-      control={control}
-      rules={{ required: "Activity is required" }}
-      render={({ field }) => (
-        <Select
-          value={field.value}
-          onValueChange={field.onChange}
-          // disabled={loadingActivities} // No loading needed for static list
-        >
-          {/* Note: Use the same SelectTrigger classnames for matching style */}
-          <SelectTrigger className="mt-1 w-full bg-neutral-900 border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50 text-white h-auto min-h-12 py-3 items-start">
-            <SelectValue placeholder="Select activity" />
-          </SelectTrigger>
-          <SelectContent className="bg-neutral-900 text-white border">
-            {ACTIVITY_OPTIONS.map((activity) => (
-              <SelectItem key={activity} value={activity} className="cursor-pointer">
-                {activity.replace(/_/g, " ")} {/* Optional: Display "REFORMER PILATES" */}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      )}
-    />
-    {errors.activity && (
-      <p className="text-red-500 text-sm mt-1">{errors.activity.message}</p>
-    )}
-  </div>
-</div>
+          {/* Activity Select Option (Second Column) */}
+          <div>
+            <Label className="text-white mb-1">Activity *</Label>
+            <Controller
+              name="activity"
+              control={control}
+              rules={{ required: "Activity is required" }}
+              render={({ field }) => (
+                <Select
+                  value={field.value}
+                  onValueChange={field.onChange}
+                // disabled={loadingActivities} // No loading needed for static list
+                >
+                  {/* Note: Use the same SelectTrigger classnames for matching style */}
+                  <SelectTrigger className="mt-1 w-full bg-neutral-900 border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50 text-white h-auto min-h-12 py-3 items-start">
+                    <SelectValue placeholder="Select activity" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-neutral-900 text-white border">
+                    {ACTIVITY_OPTIONS.map((activity) => (
+                      <SelectItem key={activity} value={activity} className="cursor-pointer">
+                        {activity.replace(/_/g, " ")} {/* Optional: Display "REFORMER PILATES" */}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
+            {errors.activity && (
+              <p className="text-red-500 text-sm mt-1">{errors.activity.message}</p>
+            )}
+          </div>
+        </div>
         {/* GALLERY */}
         <div className="mt-6">
           <Label className="text-white mb-1">Gallery Images</Label>
@@ -850,9 +917,9 @@ setValue("isFeatured", isFeaturedValue, { shouldValidate: true });
             )}
           </div>
           <div>
-            <Label className="text-white mb-1">WhatsApp *</Label>
+            <Label className="text-white mb-1">WhatsApp</Label>
             <Input
-              {...register("whatsapp", { required: "WhatsApp is required" })}
+              {...register("whatsapp")}
               className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
               placeholder="https://wa.me/..."
             />
