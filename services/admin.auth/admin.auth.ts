@@ -1,5 +1,5 @@
 // @/services/auth.ts
-
+"use client";
 interface LoginPayload {
   email: string;
   password: string;
@@ -18,9 +18,10 @@ interface LoginResponse {
 }
 
 // Admin credentials (in production, these should come from env variables)
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
+const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD;
 
+console.log("Admin Email:", ADMIN_EMAIL, ADMIN_PASSWORD);
 export const loginAdmin = async (payload: LoginPayload): Promise<LoginResponse> => {
   // Simulate a small delay to make it feel like a real API call
   await new Promise(resolve => setTimeout(resolve, 500));

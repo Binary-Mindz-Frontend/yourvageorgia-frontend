@@ -2,6 +2,7 @@
 "use server";
 
 import { Partner } from "@/types/partner.types";
+// import { CloudCog } from "lucide-react";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_API;
 
@@ -86,6 +87,7 @@ export const getPartners = async (
     const queryParams = new URLSearchParams();
 
     // Force sorting by position ASC
+   console.log({params})
     queryParams.set("sortBy", "position");
     queryParams.set("sortOrder", "asc");
 
@@ -100,6 +102,7 @@ export const getPartners = async (
     });
 
     const url = `${BASE_URL}/partner?${queryParams.toString()}`;
+    console.log("Fetching partners with URL:", url);
     const res = await fetch(url);
     const json = await res.json();
 
