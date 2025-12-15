@@ -18,8 +18,8 @@ interface LoginResponse {
 }
 
 // Admin credentials (in production, these should come from env variables)
-const ADMIN_EMAIL = "admin@example.com";
-const ADMIN_PASSWORD = "admin1234";
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
 export const loginAdmin = async (payload: LoginPayload): Promise<LoginResponse> => {
   // Simulate a small delay to make it feel like a real API call

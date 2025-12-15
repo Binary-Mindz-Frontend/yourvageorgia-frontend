@@ -108,18 +108,17 @@
 // export default DashboardLayout;
 
 "use client";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { ReactNode, useState, useEffect, useRef } from "react";
-import avatar from "@/public/assets/dashboard/header/avatar.png";
 import { MdOutlineNotificationsNone } from "react-icons/md";
 import { AppSidebar } from "@/components/Shared/dashboard/sidebar/AppSidebar";
 import useScrollTrigger from "@/hooks/useScrollTrigger";
-import { LogOut } from "lucide-react";
+import { LogOut, User } from "lucide-react";
 import { Toaster } from "sonner";
 import { useRouter, usePathname } from "next/navigation";
 
@@ -221,9 +220,9 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
                     className="h-10 w-10 cursor-pointer" 
                     onClick={toggleLogout}
                   >
-                    <AvatarImage src={avatar.src} alt="Solenne" />
+                    {/* <AvatarImage src={avatar.src} alt="Solenne" /> */}
                     <AvatarFallback className="bg-gray-700 text-white">
-                      SJ
+                      <User />
                     </AvatarFallback>
                   </Avatar>
                   
