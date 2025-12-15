@@ -5,7 +5,6 @@ import {
     Eye,
     MoreHorizontal,
     Plus,
-    Search,
     SquarePen,
     Trash2,
     X,
@@ -199,18 +198,7 @@ const CategoryPage = () => {
             <header>
                 <h1 className="text-base py-2 sm:py-5 text-white">Category Management</h1>
 
-                <div className="flex justify-between mb-4 items-center w-full flex-wrap gap-5">
-                    <div className="relative w-full sm:w-1/3">
-                        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                            <Search size={18} className="text-gray-400 group-focus:text-primary" />
-                        </div>
-                        <input
-                            type="text"
-                            placeholder="Search..."
-                            autoFocus
-                            className="w-full px-4 pl-10 py-2 rounded-full bg-accent/10 border border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 text-sm transition-all group"
-                        />
-                    </div>
+                <div className="flex justify-end mb-4 items-center w-full flex-wrap gap-5">
 
                     <Button
                         className="cursor-pointer flex items-center bg-[#1a1a1a] hover:bg-[#1a1a1a] px-4 py-2"
