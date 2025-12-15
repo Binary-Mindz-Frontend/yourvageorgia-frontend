@@ -19,9 +19,8 @@ import {
 import { ICategory } from "@/types/category.types";
 import Image from "next/image";
 
-
 // Backend base URL
-const BACKEND_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+const BACKEND_BASE_URL = process.env.NEXT_PUBLIC_BASE_API;
 
 type AddCategoryProps = {
   open: boolean;
@@ -203,12 +202,15 @@ export default function AddCategoryModal({
 
             <label
               htmlFor="featureImage"
-              className={`border border-primary/50 rounded-md p-6 text-center bg-[#1a1a1a] cursor-pointer block mt-2 hover:bg-accent/10 transition-colors ${uploading ? "opacity-50 pointer-events-none" : ""
-                }`}
+              className={`border border-primary/50 rounded-md p-6 text-center bg-[#1a1a1a] cursor-pointer block mt-2 hover:bg-accent/10 transition-colors ${
+                uploading ? "opacity-50 pointer-events-none" : ""
+              }`}
             >
               <Upload className="mx-auto mb-2 text-gray-400" />
               <p className="text-sm text-gray-400">
-                {uploading ? "Uploading..." : "Click to upload or drag and drop"}
+                {uploading
+                  ? "Uploading..."
+                  : "Click to upload or drag and drop"}
               </p>
               <p className="text-xs text-gray-500">PNG, JPG up to 10MB</p>
 
@@ -260,10 +262,10 @@ export default function AddCategoryModal({
                 ? "Updating..."
                 : "Adding..."
               : uploading
-                ? "Uploading..."
-                : isEdit
-                  ? "Update"
-                  : "Add"}
+              ? "Uploading..."
+              : isEdit
+              ? "Update"
+              : "Add"}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -3,7 +3,7 @@
 
 import { Partner } from "@/types/partner.types";
 
-const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_API;
 
 // --- New Interface for Query Parameters ---
 export interface IGetPartnersParams {

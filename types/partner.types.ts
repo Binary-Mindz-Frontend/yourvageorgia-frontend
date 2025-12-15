@@ -48,3 +48,5 @@ export interface Partner {
   contacts?: PartnerContact[];
   socials?: PartnerSocials;
 }
+
+

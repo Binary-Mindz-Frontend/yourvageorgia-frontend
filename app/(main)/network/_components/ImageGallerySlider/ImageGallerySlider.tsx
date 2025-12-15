@@ -1,4 +1,4 @@
-"use client";
+
 import Image, { StaticImageData } from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
@@ -9,6 +9,7 @@ interface ImageGallerySliderProps {
 }
 
 export default function ImageGallerySlider({ images }: ImageGallerySliderProps) {
+  // console.log(images)
   const [index, setIndex] = useState(0);
   const [fade, setFade] = useState(false);
 
