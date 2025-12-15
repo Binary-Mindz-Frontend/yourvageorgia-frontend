@@ -90,7 +90,7 @@ export const getPartners = async (
     queryParams.set("sortOrder", "asc");
 
     (Object.keys(params) as Array<keyof IGetPartnersParams>).forEach((key) => {
-      // ❌ Prevent override
+      // Prevent override
       if (key === "sortBy" || key === "sortOrder") return;
 
       const value = params[key];
