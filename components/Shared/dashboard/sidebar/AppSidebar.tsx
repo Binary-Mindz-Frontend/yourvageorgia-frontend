@@ -41,6 +41,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       url: "/dashboard/admin/partners",
       show: true,
     },
+    {
+      title: "Members",
+      Icon: Users,
+      url: "/dashboard/admin/members",
+      show: true,
+    },
   ];
 
   return (

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
@@ -32,6 +33,24 @@ interface GalleryItem {
   preview: string | null;
   file: File | null;
 }
+type Offer = {
+  title: string;
+  percentage: string;
+  description: string;
+  validUntil: string;
+};
+// Add this constant near the top of your file
+const ACTIVITY_OPTIONS = [
+  "REFORMER_PILATES",
+  "SAUNA",
+  "MASSAGE",
+  "COFFEE",
+  "GYM",
+  "SPA",
+  "PADEL",
+] as const;
+
+type ActivityOption = typeof ACTIVITY_OPTIONS[number];
 
 interface FormData {
   categoryId: string;
@@ -39,11 +58,9 @@ interface FormData {
   thumbnailUrl: string;
   logoUrl: string;
   address: string;
+  activity: ActivityOption | ""; // <-- ADD THIS LINE
   isFeatured: boolean;
-  offerTitle: string;
-  offerDescription: string;
-  offerValidUntil: string;
-  offerPercentage: string;
+  offers: Offer[];
   aboutTitle: string;
   aboutDescription: string;
   terms: string[];
@@ -66,7 +83,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
   const [loadingPartner, setLoadingPartner] = useState(false);
 
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
-  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [ , setLogoPreview] = useState<string | null>(null);
   const [gallery, setGallery] = useState<GalleryItem[]>([]);
 
   const galleryInputRef = useRef<HTMLInputElement | null>(null);
@@ -90,11 +107,9 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
       thumbnailUrl: "",
       logoUrl: "",
       address: "",
+      activity: "",
       isFeatured: false,
-      offerTitle: "",
-      offerDescription: "",
-      offerValidUntil: "",
-      offerPercentage: "",
+      offers: [{ title: "", percentage: "", description: "", validUntil: "" }], // Changed
       aboutTitle: "",
       aboutDescription: "",
       terms: [""],
@@ -107,7 +122,45 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
 
   const terms = watch("terms");
   const contacts = watch("contacts");
+  const offers = watch("offers");
 
+  // Add this function near the top of your component, after the imports
+const uploadImageToServer = async (file: File | Blob, originalFileName?: string): Promise<string> => {
+  const formData = new FormData();
+  
+  // If it's a Blob (from cropping), create a File object with proper extension
+  if (file instanceof Blob && !(file instanceof File)) {
+    // Get extension from original filename or default to jpg
+    const extension = originalFileName 
+      ? originalFileName.split('.').pop() 
+      : 'jpg';
+    
+    // Create a File object with proper name and extension
+    const newFile = new File([file], `image.${extension}`, { type: file.type || 'image/jpeg' });
+    formData.append('file', newFile);
+  } else {
+    // It's already a File object, use it directly
+    formData.append('file', file);
+  }
+
+  try {
+    const apiUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+    const response = await fetch(`${apiUrl}/upload`, {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error('Upload failed');
+    }
+
+    const data = await response.json();
+    return data.url || data.data?.url;
+  } catch (error) {
+    console.error('Error uploading image:', error);
+    throw error;
+  }
+};
   // Fetch partner data if in edit mode
   useEffect(() => {
     if (!partnerId) return;
@@ -116,11 +169,10 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
       setLoadingPartner(true);
       try {
         // Construct the correct API URL
-        const apiUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+        const apiUrl = process.env.NEXT_PUBLIC_BASE_API;
         const fetchUrl = `${apiUrl}/partner/${partnerId}`;
 
         const res = await fetch(fetchUrl);
-
         const json = await res.json();
 
         if (!res.ok) {
@@ -138,11 +190,10 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
         setValue("thumbnailUrl", partner.thumbnail || "");
         setValue("logoUrl", partner.logo || "");
         setValue("address", partner.address || "");
-        setValue("isFeatured", partner.isFeatured || false);
-        setValue("offerTitle", partner.offer?.title || "");
-        setValue("offerDescription", partner.offer?.description || "");
-        setValue("offerValidUntil", partner.offer?.validUntil ? partner.offer.validUntil.split('T')[0] : "");
-        setValue("offerPercentage", partner.offer?.offerPercentage?.toString() || "");
+        setValue("activity", partner.activity || "", { shouldValidate: true });
+        const isFeaturedValue = partner.isFeatured === true || partner.isFeatured === "true";
+
+        setValue("isFeatured", isFeaturedValue, { shouldValidate: true });
         setValue("aboutTitle", partner.about?.title || "");
         setValue("aboutDescription", partner.about?.description || "");
         setValue("terms", partner.terms && partner.terms.length > 0 ? partner.terms : [""]);
@@ -150,6 +201,18 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
         setValue("website", partner.socials?.website || "");
         setValue("instagram", partner.socials?.instagram || "");
         setValue("whatsapp", partner.socials?.whatsapp || "");
+
+        // Set offers data, ensuring proper default values
+        if (partner.offer && partner.offer.length > 0) {  // Changed from offers to offer
+          setValue("offers", partner.offer.map((o: any) => ({  // Changed from offers to offer
+            title: o.title || "",
+            percentage: o.offerPercentage?.toString() || "",
+            description: o.description || "",
+            validUntil: o.validUntil ? o.validUntil.split('T')[0] : "",
+          })));
+        } else {
+          setValue("offers", [{ title: "", percentage: "", description: "", validUntil: "" }]);
+        }
 
         // Set previews for images
         if (partner.thumbnail) setThumbnailPreview(partner.thumbnail);
@@ -178,17 +241,13 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
     fetchPartnerData();
   }, [partnerId, setValue]);
 
+
   const removeThumbnail = () => {
     setThumbnailPreview("");
     setValue("thumbnailUrl", "");
     if (thumbnailInputRef.current) thumbnailInputRef.current.value = "";
   };
 
-  // const removeLogo = () => {
-  //   setLogoPreview("");
-  //   setValue("logoUrl", "");
-  //   if (logoInputRef.current) logoInputRef.current.value = "";
-  // };
 
   const handleGalleryFileChange = (files: FileList) => {
     const newImages: GalleryItem[] = Array.from(files).map((file) => ({
@@ -241,23 +300,61 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
 
   const toastStyle = { background: "#000", color: "#fff", marginTop: "4rem" };
 
-  const onSubmit = async (data: FormData) => {
+const onSubmit = async (data: FormData) => {
+  try {
+    toast.loading("Uploading images...", { id: "upload-images", style: toastStyle });
+
+    // Upload thumbnail if it's a blob URL
+    let thumbnailUrl = data.thumbnailUrl;
+    if (thumbnailPreview && thumbnailPreview.startsWith('blob:')) {
+      const blob = await fetch(thumbnailPreview).then(r => r.blob());
+      // Determine file extension from blob type
+      const extension = blob.type.split('/')[1] || 'jpg';
+      const file = new File([blob], `thumbnail.${extension}`, { type: blob.type });
+      thumbnailUrl = await uploadImageToServer(file);
+    }
+
+    // Upload logo if it's a blob URL
+    let logoUrl = data.logoUrl;
+    if (logoUrl && logoUrl.startsWith('blob:')) {
+      const blob = await fetch(logoUrl).then(r => r.blob());
+      const extension = blob.type.split('/')[1] || 'jpg';
+      const file = new File([blob], `logo.${extension}`, { type: blob.type });
+      logoUrl = await uploadImageToServer(file);
+    }
+
+    // Upload gallery images
+    const uploadedGalleryUrls: string[] = [];
+    for (let i = 0; i < gallery.length; i++) {
+      const item = gallery[i];
+      if (item.preview && item.preview.startsWith('blob:')) {
+        const blob = await fetch(item.preview).then(r => r.blob());
+        const extension = blob.type.split('/')[1] || 'jpg';
+        const file = new File([blob], `gallery-${i}.${extension}`, { type: blob.type });
+        const uploadedUrl = await uploadImageToServer(file);
+        uploadedGalleryUrls.push(uploadedUrl);
+      } else if (item.url) {
+        uploadedGalleryUrls.push(item.url);
+      }
+    }
+
+    toast.dismiss("upload-images");
+
     const payload = {
       category: data.categoryId,
       name: data.name,
-      thumbnail: thumbnailPreview || data.thumbnailUrl,
+      thumbnail: thumbnailUrl,
       address: data.address,
-      gallery: gallery
-        .filter(g => g.url.trim() || g.preview)
-        .map(g => g.preview || g.url),
-      logo: logoPreview || data.logoUrl,
+      activity: data.activity || undefined,
+      gallery: uploadedGalleryUrls,
+      logo: logoUrl,
       isFeatured: data.isFeatured,
-      offer: {
-        title: data.offerTitle,
-        description: data.offerDescription,
-        validUntil: data.offerValidUntil,
-        offerPercentage: data.offerPercentage === "" ? undefined : Number(data.offerPercentage),
-      },
+      offer: data.offers.map(o => ({
+        title: o.title,
+        description: o.description,
+        validUntil: o.validUntil,
+        offerPercentage: o.percentage === "" ? undefined : Number(o.percentage)
+      })),
       about: {
         title: data.aboutTitle,
         description: data.aboutDescription,
@@ -271,44 +368,39 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
       },
     };
 
-    console.log("Payload Data:", payload);
+    console.log("Full Payload Data:", JSON.stringify(payload, null, 2));
 
-    try {
-      let res;
+    let res;
 
-      if (isEditMode) {
-        // Update existing partner
-        res = await updatePartner(partnerId, payload);
+    if (isEditMode) {
+      res = await updatePartner(partnerId, payload);
 
-        if ("error" in res) {
-          toast.error("Failed to update partner: " + res.error, { style: toastStyle });
-          return;
-        }
-
-        toast.success("Partner updated successfully!", { style: toastStyle });
-        console.log("Partner updated successfully:", res);
-      } else {
-        // Create new partner
-        res = await createPartner(payload);
-
-        if ("error" in res) {
-          toast.error("Failed to create partner: " + res.error, { style: toastStyle });
-          return;
-        }
-
-        toast.success("Partner created successfully!", { style: toastStyle });
-        console.log("Partner created successfully:", res);
+      if ("error" in res) {
+        toast.error("Failed to update partner: " + res.error, { style: toastStyle });
+        return;
       }
 
-      // Navigate back after success
-      setTimeout(() => {
-        router.push("/dashboard/admin/partners");
-      }, 1500);
-    } catch (err: unknown) {
-      console.error(err);
-      toast.error(`Something went wrong while ${isEditMode ? 'updating' : 'creating'} partner.`, { style: toastStyle });
+      toast.success("Partner updated successfully!", { style: toastStyle });
+    } else {
+      res = await createPartner(payload);
+
+      if ("error" in res) {
+        toast.error("Failed to create partner: " + res.error, { style: toastStyle });
+        return;
+      }
+
+      toast.success("Partner created successfully!", { style: toastStyle });
     }
-  };
+
+    setTimeout(() => {
+      router.push("/dashboard/admin/partners");
+    }, 1500);
+  } catch (err: unknown) {
+    console.error(err);
+    toast.dismiss("upload-images");
+    toast.error(`Something went wrong while ${isEditMode ? 'updating' : 'creating'} partner.`, { style: toastStyle });
+  }
+};
 
   const handleReset = () => {
     reset();
@@ -318,7 +410,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
     if (thumbnailInputRef.current) thumbnailInputRef.current.value = "";
     if (logoInputRef.current) logoInputRef.current.value = "";
     if (galleryInputRef.current) galleryInputRef.current.value = "";
-  };
+  }
 
   if (loadingPartner) {
     return (
@@ -383,80 +475,114 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
           </div>
         </div>
 
-{/* THUMBNAIL + LOGO */}
-<div className="grid sm:grid-cols-2 gap-4">
-  {/* Thumbnail - keep as is */}
-  <div>
-    <Label className="text-white mb-1">Thumbnail Image *</Label>
-    <div className="flex gap-2 mt-1">
-      <Input
-        {...register("thumbnailUrl", { required: "Thumbnail is required" })}
-        placeholder="/uploads/example.jpg or full URL"
-        className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
-      />
-      <label className="px-3 py-2 bg-neutral-800 rounded cursor-pointer flex items-center gap-2 text-white hover:bg-neutral-700">
-        <Upload size={16} />
-        <input
-          ref={thumbnailInputRef}
-          type="file"
-          accept="image/*"
-          className="hidden"
-          onChange={(e) => {
-            const file = e.target.files?.[0];
-            if (file) {
-              previewFile(file, setThumbnailPreview);
-              setValue("thumbnailUrl", file.name, { shouldValidate: true });
-            }
-          }}
-        />
-      </label>
-    </div>
-    {errors.thumbnailUrl && !thumbnailPreview && (
-      <p className="text-red-500 text-sm mt-1">{errors.thumbnailUrl.message}</p>
-    )}
+        {/* THUMBNAIL + LOGO */}
+        <div className="grid sm:grid-cols-2 gap-4">
+          {/* Thumbnail - keep as is */}
+          <div>
+            <Label className="text-white mb-1">Thumbnail Image *</Label>
+            <div className="flex gap-2 mt-1">
+              <Input
+                {...register("thumbnailUrl", { required: "Thumbnail is required" })}
+                placeholder="/uploads/example.jpg or full URL"
+                className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
+              />
+              <label className="px-3 py-2 bg-neutral-800 rounded cursor-pointer flex items-center gap-2 text-white hover:bg-neutral-700">
+                <Upload size={16} />
+                <input
+                  ref={thumbnailInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      previewFile(file, setThumbnailPreview);
+                      setValue("thumbnailUrl", file.name, { shouldValidate: true });
+                    }
+                  }}
+                />
+              </label>
+            </div>
+            {errors.thumbnailUrl && !thumbnailPreview && (
+              <p className="text-red-500 text-sm mt-1">{errors.thumbnailUrl.message}</p>
+            )}
 
-    {(thumbnailPreview || watch("thumbnailUrl")) && (
-      <div className="mt-2 w-full h-44 relative rounded overflow-hidden border border-neutral-700">
-        <button
-          type="button"
-          onClick={removeThumbnail}
-          className="absolute top-2 right-2 bg-red-600 text-white rounded w-7 h-7 flex items-center justify-center hover:bg-red-700 z-10"
-        >
-          ×
-        </button>
-        <Image
-          src={thumbnailPreview || watch("thumbnailUrl")}
-          alt="thumb"
-          fill
-          className="object-cover"
-          unoptimized
-        />
-      </div>
-    )}
-  </div>
+            {(thumbnailPreview || watch("thumbnailUrl")) && (
+              <div className="mt-2 w-full h-44 relative rounded overflow-hidden border border-neutral-700">
+                <button
+                  type="button"
+                  onClick={removeThumbnail}
+                  className="absolute top-2 right-2 bg-red-600 text-white rounded w-7 h-7 flex items-center justify-center hover:bg-red-700 z-10"
+                >
+                  ×
+                </button>
+                <Image
+                  src={thumbnailPreview || watch("thumbnailUrl")}
+                  alt="thumb"
+                  fill
+                  className="object-cover"
+                  unoptimized
+                />
+              </div>
+            )}
+          </div>
 
-  {/* Logo Section - Now using the component */}
-  <LogoUploadWithCrop
-    value={watch("logoUrl") || ""}
-    onChange={(value) => setValue("logoUrl", value, { shouldValidate: true })}
-    error={errors.logoUrl?.message}
-    required={watch("isFeatured")}
-  />
-</div>
-
-        {/* Address */}
-        <div>
-          <Label className="text-white mb-1">Address *</Label>
-          <Input
-            {...register("address", { required: "Address is required" })}
-            className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
-            placeholder="Full address"
+          {/* Logo Section - Now using the component */}
+          <LogoUploadWithCrop
+            value={watch("logoUrl") || ""}
+            onChange={(value) => setValue("logoUrl", value, { shouldValidate: true })}
+            error={errors.logoUrl?.message}
+            required={watch("isFeatured")}
           />
-          {errors.address && (
-            <p className="text-red-500 text-sm mt-1">{errors.address.message}</p>
-          )}
         </div>
 
+        {/* ADDRESS + ACTIVITY */}
+        <div className="grid sm:grid-cols-2 gap-4">
+          {/* Address Field (First Column) */}
+          <div>
+            <Label className="text-white mb-1">Address *</Label>
+            <Input
+              {...register("address", { required: "Address is required" })}
+              className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
+              placeholder="Full address"
+            />
+            {errors.address && (
+              <p className="text-red-500 text-sm mt-1">{errors.address.message}</p>
+            )}
+          </div>
+
+          {/* Activity Select Option (Second Column) */}
+          <div>
+            <Label className="text-white mb-1">Activity *</Label>
+            <Controller
+              name="activity"
+              control={control}
+              rules={{ required: "Activity is required" }}
+              render={({ field }) => (
+                <Select
+                  value={field.value}
+                  onValueChange={field.onChange}
+                // disabled={loadingActivities} // No loading needed for static list
+                >
+                  {/* Note: Use the same SelectTrigger classnames for matching style */}
+                  <SelectTrigger className="mt-1 w-full bg-neutral-900 border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50 text-white h-auto min-h-12 py-3 items-start">
+                    <SelectValue placeholder="Select activity" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-neutral-900 text-white border">
+                    {ACTIVITY_OPTIONS.map((activity) => (
+                      <SelectItem key={activity} value={activity} className="cursor-pointer">
+                        {activity.replace(/_/g, " ")} {/* Optional: Display "REFORMER PILATES" */}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
+            {errors.activity && (
+              <p className="text-red-500 text-sm mt-1">{errors.activity.message}</p>
+            )}
+          </div>
+        </div>
         {/* GALLERY */}
         <div className="mt-6">
           <Label className="text-white mb-1">Gallery Images</Label>
@@ -519,52 +645,114 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
           )}
         </div>
 
-        {/* OFFER */}
-        <div className="grid sm:grid-cols-2 gap-4">
-          <div>
-            <Label className="text-white mb-1">Offer Title *</Label>
-            <Input
-              {...register("offerTitle", { required: "Offer title is required" })}
-              className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
-              placeholder="Offer title"
-            />
-            {errors.offerTitle && (
-              <p className="text-red-500 text-sm mt-1">{errors.offerTitle.message}</p>
-            )}
+        {/* OFFERS */}
+        <div>
+          <div className="flex justify-between mb-2">
+            <Label className="text-white">Offers *</Label>
+            <Button
+              type="button"
+              className="bg-neutral-700 hover:bg-neutral-600 cursor-pointer"
+              onClick={() => {
+                // Get common description and validUntil from first offer
+                const commonDesc = offers.length > 0 ? offers[0].description : "";
+                const commonValid = offers.length > 0 ? offers[0].validUntil : "";
+                setValue("offers", [...offers, { title: "", percentage: "", description: commonDesc, validUntil: commonValid }]);
+              }}
+            >
+              + Add Offer
+            </Button>
           </div>
-          <div>
-            <Label className="text-white mb-1">Offer Percentage *</Label>
-            <Input
-              type="number"
-              {...register("offerPercentage", { required: "Offer percentage is required" })}
-              className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
-              placeholder="10"
-            />
-            {errors.offerPercentage && (
-              <p className="text-red-500 text-sm mt-1">{errors.offerPercentage.message}</p>
-            )}
-          </div>
-          <div className="sm:col-span-2">
-            <Label className="text-white mb-1">Description *</Label>
-            <Textarea
-              {...register("offerDescription", { required: "Offer description is required" })}
-              className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
-            />
-            {errors.offerDescription && (
-              <p className="text-red-500 text-sm mt-1">{errors.offerDescription.message}</p>
-            )}
-          </div>
-          <div>
-            <Label className="text-white mb-1">Valid Until *</Label>
-            <Input
-              type="date"
-              {...register("offerValidUntil", { required: "Valid until date is required" })}
-              className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
-            />
-            {errors.offerValidUntil && (
-              <p className="text-red-500 text-sm mt-1">{errors.offerValidUntil.message}</p>
-            )}
-          </div>
+
+          {offers.map((offer, i) => (
+            <div key={i} className="mt-3 p-4 border bg-neutral-900 border-neutral-700 rounded-md">
+              <div className="flex justify-between mb-2">
+                <p className="text-white">Offer {i + 1}</p>
+                {i > 0 && (
+                  <Button
+                    type="button"
+                    className="bg-neutral-700 hover:bg-neutral-600 text-white"
+                    onClick={() => setValue("offers", offers.filter((_, idx) => idx !== i))}
+                  >
+                    -
+                  </Button>
+                )}
+              </div>
+
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-white mb-1">Offer Title *</Label>
+                  <Input
+                    {...register(`offers.${i}.title`, { required: "Offer title is required" })}
+                    className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
+                    placeholder="Offer title"
+                  />
+                  {errors.offers?.[i]?.title && (
+                    <p className="text-red-500 text-sm mt-1">{errors.offers[i]?.title?.message}</p>
+                  )}
+                </div>
+                <div>
+                  <Label className="text-white mb-1">Offer Percentage *</Label>
+                  <Input
+                    type="number"
+                    {...register(`offers.${i}.percentage`, { required: "Offer percentage is required" })}
+                    className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
+                    placeholder="10"
+                  />
+                  {errors.offers?.[i]?.percentage && (
+                    <p className="text-red-500 text-sm mt-1">{errors.offers[i]?.percentage?.message}</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="mt-4">
+                <Label className="text-white mb-1">Description *</Label>
+                <Controller
+                  name={`offers.${i}.description`}
+                  control={control}
+                  rules={{ required: "Offer description is required" }}
+                  render={({ field }) => (
+                    <Textarea
+                      value={field.value}
+                      onChange={(e) => {
+                        const newDesc = e.target.value;
+                        const updatedOffers = offers.map(o => ({ ...o, description: newDesc }));
+                        setValue("offers", updatedOffers, { shouldValidate: false });
+                      }}
+                      className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
+                      placeholder="Offer description"
+                    />
+                  )}
+                />
+                {errors.offers?.[i]?.description && (
+                  <p className="text-red-500 text-sm mt-1">{errors.offers[i]?.description?.message}</p>
+                )}
+              </div>
+
+              <div className="mt-4">
+                <Label className="text-white mb-1">Valid Until *</Label>
+                <Controller
+                  name={`offers.${i}.validUntil`}
+                  control={control}
+                  rules={{ required: "Valid until date is required" }}
+                  render={({ field }) => (
+                    <Input
+                      type="date"
+                      value={field.value}
+                      onChange={(e) => {
+                        const newDate = e.target.value;
+                        const updatedOffers = offers.map(o => ({ ...o, validUntil: newDate }));
+                        setValue("offers", updatedOffers, { shouldValidate: false });
+                      }}
+                      className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
+                    />
+                  )}
+                />
+                {errors.offers?.[i]?.validUntil && (
+                  <p className="text-red-500 text-sm mt-1">{errors.offers[i]?.validUntil?.message}</p>
+                )}
+              </div>
+            </div>
+          ))}
         </div>
 
         {/* ABOUT */}
@@ -638,7 +826,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
             </Button>
           </div>
           {contacts.map((c, i) => (
-            <div key={i} className="mt-3 p-4 border bg-neutral-900 text-white border-neutral-700">
+            <div key={i} className="mt-3 p-4 border bg-neutral-900 text-white border-neutral-700 rounded-md">
               <div className="flex justify-between mb-2">
                 <p>Contact {i + 1}</p>
                 {i > 0 && (
@@ -666,7 +854,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
                 <Input
                   {...register(`contacts.${i}.phone`, {
                     required: "Phone is required"
-                    })}
+                  })}
                   placeholder="Phone"
                   className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
                 />
@@ -729,9 +917,9 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
             )}
           </div>
           <div>
-            <Label className="text-white mb-1">WhatsApp *</Label>
+            <Label className="text-white mb-1">WhatsApp</Label>
             <Input
-              {...register("whatsapp", { required: "WhatsApp is required" })}
+              {...register("whatsapp")}
               className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
               placeholder="https://wa.me/..."
             />
@@ -764,7 +952,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
           {
             isEditMode ? " " : (<Button
               type="button"
-              className="bg-white cursor-pointer font-normal text-black hover:bg-black"
+              className="bg-white cursor-pointer font-normal text-black hover:bg-white"
               onClick={handleReset}
             >
               Reset

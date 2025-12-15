@@ -2,7 +2,7 @@ export const WhatsappIcon = () => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      className="w-6 h-6 md:w-8 md:h-8"
+      className="w-6 h-6 md:w-10 md:h-10"
       viewBox="0 0 40 40"
       fill="none"
     >

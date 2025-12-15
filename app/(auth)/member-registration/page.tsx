@@ -1,6 +1,6 @@
 "use client";
 
-import { EyeOff } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -13,8 +13,6 @@ import toast from "react-hot-toast";
 
 const MembershipRegister = () => {
   const router = useRouter();
-
-  // console.log(process.env.NEXT_PUBLIC_BASE_API);
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -80,7 +78,7 @@ const MembershipRegister = () => {
 
     const response = await registerUser(payload);
     toast.success(response.message);
-    console.log("===============> res in client =========>", response);
+    // console.log("===============> res in client =========>", response);
     setLoading(false);
 
     if (response?.error) {
@@ -171,7 +169,11 @@ const MembershipRegister = () => {
               onClick={() => setShowPassword(!showPassword)}
               className="absolute inset-y-0 right-0 pr-3 flex items-center"
             >
-              <EyeOff className="w-5 h-5 text-neutral-400" />
+              {showPassword ? (
+                <Eye className="w-5 h-5 text-neutral-400 cursor-pointer" />
+              ) : (
+                <EyeOff className="w-5 h-5 text-neutral-400 cursor-pointer" />
+              )}
             </button>
           </div>
 
@@ -191,7 +193,11 @@ const MembershipRegister = () => {
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
               className="absolute inset-y-0 right-0 pr-3 flex items-center"
             >
-              <EyeOff className="w-5 h-5 text-neutral-400" />
+              {showConfirmPassword ? (
+                <Eye className="w-5 h-5 text-neutral-400 cursor-pointer" />
+              ) : (
+                <EyeOff className="w-5 h-5 text-neutral-400 cursor-pointer" />
+              )}
             </button>
           </div>
 
