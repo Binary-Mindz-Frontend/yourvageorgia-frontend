@@ -70,10 +70,10 @@ export default function SolenneMembership() {
       {/* Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-9999  overflow-y-auto">
-          <NetworkCardModal
+          {/* <NetworkCardModal
             isOpen={isModalOpen}
             onClose={() => setIsModalOpen(false)}
-          />
+          /> */}
         </div>
       )}
     </div>

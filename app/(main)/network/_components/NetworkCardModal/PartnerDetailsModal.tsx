@@ -6,7 +6,7 @@ import { WhatsappIcon } from "@/app/(main)/network/_components/NetworkCardModal/
 import ImageGallerySlider from "@/app/(main)/network/_components/ImageGallerySlider/ImageGallerySlider";
 import Link from "next/link";
 
-export default function FeaturePartnerModal({
+export default function PartnerDetailsModal({
   onClose,
   partner,
 }: {

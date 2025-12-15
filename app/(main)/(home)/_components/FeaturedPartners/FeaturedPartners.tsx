@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { getPartners } from "@/services/partner/partner";
 import FeaturedPartnersCarouselClient from "./FeaturedPartnersCarouselClient";
 
@@ -9,9 +10,12 @@ export default async function FeaturedPartnersCarousel() {
   }
 
   // only featured partners
-  const featuredPartners = res.data.filter(
-    (partner) => partner.isFeatured === "true"
-  );
+ const featuredPartners = res.data.filter(
+  (partner) =>
+    partner.isFeatured === true || partner.isFeatured === "true" as any
+);
+
+
 
   return (
     <FeaturedPartnersCarouselClient partners={featuredPartners} />
