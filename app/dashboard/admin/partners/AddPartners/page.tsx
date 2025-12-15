@@ -156,7 +156,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
         setValue("activity", partner.activity || "", { shouldValidate: true });
         const isFeaturedValue = partner.isFeatured === true || partner.isFeatured === "true";
 
-setValue("isFeatured", isFeaturedValue, { shouldValidate: true });
+        setValue("isFeatured", isFeaturedValue, { shouldValidate: true });
         setValue("aboutTitle", partner.about?.title || "");
         setValue("aboutDescription", partner.about?.description || "");
         setValue("terms", partner.terms && partner.terms.length > 0 ? partner.terms : [""]);
@@ -850,9 +850,9 @@ setValue("isFeatured", isFeaturedValue, { shouldValidate: true });
             )}
           </div>
           <div>
-            <Label className="text-white mb-1">WhatsApp *</Label>
+            <Label className="text-white mb-1">WhatsApp</Label>
             <Input
-              {...register("whatsapp", { required: "WhatsApp is required" })}
+              {...register("whatsapp")}
               className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
               placeholder="https://wa.me/..."
             />
