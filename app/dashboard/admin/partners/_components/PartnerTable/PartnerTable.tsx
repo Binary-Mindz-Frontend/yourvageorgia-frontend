@@ -218,10 +218,10 @@ const PartnerPage = () => {
             header: "Name",
             cell: (row) => <span className="text-white">{row.name}</span>,
         },
-        {
-            header: "Position",
-            cell: (row) => <span className="text-white">{row.position}</span>,
-        },
+        // {
+        //     header: "Position",
+        //     cell: (row) => <span className="text-white">{row.position}</span>,
+        // },
         {
             header: "Category",
             cell: (row) => {

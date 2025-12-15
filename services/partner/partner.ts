@@ -78,46 +78,44 @@ export const createPartner = async (
 
 // GET ALL PARTNERS (Updated to include query parameters)
 export const getPartners = async (
-  params: IGetPartnersParams = {} // Use an optional parameter object with a default empty value
+  params: IGetPartnersParams = {}
 ): Promise<
   { data: IGetAllPartnersResponse["data"]; meta: IGetAllPartnersResponse["meta"] } | { error: string }
 > => {
   try {
-    // 1. Construct URLSearchParams from the parameters object
     const queryParams = new URLSearchParams();
-    
-    // Iterate over keys in params and append non-null/non-undefined values
+
+    // Force sorting by position ASC
+    queryParams.set("sortBy", "position");
+    queryParams.set("sortOrder", "asc");
+
     (Object.keys(params) as Array<keyof IGetPartnersParams>).forEach((key) => {
-        const value = params[key];
-        if (value !== undefined && value !== null) {
-            // Ensure numbers are converted to string for URLSearchParams
-            queryParams.append(key, String(value));
-        }
+      // Prevent override
+      if (key === "sortBy" || key === "sortOrder") return;
+
+      const value = params[key];
+      if (value !== undefined && value !== null && value !== "") {
+        queryParams.append(key, String(value));
+      }
     });
 
-    // 2. Construct the full URL with query parameters
-    const queryString = queryParams.toString();
-    const url = `${BASE_URL}/partner${queryString ? '?' + queryString : ''}`;
-
-    // 3. Fetch data
+    const url = `${BASE_URL}/partner?${queryParams.toString()}`;
     const res = await fetch(url);
-    const json: IGetAllPartnersResponse | { message: string } = await res.json();
+    const json = await res.json();
 
     if (!res.ok) {
-      // Type assertion for error handling based on API response structure
-      const errorJson = json as { message: string }; 
-      return { error: errorJson.message || "Failed to fetch partners" };
+      return { error: json.message || "Failed to fetch partners" };
     }
-    
-    // Type assertion for success response
-    const successJson = json as IGetAllPartnersResponse;
 
-    // The API response for 'get all' often includes 'meta' data for pagination.
-    return { data: successJson.data, meta: successJson.meta };
+    return {
+      data: json.data,
+      meta: json.meta,
+    };
   } catch (error: any) {
     return { error: error.message };
   }
 };
+
 
 
 // GET SINGLE PARTNER BY ID  
