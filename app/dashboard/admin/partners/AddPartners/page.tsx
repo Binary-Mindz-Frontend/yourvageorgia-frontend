@@ -169,7 +169,7 @@ const uploadImageToServer = async (file: File | Blob, originalFileName?: string)
       setLoadingPartner(true);
       try {
         // Construct the correct API URL
-        const apiUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+        const apiUrl = process.env.NEXT_PUBLIC_BASE_API;
         const fetchUrl = `${apiUrl}/partner/${partnerId}`;
 
         const res = await fetch(fetchUrl);
