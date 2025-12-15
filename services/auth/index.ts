@@ -69,7 +69,38 @@ export const loginUser = async (userData: FieldValues) => {
   }
 };
 
+//Logout User
+export const logout = async () => {
+  const cookieStore = await cookies();
+
+  // Remove token and user from cookies
+  cookieStore.delete("accessToken");
+  cookieStore.delete("user");
+};
+
+
+
 //Change Password
+
+//Get Current User
+export const getCurrentUser = async () => {
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get("accessToken")?.value;
+  const userCookie = cookieStore.get("user")?.value;
+  
+  if (accessToken && userCookie) {
+    try {
+      const user = JSON.parse(userCookie);
+      return { ...user, accessToken };
+    } catch (err) {
+      console.error("Error parsing user cookie:", err);
+      return null;
+    }
+  }
+  
+  return null;
+};
+
 export const changePassword = async (userData: any) => {
   const token = await getValidToken();
 
@@ -92,26 +123,6 @@ export const changePassword = async (userData: any) => {
     return new Error(error);
   }
 };
-
-//Get Current User
-export const getCurrentUser = async () => {
-  const cookieStore = await cookies();
-  const accessToken = cookieStore.get("accessToken")?.value;
-  const userCookie = cookieStore.get("user")?.value;
-
-  if (accessToken && userCookie) {
-    try {
-      const user = JSON.parse(userCookie);
-      return { ...user, accessToken };
-    } catch (err) {
-      console.error("Error parsing user cookie:", err);
-      return null;
-    }
-  }
-
-  return null;
-};
-
 
 // Forget Password: Send OTP to Email
 export const forgetPassword = async ({ email }: { email: string }) => {
@@ -190,11 +201,3 @@ export const resetPassword = async ({
 
 
 
-//Logout User
-export const logout = async () => {
-  const cookieStore = await cookies();
-
-  // Remove token and user from cookies
-  cookieStore.delete("accessToken");
-  cookieStore.delete("user");
-};

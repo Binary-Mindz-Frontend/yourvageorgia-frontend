@@ -2,7 +2,11 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
  images: {
-     domains: ["localhost"],
+    domains: [
+      "localhost",
+      "127.0.0.1",
+      "api.solenneuae.com",
+    ],
  remotePatterns: [
       { protocol: "https", hostname: "d1csarkz8obe9u.cloudfront.net" },
       { protocol: "https", hostname: "i.ibb.co.com" },
