@@ -41,10 +41,11 @@ export default function CheckoutPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
-      <div className="w-full max-w-sm  shadow-lg p-6 rounded-xl space-y-4">
-        <h1 className="text-xl font-bold text-center">Stripe Checkout</h1>
-
+    <div className="h-[90vh] flex items-center justify-center px-4">
+      <div className="w-full max-w-sm  shadow-lg p-6 rounded-xl space-y-6">
+        <h1 className="text-4xl lg:text-5xl text-[#FFF] font-semibold font-serif text-center mb-10">
+          Stripe Checkout
+        </h1>
         <Input
           placeholder="Enter Email"
           type="email"
@@ -61,15 +62,15 @@ export default function CheckoutPage() {
           className="rounded-full px-6"
         />
 
-       <div className="flex">
-         <Button
-          className="bg-black cursor-pointer px-10 text-white border-white mt-4 md:mt-0 hover:bg-white hover:text-black hover:border-black transition-colors duration-200"
-          onClick={handleCheckout}
-          disabled={loading}
-        >
-          {loading ? "Processing..." : "Pay Now"}
-        </Button>
-       </div>
+        <div className="flex justify-center">
+          <Button
+            className="bg-black cursor-pointer px-10 text-white border-white mt-4 md:mt-0 hover:bg-white hover:text-black hover:border-black transition-colors duration-200"
+            onClick={handleCheckout}
+            disabled={loading}
+          >
+            {loading ? "Processing..." : "Pay Now"}
+          </Button>
+        </div>
       </div>
     </div>
   );

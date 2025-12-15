@@ -53,7 +53,7 @@ export const MemberShipDate = ({
     <div className="flex flex-col gap-3">
       <div className="relative flex gap-2">
         <Input
-          id="dob"
+          id="date"
           value={displayValue}
           placeholder="Date of Birth*"
           className="pr-10"
@@ -73,9 +73,9 @@ export const MemberShipDate = ({
           <PopoverTrigger asChild>
             <Button
               variant="ghost"
-              className="absolute top-1/2 right-2 size-6 -translate-y-1/2"
+              className="absolute top-1/2 right-2 size-6 -translate-y-1/2 cursor-pointer"
             >
-              <CalendarIcon className="size-3.5 text-white/60" />
+              <CalendarIcon className="size-4  text-white/60" />
             </Button>
           </PopoverTrigger>
 

@@ -14,7 +14,6 @@ import toast from "react-hot-toast";
 const MembershipRegister = () => {
   const router = useRouter();
 
-  // console.log(process.env.NEXT_PUBLIC_BASE_API);
 
   const [formData, setFormData] = useState({
     firstName: "",
