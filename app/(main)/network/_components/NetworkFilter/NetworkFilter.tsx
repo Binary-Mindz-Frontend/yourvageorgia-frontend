@@ -42,7 +42,7 @@ const NetworkFilter = () => {
   useEffect(() => {
     const fetchPartners = async () => {
       try {
-        const res = await fetch("https://api.solenneuae.com/api/partner", {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_API}/partner`, {
           cache: "no-store",
         });
         const data = await res.json();
