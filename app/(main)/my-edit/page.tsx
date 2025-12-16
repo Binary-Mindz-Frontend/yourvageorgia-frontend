@@ -1,7 +1,6 @@
 import img1 from "@/public/assets/network/1.svg";
 import img2 from "@/public/assets/network/2.svg";
-import img3 from "@/public/assets/network/3.svg";
-import img4 from "@/public/assets/network/4.svg";
+
 import { ArrowRight, ChevronDown, Heart } from "lucide-react";
 
 const MyEdit = () => {
@@ -18,13 +17,7 @@ const MyEdit = () => {
       location: "Al Quoz",
       category: "Recovery",
     },
-    // {
-    //   img: img3,
-    //   title: "Urban Yoga",
-    //   location: "Downtown Dubai",
-    //   category: "Radiance",
-    // },
-    // { img: img4, title: "Seva Table", location: "Jumeirah", category: "Taste" },
+    
   ];
   return (
     <div className="max-w-[872px] mx-auto p-4 lg:px-0 mt-10 md:mt-25">
