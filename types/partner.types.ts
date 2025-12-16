@@ -42,6 +42,7 @@ export interface Partner {
   gallery?: string[];
   logo?: string;
   isFeatured?: boolean;
+  isFeaturedMap?: boolean;
   offer?: PartnerOffer[];  
   about?: PartnerAbout;
   terms?: string[];
