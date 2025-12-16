@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, ChevronDown, Heart, ListFilter } from "lucide-react";
 import { FilterDrawer } from "./FilterDrawer";
 import PartnerDetailsModal from "../NetworkCardModal/PartnerDetailsModal";
+import FavouriteButton from "./FavouriteButton";
 
 interface Partner {
   _id: string;
@@ -24,10 +25,10 @@ const NetworkFilter = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-const filterFromUrl = searchParams.get("filter");
+  const filterFromUrl = searchParams.get("filter");
 
   const [partners, setPartners] = useState<Partner[]>([]);
-  
+
   const [showAll, setShowAll] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPartner, setSelectedPartner] = useState<Partner | null>(null);
@@ -41,7 +42,7 @@ const filterFromUrl = searchParams.get("filter");
   useEffect(() => {
     const fetchPartners = async () => {
       try {
-        const res = await fetch("http://82.25.109.232:5000/api/partner", {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_API}/partner`, {
           cache: "no-store",
         });
         const data = await res.json();
@@ -142,7 +143,7 @@ const filterFromUrl = searchParams.get("filter");
               setSelectedPartner(partner);
               setIsModalOpen(true);
             }}
-            className="relative w-full h-61 lg:h-auto aspect-video rounded-xl overflow-hidden cursor-pointer shadow-lg hover:shadow-2xl transition-shadow duration-300"
+            className="relative w-full aspect-video rounded-xl overflow-hidden cursor-pointer shadow-lg hover:shadow-2xl transition-shadow duration-300"
           >
             <div
               className="absolute inset-0 bg-cover bg-center"
@@ -153,23 +154,30 @@ const filterFromUrl = searchParams.get("filter");
             >
               <div className="absolute inset-0 bg-linear-to-t from-black/10 via-black/10 to-transparent"></div>
 
-              <div className="absolute bottom-0 left-0 p-6 text-white">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="flex gap-1">
-                      <h2 className="text-lg lg:text-3xl font-semibold mb-1 font-serif">
-                        {partner.name}
-                      </h2>
-                      <button className="text-white hover:text-red-400 cursor-pointer p-2">
-                        <Heart />
-                      </button>
-                    </div>
+              {/* Heart button – clickable */}
+              {/* <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  console.log("Heart clicked");
+                }}
+                className="absolute cursor-pointer left-64 bottom-14 z-10 text-white hover:text-red-400 p-1 bg-black/30 rounded-full"
+              >
+                <Heart />
+              </button> */}
 
-                    <div className="flex items-center text-sm lg:text-lg gap-2 italic opacity-80">
-                      {partner.address}
-                      <ArrowRight />
-                    </div>
-                  </div>
+              <FavouriteButton
+                partnerId={partner._id}
+                className="left-64 bottom-14"
+              />
+
+              <div className="absolute bottom-0 left-0 p-6 text-white">
+                <h2 className="text-lg lg:text-3xl font-semibold mb-1 font-serif">
+                  {partner.name}
+                </h2>
+
+                <div className="flex items-center text-sm lg:text-lg gap-2 italic opacity-80">
+                  {partner.address}
+                  <ArrowRight />
                 </div>
               </div>
             </div>

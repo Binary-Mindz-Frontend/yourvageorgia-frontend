@@ -1,9 +1,12 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Heart, User, X } from "lucide-react";
+import useUser from "@/hooks/useUser";
+import { getCurrentUser } from "@/services/auth";
+import { ArrowRight, CircleUserRound, Heart, LogIn, User, X } from "lucide-react";
 import Link from "next/link";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 interface NavigationDrawerProps {
   isOpen: boolean;
@@ -11,6 +14,17 @@ interface NavigationDrawerProps {
 }
 
 export function NavigationDrawer({ isOpen, onClose }: NavigationDrawerProps) {
+
+   const { user } = useUser();
+  // const [user, setUser] = useState<any>(null);
+  // console.log('user',user)
+  // useEffect(() => {
+  //   const fetchUser = async () => {
+  //     const currentUser = await getCurrentUser();
+  //     setUser(currentUser);
+  //   };
+  //   fetchUser();
+  // }, []) ;
   // Prevent body scroll when drawer is open
   useEffect(() => {
     if (isOpen) {
@@ -83,26 +97,36 @@ export function NavigationDrawer({ isOpen, onClose }: NavigationDrawerProps) {
           ))}
 
           {/* Icon items as Menu Links */}
-        <div className="flex">
-            <Link href="/login" passHref>
-            <button
-              onClick={onClose}
-              className="group cursor-pointer flex w-full items-center justify-between rounded-md px-4 py-4 text-sm font-light tracking-wide text-foreground transition-colors hover:bg-accent/10"
-            >
-             
-              <User className="h-5 w-5" />
-            </button>
-          </Link>
-
-          <Link href="/my-edit" passHref>
-            <button
-              onClick={onClose}
-              className="group cursor-pointer flex w-full items-center justify-between rounded-md px-4 py-4 text-sm font-light tracking-wide text-foreground transition-colors hover:bg-accent/10"
-            >
-              <Heart className="h-5 w-5" />
-            </button>
-          </Link>
-        </div>
+          <div className="flex items-center">
+           {!user ? (
+              <Link href="/login" passHref>
+                <button
+                  onClick={onClose}
+                  className="group cursor-pointer flex w-full items-center justify-between rounded-md px-4 py-4 text-sm font-light tracking-wide text-foreground transition-colors hover:bg-accent/10"
+                >
+                  <User className="h-5 w-5" />
+                </button>
+              </Link>
+            ) : (
+              <Link href="/profile" passHref className="ml-2">
+                <button
+                  onClick={onClose}
+                  className="group cursor-pointer border rounded-full flex w-full items-center justify-between p-1.5 text-sm font-light tracking-wide text-foreground transition-colors hover:bg-accent/10"
+                >
+                  {/* <User className="h-5 w-5" /> */}
+                  <CircleUserRound className="h-5 w-5" />
+                </button>
+              </Link>
+            )}
+            <Link href="/my-edit" passHref>
+              <button
+                onClick={onClose}
+                className="group cursor-pointer flex w-full items-center justify-between rounded-md px-4 py-4 text-sm font-light tracking-wide text-foreground transition-colors hover:bg-accent/10"
+              >
+                <Heart className="h-5 w-5" />
+              </button>
+            </Link>
+          </div>
         </div>
       </div>
     </>
