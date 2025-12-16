@@ -1,0 +1,15 @@
+services:
+  web:
+    build: .
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    image: softvence/${PACKAGE_NAME}:latest
+    container_name: gokul-admin
+    networks:
+      - gokul-network
+
+networks:
+  gokul-network:
+    external: true
