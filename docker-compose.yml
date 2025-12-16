@@ -6,10 +6,11 @@ services:
     env_file:
       - .env
     image: softvence/${PACKAGE_NAME}:latest
-    container_name: gokul-admin
+    container_name: georgia_app
     networks:
-      - gokul-network
+      - georgia_app_network
 
 networks:
-  gokul-network:
+  georgia_app_network:
     external: true
+    driver: bridge

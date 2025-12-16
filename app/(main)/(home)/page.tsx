@@ -1,4 +1,4 @@
-
+export const dynamic = 'force-dynamic';
 import WellnessHero from "./_components/Banner/WellnessHero";
 import FeaturedPartners from "./_components/FeaturedPartners/FeaturedPartners";
 import SolenneMembership from "./_components/SolenneMembership/SolenneMembership";
