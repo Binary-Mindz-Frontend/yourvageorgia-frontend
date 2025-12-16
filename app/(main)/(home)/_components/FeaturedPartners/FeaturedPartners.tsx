@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { getPartners } from "@/services/partner/partner";
+// import { getPartners } from "@/services/partner/partner";
+import { getPartners } from "@/services/partner/getpartner";
 import FeaturedPartnersCarouselClient from "./FeaturedPartnersCarouselClient";
 
 export default async function FeaturedPartnersCarousel() {
