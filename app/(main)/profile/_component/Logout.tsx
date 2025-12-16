@@ -1,15 +1,17 @@
 'use client';
 import { useRouter } from "next/navigation"; // for programmatic navigation
 import { logout } from "@/services/auth"; // Assuming you have a logout function that removes cookies or session data
+import useUser from "@/hooks/useUser";
 
 const Logout = () => {
-  const router = useRouter(); // useRouter for navigation after logout
+  const router = useRouter();
+  const {setUser } = useUser();
 
   const handleLogout = async () => {
     try {
-      await logout(); // Call the logout function
-      // After logout, redirect to the homepage
-      router.push("/"); // Navigate to the homepage
+      await logout(); 
+      setUser(null);
+      router.push("/");
     } catch (error) {
       console.error("Error during logout:", error);
       // Optionally, show an error message to the user
