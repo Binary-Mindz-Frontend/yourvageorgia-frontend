@@ -129,13 +129,13 @@
 //     const res = await fetch(`${BASE_URL}/partner/${partnerId}`);
 //     const json = await res.json();
 //     if (!res.ok) return { error: json.message || "Failed to fetch partner" };
-    
+
 //     // Convert isFeatured from string to boolean
 //     const data = {
 //       ...json.data,
 //       isFeatured: json.data.isFeatured === "true" || json.data.isFeatured === true
 //     };
-    
+
 //     return data;
 //   } catch (error: any) {
 //     return { error: error.message };
@@ -199,7 +199,7 @@
 //         });
 
 //         const json = await res.json();
-        
+
 //         // Handle non-2xx response
 //         if (!res.ok) {
 //             return { error: json.message || "Failed to update partner position" };
@@ -217,10 +217,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
+
 import { Partner } from "@/types/partner.types";
-import { fetchWithAuth } from "@/services/admin.auth/admin.auth";
+import { fetchWithAuth } from "../admin.auth/admin.auth";
+// import { CloudCog } from "lucide-react";
+
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_API;
+
 
 // --- New Interface for Query Parameters ---
 export interface IGetPartnersParams {
@@ -228,27 +232,30 @@ export interface IGetPartnersParams {
   page?: number;
   search?: string;
   address?: string;
-  category?: string;
-  activity?: string;
+  category?: string; // Should be category ID
+  activity?: string; // Should be activity name or ID
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
 }
+
 
 export interface IPartnerResponse {
   success: boolean;
   statusCode: number;
   message: string;
-  data: Partner & { 
-    _id: string; 
-    createdAt: string; 
-    updatedAt: string; 
+  data: Partner & {
+    _id: string;
+    createdAt: string;
+    updatedAt: string;
     __v: number;
   };
 }
 
+
 export interface IPositionUpdateData {
-    position: number;
+  position: number; // Assuming 'position' is a number
 }
+
 
 export interface IGetAllPartnersResponse {
   success: boolean;
@@ -268,21 +275,28 @@ export interface IGetAllPartnersResponse {
   };
 }
 
-// CREATE PARTNER - Uses fetchWithAuth for authentication
+
+// CREATE PARTNER (No change)
 export const createPartner = async (
   data: Partner
 ): Promise<IPartnerResponse | { error: string }> => {
   try {
-    const res = await fetchWithAuth("/partner", {
+    const res = await fetch(`${BASE_URL}/partner`, {
       method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify(data),
     });
 
+
     const json = await res.json();
+
 
     if (!res.ok) {
       return { error: json.message || "Failed to create partner" };
     }
+
 
     return json;
   } catch (error: any) {
@@ -290,7 +304,8 @@ export const createPartner = async (
   }
 };
 
-// GET ALL PARTNERS - Public endpoint, no auth needed
+
+// GET ALL PARTNERS (Updated to include query parameters)
 export const getPartners = async (
   params: IGetPartnersParams = {}
 ): Promise<
@@ -299,14 +314,17 @@ export const getPartners = async (
   try {
     const queryParams = new URLSearchParams();
 
+
     // Force sorting by position ASC
-    console.log({params})
+    console.log({ params })
     queryParams.set("sortBy", "position");
     queryParams.set("sortOrder", "asc");
+
 
     (Object.keys(params) as Array<keyof IGetPartnersParams>).forEach((key) => {
       // Prevent override
       if (key === "sortBy" || key === "sortOrder") return;
+
 
       const value = params[key];
       if (value !== undefined && value !== null && value !== "") {
@@ -314,16 +332,17 @@ export const getPartners = async (
       }
     });
 
+
     const url = `${BASE_URL}/partner?${queryParams.toString()}`;
     console.log("Fetching partners with URL:", url);
-    
-    // Public endpoint - use regular fetch
     const res = await fetch(url);
     const json = await res.json();
+
 
     if (!res.ok) {
       return { error: json.message || "Failed to fetch partners" };
     }
+
 
     return {
       data: json.data,
@@ -334,88 +353,124 @@ export const getPartners = async (
   }
 };
 
-// GET SINGLE PARTNER BY ID - Public endpoint
+
+
+
+
+
+// GET SINGLE PARTNER BY ID  
 export const getPartnerById = async (
   partnerId: string
 ): Promise<IPartnerResponse["data"] | { error: string }> => {
   try {
-    // Public endpoint - use regular fetch
     const res = await fetch(`${BASE_URL}/partner/${partnerId}`);
     const json = await res.json();
-    
     if (!res.ok) return { error: json.message || "Failed to fetch partner" };
-    
+
     // Convert isFeatured from string to boolean
     const data = {
       ...json.data,
       isFeatured: json.data.isFeatured === "true" || json.data.isFeatured === true
     };
-    
+
     return data;
   } catch (error: any) {
     return { error: error.message };
   }
 };
 
-// UPDATE PARTNER - Uses fetchWithAuth for authentication
+
 export const updatePartner = async (
   partnerId: string,
   data: Partial<Partner>
 ): Promise<IPartnerResponse | { error: string }> => {
   try {
-    const res = await fetchWithAuth(`/partner/${partnerId}`, {
+    const response = await fetchWithAuth(`/partner/${partnerId}`, {
       method: "PATCH",
       body: JSON.stringify(data),
     });
 
-    const json = await res.json();
-    if (!res.ok) return { error: json.message || "Failed to update partner" };
+
+    const json = await response.json();
+    if (!response.ok)
+      return {
+        error:
+          json.message ||
+          `Failed to update partner with status: ${response.status}`,
+      };
     return json;
   } catch (error: any) {
-    return { error: error.message };
+    // This returns the error message thrown by fetchWithAuth
+    return { error: error.message || "An unexpected error occurred." };
   }
 };
-
-// DELETE PARTNER - Uses fetchWithAuth for authentication
+// DELETE PARTNER (CORRECTED IMPLEMENTATION)
 export const deletePartner = async (
   partnerId: string
 ): Promise<{ success: boolean; message: string } | { error: string }> => {
   try {
-    const res = await fetchWithAuth(`/partner/${partnerId}`, {
+    // 💡 Use fetchWithAuth for an authenticated request
+    const response = await fetchWithAuth(`/partner/${partnerId}`, {
       method: "DELETE",
+      // The Authorization header is automatically added by fetchWithAuth
     });
 
-    const json = await res.json();
-    if (!res.ok) return { error: json?.message || "Failed to delete partner" };
+    const json = await response.json();
+
+    // Check for non-2xx status code
+    if (!response.ok) {
+      return {
+        error:
+          json?.message ||
+          `Failed to delete partner with status: ${response.status}`,
+      };
+    }
 
     return {
       success: true,
       message: json?.message || "Partner deleted successfully",
     };
   } catch (error: any) {
-    return { error: error.message };
+    // Catch errors thrown by fetchWithAuth (e.g., token missing)
+    return { error: error.message || "An unexpected error occurred." };
   }
 };
 
-// UPDATE PARTNER POSITION - Uses fetchWithAuth for authentication
+
+// UPDATE PARTNER POSITION
 export const updatePartnerPosition = async (
-    partnerId: string,
-    data: IPositionUpdateData
+  partnerId: string,
+  data: IPositionUpdateData
 ): Promise<IPartnerResponse | { error: string }> => {
-    try {
-        const res = await fetchWithAuth(`/partner/change-position/${partnerId}`, {
-            method: "PATCH",
-            body: JSON.stringify(data),
-        });
+  try {
+    // 💡 Use fetchWithAuth for an authenticated request
+    const response = await fetchWithAuth(
+      `/partner/change-position/${partnerId}`, // The specific endpoint
+      {
+        method: "PATCH",
+        // The Authorization header is automatically added by fetchWithAuth
+        body: JSON.stringify(data),
+      }
+    );
 
-        const json = await res.json();
-        
-        if (!res.ok) {
-            return { error: json.message || "Failed to update partner position" };
-        }
 
-        return json;
-    } catch (error: any) {
-        return { error: error.message || "An unexpected error occurred during position update" };
+    const json = await response.json();
+
+
+    // Handle non-2xx response
+    if (!response.ok) {
+      return {
+        error:
+          json.message ||
+          `Failed to update partner position with status: ${response.status}`,
+      };
     }
+
+
+    // Return success response
+    return json;
+  } catch (error: any) {
+    // Catch errors thrown by fetchWithAuth (e.g., token missing, 401/403)
+    return { error: error.message || "An unexpected error occurred during position update" };
+  }
 };

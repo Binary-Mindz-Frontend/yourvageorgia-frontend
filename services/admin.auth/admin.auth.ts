@@ -84,26 +84,26 @@
 
 "use client";
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_API;
-const LOGIN_ENDPOINT = "/user/login"; 
 
-// --- Token Management Keys ---
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_API;
+const LOGIN_ENDPOINT = "/user/login";
+
+
 const ACCESS_TOKEN_KEY = 'accessToken';
 const REFRESH_TOKEN_KEY = 'refreshToken';
 
-
-// --- Interfaces based on your ACTUAL API response ---
 
 interface LoginPayload {
   email: string;
   password: string;
 }
 
+
 interface UserData {
   accessToken: string;
   refreashToken: string;
-  // Add other user fields if needed
 }
+
 
 interface LoginResponseData {
   success: boolean;
@@ -112,7 +112,7 @@ interface LoginResponseData {
   data: UserData;
 }
 
-// Custom error type for better client-side handling
+
 type ApiError = {
   success: false;
   message: string;
@@ -120,23 +120,25 @@ type ApiError = {
 };
 
 
-// ----------------------------------------------------------------------
-// --- 1. Helper Functions (Retrieve/Check Tokens) ----------------------
-// ----------------------------------------------------------------------
+// --- Helper Functions ---
+
 
 export const getAccessToken = (): string | null => {
   if (typeof window !== 'undefined') {
-    return localStorage.getItem(ACCESS_TOKEN_KEY);
+    const token = localStorage.getItem(ACCESS_TOKEN_KEY);
+    return token ? token.trim() : null;
   }
   return null;
 };
 
+
 export const getRefreshToken = (): string | null => {
-    if (typeof window !== 'undefined') {
-        return localStorage.getItem(REFRESH_TOKEN_KEY);
-    }
-    return null;
+  if (typeof window !== 'undefined') {
+    return localStorage.getItem(REFRESH_TOKEN_KEY);
+  }
+  return null;
 };
+
 
 export const logoutAdmin = () => {
   if (typeof window !== 'undefined') {
@@ -145,18 +147,18 @@ export const logoutAdmin = () => {
   }
 };
 
+
 export const isAuthenticated = (): boolean => {
-  // A user is considered authenticated if they have an access token
   return !!getAccessToken();
 };
 
 
-// ----------------------------------------------------------------------
-// --- 2. Login Function ------------------------------------------------
-// ----------------------------------------------------------------------
+// --- Login Function ---
+
 
 export const loginAdmin = async (payload: LoginPayload): Promise<LoginResponseData | ApiError> => {
   const url = `${BASE_URL}${LOGIN_ENDPOINT}`;
+
 
   try {
     const response = await fetch(url, {
@@ -165,70 +167,69 @@ export const loginAdmin = async (payload: LoginPayload): Promise<LoginResponseDa
       body: JSON.stringify(payload),
     });
 
+
     if (!response.ok) {
-        const errorBody = await response.json().catch(() => ({}));
-        return {
-            success: false,
-            message: errorBody.message || `Login failed with status: ${response.status}`,
-            statusCode: response.status
-        };
+      const errorBody = await response.json().catch(() => ({}));
+      return {
+        success: false,
+        message: errorBody.message || `Login failed with status: ${response.status}`,
+        statusCode: response.status
+      };
     }
-    
+
+
     const result: LoginResponseData = await response.json();
-    
+
+
     if (result.success && result.data?.accessToken) {
-      // Store both access and refresh tokens
-      localStorage.setItem(ACCESS_TOKEN_KEY, result.data.accessToken); 
-      localStorage.setItem(REFRESH_TOKEN_KEY, result.data.refreashToken); 
-      
+      localStorage.setItem(ACCESS_TOKEN_KEY, result.data.accessToken);
+      localStorage.setItem(REFRESH_TOKEN_KEY, result.data.refreashToken);
       return result;
     }
-    
+
+
     return { success: false, message: result.message || "Login failed due to unexpected server response." };
 
+
   } catch (err) {
-    console.error("Network or parsing error during login:", err);
     return { success: false, message: "Could not connect to the backend server. Please check your connection." };
   }
 };
 
 
-// ----------------------------------------------------------------------
-// --- 3. Authenticated Fetch (Simple - No Auto Refresh) ----------------
-// ----------------------------------------------------------------------
+// --- Authenticated Fetch ---
 
-/**
- * Makes an authenticated request by adding the access token to headers.
- * If the token is invalid (401/403), logs out the user and throws an error.
- */
+
 export const fetchWithAuth = async (
-  endpoint: string, 
-  options: RequestInit = {} 
+  endpoint: string,
+  options: RequestInit = {}
 ): Promise<Response> => {
-    
+   
     const token = getAccessToken();
     const url = `${BASE_URL}${endpoint}`;
 
-    // Check if token exists
+
     if (!token) {
         throw new Error("No authentication token found. Please log in.");
     }
+   
+    const requestHeaders = new Headers(options.headers || {});
+    requestHeaders.set('Content-Type', 'application/json');
+   
+    // FIX: Send token without 'Bearer ' prefix as required by your API
+    requestHeaders.set('Authorization', token);
+   
+    const response = await fetch(url, {
+        ...options,
+        headers: requestHeaders,
+    });
 
-    // Add authorization header
-    const headers = {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`, 
-        ...options.headers, 
-    };
 
-    // Make the request
-    const response = await fetch(url, { ...options, headers });
-
-    // If unauthorized, clear tokens and throw error
     if (response.status === 401 || response.status === 403) {
-        logoutAdmin();
+        // Optionally add logoutAdmin() here if you want to clear tokens on 401
+        // logoutAdmin();
         throw new Error("Session expired or unauthorized. Please log in again.");
     }
-
+   
     return response;
 };

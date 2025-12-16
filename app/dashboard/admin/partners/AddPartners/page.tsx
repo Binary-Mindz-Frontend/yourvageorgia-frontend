@@ -301,106 +301,176 @@ const uploadImageToServer = async (file: File | Blob, originalFileName?: string)
   const toastStyle = { background: "#000", color: "#fff", marginTop: "4rem" };
 
 const onSubmit = async (data: FormData) => {
-  try {
-    toast.loading("Uploading images...", { id: "upload-images", style: toastStyle });
+    const unauthorizedMessage = "Session expired or unauthorized. Please log in again.";
 
-    // Upload thumbnail if it's a blob URL
-    let thumbnailUrl = data.thumbnailUrl;
-    if (thumbnailPreview && thumbnailPreview.startsWith('blob:')) {
-      const blob = await fetch(thumbnailPreview).then(r => r.blob());
-      // Determine file extension from blob type
-      const extension = blob.type.split('/')[1] || 'jpg';
-      const file = new File([blob], `thumbnail.${extension}`, { type: blob.type });
-      thumbnailUrl = await uploadImageToServer(file);
-    }
 
-    // Upload logo if it's a blob URL
-    let logoUrl = data.logoUrl;
-    if (logoUrl && logoUrl.startsWith('blob:')) {
-      const blob = await fetch(logoUrl).then(r => r.blob());
-      const extension = blob.type.split('/')[1] || 'jpg';
-      const file = new File([blob], `logo.${extension}`, { type: blob.type });
-      logoUrl = await uploadImageToServer(file);
-    }
+    // Helper function to handle session expiration and redirect
+    const handleAuthError = (errorMessage: string) => {
+      if (errorMessage.includes(unauthorizedMessage)) {
+        toast.error("Session expired. Redirecting to login...", { style: toastStyle });
 
-    // Upload gallery images
-    const uploadedGalleryUrls: string[] = [];
-    for (let i = 0; i < gallery.length; i++) {
-      const item = gallery[i];
-      if (item.preview && item.preview.startsWith('blob:')) {
-        const blob = await fetch(item.preview).then(r => r.blob());
-        const extension = blob.type.split('/')[1] || 'jpg';
-        const file = new File([blob], `gallery-${i}.${extension}`, { type: blob.type });
-        const uploadedUrl = await uploadImageToServer(file);
-        uploadedGalleryUrls.push(uploadedUrl);
-      } else if (item.url) {
-        uploadedGalleryUrls.push(item.url);
+
+        // Redirect the user to the login page after a short delay
+        setTimeout(() => {
+          router.push("/dashboard/admin/login"); // <-- CONFIRM THIS PATH
+        }, 1500);
+        return true; // Indicates error was handled (and is an auth error)
       }
-    }
-
-    toast.dismiss("upload-images");
-
-    const payload = {
-      category: data.categoryId,
-      name: data.name,
-      thumbnail: thumbnailUrl,
-      address: data.address,
-      activity: data.activity || undefined,
-      gallery: uploadedGalleryUrls,
-      logo: logoUrl,
-      isFeatured: data.isFeatured,
-      offer: data.offers.map(o => ({
-        title: o.title,
-        description: o.description,
-        validUntil: o.validUntil,
-        offerPercentage: o.percentage === "" ? undefined : Number(o.percentage)
-      })),
-      about: {
-        title: data.aboutTitle,
-        description: data.aboutDescription,
-      },
-      terms: data.terms.filter((t) => t.trim()),
-      contacts: data.contacts.filter((c) => Object.values(c).some((v) => v && v.trim())),
-      socials: {
-        website: data.website,
-        instagram: data.instagram,
-        whatsapp: data.whatsapp,
-      },
+      return false; // Indicates it was a non-auth error
     };
 
-    console.log("Full Payload Data:", JSON.stringify(payload, null, 2));
 
-    let res;
+    try {
+      toast.loading("Uploading images...", { id: "upload-images", style: toastStyle });
 
-    if (isEditMode) {
-      res = await updatePartner(partnerId, payload);
 
-      if ("error" in res) {
-        toast.error("Failed to update partner: " + res.error, { style: toastStyle });
+      // --- Image Upload Logic (NO CHANGE) ---
+      // Upload thumbnail if it's a blob URL
+      let thumbnailUrl = data.thumbnailUrl;
+      if (thumbnailPreview && thumbnailPreview.startsWith('blob:')) {
+        const blob = await fetch(thumbnailPreview).then(r => r.blob());
+        // Determine file extension from blob type
+        const extension = blob.type.split('/')[1] || 'jpg';
+        const file = new File([blob], `thumbnail.${extension}`, { type: blob.type });
+        thumbnailUrl = await uploadImageToServer(file);
+      }
+
+
+      // Upload logo if it's a blob URL
+      let logoUrl = data.logoUrl;
+      if (logoUrl && logoUrl.startsWith('blob:')) {
+        const blob = await fetch(logoUrl).then(r => r.blob());
+        const extension = blob.type.split('/')[1] || 'jpg';
+        const file = new File([blob], `logo.${extension}`, { type: blob.type });
+        logoUrl = await uploadImageToServer(file);
+      }
+
+
+      // Upload gallery images
+      const uploadedGalleryUrls: string[] = [];
+      for (let i = 0; i < gallery.length; i++) {
+        const item = gallery[i];
+        if (item.preview && item.preview.startsWith('blob:')) {
+          const blob = await fetch(item.preview).then(r => r.blob());
+          const extension = blob.type.split('/')[1] || 'jpg';
+          const file = new File([blob], `gallery-${i}.${extension}`, { type: blob.type });
+          const uploadedUrl = await uploadImageToServer(file);
+          uploadedGalleryUrls.push(uploadedUrl);
+        } else if (item.url) {
+          uploadedGalleryUrls.push(item.url);
+        }
+      }
+
+
+      toast.dismiss("upload-images");
+      // --- End Image Upload Logic ---
+
+
+
+
+      const payload = {
+        category: data.categoryId,
+        name: data.name,
+        thumbnail: thumbnailUrl,
+        address: data.address,
+        activity: data.activity || undefined,
+        gallery: uploadedGalleryUrls,
+        logo: logoUrl,
+        isFeatured: data.isFeatured,
+        offer: data.offers.map(o => ({
+          title: o.title,
+          description: o.description,
+          validUntil: o.validUntil,
+          offerPercentage: o.percentage === "" ? undefined : Number(o.percentage)
+        })),
+        about: {
+          title: data.aboutTitle,
+          description: data.aboutDescription,
+        },
+        terms: data.terms.filter((t) => t.trim()),
+        contacts: data.contacts.filter((c) => Object.values(c).some((v) => v && v.trim())),
+        socials: {
+          website: data.website,
+          instagram: data.instagram,
+          whatsapp: data.whatsapp,
+        },
+      };
+
+
+      console.log("Full Payload Data:", JSON.stringify(payload, null, 2));
+
+
+      let res;
+
+
+      // --- Update Partner Logic ---
+      if (isEditMode) {
+        res = await updatePartner(partnerId!, payload);
+
+
+        if ("error" in res) {
+          // **NEW: Check for Unauthorized Error and Redirect**
+          if (handleAuthError(res.error)) {
+            return; // Stop processing since redirect is scheduled
+          }
+
+
+          // Handle other non-auth errors
+          toast.error("Failed to update partner: " + res.error, { style: toastStyle });
+          return;
+        }
+
+
+        toast.success("Partner updated successfully!", { style: toastStyle });
+
+
+        // --- Create Partner Logic ---
+      } else {
+        res = await createPartner(payload);
+
+
+        if ("error" in res) {
+          // **NEW: Check for Unauthorized Error and Redirect (Create is also an authenticated action)**
+          if (handleAuthError(res.error)) {
+            return; // Stop processing since redirect is scheduled
+          }
+
+
+          // Handle other non-auth errors
+          toast.error("Failed to create partner: " + res.error, { style: toastStyle });
+          return;
+        }
+
+
+        toast.success("Partner created successfully!", { style: toastStyle });
+      }
+
+
+      // Redirect to the partners list on success
+      setTimeout(() => {
+        router.push("/dashboard/admin/partners");
+      }, 1500);
+
+
+    } catch (err: unknown) {
+      console.error(err);
+      toast.dismiss("upload-images");
+
+
+      // Fallback for network errors or unhandled exceptions during upload/processing
+      const errorMessage = err instanceof Error ? err.message : `Something went wrong while ${isEditMode ? 'updating' : 'creating'} partner.`;
+
+
+      // Check if the generic catch block error is the auth error too
+      if (handleAuthError(errorMessage)) {
         return;
       }
 
-      toast.success("Partner updated successfully!", { style: toastStyle });
-    } else {
-      res = await createPartner(payload);
 
-      if ("error" in res) {
-        toast.error("Failed to create partner: " + res.error, { style: toastStyle });
-        return;
-      }
-
-      toast.success("Partner created successfully!", { style: toastStyle });
+      toast.error(errorMessage, { style: toastStyle });
     }
+  };
 
-    setTimeout(() => {
-      router.push("/dashboard/admin/partners");
-    }, 1500);
-  } catch (err: unknown) {
-    console.error(err);
-    toast.dismiss("upload-images");
-    toast.error(`Something went wrong while ${isEditMode ? 'updating' : 'creating'} partner.`, { style: toastStyle });
-  }
-};
 
   const handleReset = () => {
     reset();
