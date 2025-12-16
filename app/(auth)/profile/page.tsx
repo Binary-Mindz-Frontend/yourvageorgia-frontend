@@ -1,25 +1,37 @@
 import membership from "@/public/assets/profile/profile.jpg";
+import { getCurrentUser } from "@/services/auth"; // Assuming this is the function to get the current user
+import { Suspense } from "react";
 import Link from "next/link";
+import Logout from "./_component/Logout";
 
-const ProfilePage = () => {
-  const memberData = {
-    name: "Georgia Cowdry",
-    memberSince: "20 Nov 2025",
-    cardName: "Member Name",
-    id: "12345678",
-    expiry: "20 October 2026",
-    company: "Solenne.",
-    title: "Membership Card",
-  };
+// Convert UNIX timestamp to human-readable date format
+const convertTimestampToDate = (timestamp: number) => {
+  return new Date(timestamp * 1000).toLocaleString(); // Convert UNIX timestamp to Date string
+};
+
+// Server Component for fetching member data
+const ProfilePage = async () => {
+  const memberData = await getCurrentUser(); // Fetching the current user data
+
+  // If the user is not authenticated, redirect to the login page
+
+
+  // If member data is not available, return loading state
+  if (!memberData) {
+    return <div className="text-center text-white">Loading...</div>;
+  }
+
+  
+
   return (
-    <div className="min-h-screen max-w-[872px] mx-auto text-white flex flex-col items-center justify-center px-4 lg:p-0 mt-10 lg:mt-25 ">
+    <div className="min-h-screen max-w-218 mx-auto text-white flex flex-col items-center justify-center px-4 lg:p-0 mt-10 lg:mt-25">
       {/* Header Info */}
       <div className="text-center mb-18">
-        <h1 className="text-4xl lg:text-5xl text-[#FFF] font-semibold font-serif text-center tracking-wider mb-8">
-          {memberData.name}
-        </h1>
+        {/* <h1 className="text-4xl lg:text-5xl text-[#FFF] font-semibold font-serif text-center tracking-wider mb-8">
+          {memberData.firstName} {memberData.lastName}
+        </h1> */}
         <p className="text-xl lg:text-3xl text-[#FFFFFF]/70">
-          Member Since: {memberData.memberSince}
+          Member Since: {convertTimestampToDate(memberData.startDate)} {/* Format the startDate */}
         </p>
       </div>
 
@@ -27,106 +39,35 @@ const ProfilePage = () => {
       <div className="relative w-full">
         {/* Background Image */}
         <div
-          className="w-full h-[290px] lg:h-[620px] bg-cover bg-center rounded-xl flex flex-col justify-end items-center p-6"
+          className="w-full h-72 lg:h-155 bg-cover bg-center rounded-xl flex flex-col justify-end items-center p-6"
           style={{
-            backgroundImage: `url(${membership.src})`,
+            backgroundImage: `url(${membership.src})`, // Background image
           }}
         >
           {/* Member Info On Image Bottom */}
-          <h1 className="text-xl lg:text-4xl  text-white font-semibold font-serif tracking-wider">
-            {memberData.name}
+          <h1 className="text-xl lg:text-4xl text-white font-semibold font-serif tracking-wider">
+            {memberData.firstName} {memberData.lastName}
           </h1>
-          <p className="text-sm lg:text-2xl text-[#FFFFFF]/80">ID: {memberData.id}</p>
+          <p className="text-sm lg:text-2xl text-[#FFFFFF]/80">ID: {memberData.memberShipId}</p>
           <p className="text-sm lg:text-2xl text-[#FFFFFF]/80">
-           Expiry: {memberData.expiry}
+            Expiry: {convertTimestampToDate(memberData.exp)} {/* Format the expiry timestamp */}
           </p>
         </div>
       </div>
 
       {/* Log out Button */}
-      <Link href="/">
-        <button className="mt-12 cursor-pointer text-gray-400 hover:text-white transition-colors duration-200 lg:text-2xl focus:outline-none focus:ring-2 focus:ring-gray-600 rounded-md p-2">
-          Logout
-        </button>
-      </Link>
+      <Logout />
     </div>
   );
 };
 
-export default ProfilePage;
+// Wrapping the component in Suspense for loading state
+const ProfilePageWithSuspense = () => {
+  return (
+    <Suspense fallback={<div className="text-center text-white">Loading...</div>}>
+      <ProfilePage />
+    </Suspense>
+  );
+};
 
-
-
-
-// import membership from "@/public/assets/profile/profile.jpg";
-// import { getMyProfile } from "@/services/profile/inxdex";
-// import Link from "next/link";
-
-// // Server-side function to fetch the profile data
-// export async function getServerSideProps() {
-//   try {
-//     const res = await getMyProfile();  // Fetch profile data from the API or database
-//     return {
-//       props: {
-//         memberData: res,  // Pass fetched data as a prop to the page
-//       },
-//     };
-//   } catch (error) {
-//     console.error("Error fetching profile data:", error);
-//     return {
-//       props: {
-//         memberData: null,  // If error occurs, pass null to show loading/error state
-//       },
-//     };
-//   }
-// }
-
-// const ProfilePage = ({ memberData }) => {
-//   // If memberData is not available yet, show a loading message
-//   if (!memberData) {
-//     return <div className="text-center text-white">Loading...</div>;
-//   }
-
-//   return (
-//     <div className="min-h-screen max-w-[872px] mx-auto text-white flex flex-col items-center justify-center px-4 lg:p-0 mt-10 lg:mt-25">
-//       {/* Header Info */}
-//       <div className="text-center mb-18">
-//         <h1 className="text-4xl lg:text-5xl text-[#FFF] font-semibold font-serif text-center tracking-wider mb-8">
-//           {memberData.name}
-//         </h1>
-//         <p className="text-xl lg:text-3xl text-[#FFFFFF]/70">
-//           Member Since: {memberData.memberSince}
-//         </p>
-//       </div>
-
-//       {/* Membership Card Container */}
-//       <div className="relative w-full">
-//         {/* Background Image */}
-//         <div
-//           className="w-full h-[290px] lg:h-[620px] bg-cover bg-center rounded-xl flex flex-col justify-end items-center p-6"
-//           style={{
-//             backgroundImage: `url(${membership.src})`,
-//           }}
-//         >
-//           {/* Member Info On Image Bottom */}
-//           <h1 className="text-xl lg:text-4xl  text-white font-semibold font-serif tracking-wider">
-//             {memberData.name}
-//           </h1>
-//           <p className="text-sm lg:text-2xl text-[#FFFFFF]/80">ID: {memberData.id}</p>
-//           <p className="text-sm lg:text-2xl text-[#FFFFFF]/80">
-//             Expiry: {memberData.expiry}
-//           </p>
-//         </div>
-//       </div>
-
-//       {/* Log out Button */}
-//       <Link href="/">
-//         <button className="mt-12 cursor-pointer text-gray-400 hover:text-white transition-colors duration-200 lg:text-2xl focus:outline-none focus:ring-2 focus:ring-gray-600 rounded-md p-2">
-//           Logout
-//         </button>
-//       </Link>
-//     </div>
-//   );
-// };
-
-// export default ProfilePage;
+export default ProfilePageWithSuspense;
