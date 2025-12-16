@@ -13,10 +13,15 @@ const convertTimestampToDate = (timestamp: number) => {
 const ProfilePage = async () => {
   const memberData = await getCurrentUser(); // Fetching the current user data
 
+  // If the user is not authenticated, redirect to the login page
+
+
   // If member data is not available, return loading state
   if (!memberData) {
     return <div className="text-center text-white">Loading...</div>;
   }
+
+  
 
   return (
     <div className="min-h-screen max-w-218 mx-auto text-white flex flex-col items-center justify-center px-4 lg:p-0 mt-10 lg:mt-25">
