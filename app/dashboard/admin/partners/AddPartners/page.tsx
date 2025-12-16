@@ -144,7 +144,7 @@ const uploadImageToServer = async (file: File | Blob, originalFileName?: string)
   }
 
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+    const apiUrl = process.env.NEXT_PUBLIC_BASE_API;
     const response = await fetch(`${apiUrl}/upload`, {
       method: 'POST',
       body: formData,
