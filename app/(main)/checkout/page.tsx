@@ -126,7 +126,7 @@ export default function CheckoutPage() {
     <div className="h-[90vh] flex items-center justify-center px-4">
       <div className="w-full max-w-sm shadow-lg p-6 rounded-xl space-y-6">
         <h1 className="text-4xl lg:text-5xl text-[#FFF] font-semibold font-serif text-center mb-10">
-          Stripe Checkout
+           Checkout
         </h1>
         <Input
           placeholder="Enter Email"
