@@ -3,7 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { CheckCircle } from "lucide-react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+
 import { useEffect, useState } from "react";
 import { loginUserWithToken } from "@/services/auth";
 import toast from "react-hot-toast";
@@ -44,7 +44,7 @@ export default function SuccessPage() {
   }, [accessToken, router]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <div className="h-[65vh] flex items-center justify-center bg-[#0A0A0A] px-4">
       <div className="max-w-md w-full bg-white rounded-2xl shadow-md p-8 text-center">
         <div className="flex justify-center mb-4">
           <CheckCircle className="h-16 w-16 text-green-500" />
