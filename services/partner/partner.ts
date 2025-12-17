@@ -356,8 +356,6 @@ export const getPartners = async (
 
 
 
-
-
 // GET SINGLE PARTNER BY ID  
 export const getPartnerById = async (
   partnerId: string
