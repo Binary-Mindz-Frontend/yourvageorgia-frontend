@@ -12,6 +12,8 @@ import { registerUser } from "@/services/auth";
 import toast from "react-hot-toast";
 
 const MembershipRegister = () => {
+
+
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -31,7 +33,7 @@ const MembershipRegister = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const validCoupon = "SOLENNE15"; // Example valid coupon
+  const validCoupon = "SOLENNE15";
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -45,9 +47,12 @@ const MembershipRegister = () => {
     setFormData((prev) => ({ ...prev, [name]: checked }));
   };
 
+
+ 
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setApiError(""); // Clear previous errors
+    setApiError("");
 
     // Basic validation
     if (formData.password !== formData.confirmPassword) {
@@ -65,16 +70,16 @@ const MembershipRegister = () => {
       return;
     }
 
-    setLoading(true); // Set loading state
+    setLoading(true);
 
     // Validate coupon if provided
     if (formData.accessCode && formData.accessCode !== validCoupon) {
-      toast.error("Invalid coupon code"); // Show toast for invalid coupon
-      setLoading(false); // Reset loading state
-      return; // Stop the form submission
+      toast.error("Invalid coupon code");
+      setLoading(false);
+      return;
     }
 
-    // Payload with backend-friendly snake_case
+    // Payload
     const payload = {
       firstName: formData.firstName,
       lastName: formData.lastName,
@@ -82,23 +87,22 @@ const MembershipRegister = () => {
       password: formData.password,
       dateOfBirth: formData.dob,
       phone: formData.phone,
-      coupon: formData.accessCode || undefined, // Pass the access code (coupon) here (optional)
+      coupon: formData.accessCode || undefined,
     };
 
     try {
-      // Send the request to register the user
       const response = await registerUser(payload);
       console.log(response);
 
-      toast.success(response.message); // Show success message
+      toast.success(response.message);
 
       if (response?.data?.onBoardingLink) {
-        window.location.href = response.data.onBoardingLink; // Redirect to the Stripe onboarding link
+        window.location.href = response.data.onBoardingLink;
       }
 
-      setLoading(false); // Reset loading state after request completion
+      setLoading(false);
     } catch (error) {
-      setLoading(false); // Reset loading state in case of error
+      setLoading(false);
       setApiError("Registration failed. Please try again.");
       console.error("Error during registration:", error);
     }
@@ -239,7 +243,7 @@ const MembershipRegister = () => {
                 htmlFor="agreeTerms"
                 className="text-[#FFFFFFB3] text-sm cursor-pointer"
               >
-                I have read and agree to Solenne’s{" "}
+                I have read and agree to Solenne&lsquo;s{" "}
                 <Link href="/become-member" className="underline">
                   Terms & Conditions
                 </Link>
@@ -259,7 +263,7 @@ const MembershipRegister = () => {
                 htmlFor="confirmEligibility"
                 className="text-[#FFFFFFB3] text-sm cursor-pointer"
               >
-                Solenne is a women’s-only membership. Please confirm your
+                Solenne is a women&lsquo;s-only membership. Please confirm your
                 eligibility.
               </label>
             </div>
