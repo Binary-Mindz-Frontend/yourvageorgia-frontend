@@ -1,0 +1,16 @@
+services:
+  web:
+    build: .
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    image: softvence/${PACKAGE_NAME}:latest
+    container_name: georgia_app
+    networks:
+      - georgia_app_network
+
+networks:
+  georgia_app_network:
+    external: true
+    driver: bridge
