@@ -7,13 +7,11 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { MemberShipDate } from "./_components/MemberShipDate/MemberShipDate";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+
 import { registerUser } from "@/services/auth";
 import toast from "react-hot-toast";
 
 const MembershipRegister = () => {
-  const router = useRouter();
-
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -24,6 +22,7 @@ const MembershipRegister = () => {
     confirmPassword: "",
     agreeTerms: false,
     confirmEligibility: false,
+    accessCode: "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -31,6 +30,8 @@ const MembershipRegister = () => {
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const validCoupon = "SOLENNE15"; // Example valid coupon
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -46,7 +47,7 @@ const MembershipRegister = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setApiError("");
+    setApiError(""); // Clear previous errors
 
     // Basic validation
     if (formData.password !== formData.confirmPassword) {
@@ -64,7 +65,14 @@ const MembershipRegister = () => {
       return;
     }
 
-    setLoading(true);
+    setLoading(true); // Set loading state
+
+    // Validate coupon if provided
+    if (formData.accessCode && formData.accessCode !== validCoupon) {
+      toast.error("Invalid coupon code"); // Show toast for invalid coupon
+      setLoading(false); // Reset loading state
+      return; // Stop the form submission
+    }
 
     // Payload with backend-friendly snake_case
     const payload = {
@@ -74,25 +82,31 @@ const MembershipRegister = () => {
       password: formData.password,
       dateOfBirth: formData.dob,
       phone: formData.phone,
+      coupon: formData.accessCode || undefined, // Pass the access code (coupon) here (optional)
     };
 
-    const response = await registerUser(payload);
-    toast.success(response.message);
-    // console.log("===============> res in client =========>", response);
-    setLoading(false);
+    try {
+      // Send the request to register the user
+      const response = await registerUser(payload);
+      console.log(response);
 
-    if (response?.error) {
-      setApiError(response.error);
-      return;
+      toast.success(response.message); // Show success message
+
+      if (response?.data?.onBoardingLink) {
+        window.location.href = response.data.onBoardingLink; // Redirect to the Stripe onboarding link
+      }
+
+      setLoading(false); // Reset loading state after request completion
+    } catch (error) {
+      setLoading(false); // Reset loading state in case of error
+      setApiError("Registration failed. Please try again.");
+      console.error("Error during registration:", error);
     }
-
-    // Success → redirect
-    router.push("/checkout");
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center p-5 antialiased">
-      <div className="w-full max-w-[516px] mx-auto">
+      <div className="w-full max-w-129 mx-auto">
         <h1 className="text-4xl lg:text-5xl text-[#FFF] font-semibold font-serif text-center mb-10">
           Join Solenne
         </h1>
@@ -201,6 +215,16 @@ const MembershipRegister = () => {
             </button>
           </div>
 
+          <div className="grow">
+            <Input
+              placeholder="Access code"
+              name="accessCode"
+              value={formData.accessCode}
+              onChange={handleChange}
+              className="text-white border-neutral-700 focus:border-neutral-500"
+            />
+          </div>
+
           {/* Checkboxes */}
           <div className="space-y-8 mt-10">
             <div className="flex items-center gap-3">
@@ -248,7 +272,7 @@ const MembershipRegister = () => {
               disabled={loading}
               className="bg-black cursor-pointer text-white border text-base border-white font-medium py-3.5 px-10 rounded-full hover:bg-white hover:text-black transition"
             >
-              {loading ? "Processing..." : "Poceed to Payment"}
+              {loading ? "Processing..." : "Proceed to Payment"}
             </Button>
           </div>
         </form>
