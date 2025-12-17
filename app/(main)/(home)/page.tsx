@@ -9,7 +9,7 @@ export default function HomePage() {
     <div className="container min-w-full mx-auto">
       <WellnessHero />
       <WellnessCards />
-      <SolenneMembership />
+      {/* <SolenneMembership /> */}
       <FeaturedPartners />
     </div>
   );

@@ -248,7 +248,7 @@ const MembershipRegister = () => {
               disabled={loading}
               className="bg-black cursor-pointer text-white border text-base border-white font-medium py-3.5 px-10 rounded-full hover:bg-white hover:text-black transition"
             >
-              {loading ? "Processing..." : "Next"}
+              {loading ? "Processing..." : "Poceed to Payment"}
             </Button>
           </div>
         </form>
