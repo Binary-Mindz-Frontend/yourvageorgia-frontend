@@ -231,7 +231,7 @@ export interface IGetPartnersParams {
   limit?: number;
   page?: number;
   search?: string;
-  address?: string;
+  addressUrl?: string;
   category?: string; // Should be category ID
   activity?: string; // Should be activity name or ID
   sortBy?: string;
