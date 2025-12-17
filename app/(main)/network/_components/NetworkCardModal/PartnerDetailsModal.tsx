@@ -16,6 +16,10 @@ export default function PartnerDetailsModal({
   // const galleryImages =
   //   partner.gallery?.length > 0 ? partner.gallery : [partner.thumbnail];
 
+  const hasWhatsapp =
+    typeof partner?.socials?.whatsapp === "string" &&
+    partner.socials.whatsapp.trim().length > 0;
+
   return (
     <div className="min-h-screen container mx-auto text-white px-4 lg:px-0 py-10 overflow-y-auto scrollbar-hide">
       {/* Back Button */}
@@ -120,14 +124,16 @@ export default function PartnerDetailsModal({
                 </Link>
               )}
 
-              {partner.socials?.whatsapp && (
+              {hasWhatsapp && (
                 <Link
                   href={`https://wa.me/${partner.socials.whatsapp}`}
                   target="_blank"
+                  className="p-3 rounded-full hover:bg-white/10 transition"
                 >
                   <WhatsappIcon />
                 </Link>
               )}
+
             </div>
           </div>
         </div>
