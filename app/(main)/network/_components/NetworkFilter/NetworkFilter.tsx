@@ -3,18 +3,12 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, ChevronDown, Heart, ListFilter } from "lucide-react";
+import { ArrowRight, ChevronDown, ListFilter } from "lucide-react";
 import { FilterDrawer } from "./FilterDrawer";
 import PartnerDetailsModal from "../NetworkCardModal/PartnerDetailsModal";
 import FavouriteButton from "./FavouriteButton";
-
-interface Partner {
-  _id: string;
-  name: string;
-  address: string;
-  category: { title: string };
-  thumbnail: string;
-}
+import { getPartners } from "@/services/partner/getpartner";
+import { Partner, PartnerCategory } from "@/types/partner.types";
 
 interface AppliedFilters {
   locations: string[];
@@ -28,6 +22,7 @@ const NetworkFilter = () => {
   const filterFromUrl = searchParams.get("filter");
 
   const [partners, setPartners] = useState<Partner[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const [showAll, setShowAll] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -38,17 +33,24 @@ const NetworkFilter = () => {
     activities: [],
   });
 
-  // Fetch partners from API
+  // Fetch partners using getPartners function
   useEffect(() => {
     const fetchPartners = async () => {
+      setIsLoading(true);
       try {
-        const res = await fetch("https://api.solenneuae.com/api/partner", {
-          cache: "no-store",
-        });
-        const data = await res.json();
-        setPartners(data.data || []);
+        const result = await getPartners({});
+
+        if ("error" in result) {
+          console.error("Failed to fetch partners:", result.error);
+          setPartners([]);
+        } else {
+          setPartners(result.data || []);
+        }
       } catch (err) {
         console.error("Failed to fetch partners:", err);
+        setPartners([]);
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchPartners();
@@ -68,18 +70,24 @@ const NetworkFilter = () => {
   let filteredPartners =
     activeFilter === "All"
       ? partners
-      : partners.filter((p) => p.category.title === activeFilter);
+      : partners.filter((p) => {
+          // Handle both string and PartnerCategory types
+          const categoryTitle = typeof p.category === "string" 
+            ? p.category 
+            : (p.category as PartnerCategory)?.title;
+          return categoryTitle === activeFilter;
+        });
 
   // Apply drawer filters
   if (appliedFilters.locations.length > 0) {
     filteredPartners = filteredPartners.filter((p) =>
-      appliedFilters.locations.includes(p.address)
+      p.address ? appliedFilters.locations.includes(p.address) : false
     );
   }
 
   if (appliedFilters.activities.length > 0) {
     filteredPartners = filteredPartners.filter((p) =>
-      appliedFilters.activities.includes(p.name)
+      p.activity ? appliedFilters.activities.includes(p.activity) : false
     );
   }
 
@@ -134,59 +142,63 @@ const NetworkFilter = () => {
         ))}
       </div>
 
+      {/* Loading State */}
+      {isLoading && (
+        <div className="text-center py-10">
+          <p className="text-lg">Loading partners...</p>
+        </div>
+      )}
+
       {/* Partner Cards */}
-      <div className="space-y-10">
-        {filteredPartners.map((partner) => (
-          <div
-            key={partner._id}
-            onClick={() => {
-              setSelectedPartner(partner);
-              setIsModalOpen(true);
-            }}
-            className="relative w-full aspect-video rounded-xl overflow-hidden cursor-pointer shadow-lg hover:shadow-2xl transition-shadow duration-300"
-          >
-            <div
-              className="absolute inset-0 bg-cover bg-center"
-              style={{
-                backgroundImage: `url(${partner.thumbnail})`,
-                filter: "brightness(1.05) saturate(1.2)",
-              }}
-            >
-              <div className="absolute inset-0 bg-linear-to-t from-black/10 via-black/10 to-transparent"></div>
-
-              {/* Heart button – clickable */}
-              {/* <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  console.log("Heart clicked");
+      {!isLoading && (
+        <div className="space-y-10">
+          {filteredPartners.length === 0 ? (
+            <div className="text-center py-10">
+              <p className="text-lg opacity-70">No partners found</p>
+            </div>
+          ) : (
+            filteredPartners.map((partner) => (
+              <div
+                key={partner._id}
+                onClick={() => {
+                  setSelectedPartner(partner);
+                  setIsModalOpen(true);
                 }}
-                className="absolute cursor-pointer left-64 bottom-14 z-10 text-white hover:text-red-400 p-1 bg-black/30 rounded-full"
+                className="relative w-full aspect-video rounded-xl overflow-hidden cursor-pointer shadow-lg hover:shadow-2xl transition-shadow duration-300"
               >
-                <Heart />
-              </button> */}
+                <div
+                  className="absolute inset-0 bg-cover bg-center"
+                  style={{
+                    backgroundImage: `url(${partner.thumbnail})`,
+                    filter: "brightness(1.05) saturate(1.2)",
+                  }}
+                >
+                  <div className="absolute inset-0 bg-linear-to-t from-black/10 via-black/10 to-transparent"></div>
 
-              <FavouriteButton
-                partnerId={partner._id}
-                className="left-64 bottom-14"
-              />
+                  <FavouriteButton
+                    partnerId={partner._id || ""}
+                    className="left-64 bottom-14"
+                  />
 
-              <div className="absolute bottom-0 left-0 p-6 text-white">
-                <h2 className="text-lg lg:text-3xl font-semibold mb-1 font-serif">
-                  {partner.name}
-                </h2>
+                  <div className="absolute bottom-0 left-0 p-6 text-white">
+                    <h2 className="text-lg lg:text-3xl font-semibold mb-1 font-serif">
+                      {partner.name}
+                    </h2>
 
-                <div className="flex items-center text-sm lg:text-lg gap-2 italic opacity-80">
-                  {partner.address}
-                  <ArrowRight />
+                    <div className="flex items-center text-sm lg:text-lg gap-2 italic opacity-80">
+                      {partner.address || "Location not specified"}
+                      <ArrowRight />
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
-        ))}
-      </div>
+            ))
+          )}
+        </div>
+      )}
 
       {/* Show All Arrow */}
-      {!showAll && (
+      {!showAll && !isLoading && filteredPartners.length > 0 && (
         <div className="mt-10 flex justify-center">
           <button
             onClick={() => setShowAll(true)}
@@ -207,11 +219,12 @@ const NetworkFilter = () => {
         </div>
       )}
 
-      {/* Filter Drawer */}
+      {/* Filter Drawer - Now receives all partners data */}
       <FilterDrawer
         isOpen={isFilterOpen}
         onClose={() => setIsFilterOpen(false)}
         onFilterChange={handleFilterChange}
+        partners={partners}
       />
     </div>
   );
