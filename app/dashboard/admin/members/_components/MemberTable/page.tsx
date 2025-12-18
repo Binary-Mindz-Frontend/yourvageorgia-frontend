@@ -21,17 +21,17 @@ type ActionType = 'block' | 'unblock' | 'delete' | 'restore' | 'addPartner' | 'r
 
 const MemberPage = () => {
     const pageSize = 10;
-    
+
     // FIX 1: Update actionType state definition to include 'restore'
     const [isActionDialogOpen, setActionDialogOpen] = useState(false);
     const [actionType, setActionType] = useState<ActionType | null>(null);
     const [selectedUser, setSelectedUser] = useState<IUserResponse["data"] | null>(null);
     const [isProcessing, setIsProcessing] = useState(false);
-    
+
     // NEW STATE for Modal
     const [isUserDetailModalOpen, setUserDetailModalOpen] = useState(false);
     const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
-    
+
     // State for storing fetched users and the filters
     const [users, setUsers] = useState<IUserResponse["data"][]>([]);
     const [totalItems, setTotalItems] = useState(0);
@@ -74,7 +74,6 @@ const MemberPage = () => {
     };
 
     // Handle action clicks (Block, Unblock, Delete, Partner, Verified)
-    // FIX 2: Update the action parameter type to include 'restore'
     const handleActionClick = (user: IUserResponse["data"], action: ActionType) => {
         setSelectedUser(user);
         setActionType(action);
@@ -86,9 +85,9 @@ const MemberPage = () => {
         if (!selectedUser || !actionType) return;
 
         setIsProcessing(true);
-        
+
         let payload = {};
-        
+
         // Block/Unblock/Delete/Restore logic
         if (actionType === 'block') {
             payload = { isBlocked: true };
@@ -96,14 +95,14 @@ const MemberPage = () => {
             payload = { isBlocked: false };
         } else if (actionType === 'delete') {
             payload = { isDeleted: true };
-        } else if (actionType === 'restore') { // Added restore logic
+        } else if (actionType === 'restore') {
             payload = { isDeleted: false };
-        // Partner logic
+            // Partner logic
         } else if (actionType === 'addPartner') {
             payload = { isPartner: true };
         } else if (actionType === 'removePartner') {
             payload = { isPartner: false };
-        // Verified logic
+            // Verified logic
         } else if (actionType === 'verify') {
             payload = { isVerified: true };
         } else if (actionType === 'unverify') {
@@ -151,6 +150,14 @@ const MemberPage = () => {
 
     const columns: Column<typeof users[0]>[] = [
         {
+            header: "ID",
+            cell: (row) => (
+                <div className="flex justify-center items-center w-full">
+                    <span className="text-white">{row._id}</span>
+                </div>
+            ),
+        },
+        {
             header: "Name",
             cell: (row) => (
                 <div className="flex justify-center items-center w-full">
@@ -175,15 +182,26 @@ const MemberPage = () => {
             ),
         },
         {
+            header: "Expired Membership",
+            cell: (row) => {
+                const date = new Date(row.createdAt);
+                const formattedDate = date.toLocaleDateString("en-GB"); // Format: DD/MM/YYYY
+                return (
+                    <div className="flex justify-center items-center w-full">
+                        <span className="text-white">{formattedDate}</span>
+                    </div>
+                );
+            },
+        },
+        {
             header: "Verified",
             cell: (row) => (
                 <div className="flex justify-center items-center w-full">
                     <span
-                        className={`px-3 py-1 inline-flex text-xs font-semibold rounded-full ${
-                            row.isVerified
+                        className={`px-3 py-1 inline-flex text-xs font-semibold rounded-full ${row.isVerified
                                 ? "bg-green-100 text-green-800"
                                 : "bg-gray-100 text-gray-800"
-                        }`}
+                            }`}
                     >
                         {row.isVerified ? "Verified" : "Not Verified"}
                     </span>
@@ -195,11 +213,10 @@ const MemberPage = () => {
             cell: (row) => (
                 <div className="flex justify-center items-center w-full">
                     <span
-                        className={`px-3 py-1 inline-flex text-xs font-semibold rounded-full ${
-                            row.isMembership
+                        className={`px-3 py-1 inline-flex text-xs font-semibold rounded-full ${row.isMembership
                                 ? "bg-blue-100 text-blue-800"
                                 : "bg-yellow-100 text-yellow-800"
-                        }`}
+                            }`}
                     >
                         {row.isMembership ? "Member" : "Inactive"}
                     </span>
@@ -211,11 +228,10 @@ const MemberPage = () => {
             cell: (row) => (
                 <div className="flex justify-center items-center w-full">
                     <span
-                        className={`px-3 py-1 inline-flex text-xs font-semibold rounded-full ${
-                            row.isPartner
+                        className={`px-3 py-1 inline-flex text-xs font-semibold rounded-full ${row.isPartner
                                 ? "bg-purple-100 text-purple-800"
                                 : "bg-gray-100 text-gray-800"
-                        }`}
+                            }`}
                     >
                         {row.isPartner ? "Partner" : "Not Partner"}
                     </span>
@@ -227,11 +243,10 @@ const MemberPage = () => {
             cell: (row) => (
                 <div className="flex justify-center items-center w-full">
                     <span
-                        className={`px-3 py-1 inline-flex text-xs font-semibold rounded-full ${
-                            row.isBlocked
+                        className={`px-3 py-1 inline-flex text-xs font-semibold rounded-full ${row.isBlocked
                                 ? "bg-red-100 text-red-800"
                                 : "bg-green-100 text-green-800"
-                        }`}
+                            }`}
                     >
                         {row.isBlocked ? "Blocked" : "Active"}
                     </span>
@@ -243,11 +258,10 @@ const MemberPage = () => {
             cell: (row) => (
                 <div className="flex justify-center items-center w-full">
                     <span
-                        className={`px-3 py-1 inline-flex text-xs font-semibold rounded-full ${
-                            row.isDeleted
+                        className={`px-3 py-1 inline-flex text-xs font-semibold rounded-full ${row.isDeleted
                                 ? "bg-red-100 text-red-800"
                                 : "bg-green-100 text-green-800"
-                        }`}
+                            }`}
                     >
                         {row.isDeleted ? "Deleted" : "Active"}
                     </span>
@@ -273,8 +287,8 @@ const MemberPage = () => {
                                 <Eye size={16} className="text-blue-500" />
                                 View Details
                             </DropdownMenuItem>
-                        
-                            
+
+
                             {/* Show Block or Unblock based on current status */}
                             {!row.isBlocked ? (
                                 <DropdownMenuItem
@@ -293,7 +307,7 @@ const MemberPage = () => {
                                     Unblock
                                 </DropdownMenuItem>
                             )}
-                            
+
                             {/* Show partner status: Add Partner if !isPartner, Remove Partner if isPartner */}
                             {!row.isPartner ? (
                                 <DropdownMenuItem
@@ -312,7 +326,7 @@ const MemberPage = () => {
                                     Remove Partner
                                 </DropdownMenuItem>
                             )}
-                            
+
                             {/* Show verified status: Verify if !isVerified, Unverify if isVerified */}
                             {/* NOTE: I've corrected the check to use row.isVerified */}
                             {!row.isVerified ? (
@@ -346,7 +360,7 @@ const MemberPage = () => {
                                     className="flex items-center gap-2 cursor-pointer"
                                     onClick={() => handleActionClick(row, 'restore')} // New Restore Action
                                 >
-                                    <CircleCheck size={16} className="text-green-500" /> 
+                                    <CircleCheck size={16} className="text-green-500" />
                                     Restore
                                 </DropdownMenuItem>
                             )}
@@ -381,7 +395,7 @@ const MemberPage = () => {
     const getDialogContent = () => {
         // It's safe to use ActionType as key here because actionType is of type ActionType | null
         if (!actionType) return { title: "", description: "", buttonText: "", buttonClass: "" };
-        
+
         const content: Record<ActionType, { title: string, description: string, buttonText: string, buttonClass: string }> = {
             block: {
                 title: "Block User",
@@ -432,7 +446,7 @@ const MemberPage = () => {
                 buttonClass: "bg-red-600 rounded-md hover:bg-red-700"
             }
         };
-        
+
         return content[actionType];
     };
 
@@ -472,7 +486,7 @@ const MemberPage = () => {
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <div className="flex justify-end space-x-2">
-                        <AlertDialogCancel 
+                        <AlertDialogCancel
                             onClick={() => setActionDialogOpen(false)}
                             disabled={isProcessing}
                         >
