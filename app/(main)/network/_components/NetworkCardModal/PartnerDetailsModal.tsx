@@ -13,8 +13,8 @@ export default function PartnerDetailsModal({
   onClose: () => void;
   partner: any;
 }) {
-  // const galleryImages =
-  //   partner.gallery?.length > 0 ? partner.gallery : [partner.thumbnail];
+  const galleryImages =
+    partner.gallery?.length > 0 ? partner.gallery : [partner.thumbnail];
 
   const hasWhatsapp =
     typeof partner?.socials?.whatsapp === "string" &&
@@ -64,10 +64,10 @@ export default function PartnerDetailsModal({
 
         {/* Left Section */}
         <div className="order-2 lg:order-0">
-          {/* <ImageGallerySlider images={galleryImages} /> */}
-          <ImageGallerySlider
+          <ImageGallerySlider images={galleryImages} />
+          {/* <ImageGallerySlider
             images={partner?.thumbnail ? [partner.thumbnail] : []}
-          />
+          /> */}
 
           {/* About Section */}
           <div className="mt-10">

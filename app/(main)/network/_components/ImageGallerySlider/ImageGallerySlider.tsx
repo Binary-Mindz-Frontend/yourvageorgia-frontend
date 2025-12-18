@@ -94,7 +94,7 @@ export default function ImageGallerySlider({ images }: ImageGallerySliderProps) 
           <div className="relative">
             <button
               onClick={closeZoom}
-              className="absolute top-4 right-4 text-white text-3xl"
+              className="absolute top-4 right-4 text-white text-3xl cursor-pointer"
             >
               <X />
             </button>
