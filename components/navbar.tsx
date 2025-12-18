@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import { Button } from "@/components/ui/button";
 import { Menu, Search, X } from "lucide-react";
@@ -40,7 +40,9 @@ export function Navbar() {
   useEffect(() => {
     const fetchPartners = async () => {
       try {
-        const response = await fetch("https://api.solenneuae.com/api/partner");
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_BASE_API}/partner`
+        );
         const data = await response.json();
         if (data.success) {
           setPartners(data.data);
@@ -78,23 +80,23 @@ export function Navbar() {
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
-      const searchContainer = document.querySelector('.search-container');
-      const searchResults = document.getElementById('search-results-container');
-      
+      const searchContainer = document.querySelector(".search-container");
+      const searchResults = document.getElementById("search-results-container");
+
       // If click is outside both search input and results, close search
       if (
-        isSearchOpen && 
-        searchContainer && 
+        isSearchOpen &&
+        searchContainer &&
         !searchContainer.contains(target) &&
-        searchResults && 
+        searchResults &&
         !searchResults.contains(target)
       ) {
         setIsSearchOpen(false);
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isSearchOpen]);
 
   return (
@@ -102,9 +104,10 @@ export function Navbar() {
       <nav
         className={`
           sticky top-0 z-20 w-full transition-all duration-300 ease-in-out
-          ${scrolled
-            ? "bg-background/50 backdrop-blur-md border-b border-border/40 shadow-sm py-2"
-            : "bg-transparent py-4 border-transparent"
+          ${
+            scrolled
+              ? "bg-background/50 backdrop-blur-md border-b border-border/40 shadow-sm py-2"
+              : "bg-transparent py-4 border-transparent"
           }
         `}
       >
@@ -177,40 +180,40 @@ export function Navbar() {
 
       {/* Partner Cards Display Below Search */}
       {isSearchOpen && (
-       <div 
-  id="search-results-container"
-  className="mt-4 space-y-4 max-w-xl mx-auto bg-black absolute left-0 right-0 z-10 border backdrop-blur-md p-4 rounded-lg shadow-lg max-h-96 overflow-y-auto"
->
-  {filteredPartners.length === 0 ? (
-    <div className="text-center text-white opacity-70 py-4">
-      No results found
-    </div>
-  ) : (
-    <div className="space-y-2">
-      {filteredPartners.map((partner) => (
         <div
-          key={partner._id}
-          onClick={() => handlePartnerClick(partner)}
-          className="flex items-center border space-x-4 p-3 bg-accent/10 rounded-lg shadow-md cursor-pointer hover:bg-accent/20 transition-colors"
+          id="search-results-container"
+          className="mt-4 space-y-4 max-w-xl mx-auto bg-black absolute left-0 right-0 z-10 border backdrop-blur-md p-4 rounded-lg shadow-lg max-h-96 overflow-y-auto"
         >
-          <Image
-            width={48}
-            height={48}
-            src={partner.thumbnail}
-            alt={partner.name}
-            className="w-12 h-12 rounded-full object-cover"
-          />
-          <div>
-            <h3 className="text-base font-semibold">{partner.name}</h3>
-            <p className="text-xs text-gray-400">
-              {partner.category.title}
-            </p>
-          </div>
+          {filteredPartners.length === 0 ? (
+            <div className="text-center text-white opacity-70 py-4">
+              No results found
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {filteredPartners.map((partner) => (
+                <div
+                  key={partner._id}
+                  onClick={() => handlePartnerClick(partner)}
+                  className="flex items-center border space-x-4 p-3 bg-accent/10 rounded-lg shadow-md cursor-pointer hover:bg-accent/20 transition-colors"
+                >
+                  <Image
+                    width={48}
+                    height={48}
+                    src={partner.thumbnail}
+                    alt={partner.name}
+                    className="w-12 h-12 rounded-full object-cover"
+                  />
+                  <div>
+                    <h3 className="text-base font-semibold">{partner.name}</h3>
+                    <p className="text-xs text-gray-400">
+                      {partner.category.title}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
-      ))}
-    </div>
-  )}
-</div>
       )}
 
       {/* Partner Modal */}
