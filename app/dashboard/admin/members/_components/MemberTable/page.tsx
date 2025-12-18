@@ -153,7 +153,7 @@ const MemberPage = () => {
             header: "ID",
             cell: (row) => (
                 <div className="flex justify-center items-center w-full">
-                    <span className="text-white">{row._id}</span>
+                    <span className="text-white">{row.membershipId ?? "N/A"}</span>
                 </div>
             ),
         },
@@ -184,8 +184,18 @@ const MemberPage = () => {
         {
             header: "Expired Membership",
             cell: (row) => {
-                const date = new Date(row.createdAt);
-                const formattedDate = date.toLocaleDateString("en-GB"); // Format: DD/MM/YYYY
+                if (!row.membershipExpiry) {
+                    return (
+                        <div className="flex justify-center items-center w-full">
+                            <span className="text-white">N/A</span>
+                        </div>
+                    );
+                }
+
+                // Convert Unix timestamp (seconds) to milliseconds
+                const date = new Date(row.membershipExpiry * 1000);
+                const formattedDate = date.toLocaleDateString("en-GB"); // DD/MM/YYYY
+
                 return (
                     <div className="flex justify-center items-center w-full">
                         <span className="text-white">{formattedDate}</span>
@@ -199,8 +209,8 @@ const MemberPage = () => {
                 <div className="flex justify-center items-center w-full">
                     <span
                         className={`px-3 py-1 inline-flex text-xs font-semibold rounded-full ${row.isVerified
-                                ? "bg-green-100 text-green-800"
-                                : "bg-gray-100 text-gray-800"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-gray-100 text-gray-800"
                             }`}
                     >
                         {row.isVerified ? "Verified" : "Not Verified"}
@@ -214,8 +224,8 @@ const MemberPage = () => {
                 <div className="flex justify-center items-center w-full">
                     <span
                         className={`px-3 py-1 inline-flex text-xs font-semibold rounded-full ${row.isMembership
-                                ? "bg-blue-100 text-blue-800"
-                                : "bg-yellow-100 text-yellow-800"
+                            ? "bg-blue-100 text-blue-800"
+                            : "bg-yellow-100 text-yellow-800"
                             }`}
                     >
                         {row.isMembership ? "Member" : "Inactive"}
@@ -229,8 +239,8 @@ const MemberPage = () => {
                 <div className="flex justify-center items-center w-full">
                     <span
                         className={`px-3 py-1 inline-flex text-xs font-semibold rounded-full ${row.isPartner
-                                ? "bg-purple-100 text-purple-800"
-                                : "bg-gray-100 text-gray-800"
+                            ? "bg-purple-100 text-purple-800"
+                            : "bg-gray-100 text-gray-800"
                             }`}
                     >
                         {row.isPartner ? "Partner" : "Not Partner"}
@@ -244,8 +254,8 @@ const MemberPage = () => {
                 <div className="flex justify-center items-center w-full">
                     <span
                         className={`px-3 py-1 inline-flex text-xs font-semibold rounded-full ${row.isBlocked
-                                ? "bg-red-100 text-red-800"
-                                : "bg-green-100 text-green-800"
+                            ? "bg-red-100 text-red-800"
+                            : "bg-green-100 text-green-800"
                             }`}
                     >
                         {row.isBlocked ? "Blocked" : "Active"}
@@ -259,8 +269,8 @@ const MemberPage = () => {
                 <div className="flex justify-center items-center w-full">
                     <span
                         className={`px-3 py-1 inline-flex text-xs font-semibold rounded-full ${row.isDeleted
-                                ? "bg-red-100 text-red-800"
-                                : "bg-green-100 text-green-800"
+                            ? "bg-red-100 text-red-800"
+                            : "bg-green-100 text-green-800"
                             }`}
                     >
                         {row.isDeleted ? "Deleted" : "Active"}
