@@ -145,8 +145,8 @@ export default function PartnersMap({
       <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'>
         <path d='M32 5a21 21 0 0 0-21 21c0 17 21 33 21 33s21-16 21-33A21 21 0 0 0 32 5zm0 31a10 10 0 1 1 10-10 10 10 0 0 1-10 10z'/>
       </svg>`,
-      scaledSize: new window.google.maps.Size(36, 36),
-      anchor: new window.google.maps.Point(18, 36),
+      scaledSize: new window.google.maps.Size(40, 40),
+      anchor: new window.google.maps.Point(20, 40),
     };
   }, [mapLoaded]);
 
@@ -177,7 +177,7 @@ export default function PartnersMap({
               position={partner.coordinates!}
               mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
             >
-              <div className=" text-black font-bold text-xs px-2 py-1 rounded shadow-md -translate-y-8">
+              <div className=" text-black font-bold text-xs px-4 py-1 rounded shadow-md -translate-y-8">
                 {partner.name}
               </div>
             </OverlayView>
