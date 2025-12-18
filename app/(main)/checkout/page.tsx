@@ -126,10 +126,10 @@ export default function CheckoutPage() {
     <div className="h-[90vh] flex items-center justify-center px-4">
       <div className="w-full max-w-sm shadow-lg p-6 rounded-xl space-y-6">
         <h1 className="text-4xl lg:text-5xl text-[#FFF] font-semibold font-serif text-center mb-10">
-          Stripe Checkout
+           Checkout
         </h1>
         <Input
-          placeholder="Enter Email"
+          placeholder="Enter Email*"
           type="email"
           required
           value={email}
@@ -138,7 +138,7 @@ export default function CheckoutPage() {
         />
 
         <Input
-          placeholder="Coupon (optional)"
+          placeholder="Access code"
           value={coupon}
           onChange={(e) => setCoupon(e.target.value)}
           className="rounded-full px-6"
@@ -146,11 +146,11 @@ export default function CheckoutPage() {
 
         <div className="flex justify-center">
           <Button
-            className="bg-black cursor-pointer px-10 text-white border-white mt-4 md:mt-0 hover:bg-white hover:text-black hover:border-black transition-colors duration-200"
+            className="bg-black cursor-pointer px-8 text-white border-white mt-4 md:mt-0 hover:bg-white hover:text-black hover:border-black transition-colors duration-200"
             onClick={handleCheckout}
             disabled={loading}
           >
-            {loading ? "Processing..." : "Pay Now"}
+            {loading ? "Processing..." : "Proceed to Payment"}
           </Button>
         </div>
       </div>

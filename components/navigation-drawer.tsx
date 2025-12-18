@@ -2,6 +2,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import useUser from "@/hooks/useUser";
 import { getCurrentUser } from "@/services/auth";
 import { ArrowRight, CircleUserRound, Heart, LogIn, User, X } from "lucide-react";
 import Link from "next/link";
@@ -13,15 +14,17 @@ interface NavigationDrawerProps {
 }
 
 export function NavigationDrawer({ isOpen, onClose }: NavigationDrawerProps) {
-  const [user, setUser] = useState<any>(null);
-  console.log('user',user)
-  useEffect(() => {
-    const fetchUser = async () => {
-      const currentUser = await getCurrentUser();
-      setUser(currentUser);
-    };
-    fetchUser();
-  }, []);
+
+   const { user } = useUser();
+  // const [user, setUser] = useState<any>(null);
+  // console.log('user',user)
+  // useEffect(() => {
+  //   const fetchUser = async () => {
+  //     const currentUser = await getCurrentUser();
+  //     setUser(currentUser);
+  //   };
+  //   fetchUser();
+  // }, []) ;
   // Prevent body scroll when drawer is open
   useEffect(() => {
     if (isOpen) {

@@ -8,8 +8,10 @@ const getAccessTokenFromCookies = async () => {
 };
 
 
-export const addFavourite = async (partner: string) => {
+export const addFavourite = async (program: string) => {
   const token = await getAccessTokenFromCookies();
+
+  // console.log('accessToken',token.access);
 
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_BASE_API}/favourite`,
@@ -19,7 +21,7 @@ export const addFavourite = async (partner: string) => {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ partner }),
+      body: JSON.stringify({ program }),
     }
   );
 
