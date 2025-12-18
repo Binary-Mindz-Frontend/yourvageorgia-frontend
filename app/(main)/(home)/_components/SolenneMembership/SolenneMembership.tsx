@@ -106,20 +106,24 @@ export default function SolenneMembership() {
 
   // Load partners
   useEffect(() => {
-    const loadPartners = async () => {
-      const res = await getPartners();
-      if ("data" in res) {
-        setPartners(res.data);
+  const loadPartners = async () => {
+    const res = await getPartners();
+    if ("data" in res) {
+      setPartners(res.data);
 
-        // Optionally select the first partner as default
-        if (res.data.length > 0) {
-          setSelectedPartner(res.data[0]);
-        }
-      }
-    };
+      // ✅ Find the first partner with isFeaturedMap === "true"
+      const featuredPartner = res.data.find(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (p: any) => p.isFeaturedMap === "true"
+      );
 
-    loadPartners();
-  }, []);
+      // ✅ If found, set as default selected partner; otherwise fallback to first
+      setSelectedPartner(featuredPartner || res.data[0]);
+    }
+  };
+
+  loadPartners();
+}, []);
 
   return (
     <div className="text-white flex items-center justify-center my-16 lg:my-38 p-4 lg:px-12">

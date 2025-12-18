@@ -23,15 +23,17 @@ export interface IUserResponse {
     _id: string;
     email: string;
     phone: string | null;
-    username: string; // I'm keeping 'username' but using 'firstName' and 'lastName' below
+    username: string;
     name: string;
-    firstName: string; //
-    lastName: string; //
-    dateOfBirth: string; //
-    isDeleted: boolean; //
-    isVerified: boolean; //
-    isPartner: boolean; //
+    firstName: string;
+    lastName: string;
+    dateOfBirth: string;
+    isDeleted: boolean;
+    isVerified: boolean;
+    isPartner: boolean;
     isMembership: boolean;
+    membershipId?: string;
+    membershipExpiry?: number;
     isBlocked: boolean;
     isResettingPassword: boolean;
     avatarUrl: string;
@@ -51,7 +53,8 @@ export interface IUserUpdatePayload {
   phone?: string | null;
   dateOfBirth?: string | null;
   role?: "user" | "admin";
-  // NEW: Boolean fields for user status
+    membershipId?: string;      // <-- add this
+  membershipExpiry?: number;
   isVerified?: boolean;
   isMembership?: boolean;
   isPartner?: boolean;
