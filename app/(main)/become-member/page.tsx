@@ -9,7 +9,7 @@ const SolenneMembership = () => {
       <div className="container mx-auto">
         {/* === Membership Card Section === */}
         <div
-          className="w-full max-w-[475px] h-[408px] lg:h-[475px] mx-auto rounded-xl shadow-2x overflow-hidden bg-cover bg-center"
+          className="w-full max-w-125 h-[408px] lg:h-[475px] mx-auto rounded-xl shadow-2x overflow-hidden bg-cover bg-center"
           style={{
             backgroundImage: `url(${img.src})`,
           }}
@@ -19,27 +19,36 @@ const SolenneMembership = () => {
               Membership
             </h2>
 
-            <p className="text-3xl lg:text-[40px] font-semibold font-serif tracking-wide text-center text-white mb-16">
+            <h3 className=" text-center lg:text-lg mb-6 leading-relaxed text-gray-300">Founding Circle · Limited Capacity</h3>
+
+            <p className="text-3xl lg:text-[40px] font-semibold font-serif tracking-wide text-center text-white ">
               900 AED/Year
             </p>
+            <p className=" text-center lg:text-lg mb-6 leading-relaxed text-gray-300">12-month membership</p>
 
-            <p className="px-10 lg:px-5  text-center lg:text-lg mb-6 leading-relaxed text-gray-300">
-              One year of member access to preferred rates across our curated
-              network of wellness, beauty and lifestyle partners in Dubai.
+            <div className="space-y-4">
+              <p className="text-center lg:text-lg leading-relaxed text-gray-300">
+              Preferred rates across Dubai is most considered wellness, beauty,
+              and lifestyle destinations.
             </p>
 
             <p className="px-10 lg:px-0 text-center lg:text-lg text-gray-300">
-              Includes invitations to exclusive member events.
+              Invitations to intimate member gatherings and partner-led
+              engagements
             </p>
+            <p className="px-10 lg:px-0 text-center lg:text-lg text-gray-300">
+              A discreet digital membership ID, recognized across our partner
+              network.
+            </p>
+            </div>
           </div>
         </div>
 
         {/* Join Us Button */}
         <div className="flex justify-center mb-24 mt-6">
           <Link href="/member-registration">
-            <Button
-              className="border border-white cursor-pointer text-sm lg:text-base px-10 py-3 lg:px-7 lg:py-2.5 rounded-full tracking-wider bg-black text-white hover:bg-white hover:text-black hover:border-black transition-colors duration-200">
-              Join Us
+            <Button className="border border-white cursor-pointer text-sm lg:text-base px-10 py-3 lg:px-7 lg:py-2.5 rounded-full tracking-wider bg-black text-white hover:bg-white hover:text-black hover:border-black transition-colors duration-200">
+              Become Member
             </Button>
           </Link>
         </div>

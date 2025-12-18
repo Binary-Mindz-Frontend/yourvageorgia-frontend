@@ -52,20 +52,55 @@ export const loginUser = async (userData: FieldValues) => {
       // Save token in cookies
       cookieStore.set("accessToken", result?.data?.accessToken);
 
-    // Save user in cookies
+      // Save user in cookies
       const decodedUser: any = jwtDecode(result?.data?.accessToken);
       cookieStore.set("user", JSON.stringify(decodedUser), {
         httpOnly: false,
         secure: true,
         path: "/",
       });
-      // Save user in cookies
-      // cookieStore.set("user", JSON.stringify(result?.data?.user));
     }
 
     return result;
   } catch (error: any) {
     return Error(error);
+  }
+};
+
+export const loginUserWithToken = async (token: any) => {
+  const cookieStore = await cookies();
+  console.log({ token });
+  try {
+    // Prepare the request URL with the accessToken in the query
+    const url = `${process.env.NEXT_PUBLIC_BASE_API}/user/login-with-token`;
+
+    const res = await fetch(url, {
+      method: "POST", // Assuming it's a GET request for login with token
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ token }),
+    });
+
+    const result = await res.json();
+    console.log({ result });
+    if (result?.success) {
+      // Save token in cookies
+      cookieStore.set("accessToken", result?.data?.accessToken);
+
+      // Save user in cookies
+      const decodedUser: any = jwtDecode(result?.data?.accessToken);
+      cookieStore.set("user", JSON.stringify(decodedUser), {
+        httpOnly: false,
+        secure: true,
+        path: "/",
+      });
+    }
+
+    return result;
+  } catch (error: any) {
+    console.error("Login with token failed:", error);
+    return { error: error.message };
   }
 };
 
@@ -78,8 +113,6 @@ export const logout = async () => {
   cookieStore.delete("user");
 };
 
-
-
 //Change Password
 
 //Get Current User
@@ -87,7 +120,7 @@ export const getCurrentUser = async () => {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get("accessToken")?.value;
   const userCookie = cookieStore.get("user")?.value;
-  
+
   if (accessToken && userCookie) {
     try {
       const user = JSON.parse(userCookie);
@@ -97,7 +130,7 @@ export const getCurrentUser = async () => {
       return null;
     }
   }
-  
+
   return null;
 };
 
@@ -134,7 +167,6 @@ export const forgetPassword = async ({ email }: { email: string }) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
       }
-   
     );
 
     const result = await res.json();
@@ -172,7 +204,6 @@ export const verifyForgetOtp = async ({
   }
 };
 
-
 // Reset Password
 export const resetPassword = async ({
   email,
@@ -198,6 +229,3 @@ export const resetPassword = async ({
     return { success: false, message: error.message };
   }
 };
-
-
-

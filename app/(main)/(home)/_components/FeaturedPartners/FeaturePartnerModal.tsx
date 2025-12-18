@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import Image from "next/image";
 import {
   MapPin,
   Globe,
@@ -19,7 +18,9 @@ export default function FeaturePartnerModal({
   partner: any;
 }) {
   const galleryImages =
-    partner.gallery?.length > 0 ? partner.gallery : [partner.thumbnail];
+    partner.gallery;
+
+    console.log('galleryImages',galleryImages)
 
   return (
     <div className="min-h-screen container mx-auto text-white px-4 lg:px-0 py-10 overflow-y-auto scrollbar-hide">
