@@ -236,7 +236,7 @@ const NetworkFilter = () => {
 
       {/* Partner Modal */}
       {isModalOpen && selectedPartner && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-999 overflow-y-auto">
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-999 overflow-y-auto scrollbar-hide">
           <PartnerDetailsModal
             onClose={() => setIsModalOpen(false)}
             partner={selectedPartner}

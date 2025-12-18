@@ -14,7 +14,7 @@ export default function PartnerDetailsModal({
   partner: any;
 }) {
   const galleryImages =
-    partner.gallery?.length > 0 ? partner.gallery : [partner.thumbnail];
+    partner?.gallery?.length > 0 ? partner.gallery : partner?.thumbnail;
 
   const hasWhatsapp =
     typeof partner?.socials?.whatsapp === "string" &&
@@ -34,12 +34,14 @@ export default function PartnerDetailsModal({
         {/* Right Section */}
         <div className="flex flex-col justify-start order-1">
           <div className="flex lg:py-4 pb-4 md:pb-0">
-            <Button
-              variant="outline"
-              className="cursor-pointer py-3 border border-white/70 rounded-md sm:w-auto text-sm lg:text-base text-white/70 px-10"
-            >
-              {partner.category?.title}
-            </Button>
+            {partner.category?.title && (
+              <Button
+                variant="outline"
+                className="cursor-pointer py-3 border border-white/70 rounded-md sm:w-auto text-sm lg:text-base text-white/70 px-10"
+              >
+                {partner.category?.title}
+              </Button>
+            )}
           </div>
 
           <h1 className="text-2xl lg:text-4xl font-semibold font-serif lg:mt-6 mb-2">
@@ -133,7 +135,6 @@ export default function PartnerDetailsModal({
                   <WhatsappIcon />
                 </Link>
               )}
-
             </div>
           </div>
         </div>
