@@ -260,7 +260,6 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { ReactNode, useState, useEffect, useRef } from "react";
-import { MdOutlineNotificationsNone } from "react-icons/md";
 import { AppSidebar } from "@/components/Shared/dashboard/sidebar/AppSidebar";
 import useScrollTrigger from "@/hooks/useScrollTrigger";
 import { LogOut, User } from "lucide-react";
@@ -365,7 +364,7 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
                 </h1>
               </div>
               <div className="flex items-center gap-4 mr-2">
-                <MdOutlineNotificationsNone className="text-xl text-white" />
+                
                 <div className="relative" ref={dropdownRef}>
                   <Avatar 
                     className="h-10 w-10 cursor-pointer" 
