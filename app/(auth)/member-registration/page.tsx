@@ -1,20 +1,18 @@
 "use client";
 
-import { EyeOff } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { MemberShipDate } from "./_components/MemberShipDate/MemberShipDate";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+
 import { registerUser } from "@/services/auth";
 import toast from "react-hot-toast";
 
 const MembershipRegister = () => {
-  const router = useRouter();
 
-  // console.log(process.env.NEXT_PUBLIC_BASE_API);
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -26,6 +24,7 @@ const MembershipRegister = () => {
     confirmPassword: "",
     agreeTerms: false,
     confirmEligibility: false,
+    accessCode: "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -33,6 +32,8 @@ const MembershipRegister = () => {
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const validCoupon = "SOLENNE15";
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -45,6 +46,9 @@ const MembershipRegister = () => {
   const handleCheckboxChange = (name: string, checked: boolean) => {
     setFormData((prev) => ({ ...prev, [name]: checked }));
   };
+
+
+ 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,7 +72,14 @@ const MembershipRegister = () => {
 
     setLoading(true);
 
-    // Payload with backend-friendly snake_case
+    // Validate coupon if provided
+    if (formData.accessCode && formData.accessCode !== validCoupon) {
+      toast.error("Invalid coupon code");
+      setLoading(false);
+      return;
+    }
+
+    // Payload
     const payload = {
       firstName: formData.firstName,
       lastName: formData.lastName,
@@ -76,25 +87,30 @@ const MembershipRegister = () => {
       password: formData.password,
       dateOfBirth: formData.dob,
       phone: formData.phone,
+      coupon: formData.accessCode || undefined,
     };
 
-    const response = await registerUser(payload);
-    toast.success(response.message);
-    console.log("===============> res in client =========>", response);
-    setLoading(false);
+    try {
+      const response = await registerUser(payload);
+      console.log(response);
 
-    if (response?.error) {
-      setApiError(response.error);
-      return;
+      toast.success(response.message);
+
+      if (response?.data?.onBoardingLink) {
+        window.location.href = response.data.onBoardingLink;
+      }
+
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      setApiError("Registration failed. Please try again.");
+      console.error("Error during registration:", error);
     }
-
-    // Success → redirect
-    router.push("/checkout");
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center p-5 antialiased">
-      <div className="w-full max-w-[516px] mx-auto">
+      <div className="w-full max-w-129 mx-auto">
         <h1 className="text-4xl lg:text-5xl text-[#FFF] font-semibold font-serif text-center mb-10">
           Join Solenne
         </h1>
@@ -171,7 +187,11 @@ const MembershipRegister = () => {
               onClick={() => setShowPassword(!showPassword)}
               className="absolute inset-y-0 right-0 pr-3 flex items-center"
             >
-              <EyeOff className="w-5 h-5 text-neutral-400" />
+              {showPassword ? (
+                <Eye className="w-5 h-5 text-neutral-400 cursor-pointer" />
+              ) : (
+                <EyeOff className="w-5 h-5 text-neutral-400 cursor-pointer" />
+              )}
             </button>
           </div>
 
@@ -191,8 +211,22 @@ const MembershipRegister = () => {
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
               className="absolute inset-y-0 right-0 pr-3 flex items-center"
             >
-              <EyeOff className="w-5 h-5 text-neutral-400" />
+              {showConfirmPassword ? (
+                <Eye className="w-5 h-5 text-neutral-400 cursor-pointer" />
+              ) : (
+                <EyeOff className="w-5 h-5 text-neutral-400 cursor-pointer" />
+              )}
             </button>
+          </div>
+
+          <div className="grow">
+            <Input
+              placeholder="Access code"
+              name="accessCode"
+              value={formData.accessCode}
+              onChange={handleChange}
+              className="text-white border-neutral-700 focus:border-neutral-500"
+            />
           </div>
 
           {/* Checkboxes */}
@@ -209,7 +243,7 @@ const MembershipRegister = () => {
                 htmlFor="agreeTerms"
                 className="text-[#FFFFFFB3] text-sm cursor-pointer"
               >
-                I have read and agree to Solenne’s{" "}
+                I have read and agree to Solenne&lsquo;s{" "}
                 <Link href="/become-member" className="underline">
                   Terms & Conditions
                 </Link>
@@ -229,7 +263,7 @@ const MembershipRegister = () => {
                 htmlFor="confirmEligibility"
                 className="text-[#FFFFFFB3] text-sm cursor-pointer"
               >
-                Solenne is a women’s-only membership. Please confirm your
+                Solenne is a women&lsquo;s-only membership. Please confirm your
                 eligibility.
               </label>
             </div>
@@ -242,7 +276,7 @@ const MembershipRegister = () => {
               disabled={loading}
               className="bg-black cursor-pointer text-white border text-base border-white font-medium py-3.5 px-10 rounded-full hover:bg-white hover:text-black transition"
             >
-              {loading ? "Processing..." : "Next"}
+              {loading ? "Processing..." : "Proceed to Payment"}
             </Button>
           </div>
         </form>

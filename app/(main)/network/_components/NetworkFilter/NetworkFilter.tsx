@@ -1,108 +1,101 @@
 "use client";
-import { Button } from "@/components/ui/button";
-import img1 from "@/public/assets/network/1.svg";
-import img2 from "@/public/assets/network/2.svg";
-import img3 from "@/public/assets/network/3.svg";
-import img4 from "@/public/assets/network/4.svg";
-import { ArrowRight, ChevronDown, Heart, ListFilter } from "lucide-react";
-import { useState } from "react";
+
+import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import NetworkCardModal from "../NetworkCardModal/NetworkCardModal";
+import { Button } from "@/components/ui/button";
+import { ArrowRight, ChevronDown, ListFilter } from "lucide-react";
 import { FilterDrawer } from "./FilterDrawer";
+import PartnerDetailsModal from "../NetworkCardModal/PartnerDetailsModal";
+import FavouriteButton from "./FavouriteButton";
+import { getPartners } from "@/services/partner/getpartner";
+import { Partner, PartnerCategory } from "@/types/partner.types";
+
+interface AppliedFilters {
+  locations: string[];
+  activities: string[];
+}
 
 const NetworkFilter = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
+
   const filterFromUrl = searchParams.get("filter");
-  
-  // Initialize activeFilter from URL or default to "All"
-  const validFilters = ["All", "Movement", "Recovery", "Radiance", "Taste"];
-  const initialFilter = filterFromUrl && validFilters.includes(filterFromUrl) 
-    ? filterFromUrl 
-    : "All";
-  
-  const [activeFilter, setActiveFilter] = useState(initialFilter);
+
+  const [partners, setPartners] = useState<Partner[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
   const [showAll, setShowAll] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedPartner, setSelectedPartner] = useState<Partner | null>(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-
-  const data = [
-    {
-      img: img1,
-      title: "The Hundred Wellness Centre",
-      location: "Jumeirah",
-      category: "Movement",
-      activity: "Gym",
-    },
-    {
-      img: img2,
-      title: "Reform Studio",
-      location: "Al Quoz",
-      category: "Recovery",
-      activity: "Reformer Pilates",
-    },
-    {
-      img: img3,
-      title: "Urban Yoga",
-      location: "Downtown",
-      category: "Radiance",
-      activity: "Spa",
-    },
-    {
-      img: img4,
-      title: "Seva Table",
-      location: "Jumeirah",
-      category: "Taste",
-      activity: "Coffee",
-    },
-    {
-      img: img4,
-      title: "New one",
-      location: "Palm Jumeirah",
-      category: "Taste",
-      activity: "Massage",
-    },
-  ];
-
-  const [appliedFilters, setAppliedFilters] = useState({
-    locations: [] as string[],
-    activities: [] as string[],
+  const [appliedFilters, setAppliedFilters] = useState<AppliedFilters>({
+    locations: [],
+    activities: [],
   });
 
-  const filteredData =
+  // Fetch partners using getPartners function
+  useEffect(() => {
+    const fetchPartners = async () => {
+      setIsLoading(true);
+      try {
+        const result = await getPartners({});
+
+        if ("error" in result) {
+          console.error("Failed to fetch partners:", result.error);
+          setPartners([]);
+        } else {
+          setPartners(result.data || []);
+        }
+      } catch (err) {
+        console.error("Failed to fetch partners:", err);
+        setPartners([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchPartners();
+  }, []);
+
+  // Set active filter from URL after first render
+  const [activeFilter, setActiveFilter] = useState("All");
+  useEffect(() => {
+    if (filterFromUrl) {
+      setActiveFilter(filterFromUrl);
+    }
+  }, [filterFromUrl]);
+
+  const filters = ["All", "Movement", "Recovery", "Radiance", "Taste"];
+
+  // Filter partners by category
+  let filteredPartners =
     activeFilter === "All"
-      ? data
-      : data.filter((item) => item.category === activeFilter);
+      ? partners
+      : partners.filter((p) => {
+          // Handle both string and PartnerCategory types
+          const categoryTitle = typeof p.category === "string" 
+            ? p.category 
+            : (p.category as PartnerCategory)?.title;
+          return categoryTitle === activeFilter;
+        });
 
   // Apply drawer filters
-  let finalData = showAll ? data : filteredData;
-
   if (appliedFilters.locations.length > 0) {
-    finalData = finalData.filter((item) =>
-      appliedFilters.locations.includes(item.location)
+    filteredPartners = filteredPartners.filter((p) =>
+      p.address ? appliedFilters.locations.includes(p.address) : false
     );
   }
 
   if (appliedFilters.activities.length > 0) {
-    finalData = finalData.filter((item) =>
-      appliedFilters.activities.includes(item.activity)
+    filteredPartners = filteredPartners.filter((p) =>
+      p.activity ? appliedFilters.activities.includes(p.activity) : false
     );
   }
-
-  const filters = ["All", "Movement", "Recovery", "Radiance", "Taste"];
-
-  const handleFilterChange = (filters: {
-    locations: string[];
-    activities: string[];
-  }) => {
-    setAppliedFilters(filters);
-  };
 
   const handleFilterClick = (filter: string) => {
     setActiveFilter(filter);
     setShowAll(false);
-    
-    // Update URL with the selected filter
+
+    // Update URL without full reload
     if (filter === "All") {
       router.push("/network");
     } else {
@@ -110,87 +103,102 @@ const NetworkFilter = () => {
     }
   };
 
+  const handleFilterChange = (filters: AppliedFilters) => {
+    setAppliedFilters(filters);
+  };
+
   return (
     <div className="text-white p-4 max-w-4xl mx-auto">
-      <div>
-        <h2 className="font-serif text-3xl lg:text-5xl font-bold lg:font-semibold text-center py-4 lg:py-20">
-          The Network
-        </h2>
-      </div>
+      <h2 className="font-serif text-3xl lg:text-5xl font-bold lg:font-semibold text-center py-4 lg:py-20">
+        The Network
+      </h2>
 
+      {/* Filter Button */}
       <header className="flex justify-end mb-8">
         <Button
           variant="ghost"
-          size={"lg"}
-          className="text-white focus:outline-none hover:bg-gray-800 p-2 rounded transition cursor-pointer [&_svg:not([class*='size-'])]:size-6"
+          size="lg"
+          className="text-white focus:outline-none hover:bg-gray-800 p-2 rounded transition [&_svg:not([class*='size-'])]:size-6"
           onClick={() => setIsFilterOpen(true)}
         >
           <ListFilter className="h-6 w-6" />
         </Button>
       </header>
 
-      {/* Filters */}
+      {/* Category Filters */}
       <div className="flex gap-4 mb-8 overflow-x-auto pb-2 sm:grid sm:grid-cols-5 lg:overflow-visible">
         {filters.map((filter) => (
           <Button
             key={filter}
             onClick={() => handleFilterClick(filter)}
-            className={`md:py-2.5 rounded lg:rounded-lg whitespace-nowrap min-w-max
-        ${
-          activeFilter === filter && !showAll
-            ? "bg-white text-black hover:bg-white"
-            : "text-white"
-        }
-      `}
+            className={`md:py-2.5 rounded lg:rounded-lg whitespace-nowrap min-w-max ${
+              activeFilter === filter && !showAll
+                ? "bg-white text-black hover:bg-white"
+                : "text-white"
+            }`}
           >
             {filter}
           </Button>
         ))}
       </div>
 
-      {/* Cards */}
-      <div className="space-y-10">
-        {finalData.map((item, index) => (
-          <div
-            key={index}
-            onClick={() => setIsModalOpen(true)}
-            className="relative w-full h-61 lg:h-auto aspect-video rounded-xl overflow-hidden cursor-pointer shadow-lg hover:shadow-2xl transition-shadow duration-300"
-          >
-            <div
-              className="absolute inset-0 bg-cover bg-center"
-              style={{
-                backgroundImage: `url(${item.img.src})`,
-                filter: "brightness(1.05) saturate(1.2)",
-              }}
-            >
-              <div className="absolute inset-0 bg-linear-to-t from-black/10 via-black/10 to-transparent"></div>
+      {/* Loading State */}
+      {isLoading && (
+        <div className="text-center py-10">
+          <p className="text-lg">Loading partners...</p>
+        </div>
+      )}
 
-              <div className="absolute bottom-0 left-0 p-6 text-white">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="flex gap-1">
-                      <h2 className="text-lg lg:text-3xl font-semibold mb-1 font-serif">
-                        {item.title}
-                      </h2>
-                      <button className="text-white hover:text-red-400 cursor-pointer p-2">
-                        <Heart />
-                      </button>
-                    </div>
+      {/* Partner Cards */}
+      {!isLoading && (
+        <div className="space-y-10">
+          {filteredPartners.length === 0 ? (
+            <div className="text-center py-10">
+              <p className="text-lg opacity-70">No partners found</p>
+            </div>
+          ) : (
+            filteredPartners.map((partner) => (
+              <div
+                key={partner._id}
+                onClick={() => {
+                  setSelectedPartner(partner);
+                  setIsModalOpen(true);
+                }}
+                className="relative w-full aspect-video rounded-xl overflow-hidden cursor-pointer shadow-lg hover:shadow-2xl transition-shadow duration-300"
+              >
+                <div
+                  className="absolute inset-0 bg-cover bg-center"
+                  style={{
+                    backgroundImage: `url(${partner.thumbnail})`,
+                    filter: "brightness(1.05) saturate(1.2)",
+                  }}
+                >
+                  <div className="absolute inset-0 bg-linear-to-t from-black/10 via-black/10 to-transparent"></div>
+
+                  <FavouriteButton
+                    partnerId={partner._id || ""}
+                    className="left-64 bottom-14"
+                  />
+
+                  <div className="absolute bottom-0 left-0 p-6 text-white">
+                    <h2 className="text-lg lg:text-3xl font-semibold mb-1 font-serif">
+                      {partner.name}
+                    </h2>
 
                     <div className="flex items-center text-sm lg:text-lg gap-2 italic opacity-80">
-                      {item.location}
+                      {partner.address || "Location not specified"}
                       <ArrowRight />
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
-        ))}
-      </div>
+            ))
+          )}
+        </div>
+      )}
 
       {/* Show All Arrow */}
-      {!showAll && (
+      {!showAll && !isLoading && filteredPartners.length > 0 && (
         <div className="mt-10 flex justify-center">
           <button
             onClick={() => setShowAll(true)}
@@ -201,24 +209,248 @@ const NetworkFilter = () => {
         </div>
       )}
 
-      {/* Network Card Modal */}
-      {isModalOpen && (
+      {/* Partner Modal */}
+      {isModalOpen && selectedPartner && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-999 overflow-y-auto">
-          <NetworkCardModal
-            isOpen={isModalOpen}
+          <PartnerDetailsModal
             onClose={() => setIsModalOpen(false)}
+            partner={selectedPartner}
           />
         </div>
       )}
 
-      {/* Filter Drawer */}
+      {/* Filter Drawer - Now receives all partners data */}
       <FilterDrawer
         isOpen={isFilterOpen}
         onClose={() => setIsFilterOpen(false)}
         onFilterChange={handleFilterChange}
+        partners={partners}
       />
     </div>
   );
 };
 
 export default NetworkFilter;
+
+// "use client";
+
+// import { useEffect, useState, useCallback } from "react";
+// import { useSearchParams, useRouter } from "next/navigation";
+// import { Button } from "@/components/ui/button";
+// import { ArrowRight, ChevronDown, ListFilter } from "lucide-react";
+// import { FilterDrawer } from "./FilterDrawer";
+// import PartnerDetailsModal from "../NetworkCardModal/PartnerDetailsModal";
+// import FavouriteButton from "./FavouriteButton";
+
+// import { Partner } from "@/types/partner.types";
+// import { getPartnersFilter, IGetPartnersParams } from "@/services/partner/partner";
+
+// interface AppliedFilters {
+//   locations: string[];
+//   activities: string[];
+// }
+
+// const NetworkFilter = () => {
+//   const searchParams = useSearchParams();
+//   const router = useRouter();
+
+//   const filterFromUrl = searchParams.get("filter") || "All";
+
+//   const [partners, setPartners] = useState<Partner[]>([]);
+//   const [allPartnersForFilters, setAllPartnersForFilters] = useState<Partner[]>([]);
+//   const [isLoading, setIsLoading] = useState(true);
+//   const [showAll, setShowAll] = useState(false);
+//   const [isModalOpen, setIsModalOpen] = useState(false);
+//   const [selectedPartner, setSelectedPartner] = useState<Partner | null>(null);
+//   const [isFilterOpen, setIsFilterOpen] = useState(false);
+//   const [activeFilter, setActiveFilter] = useState(filterFromUrl);
+  
+//   const [categoryMap, setCategoryMap] = useState<Record<string, string>>({});
+
+//   const [appliedFilters, setAppliedFilters] = useState<AppliedFilters>({
+//     locations: [],
+//     activities: [],
+//   });
+
+//   // 1. Initial Load: Fetch everything once to build the Category Map and Drawer options
+//   useEffect(() => {
+//     const initialize = async () => {
+//       setIsLoading(true);
+//       try {
+//         const result = await getPartnersFilter({});
+//         if (!("error" in result)) {
+//           const data = result.data || [];
+//           setAllPartnersForFilters(data);
+          
+//           const mapping: Record<string, string> = {};
+//           data.forEach((p: any) => {
+//             if (p.category?.title && p.category?._id) {
+//               mapping[p.category.title] = p.category._id;
+//             }
+//           });
+//           setCategoryMap(mapping);
+//         }
+//       } catch (err) {
+//         console.error("Initialization error:", err);
+//       } finally {
+//         setIsLoading(false);
+//       }
+//     };
+//     initialize();
+//   }, []);
+
+//   // 2. Fetch partners from API with corrected parameters
+//   const fetchFilteredData = useCallback(async () => {
+//     setIsLoading(true);
+//     try {
+//       const params: any = {}; // Using any to match dynamic param keys
+      
+//       // Category Filter (Using the Map to get ID)
+//       if (activeFilter !== "All") {
+//         const categoryId = categoryMap[activeFilter];
+//         if (categoryId) {
+//           params.category = categoryId;
+//         } else {
+//           params.category = "000000000000000000000000"; 
+//         }
+//       }
+
+//       // Address Filter - CHANGED to use 'address' to match the drawer's output
+//       if (appliedFilters.locations.length > 0) {
+//         params.address = appliedFilters.locations[0]; 
+//       }
+
+//       // Activity Filter
+//       if (appliedFilters.activities.length > 0) {
+//         params.activity = appliedFilters.activities[0];
+//       }
+
+//       const result = await getPartnersFilter(params);
+
+//       if ("error" in result) {
+//         console.error(result.error);
+//         setPartners([]);
+//       } else {
+//         setPartners(result.data || []);
+//       }
+//     } catch (err) {
+//       console.error("Fetch error:", err);
+//       setPartners([]);
+//     } finally {
+//       setIsLoading(false);
+//     }
+//   }, [activeFilter, appliedFilters, categoryMap]);
+
+//   useEffect(() => {
+//     fetchFilteredData();
+//   }, [fetchFilteredData]);
+
+//   const filters = ["All", "Movement", "Recovery", "Radiance", "Taste"];
+
+//   const handleFilterClick = (filter: string) => {
+//     setActiveFilter(filter);
+//     setShowAll(false);
+//     if (filter === "All") {
+//       router.push("/network");
+//     } else {
+//       router.push(`/network?filter=${encodeURIComponent(filter)}`);
+//     }
+//   };
+
+//   const handleFilterChange = (filters: AppliedFilters) => {
+//     setAppliedFilters(filters);
+//   };
+
+//   return (
+//     <div className="text-white p-4 max-w-4xl mx-auto">
+//       <h2 className="font-serif text-3xl lg:text-5xl font-bold lg:font-semibold text-center py-4 lg:py-20">
+//         The Network
+//       </h2>
+
+//       <header className="flex justify-end mb-8">
+//         <Button
+//           variant="ghost"
+//           size="lg"
+//           className="text-white focus:outline-none hover:bg-gray-800 p-2 rounded transition"
+//           onClick={() => setIsFilterOpen(true)}
+//         >
+//           <ListFilter className="h-6 w-6" />
+//         </Button>
+//       </header>
+
+//       <div className="flex gap-4 mb-8 overflow-x-auto pb-2 sm:grid sm:grid-cols-5 lg:overflow-visible">
+//         {filters.map((filter) => (
+//           <Button
+//             key={filter}
+//             onClick={() => handleFilterClick(filter)}
+//             className={`md:py-2.5 rounded lg:rounded-lg whitespace-nowrap min-w-max ${
+//               activeFilter === filter && !showAll
+//                 ? "bg-white text-black hover:bg-white"
+//                 : "text-white"
+//             }`}
+//           >
+//             {filter}
+//           </Button>
+//         ))}
+//       </div>
+
+//       {isLoading ? (
+//         <div className="text-center py-10"><p className="text-lg">Loading partners...</p></div>
+//       ) : (
+//         <div className="space-y-10">
+//           {partners.length === 0 ? (
+//             <div className="text-center py-10"><p className="text-lg opacity-70">No partners found</p></div>
+//           ) : (
+//             partners.map((partner) => (
+//               <div
+//                 key={partner._id}
+//                 onClick={() => {
+//                   setSelectedPartner(partner);
+//                   setIsModalOpen(true);
+//                 }}
+//                 className="relative w-full aspect-video rounded-xl overflow-hidden cursor-pointer shadow-lg hover:shadow-2xl transition-shadow duration-300"
+//               >
+//                  <div
+//                   className="absolute inset-0 bg-cover bg-center"
+//                   style={{ backgroundImage: `url(${partner.thumbnail})` }}
+//                 >
+//                   <div className="absolute inset-0 bg-black/20"></div>
+//                   <FavouriteButton partnerId={partner._id || ""} className="absolute right-6 top-6" />
+//                   <div className="absolute bottom-0 left-0 p-6 text-white">
+//                     <h2 className="text-lg lg:text-3xl font-semibold mb-1 font-serif">{partner.name}</h2>
+//                     <div className="flex items-center text-sm lg:text-lg gap-2 italic opacity-80">
+//                       {partner.address || "Location not specified"} <ArrowRight />
+//                     </div>
+//                   </div>
+//                 </div>
+//               </div>
+//             ))
+//           )}
+//         </div>
+//       )}
+
+//       {!showAll && !isLoading && partners.length > 0 && (
+//         <div className="mt-10 flex justify-center">
+//           <button onClick={() => setShowAll(true)} className="p-3 rounded-full hover:bg-black/50 transition">
+//             <ChevronDown className="lg:w-10 lg:h-10" />
+//           </button>
+//         </div>
+//       )}
+
+//       <FilterDrawer
+//         isOpen={isFilterOpen}
+//         onClose={() => setIsFilterOpen(false)}
+//         onFilterChange={handleFilterChange}
+//         partners={allPartnersForFilters} 
+//       />
+
+//       {isModalOpen && selectedPartner && (
+//         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[999] overflow-y-auto">
+//           <PartnerDetailsModal onClose={() => setIsModalOpen(false)} partner={selectedPartner} />
+//         </div>
+//       )}
+//     </div>
+//   );
+// };
+
+// export default NetworkFilter;

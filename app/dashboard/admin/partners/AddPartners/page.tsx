@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
@@ -32,18 +33,35 @@ interface GalleryItem {
   preview: string | null;
   file: File | null;
 }
+type Offer = {
+  title: string;
+  percentage: string;
+  description: string;
+  validUntil: string;
+};
+// Add this constant near the top of your file
+const ACTIVITY_OPTIONS = [
+  "REFORMER_PILATES",
+  "SAUNA",
+  "MASSAGE",
+  "COFFEE",
+  "GYM",
+  "SPA",
+  "PADEL",
+] as const;
+
+type ActivityOption = typeof ACTIVITY_OPTIONS[number];
 
 interface FormData {
   categoryId: string;
   name: string;
   thumbnailUrl: string;
   logoUrl: string;
-  address: string;
+  addressUrl: string;
+  activity: ActivityOption | "";
   isFeatured: boolean;
-  offerTitle: string;
-  offerDescription: string;
-  offerValidUntil: string;
-  offerPercentage: string;
+  isFeaturedMap: boolean;
+  offers: Offer[];
   aboutTitle: string;
   aboutDescription: string;
   terms: string[];
@@ -66,7 +84,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
   const [loadingPartner, setLoadingPartner] = useState(false);
 
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
-  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [ , setLogoPreview] = useState<string | null>(null);
   const [gallery, setGallery] = useState<GalleryItem[]>([]);
 
   const galleryInputRef = useRef<HTMLInputElement | null>(null);
@@ -89,12 +107,11 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
       name: "",
       thumbnailUrl: "",
       logoUrl: "",
-      address: "",
+      addressUrl: "",
+      activity: "",
       isFeatured: false,
-      offerTitle: "",
-      offerDescription: "",
-      offerValidUntil: "",
-      offerPercentage: "",
+      isFeaturedMap: false,
+      offers: [{ title: "", percentage: "", description: "", validUntil: "" }], // Changed
       aboutTitle: "",
       aboutDescription: "",
       terms: [""],
@@ -107,7 +124,45 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
 
   const terms = watch("terms");
   const contacts = watch("contacts");
+  const offers = watch("offers");
 
+  // Add this function near the top of your component, after the imports
+const uploadImageToServer = async (file: File | Blob, originalFileName?: string): Promise<string> => {
+  const formData = new FormData();
+  
+  // If it's a Blob (from cropping), create a File object with proper extension
+  if (file instanceof Blob && !(file instanceof File)) {
+    // Get extension from original filename or default to jpg
+    const extension = originalFileName 
+      ? originalFileName.split('.').pop() 
+      : 'jpg';
+    
+    // Create a File object with proper name and extension
+    const newFile = new File([file], `image.${extension}`, { type: file.type || 'image/jpeg' });
+    formData.append('file', newFile);
+  } else {
+    // It's already a File object, use it directly
+    formData.append('file', file);
+  }
+
+  try {
+    const apiUrl = process.env.NEXT_PUBLIC_BASE_API;
+    const response = await fetch(`${apiUrl}/upload`, {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error('Upload failed');
+    }
+
+    const data = await response.json();
+    return data.url || data.data?.url;
+  } catch (error) {
+    console.error('Error uploading image:', error);
+    throw error;
+  }
+};
   // Fetch partner data if in edit mode
   useEffect(() => {
     if (!partnerId) return;
@@ -116,11 +171,10 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
       setLoadingPartner(true);
       try {
         // Construct the correct API URL
-        const apiUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+        const apiUrl = process.env.NEXT_PUBLIC_BASE_API;
         const fetchUrl = `${apiUrl}/partner/${partnerId}`;
 
         const res = await fetch(fetchUrl);
-
         const json = await res.json();
 
         if (!res.ok) {
@@ -137,12 +191,13 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
         setValue("name", partner.name || "");
         setValue("thumbnailUrl", partner.thumbnail || "");
         setValue("logoUrl", partner.logo || "");
-        setValue("address", partner.address || "");
-        setValue("isFeatured", partner.isFeatured || false);
-        setValue("offerTitle", partner.offer?.title || "");
-        setValue("offerDescription", partner.offer?.description || "");
-        setValue("offerValidUntil", partner.offer?.validUntil ? partner.offer.validUntil.split('T')[0] : "");
-        setValue("offerPercentage", partner.offer?.offerPercentage?.toString() || "");
+        setValue("addressUrl", partner.addressUrl || "");
+        setValue("activity", partner.activity || "", { shouldValidate: true });
+        const isFeaturedValue = partner.isFeatured === true || partner.isFeatured === "true";
+
+        setValue("isFeatured", isFeaturedValue, { shouldValidate: true });
+        const isFeaturedMapValue = partner.isFeaturedMap === true || partner.isFeaturedMap === "true";
+        setValue("isFeaturedMap", isFeaturedMapValue, { shouldValidate: true });
         setValue("aboutTitle", partner.about?.title || "");
         setValue("aboutDescription", partner.about?.description || "");
         setValue("terms", partner.terms && partner.terms.length > 0 ? partner.terms : [""]);
@@ -150,6 +205,18 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
         setValue("website", partner.socials?.website || "");
         setValue("instagram", partner.socials?.instagram || "");
         setValue("whatsapp", partner.socials?.whatsapp || "");
+
+        // Set offers data, ensuring proper default values
+        if (partner.offer && partner.offer.length > 0) {  // Changed from offers to offer
+          setValue("offers", partner.offer.map((o: any) => ({  // Changed from offers to offer
+            title: o.title || "",
+            percentage: o.offerPercentage?.toString() || "",
+            description: o.description || "",
+            validUntil: o.validUntil ? o.validUntil.split('T')[0] : "",
+          })));
+        } else {
+          setValue("offers", [{ title: "", percentage: "", description: "", validUntil: "" }]);
+        }
 
         // Set previews for images
         if (partner.thumbnail) setThumbnailPreview(partner.thumbnail);
@@ -178,17 +245,13 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
     fetchPartnerData();
   }, [partnerId, setValue]);
 
+
   const removeThumbnail = () => {
     setThumbnailPreview("");
     setValue("thumbnailUrl", "");
     if (thumbnailInputRef.current) thumbnailInputRef.current.value = "";
   };
 
-  // const removeLogo = () => {
-  //   setLogoPreview("");
-  //   setValue("logoUrl", "");
-  //   if (logoInputRef.current) logoInputRef.current.value = "";
-  // };
 
   const handleGalleryFileChange = (files: FileList) => {
     const newImages: GalleryItem[] = Array.from(files).map((file) => ({
@@ -241,74 +304,175 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
 
   const toastStyle = { background: "#000", color: "#fff", marginTop: "4rem" };
 
-  const onSubmit = async (data: FormData) => {
-    const payload = {
-      category: data.categoryId,
-      name: data.name,
-      thumbnail: thumbnailPreview || data.thumbnailUrl,
-      address: data.address,
-      gallery: gallery
-        .filter(g => g.url.trim() || g.preview)
-        .map(g => g.preview || g.url),
-      logo: logoPreview || data.logoUrl,
-      isFeatured: data.isFeatured,
-      offer: {
-        title: data.offerTitle,
-        description: data.offerDescription,
-        validUntil: data.offerValidUntil,
-        offerPercentage: data.offerPercentage === "" ? undefined : Number(data.offerPercentage),
-      },
-      about: {
-        title: data.aboutTitle,
-        description: data.aboutDescription,
-      },
-      terms: data.terms.filter((t) => t.trim()),
-      contacts: data.contacts.filter((c) => Object.values(c).some((v) => v && v.trim())),
-      socials: {
-        website: data.website,
-        instagram: data.instagram,
-        whatsapp: data.whatsapp,
-      },
+const onSubmit = async (data: FormData) => {
+    const unauthorizedMessage = "Session expired or unauthorized. Please log in again.";
+
+
+    // Helper function to handle session expiration and redirect
+    const handleAuthError = (errorMessage: string) => {
+      if (errorMessage.includes(unauthorizedMessage)) {
+        toast.error("Session expired. Redirecting to login...", { style: toastStyle });
+
+
+        // Redirect the user to the login page after a short delay
+        setTimeout(() => {
+          router.push("/dashboard/admin/login"); // <-- CONFIRM THIS PATH
+        }, 1500);
+        return true; // Indicates error was handled (and is an auth error)
+      }
+      return false; // Indicates it was a non-auth error
     };
 
-    console.log("Payload Data:", payload);
 
     try {
+      toast.loading("Uploading images...", { id: "upload-images", style: toastStyle });
+
+
+      // --- Image Upload Logic (NO CHANGE) ---
+      // Upload thumbnail if it's a blob URL
+      let thumbnailUrl = data.thumbnailUrl;
+      if (thumbnailPreview && thumbnailPreview.startsWith('blob:')) {
+        const blob = await fetch(thumbnailPreview).then(r => r.blob());
+        // Determine file extension from blob type
+        const extension = blob.type.split('/')[1] || 'jpg';
+        const file = new File([blob], `thumbnail.${extension}`, { type: blob.type });
+        thumbnailUrl = await uploadImageToServer(file);
+      }
+
+
+      // Upload logo if it's a blob URL
+      let logoUrl = data.logoUrl;
+      if (logoUrl && logoUrl.startsWith('blob:')) {
+        const blob = await fetch(logoUrl).then(r => r.blob());
+        const extension = blob.type.split('/')[1] || 'jpg';
+        const file = new File([blob], `logo.${extension}`, { type: blob.type });
+        logoUrl = await uploadImageToServer(file);
+      }
+
+
+      // Upload gallery images
+      const uploadedGalleryUrls: string[] = [];
+      for (let i = 0; i < gallery.length; i++) {
+        const item = gallery[i];
+        if (item.preview && item.preview.startsWith('blob:')) {
+          const blob = await fetch(item.preview).then(r => r.blob());
+          const extension = blob.type.split('/')[1] || 'jpg';
+          const file = new File([blob], `gallery-${i}.${extension}`, { type: blob.type });
+          const uploadedUrl = await uploadImageToServer(file);
+          uploadedGalleryUrls.push(uploadedUrl);
+        } else if (item.url) {
+          uploadedGalleryUrls.push(item.url);
+        }
+      }
+
+
+      toast.dismiss("upload-images");
+      // --- End Image Upload Logic ---
+
+      const payload = {
+        category: data.categoryId,
+        name: data.name,
+        thumbnail: thumbnailUrl,
+        addressUrl: data.addressUrl,
+        activity: data.activity || undefined,
+        gallery: uploadedGalleryUrls,
+        logo: logoUrl,
+        isFeatured: data.isFeatured,
+        isFeaturedMap: data.isFeaturedMap,
+        offer: data.offers.map(o => ({
+          title: o.title,
+          description: o.description,
+          validUntil: o.validUntil,
+          offerPercentage: o.percentage === "" ? undefined : Number(o.percentage)
+        })),
+        about: {
+          title: data.aboutTitle,
+          description: data.aboutDescription,
+        },
+        terms: data.terms.filter((t) => t.trim()),
+        contacts: data.contacts.filter((c) => Object.values(c).some((v) => v && v.trim())),
+        socials: {
+          website: data.website,
+          instagram: data.instagram,
+          whatsapp: data.whatsapp,
+        },
+      };
+
+
+      console.log("Full Payload Data:", JSON.stringify(payload, null, 2));
+
+
       let res;
 
+
+      // --- Update Partner Logic ---
       if (isEditMode) {
-        // Update existing partner
-        res = await updatePartner(partnerId, payload);
+        res = await updatePartner(partnerId!, payload);
+
 
         if ("error" in res) {
+          // **NEW: Check for Unauthorized Error and Redirect**
+          if (handleAuthError(res.error)) {
+            return; // Stop processing since redirect is scheduled
+          }
+
+
+          // Handle other non-auth errors
           toast.error("Failed to update partner: " + res.error, { style: toastStyle });
           return;
         }
 
+
         toast.success("Partner updated successfully!", { style: toastStyle });
-        console.log("Partner updated successfully:", res);
+
+
+        // --- Create Partner Logic ---
       } else {
-        // Create new partner
         res = await createPartner(payload);
 
+
         if ("error" in res) {
+          // **NEW: Check for Unauthorized Error and Redirect (Create is also an authenticated action)**
+          if (handleAuthError(res.error)) {
+            return; // Stop processing since redirect is scheduled
+          }
+
+
+          // Handle other non-auth errors
           toast.error("Failed to create partner: " + res.error, { style: toastStyle });
           return;
         }
 
+
         toast.success("Partner created successfully!", { style: toastStyle });
-        console.log("Partner created successfully:", res);
       }
 
-      // Navigate back after success
+
+      // Redirect to the partners list on success
       setTimeout(() => {
         router.push("/dashboard/admin/partners");
       }, 1500);
+
+
     } catch (err: unknown) {
       console.error(err);
-      toast.error(`Something went wrong while ${isEditMode ? 'updating' : 'creating'} partner.`, { style: toastStyle });
+      toast.dismiss("upload-images");
+
+
+      // Fallback for network errors or unhandled exceptions during upload/processing
+      const errorMessage = err instanceof Error ? err.message : `Something went wrong while ${isEditMode ? 'updating' : 'creating'} partner.`;
+
+
+      // Check if the generic catch block error is the auth error too
+      if (handleAuthError(errorMessage)) {
+        return;
+      }
+
+
+      toast.error(errorMessage, { style: toastStyle });
     }
   };
+
 
   const handleReset = () => {
     reset();
@@ -318,7 +482,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
     if (thumbnailInputRef.current) thumbnailInputRef.current.value = "";
     if (logoInputRef.current) logoInputRef.current.value = "";
     if (galleryInputRef.current) galleryInputRef.current.value = "";
-  };
+  }
 
   if (loadingPartner) {
     return (
@@ -383,80 +547,114 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
           </div>
         </div>
 
-{/* THUMBNAIL + LOGO */}
-<div className="grid sm:grid-cols-2 gap-4">
-  {/* Thumbnail - keep as is */}
-  <div>
-    <Label className="text-white mb-1">Thumbnail Image *</Label>
-    <div className="flex gap-2 mt-1">
-      <Input
-        {...register("thumbnailUrl", { required: "Thumbnail is required" })}
-        placeholder="/uploads/example.jpg or full URL"
-        className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
-      />
-      <label className="px-3 py-2 bg-neutral-800 rounded cursor-pointer flex items-center gap-2 text-white hover:bg-neutral-700">
-        <Upload size={16} />
-        <input
-          ref={thumbnailInputRef}
-          type="file"
-          accept="image/*"
-          className="hidden"
-          onChange={(e) => {
-            const file = e.target.files?.[0];
-            if (file) {
-              previewFile(file, setThumbnailPreview);
-              setValue("thumbnailUrl", file.name, { shouldValidate: true });
-            }
-          }}
-        />
-      </label>
-    </div>
-    {errors.thumbnailUrl && !thumbnailPreview && (
-      <p className="text-red-500 text-sm mt-1">{errors.thumbnailUrl.message}</p>
-    )}
+        {/* THUMBNAIL + LOGO */}
+        <div className="grid sm:grid-cols-2 gap-4">
+          {/* Thumbnail - keep as is */}
+          <div>
+            <Label className="text-white mb-1">Thumbnail Image *</Label>
+            <div className="flex gap-2 mt-1">
+              <Input
+                {...register("thumbnailUrl", { required: "Thumbnail is required" })}
+                placeholder="/uploads/example.jpg or full URL"
+                className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
+              />
+              <label className="px-3 py-2 bg-neutral-800 rounded cursor-pointer flex items-center gap-2 text-white hover:bg-neutral-700">
+                <Upload size={16} />
+                <input
+                  ref={thumbnailInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      previewFile(file, setThumbnailPreview);
+                      setValue("thumbnailUrl", file.name, { shouldValidate: true });
+                    }
+                  }}
+                />
+              </label>
+            </div>
+            {errors.thumbnailUrl && !thumbnailPreview && (
+              <p className="text-red-500 text-sm mt-1">{errors.thumbnailUrl.message}</p>
+            )}
 
-    {(thumbnailPreview || watch("thumbnailUrl")) && (
-      <div className="mt-2 w-full h-44 relative rounded overflow-hidden border border-neutral-700">
-        <button
-          type="button"
-          onClick={removeThumbnail}
-          className="absolute top-2 right-2 bg-red-600 text-white rounded w-7 h-7 flex items-center justify-center hover:bg-red-700 z-10"
-        >
-          ×
-        </button>
-        <Image
-          src={thumbnailPreview || watch("thumbnailUrl")}
-          alt="thumb"
-          fill
-          className="object-cover"
-          unoptimized
-        />
-      </div>
-    )}
-  </div>
+            {(thumbnailPreview || watch("thumbnailUrl")) && (
+              <div className="mt-2 w-full h-44 relative rounded overflow-hidden border border-neutral-700">
+                <button
+                  type="button"
+                  onClick={removeThumbnail}
+                  className="absolute top-2 right-2 bg-red-600 text-white rounded w-7 h-7 flex items-center justify-center hover:bg-red-700 z-10"
+                >
+                  ×
+                </button>
+                <Image
+                  src={thumbnailPreview || watch("thumbnailUrl")}
+                  alt="thumb"
+                  fill
+                  className="object-cover"
+                  unoptimized
+                />
+              </div>
+            )}
+          </div>
 
-  {/* Logo Section - Now using the component */}
-  <LogoUploadWithCrop
-    value={watch("logoUrl") || ""}
-    onChange={(value) => setValue("logoUrl", value, { shouldValidate: true })}
-    error={errors.logoUrl?.message}
-    required={watch("isFeatured")}
-  />
-</div>
-
-        {/* Address */}
-        <div>
-          <Label className="text-white mb-1">Address *</Label>
-          <Input
-            {...register("address", { required: "Address is required" })}
-            className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
-            placeholder="Full address"
+          {/* Logo Section - Now using the component */}
+          <LogoUploadWithCrop
+            value={watch("logoUrl") || ""}
+            onChange={(value) => setValue("logoUrl", value, { shouldValidate: true })}
+            error={errors.logoUrl?.message}
+            required={watch("isFeatured")}
           />
-          {errors.address && (
-            <p className="text-red-500 text-sm mt-1">{errors.address.message}</p>
-          )}
         </div>
 
+        {/* ADDRESS + ACTIVITY */}
+        <div className="grid sm:grid-cols-2 gap-4">
+          {/* Address Field (First Column) */}
+          <div>
+            <Label className="text-white mb-1">Address Url *</Label>
+            <Input
+              {...register("addressUrl", { required: "Address is required" })}
+              className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
+              placeholder="Full addressUrl"
+            />
+            {errors.addressUrl && (
+              <p className="text-red-500 text-sm mt-1">{errors.addressUrl.message}</p>
+            )}
+          </div>
+
+          {/* Activity Select Option (Second Column) */}
+          <div>
+            <Label className="text-white mb-1">Activity *</Label>
+            <Controller
+              name="activity"
+              control={control}
+              rules={{ required: "Activity is required" }}
+              render={({ field }) => (
+                <Select
+                  value={field.value}
+                  onValueChange={field.onChange}
+                // disabled={loadingActivities} // No loading needed for static list
+                >
+                  {/* Note: Use the same SelectTrigger classnames for matching style */}
+                  <SelectTrigger className="mt-1 w-full bg-neutral-900 border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50 text-white h-auto min-h-12 py-3 items-start">
+                    <SelectValue placeholder="Select activity" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-neutral-900 text-white border">
+                    {ACTIVITY_OPTIONS.map((activity) => (
+                      <SelectItem key={activity} value={activity} className="cursor-pointer">
+                        {activity.replace(/_/g, " ")} {/* Optional: Display "REFORMER PILATES" */}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
+            {errors.activity && (
+              <p className="text-red-500 text-sm mt-1">{errors.activity.message}</p>
+            )}
+          </div>
+        </div>
         {/* GALLERY */}
         <div className="mt-6">
           <Label className="text-white mb-1">Gallery Images</Label>
@@ -519,52 +717,114 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
           )}
         </div>
 
-        {/* OFFER */}
-        <div className="grid sm:grid-cols-2 gap-4">
-          <div>
-            <Label className="text-white mb-1">Offer Title *</Label>
-            <Input
-              {...register("offerTitle", { required: "Offer title is required" })}
-              className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
-              placeholder="Offer title"
-            />
-            {errors.offerTitle && (
-              <p className="text-red-500 text-sm mt-1">{errors.offerTitle.message}</p>
-            )}
+        {/* OFFERS */}
+        <div>
+          <div className="flex justify-between mb-2">
+            <Label className="text-white">Offers *</Label>
+            <Button
+              type="button"
+              className="bg-neutral-700 hover:bg-neutral-600 cursor-pointer"
+              onClick={() => {
+                // Get common description and validUntil from first offer
+                const commonDesc = offers.length > 0 ? offers[0].description : "";
+                const commonValid = offers.length > 0 ? offers[0].validUntil : "";
+                setValue("offers", [...offers, { title: "", percentage: "", description: commonDesc, validUntil: commonValid }]);
+              }}
+            >
+              + Add Offer
+            </Button>
           </div>
-          <div>
-            <Label className="text-white mb-1">Offer Percentage *</Label>
-            <Input
-              type="number"
-              {...register("offerPercentage", { required: "Offer percentage is required" })}
-              className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
-              placeholder="10"
-            />
-            {errors.offerPercentage && (
-              <p className="text-red-500 text-sm mt-1">{errors.offerPercentage.message}</p>
-            )}
-          </div>
-          <div className="sm:col-span-2">
-            <Label className="text-white mb-1">Description *</Label>
-            <Textarea
-              {...register("offerDescription", { required: "Offer description is required" })}
-              className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
-            />
-            {errors.offerDescription && (
-              <p className="text-red-500 text-sm mt-1">{errors.offerDescription.message}</p>
-            )}
-          </div>
-          <div>
-            <Label className="text-white mb-1">Valid Until *</Label>
-            <Input
-              type="date"
-              {...register("offerValidUntil", { required: "Valid until date is required" })}
-              className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
-            />
-            {errors.offerValidUntil && (
-              <p className="text-red-500 text-sm mt-1">{errors.offerValidUntil.message}</p>
-            )}
-          </div>
+
+          {offers.map((offer, i) => (
+            <div key={i} className="mt-3 p-4 border bg-neutral-900 border-neutral-700 rounded-md">
+              <div className="flex justify-between mb-2">
+                <p className="text-white">Offer {i + 1}</p>
+                {i > 0 && (
+                  <Button
+                    type="button"
+                    className="bg-neutral-700 hover:bg-neutral-600 text-white"
+                    onClick={() => setValue("offers", offers.filter((_, idx) => idx !== i))}
+                  >
+                    -
+                  </Button>
+                )}
+              </div>
+
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-white mb-1">Offer Title *</Label>
+                  <Input
+                    {...register(`offers.${i}.title`, { required: "Offer title is required" })}
+                    className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
+                    placeholder="Offer title"
+                  />
+                  {errors.offers?.[i]?.title && (
+                    <p className="text-red-500 text-sm mt-1">{errors.offers[i]?.title?.message}</p>
+                  )}
+                </div>
+                <div>
+                  <Label className="text-white mb-1">Offer Percentage *</Label>
+                  <Input
+                    type="number"
+                    {...register(`offers.${i}.percentage`, { required: "Offer percentage is required" })}
+                    className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
+                    placeholder="10"
+                  />
+                  {errors.offers?.[i]?.percentage && (
+                    <p className="text-red-500 text-sm mt-1">{errors.offers[i]?.percentage?.message}</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="mt-4">
+                <Label className="text-white mb-1">Description *</Label>
+                <Controller
+                  name={`offers.${i}.description`}
+                  control={control}
+                  rules={{ required: "Offer description is required" }}
+                  render={({ field }) => (
+                    <Textarea
+                      value={field.value}
+                      onChange={(e) => {
+                        const newDesc = e.target.value;
+                        const updatedOffers = offers.map(o => ({ ...o, description: newDesc }));
+                        setValue("offers", updatedOffers, { shouldValidate: false });
+                      }}
+                      className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
+                      placeholder="Offer description"
+                    />
+                  )}
+                />
+                {errors.offers?.[i]?.description && (
+                  <p className="text-red-500 text-sm mt-1">{errors.offers[i]?.description?.message}</p>
+                )}
+              </div>
+
+              <div className="mt-4">
+                <Label className="text-white mb-1">Valid Until *</Label>
+                <Controller
+                  name={`offers.${i}.validUntil`}
+                  control={control}
+                  rules={{ required: "Valid until date is required" }}
+                  render={({ field }) => (
+                    <Input
+                      type="date"
+                      value={field.value}
+                      onChange={(e) => {
+                        const newDate = e.target.value;
+                        const updatedOffers = offers.map(o => ({ ...o, validUntil: newDate }));
+                        setValue("offers", updatedOffers, { shouldValidate: false });
+                      }}
+                      className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
+                    />
+                  )}
+                />
+                {errors.offers?.[i]?.validUntil && (
+                  <p className="text-red-500 text-sm mt-1">{errors.offers[i]?.validUntil?.message}</p>
+                )}
+              </div>
+            </div>
+          ))}
         </div>
 
         {/* ABOUT */}
@@ -638,7 +898,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
             </Button>
           </div>
           {contacts.map((c, i) => (
-            <div key={i} className="mt-3 p-4 border bg-neutral-900 text-white border-neutral-700">
+            <div key={i} className="mt-3 p-4 border bg-neutral-900 text-white border-neutral-700 rounded-md">
               <div className="flex justify-between mb-2">
                 <p>Contact {i + 1}</p>
                 {i > 0 && (
@@ -666,7 +926,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
                 <Input
                   {...register(`contacts.${i}.phone`, {
                     required: "Phone is required"
-                    })}
+                  })}
                   placeholder="Phone"
                   className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
                 />
@@ -729,9 +989,9 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
             )}
           </div>
           <div>
-            <Label className="text-white mb-1">WhatsApp *</Label>
+            <Label className="text-white mb-1">WhatsApp</Label>
             <Input
-              {...register("whatsapp", { required: "WhatsApp is required" })}
+              {...register("whatsapp")}
               className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
               placeholder="https://wa.me/..."
             />
@@ -756,6 +1016,24 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
           />
           <Label className="text-white mb-1">Mark as Featured</Label>
         </div>
+        {/* isFeaturedMap CHECKBOX (OPTIONAL) */}
+<div className="flex gap-3 items-center">
+  <Controller
+    name="isFeaturedMap"
+    control={control}
+    render={({ field }) => (
+      <input
+        type="checkbox"
+        checked={field.value ?? false}
+        onChange={(e) => field.onChange(e.target.checked)}
+        className="w-4 h-4"
+      />
+    )}
+  />
+  <Label className="text-white mb-1">
+    isFeaturedMap
+  </Label>
+</div>
         {/* BUTTONS */}
         <div className="flex gap-3">
           <Button type="submit" className=" bg-neutral-700 hover:bg-neutral-600 border-primary/50 cursor-pointer font-normal hover:bg-acent border ">
@@ -764,7 +1042,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
           {
             isEditMode ? " " : (<Button
               type="button"
-              className="bg-white cursor-pointer font-normal text-black hover:bg-black"
+              className="bg-white cursor-pointer font-normal text-black hover:bg-white"
               onClick={handleReset}
             >
               Reset
@@ -775,3 +1053,666 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
     </div>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// /* eslint-disable @typescript-eslint/no-explicit-any */
+// "use client";
+
+// import React, { useEffect, useState } from "react";
+// import { useRouter } from "next/navigation";
+// import { useForm, Controller } from "react-hook-form";
+
+// import { getCategories } from "@/services/category/category";
+// import { ICategory } from "@/types/category.types";
+// import { createPartner, updatePartner } from "@/services/partner/partner";
+// import { PartnerOffer, PartnerContact } from "@/types/partner.types";
+
+// import { Button } from "@/components/ui/button";
+// import { Input } from "@/components/ui/input";
+// import { Label } from "@/components/ui/label";
+// import { Textarea } from "@/components/ui/textarea";
+// import { toast } from "sonner";
+// import {
+//   Select,
+//   SelectTrigger,
+//   SelectValue,
+//   SelectContent,
+//   SelectItem,
+// } from "@/components/ui/select";
+
+// // Import reusable components
+// import ImageUploadField from "../_components/AddPartner/ImageUploadField";
+// import GalleryUpload, { GalleryItem } from "../_components/AddPartner/GalleryUpload";
+// import OffersSection from "../_components/AddPartner/OffersSection";
+// import ContactsSection from "../_components/AddPartner/ContactsSection";
+// import TermsSection from "../_components/AddPartner/TermsSection";
+// import LogoUploadWithCrop from "../_components/LogoUploadWithCrop/LogoUploadWithCrop";
+
+// // Type aliases for form
+// type Offer = PartnerOffer & { percentage: string };
+// type Contact = PartnerContact;
+
+// type CategoryOption = { _id: string; title: string };
+
+// const ACTIVITY_OPTIONS = [
+//   "REFORMER_PILATES",
+//   "SAUNA",
+//   "MASSAGE",
+//   "COFFEE",
+//   "GYM",
+//   "SPA",
+//   "PADEL",
+// ] as const;
+
+// type ActivityOption = typeof ACTIVITY_OPTIONS[number];
+
+// interface FormData {
+//   categoryId: string;
+//   name: string;
+//   thumbnailUrl: string;
+//   logoUrl: string;
+//   address: string;
+//   activity: ActivityOption | "";
+//   isFeatured: boolean;
+//   offers: Offer[];
+//   aboutTitle: string;
+//   aboutDescription: string;
+//   terms: string[];
+//   contacts: Contact[];
+//   website: string;
+//   instagram: string;
+//   whatsapp: string;
+// }
+
+// interface AddPartnerPageProps {
+//   partnerId?: string;
+//   initialCategoryId?: string;
+// }
+
+// export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPartnerPageProps) {
+//   const isEditMode = !!partnerId;
+
+//   const [categories, setCategories] = useState<CategoryOption[]>([]);
+//   const [loadingCategories, setLoadingCategories] = useState(false);
+//   const [loadingPartner, setLoadingPartner] = useState(false);
+
+//   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
+//   const [gallery, setGallery] = useState<GalleryItem[]>([]);
+
+//   const router = useRouter();
+
+//   const {
+//     register,
+//     handleSubmit,
+//     control,
+//     watch,
+//     setValue,
+//     reset,
+//     formState: { errors },
+//   } = useForm<FormData>({
+//     defaultValues: {
+//       categoryId: initialCategoryId || "",
+//       name: "",
+//       thumbnailUrl: "",
+//       logoUrl: "",
+//       address: "",
+//       activity: "",
+//       isFeatured: false,
+//       offers: [{ title: "", percentage: "", description: "", validUntil: "" }],
+//       aboutTitle: "",
+//       aboutDescription: "",
+//       terms: [""],
+//       contacts: [{ officeName: "Head Office" }],
+//       website: "",
+//       instagram: "",
+//       whatsapp: "",
+//     },
+//   });
+
+//   const terms = watch("terms");
+//   const contacts = watch("contacts");
+//   const offers = watch("offers");
+
+//   const uploadImageToServer = async (file: File | Blob, originalFileName?: string): Promise<string> => {
+//     const formData = new FormData();
+    
+//     if (file instanceof Blob && !(file instanceof File)) {
+//       const extension = originalFileName ? originalFileName.split('.').pop() : 'jpg';
+//       const newFile = new File([file], `image.${extension}`, { type: file.type || 'image/jpeg' });
+//       formData.append('file', newFile);
+//     } else {
+//       formData.append('file', file);
+//     }
+
+//     try {
+//       const apiUrl = process.env.NEXT_PUBLIC_BASE_API;
+//       const response = await fetch(`${apiUrl}/upload`, {
+//         method: 'POST',
+//         body: formData,
+//       });
+
+//       if (!response.ok) throw new Error('Upload failed');
+
+//       const data = await response.json();
+//       return data.url || data.data?.url;
+//     } catch (error) {
+//       console.error('Error uploading image:', error);
+//       throw error;
+//     }
+//   };
+
+//   // Fetch partner data if in edit mode
+//   useEffect(() => {
+//     if (!partnerId) return;
+
+//     const fetchPartnerData = async () => {
+//       setLoadingPartner(true);
+//       try {
+//         const apiUrl = process.env.NEXT_PUBLIC_BASE_API;
+//         const res = await fetch(`${apiUrl}/partner/${partnerId}`);
+//         const json = await res.json();
+
+//         if (!res.ok) {
+//           toast.error(json.message || "Failed to fetch partner data", {
+//             style: { background: "#000", color: "#fff" },
+//           });
+//           return;
+//         }
+
+//         const partner = json.data;
+
+//         setValue("categoryId", partner.category?._id || partner.category || "");
+//         setValue("name", partner.name || "");
+//         setValue("thumbnailUrl", partner.thumbnail || "");
+//         setValue("logoUrl", partner.logo || "");
+//         setValue("address", partner.address || "");
+//         setValue("activity", partner.activity || "", { shouldValidate: true });
+//         setValue("isFeatured", partner.isFeatured === true || partner.isFeatured === "true", { shouldValidate: true });
+//         setValue("aboutTitle", partner.about?.title || "");
+//         setValue("aboutDescription", partner.about?.description || "");
+//         setValue("terms", partner.terms && partner.terms.length > 0 ? partner.terms : [""]);
+//         setValue("contacts", partner.contacts && partner.contacts.length > 0 ? partner.contacts : [{ officeName: "Head Office" }]);
+//         setValue("website", partner.socials?.website || "");
+//         setValue("instagram", partner.socials?.instagram || "");
+//         setValue("whatsapp", partner.socials?.whatsapp || "");
+
+//         if (partner.offer && partner.offer.length > 0) {
+//           setValue("offers", partner.offer.map((o: any) => ({
+//             title: o.title || "",
+//             percentage: o.offerPercentage?.toString() || "",
+//             description: o.description || "",
+//             validUntil: o.validUntil ? o.validUntil.split('T')[0] : "",
+//           })));
+//         } else {
+//           setValue("offers", [{ title: "", percentage: "", description: "", validUntil: "" }]);
+//         }
+
+//         if (partner.thumbnail) setThumbnailPreview(partner.thumbnail);
+
+//         if (partner.gallery && partner.gallery.length > 0) {
+//           const galleryItems = partner.gallery.map((url: string) => ({
+//             url,
+//             preview: url,
+//             file: null,
+//           }));
+//           setGallery(galleryItems);
+//         }
+
+//       } catch (err) {
+//         console.error("Error fetching partner:", err);
+//         toast.error("Failed to fetch partner data", {
+//           style: { background: "#000", color: "#fff" }
+//         });
+//       } finally {
+//         setLoadingPartner(false);
+//       }
+//     };
+
+//     fetchPartnerData();
+//   }, [partnerId, setValue]);
+
+//   // Fetch categories
+//   useEffect(() => {
+//     const fetchCategories = async () => {
+//       setLoadingCategories(true);
+//       try {
+//         const res = await getCategories();
+//         if ("error" in res) {
+//           toast.error(res.error, { style: { background: "#000", color: "#fff" } });
+//         } else {
+//           const list: CategoryOption[] = res.data
+//             .filter((c: ICategory) => c._id)
+//             .map((c: ICategory) => ({
+//               _id: c._id!,
+//               title: c.title,
+//             }));
+//           setCategories(list);
+//         }
+//       } catch (err) {
+//         console.error(err);
+//         toast.error("Failed to fetch categories", { style: { background: "#000", color: "#fff" } });
+//       } finally {
+//         setLoadingCategories(false);
+//       }
+//     };
+
+//     fetchCategories();
+//   }, []);
+
+//   const previewFile = (file: File, setPreview: (url: string) => void) => {
+//     const url = URL.createObjectURL(file);
+//     setPreview(url);
+//   };
+
+//   const toastStyle = { background: "#000", color: "#fff", marginTop: "4rem" };
+
+//   const onSubmit = async (data: FormData) => {
+//     const unauthorizedMessage = "Session expired or unauthorized. Please log in again.";
+
+//     const handleAuthError = (errorMessage: string) => {
+//       if (errorMessage.includes(unauthorizedMessage)) {
+//         toast.error("Session expired. Redirecting to login...", { style: toastStyle });
+//         setTimeout(() => {
+//           router.push("/dashboard/admin/login");
+//         }, 1500);
+//         return true;
+//       }
+//       return false;
+//     };
+
+//     try {
+//       toast.loading("Uploading images...", { id: "upload-images", style: toastStyle });
+
+//       let thumbnailUrl = data.thumbnailUrl;
+//       if (thumbnailPreview && thumbnailPreview.startsWith('blob:')) {
+//         const blob = await fetch(thumbnailPreview).then(r => r.blob());
+//         const extension = blob.type.split('/')[1] || 'jpg';
+//         const file = new File([blob], `thumbnail.${extension}`, { type: blob.type });
+//         thumbnailUrl = await uploadImageToServer(file);
+//       }
+
+//       let logoUrl = data.logoUrl;
+//       if (logoUrl && logoUrl.startsWith('blob:')) {
+//         const blob = await fetch(logoUrl).then(r => r.blob());
+//         const extension = blob.type.split('/')[1] || 'jpg';
+//         const file = new File([blob], `logo.${extension}`, { type: blob.type });
+//         logoUrl = await uploadImageToServer(file);
+//       }
+
+//       const uploadedGalleryUrls: string[] = [];
+//       for (let i = 0; i < gallery.length; i++) {
+//         const item = gallery[i];
+//         if (item.preview && item.preview.startsWith('blob:')) {
+//           const blob = await fetch(item.preview).then(r => r.blob());
+//           const extension = blob.type.split('/')[1] || 'jpg';
+//           const file = new File([blob], `gallery-${i}.${extension}`, { type: blob.type });
+//           const uploadedUrl = await uploadImageToServer(file);
+//           uploadedGalleryUrls.push(uploadedUrl);
+//         } else if (item.url) {
+//           uploadedGalleryUrls.push(item.url);
+//         }
+//       }
+
+//       toast.dismiss("upload-images");
+
+//       const payload = {
+//         category: data.categoryId,
+//         name: data.name,
+//         thumbnail: thumbnailUrl,
+//         address: data.address,
+//         activity: data.activity || undefined,
+//         gallery: uploadedGalleryUrls,
+//         logo: logoUrl,
+//         isFeatured: data.isFeatured,
+//         offer: data.offers.map(o => ({
+//           title: o.title,
+//           description: o.description,
+//           validUntil: o.validUntil,
+//           offerPercentage: o.percentage === "" ? undefined : Number(o.percentage)
+//         })),
+//         about: {
+//           title: data.aboutTitle,
+//           description: data.aboutDescription,
+//         },
+//         terms: data.terms.filter((t) => t.trim()),
+//         contacts: data.contacts.filter((c) => Object.values(c).some((v) => v && v.trim())),
+//         socials: {
+//           website: data.website,
+//           instagram: data.instagram,
+//           whatsapp: data.whatsapp,
+//         },
+//       };
+
+//       console.log("Full Payload Data:", JSON.stringify(payload, null, 2));
+
+//       let res;
+
+//       if (isEditMode) {
+//         res = await updatePartner(partnerId!, payload);
+//         if ("error" in res) {
+//           if (handleAuthError(res.error)) return;
+//           toast.error("Failed to update partner: " + res.error, { style: toastStyle });
+//           return;
+//         }
+//         toast.success("Partner updated successfully!", { style: toastStyle });
+//       } else {
+//         res = await createPartner(payload);
+//         if ("error" in res) {
+//           if (handleAuthError(res.error)) return;
+//           toast.error("Failed to create partner: " + res.error, { style: toastStyle });
+//           return;
+//         }
+//         toast.success("Partner created successfully!", { style: toastStyle });
+//       }
+
+//       setTimeout(() => {
+//         router.push("/dashboard/admin/partners");
+//       }, 1500);
+
+//     } catch (err: unknown) {
+//       console.error(err);
+//       toast.dismiss("upload-images");
+
+//       const errorMessage = err instanceof Error ? err.message : `Something went wrong while ${isEditMode ? 'updating' : 'creating'} partner.`;
+
+//       if (handleAuthError(errorMessage)) return;
+
+//       toast.error(errorMessage, { style: toastStyle });
+//     }
+//   };
+
+//   const handleReset = () => {
+//     reset();
+//     setThumbnailPreview(null);
+//     setGallery([]);
+//   };
+
+//   if (loadingPartner) {
+//     return (
+//       <div className="max-w-5xl mx-auto p-6 bg-neutral-950 min-h-screen">
+//         <div className="flex items-center justify-center h-64">
+//           <p className="text-white text-xl">Loading partner data...</p>
+//         </div>
+//       </div>
+//     );
+//   }
+
+//   return (
+//     <div className="max-w-5xl mx-auto p-6 bg-neutral-950 min-h-screen">
+//       <h2 className="text-2xl font-semibold text-white mb-6">
+//         {isEditMode ? "Edit Partner" : "Add New Partner"}
+//       </h2>
+
+//       <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+//         {/* CATEGORY + NAME */}
+//         <div className="grid sm:grid-cols-2 gap-4">
+//           <div>
+//             <Label className="text-white mb-1">Partner Name *</Label>
+//             <Input
+//               {...register("name", { required: "Partner name is required" })}
+//               className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
+//               placeholder="Partner name"
+//             />
+//             {errors.name && (
+//               <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
+//             )}
+//           </div>
+//           <div>
+//             <Label className="text-white mb-1">Category *</Label>
+//             <Controller
+//               name="categoryId"
+//               control={control}
+//               rules={{ required: "Category is required" }}
+//               render={({ field }) => (
+//                 <Select
+//                   value={field.value}
+//                   onValueChange={field.onChange}
+//                   disabled={loadingCategories}
+//                 >
+//                   <SelectTrigger className="mt-1 w-full bg-neutral-900 border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50 text-white h-auto min-h-12 py-3 items-start">
+//                     <SelectValue placeholder={loadingCategories ? "Loading..." : "Select category"} />
+//                   </SelectTrigger>
+//                   <SelectContent className="bg-neutral-900 text-white border">
+//                     {categories.map((c) => (
+//                       <SelectItem key={c._id} value={c._id} className="cursor-pointer">
+//                         {c.title}
+//                       </SelectItem>
+//                     ))}
+//                   </SelectContent>
+//                 </Select>
+//               )}
+//             />
+//             {errors.categoryId && (
+//               <p className="text-red-500 text-sm mt-1">{errors.categoryId.message}</p>
+//             )}
+//           </div>
+//         </div>
+
+//         {/* THUMBNAIL + LOGO */}
+//         <div className="grid sm:grid-cols-2 gap-4">
+//           <ImageUploadField
+//             label="Thumbnail Image"
+//             required
+//             value={watch("thumbnailUrl")}
+//             preview={thumbnailPreview}
+//             error={errors.thumbnailUrl?.message}
+//             onFileSelect={(file) => {
+//               previewFile(file, setThumbnailPreview);
+//               setValue("thumbnailUrl", file.name, { shouldValidate: true });
+//             }}
+//             onValueChange={(value) => setValue("thumbnailUrl", value)}
+//             onRemove={() => {
+//               setThumbnailPreview("");
+//               setValue("thumbnailUrl", "");
+//             }}
+//           />
+
+//           <LogoUploadWithCrop
+//             value={watch("logoUrl") || ""}
+//             onChange={(value) => setValue("logoUrl", value, { shouldValidate: true })}
+//             error={errors.logoUrl?.message}
+//             required={watch("isFeatured")}
+//           />
+//         </div>
+
+//         {/* ADDRESS + ACTIVITY */}
+//         <div className="grid sm:grid-cols-2 gap-4">
+//           <div>
+//             <Label className="text-white mb-1">Address *</Label>
+//             <Input
+//               {...register("address", { required: "Address is required" })}
+//               className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
+//               placeholder="Full address"
+//             />
+//             {errors.address && (
+//               <p className="text-red-500 text-sm mt-1">{errors.address.message}</p>
+//             )}
+//           </div>
+
+//           <div>
+//             <Label className="text-white mb-1">Activity *</Label>
+//             <Controller
+//               name="activity"
+//               control={control}
+//               rules={{ required: "Activity is required" }}
+//               render={({ field }) => (
+//                 <Select value={field.value} onValueChange={field.onChange}>
+//                   <SelectTrigger className="mt-1 w-full bg-neutral-900 border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50 text-white h-auto min-h-12 py-3 items-start">
+//                     <SelectValue placeholder="Select activity" />
+//                   </SelectTrigger>
+//                   <SelectContent className="bg-neutral-900 text-white border">
+//                     {ACTIVITY_OPTIONS.map((activity) => (
+//                       <SelectItem key={activity} value={activity} className="cursor-pointer">
+//                         {activity.replace(/_/g, " ")}
+//                       </SelectItem>
+//                     ))}
+//                   </SelectContent>
+//                 </Select>
+//               )}
+//             />
+//             {errors.activity && (
+//               <p className="text-red-500 text-sm mt-1">{errors.activity.message}</p>
+//             )}
+//           </div>
+//         </div>
+
+//         {/* GALLERY */}
+//         <GalleryUpload
+//           gallery={gallery}
+//           onAdd={(files) => {
+//             const newImages: GalleryItem[] = Array.from(files).map((file) => ({
+//               file,
+//               preview: URL.createObjectURL(file),
+//               url: "",
+//             }));
+//             setGallery((prev) => [...prev, ...newImages]);
+//           }}
+//           onRemove={(index) => {
+//             setGallery((prev) => prev.filter((_, i) => i !== index));
+//           }}
+//         />
+
+//         {/* OFFERS */}
+//         <OffersSection
+//           offers={offers}
+//           register={register}
+//           control={control}
+//           errors={errors}
+//           onAdd={() => {
+//             const commonDesc = offers.length > 0 ? offers[0].description : "";
+//             const commonValid = offers.length > 0 ? offers[0].validUntil : "";
+//             setValue("offers", [...offers, { title: "", percentage: "", description: commonDesc, validUntil: commonValid }]);
+//           }}
+//           onRemove={(i) => setValue("offers", offers.filter((_, idx) => idx !== i))}
+//           onDescriptionChange={(newDesc) => {
+//             const updatedOffers = offers.map(o => ({ ...o, description: newDesc }));
+//             setValue("offers", updatedOffers, { shouldValidate: false });
+//           }}
+//           onValidUntilChange={(newDate) => {
+//             const updatedOffers = offers.map(o => ({ ...o, validUntil: newDate }));
+//             setValue("offers", updatedOffers, { shouldValidate: false });
+//           }}
+//         />
+
+//         {/* ABOUT */}
+//         <div>
+//           <Label className="text-white mb-1">About Title *</Label>
+//           <Input
+//             {...register("aboutTitle", { required: "About title is required" })}
+//             className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
+//           />
+//           {errors.aboutTitle && (
+//             <p className="text-red-500 text-sm mt-1">{errors.aboutTitle.message}</p>
+//           )}
+//           <Label className="mt-2 block text-white mb-1">About Description *</Label>
+//           <Textarea
+//             {...register("aboutDescription", { required: "About description is required" })}
+//             className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
+//           />
+//           {errors.aboutDescription && (
+//             <p className="text-red-500 text-sm mt-1">{errors.aboutDescription.message}</p>
+//           )}
+//         </div>
+
+//         {/* TERMS */}
+//         <TermsSection
+//           terms={terms}
+//           register={register}
+//           errors={errors}
+//           onAdd={() => setValue("terms", [...terms, ""])}
+//           onRemove={(i) => setValue("terms", terms.filter((_, idx) => idx !== i))}
+//         />
+
+//         {/* CONTACTS */}
+//         <ContactsSection
+//           contacts={contacts}
+//           register={register}
+//           errors={errors}
+//           onAdd={() => setValue("contacts", [...contacts, {}])}
+//           onRemove={(i) => setValue("contacts", contacts.filter((_, idx) => idx !== i))}
+//         />
+
+//         {/* SOCIALS */}
+//         <div className="grid sm:grid-cols-3 gap-4">
+//           <div>
+//             <Label className="text-white mb-1">Website *</Label>
+//             <Input
+//               {...register("website", { required: "Website is required" })}
+//               className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
+//               placeholder="https://example.com"
+//             />
+//             {errors.website && (
+//               <p className="text-red-500 text-sm mt-1">{errors.website.message}</p>
+//             )}
+//           </div>
+//           <div>
+//             <Label className="text-white mb-1">Instagram *</Label>
+//             <Input
+//               {...register("instagram", { required: "Instagram is required" })}
+//               className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
+//               placeholder="https://instagram.com/..."
+//             />
+//             {errors.instagram && (
+//               <p className="text-red-500 text-sm mt-1">{errors.instagram.message}</p>
+//             )}
+//           </div>
+//           <div>
+//             <Label className="text-white mb-1">WhatsApp</Label>
+//             <Input
+//               {...register("whatsapp")}
+//               className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
+//               placeholder="https://wa.me/..."
+//             />
+//           </div>
+//         </div>
+
+//         {/* FEATURED CHECK */}
+//         <div className="flex gap-3 items-center">
+//           <Controller
+//             name="isFeatured"
+//             control={control}
+//             render={({ field }) => (
+//               <input
+//                 type="checkbox"
+//                 checked={field.value}
+//                 onChange={(e) => field.onChange(e.target.checked)}
+//                 className="w-4 h-4"
+//               />
+//             )}
+//           />
+//           <Label className="text-white mb-1">Mark as Featured</Label>
+//         </div>
+
+//         {/* BUTTONS */}
+//         <div className="flex gap-3">
+//           <Button type="submit" className="bg-neutral-700 hover:bg-neutral-600 border-primary/50 cursor-pointer font-normal hover:bg-acent border">
+//             {isEditMode ? "Update Partner" : "Save Partner"}
+//           </Button>
+//           {!isEditMode && (
+//             <Button
+//               type="button"
+//               className="bg-white cursor-pointer font-normal text-black hover:bg-white"
+//               onClick={handleReset}
+//             >
+//               Reset
+//             </Button>
+//           )}
+//         </div>
+//       </form>
+//     </div>
+//   );
+// }

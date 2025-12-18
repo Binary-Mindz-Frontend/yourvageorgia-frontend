@@ -124,10 +124,10 @@ export default function PartnerDetailPage() {
                                     <h3 className="text-xl font-semibold text-green-600">Special Offer</h3>
                                 </div>
                                 <h4 className="text-lg font-medium mb-2">
-                                    {loading ? <Skeleton className="w-32 h-4" /> : partner.offer.title}
+                                    {loading ? <Skeleton className="w-32 h-4" /> : partner.offer?.[0]?.title}
                                 </h4>
                                 <p className="text-white mb-3">
-                                    {loading ? <Skeleton className="w-full h-4" /> : partner.offer.description}
+                                    {loading ? <Skeleton className="w-full h-4" /> : partner.offer?.[0]?.description}
                                 </p>
                                 <div className="flex items-center gap-4 text-sm text-white">
                                     <span className="flex items-center gap-1">
@@ -136,14 +136,14 @@ export default function PartnerDetailPage() {
                                         {loading ? (
                                             <Skeleton className="w-24 h-4" />
                                         ) : (
-                                            new Date(partner.offer.validUntil).toLocaleDateString()
+                                            new Date(partner.offer?.[0]?.validUntil).toLocaleDateString()
                                         )}
                                     </span>
                                 </div>
                             </div>
                             <div className="text-center bg-white rounded-lg p-4 shadow-md">
                                 <div className="text-4xl font-bold text-green-600">
-                                    {loading ? <Skeleton className="w-24 h-6" /> : partner.offer.offerPercentage}%{" "}
+                                    {loading ? <Skeleton className="w-24 h-6" /> : partner.offer?.[0]?.offerPercentage}%{" "}
                                 </div>
                                 <div className="text-sm text-gray-600">OFF</div>
                             </div>

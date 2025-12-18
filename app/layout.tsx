@@ -20,6 +20,11 @@ const cormorant = Cormorant_Garamond({
 export const metadata: Metadata = {
   title: "Solenne - Luxury Wellness Membership",
   description: "A lifestyle membership redefining how women experience wellness in Dubai",
+  icons: {
+    icon: "/favicon.svg",
+    shortcut: "/favicon.svg",
+    apple: "/apple-touch-icon.png",
+  },
 };
 
 export default function RootLayout({

@@ -32,18 +32,23 @@ export interface PartnerCategory {
 }
 
 export interface Partner {
-    _id?:string;
+  _id?: string;
   category: string | PartnerCategory; 
-  title?:string;
+  title?: string;
   name: string;
   thumbnail?: string;
   address?: string;
+  activity?: string;
+  position?: number;
   gallery?: string[];
   logo?: string;
   isFeatured?: boolean;
-  offer?: PartnerOffer;
+  isFeaturedMap?: boolean;
+  offer?: PartnerOffer[];  
   about?: PartnerAbout;
   terms?: string[];
   contacts?: PartnerContact[];
   socials?: PartnerSocials;
 }
+
+

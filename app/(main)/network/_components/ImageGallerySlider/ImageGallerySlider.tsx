@@ -1,6 +1,5 @@
-"use client";
 import Image, { StaticImageData } from "next/image";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { useState } from "react";
 import clsx from "clsx";
 
@@ -11,6 +10,8 @@ interface ImageGallerySliderProps {
 export default function ImageGallerySlider({ images }: ImageGallerySliderProps) {
   const [index, setIndex] = useState(0);
   const [fade, setFade] = useState(false);
+  const [isZoomed, setIsZoomed] = useState(false); // Track if image is clicked for zoom
+  const [zoomIndex, setZoomIndex] = useState(0); // Track which image is zoomed
 
   const changeSlide = (newIndex: number) => {
     setFade(true);
@@ -31,6 +32,15 @@ export default function ImageGallerySlider({ images }: ImageGallerySliderProps) 
     changeSlide(newIndex);
   };
 
+  const openZoom = (index: number) => {
+    setIsZoomed(true);
+    setZoomIndex(index);
+  };
+
+  const closeZoom = () => {
+    setIsZoomed(false);
+  };
+
   return (
     <div>
       {/* IMAGE VIEW */}
@@ -45,7 +55,8 @@ export default function ImageGallerySlider({ images }: ImageGallerySliderProps) 
             src={images[index]}
             alt="Gallery"
             fill
-            className="object-cover"
+            className="object-cover cursor-pointer"
+            onClick={() => openZoom(index)} // Open zoom when image is clicked
           />
         </div>
 
@@ -73,6 +84,30 @@ export default function ImageGallerySlider({ images }: ImageGallerySliderProps) 
           <ChevronRight className="w-6 h-6" />
         </button>
       </div>
+
+      {/* Zoom Modal */}
+      {isZoomed && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50"
+          onClick={closeZoom} // Close zoom when clicked on overlay
+        >
+          <div className="relative">
+            <button
+              onClick={closeZoom}
+              className="absolute top-4 right-4 text-white text-3xl"
+            >
+              <X />
+            </button>
+            <Image
+              src={images[zoomIndex]}
+              alt="Zoomed Gallery"
+              width={1200}
+              height={800}
+              className="object-contain"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
