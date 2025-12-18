@@ -140,7 +140,7 @@ export default function SolenneMembership() {
               <div className="absolute inset-0 bg-linear-to-b from-black/60 via-transparent to-black/80"></div>
             </div>
 
-            <div className="relative z-10 p-12 h-full flex flex-col justify-end min-h-[400px]">
+            <div className="relative z-10 p-12 h-full flex flex-col justify-end min-h-100">
               <button
                 onClick={() => selectedPartner && setShowModal(true)}
                 className="group inline-flex flex-col cursor-pointer text-left"
@@ -163,7 +163,7 @@ export default function SolenneMembership() {
           </div>
 
           {/* Right Section */}
-          <div className="relative bg-gray-100 min-h-[400px] rounded-xl lg:rounded-none">
+          <div className="relative bg-gray-100 min-h-100 rounded-xl lg:rounded-none">
             <PartnersMap
               partners={partners}
               onMarkerClick={(partner) => setSelectedPartner(partner)}

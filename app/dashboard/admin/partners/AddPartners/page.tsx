@@ -57,7 +57,7 @@ interface FormData {
   name: string;
   thumbnailUrl: string;
   logoUrl: string;
-  address: string;
+  addressUrl: string;
   activity: ActivityOption | "";
   isFeatured: boolean;
   isFeaturedMap: boolean;
@@ -107,7 +107,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
       name: "",
       thumbnailUrl: "",
       logoUrl: "",
-      address: "",
+      addressUrl: "",
       activity: "",
       isFeatured: false,
       isFeaturedMap: false,
@@ -191,7 +191,7 @@ const uploadImageToServer = async (file: File | Blob, originalFileName?: string)
         setValue("name", partner.name || "");
         setValue("thumbnailUrl", partner.thumbnail || "");
         setValue("logoUrl", partner.logo || "");
-        setValue("address", partner.address || "");
+        setValue("addressUrl", partner.addressUrl || "");
         setValue("activity", partner.activity || "", { shouldValidate: true });
         const isFeaturedValue = partner.isFeatured === true || partner.isFeatured === "true";
 
@@ -369,14 +369,11 @@ const onSubmit = async (data: FormData) => {
       toast.dismiss("upload-images");
       // --- End Image Upload Logic ---
 
-
-
-
       const payload = {
         category: data.categoryId,
         name: data.name,
         thumbnail: thumbnailUrl,
-        address: data.address,
+        addressUrl: data.addressUrl,
         activity: data.activity || undefined,
         gallery: uploadedGalleryUrls,
         logo: logoUrl,
@@ -615,14 +612,14 @@ const onSubmit = async (data: FormData) => {
         <div className="grid sm:grid-cols-2 gap-4">
           {/* Address Field (First Column) */}
           <div>
-            <Label className="text-white mb-1">Address *</Label>
+            <Label className="text-white mb-1">Address Url *</Label>
             <Input
-              {...register("address", { required: "Address is required" })}
+              {...register("addressUrl", { required: "Address is required" })}
               className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
-              placeholder="Full address"
+              placeholder="Full addressUrl"
             />
-            {errors.address && (
-              <p className="text-red-500 text-sm mt-1">{errors.address.message}</p>
+            {errors.addressUrl && (
+              <p className="text-red-500 text-sm mt-1">{errors.addressUrl.message}</p>
             )}
           </div>
 
