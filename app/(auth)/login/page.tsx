@@ -39,7 +39,7 @@ const MemberLogin = () => {
     const res = await loginUser(payload);
 
     if (res?.success) {
-      toast.success("Login successful! Redirecting...", { id: "login" });
+      toast.success("Login successful!", { id: "login" });
       setUser(res?.data?.user);
       setIsLoading(false);
 

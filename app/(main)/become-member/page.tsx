@@ -9,7 +9,7 @@ const SolenneMembership = () => {
       <div className="container mx-auto">
         {/* === Membership Card Section === */}
         <div
-          className="w-full max-w-125 h-[408px] lg:h-[475px] mx-auto rounded-xl shadow-2x overflow-hidden bg-cover bg-center"
+          className="w-full max-w-125 mx-auto rounded-xl shadow-2x overflow-hidden bg-cover bg-center"
           style={{
             backgroundImage: `url(${img.src})`,
           }}
@@ -21,8 +21,8 @@ const SolenneMembership = () => {
 
             <h3 className=" text-center lg:text-lg mb-6 leading-relaxed text-gray-300">Founding Circle · Limited Capacity</h3>
 
-            <p className="text-3xl lg:text-[40px] font-semibold font-serif tracking-wide text-center text-white ">
-              900 AED/Year
+            <p className="text-3xl lg:text-[50px] font-semibold font-serif tracking-wide text-center text-white ">
+              900 <span className="text-3xl lg:text-[35px]">AED/Year</span>
             </p>
             <p className=" text-center lg:text-lg mb-6 leading-relaxed text-gray-300">12-month membership</p>
 
