@@ -376,7 +376,7 @@ export const isAuthenticated = (): boolean => {
     const decoded: { exp: number } = jwtDecode(token);
     const currentTime = Math.floor(Date.now() / 1000);
 
-    // 🔴 TOKEN EXPIRED
+    // TOKEN EXPIRED
     if (decoded.exp <= currentTime) {
       localStorage.removeItem(ACCESS_TOKEN_KEY);
       localStorage.removeItem(REFRESH_TOKEN_KEY);
@@ -387,7 +387,7 @@ export const isAuthenticated = (): boolean => {
   } catch (error) {
     console.error("JWT decode failed", error);
 
-    // 🔴 INVALID TOKEN
+    //INVALID TOKEN
     localStorage.removeItem(ACCESS_TOKEN_KEY);
     localStorage.removeItem(REFRESH_TOKEN_KEY);
     return false;
@@ -457,7 +457,7 @@ export const loginAdmin = async (payload: LoginPayload) => {
       localStorage.setItem(ACCESS_TOKEN_KEY, result.data.accessToken);
       localStorage.setItem(REFRESH_TOKEN_KEY, result.data.refreashToken);
 
-      // 🔥 Start expiry monitor
+      // Start expiry monitor
       startTokenExpiryMonitor();
 
       return result;
