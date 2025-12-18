@@ -3,12 +3,12 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { CheckCircle } from "lucide-react";
 import Link from "next/link";
-
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { loginUserWithToken } from "@/services/auth";
 import toast from "react-hot-toast";
 
-export default function SuccessPage() {
+// Main component wrapped in Suspense
+function SuccessPageContent() {
   const searchParams = useSearchParams();
   const accessToken = searchParams.get("accessToken");
   const [loading, setLoading] = useState(false);
@@ -20,15 +20,11 @@ export default function SuccessPage() {
 
       try {
         setLoading(true);
-
         const result = await loginUserWithToken(accessToken);
 
         if (result?.success) {
-         toast.success("Membership successfully completed! Please visit your profile page.");
-          // wait for auth state to persist
+          toast.success("Membership successfully completed! Please visit your profile page.");
           await new Promise((resolve) => setTimeout(resolve, 800));
-
-          //   window.location.href = "/profile";
         } else {
           toast.error(result?.error || "Login failed. Please try again.");
         }
@@ -62,14 +58,32 @@ export default function SuccessPage() {
 
         <div className="space-y-3">
           <Link href="/profile">
-            <button
-              className="w-full rounded-xl bg-black px-6 py-3 cursor-pointer text-sm font-semibold text-white transition duration-300 hover:bg-gray-900active:scale-[0.98]focus:outline-nonefocus:ring-2 focus:ring-blackfocus:ring-offset-2"
-            >
-            Go to Profile Page
+            <button className="w-full rounded-xl bg-black px-6 py-3 cursor-pointer text-sm font-semibold text-white transition duration-300 hover:bg-gray-900 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2">
+              Go to Profile Page
             </button>
           </Link>
         </div>
       </div>
     </div>
+  );
+}
+
+// Main export wrapped with Suspense
+export default function SuccessPage() {
+  return (
+    <Suspense fallback={
+      <div className="h-[65vh] flex items-center justify-center bg-[#0A0A0A] px-4">
+        <div className="max-w-md w-full bg-white rounded-2xl shadow-md p-8 text-center">
+          <div className="animate-pulse">
+            <div className="h-16 w-16 bg-gray-300 rounded-full mx-auto mb-4"></div>
+            <div className="h-6 bg-gray-300 rounded w-3/4 mx-auto mb-2"></div>
+            <div className="h-4 bg-gray-200 rounded w-full mb-6"></div>
+            <div className="h-12 bg-gray-300 rounded w-full"></div>
+          </div>
+        </div>
+      </div>
+    }>
+      <SuccessPageContent />
+    </Suspense>
   );
 }
