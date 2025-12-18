@@ -7,15 +7,8 @@ import { ArrowRight, ChevronDown, ListFilter } from "lucide-react";
 import { FilterDrawer } from "./FilterDrawer";
 import PartnerDetailsModal from "../NetworkCardModal/PartnerDetailsModal";
 import FavouriteButton from "./FavouriteButton";
-
-interface Partner {
-  _id: string;
-  name: string;
-  address: string;
-  category: { title: string };
-  thumbnail: string;
-  position: number;
-}
+import { getPartners } from "@/services/partner/getpartner";
+import { Partner, PartnerCategory } from "@/types/partner.types";
 
 interface AppliedFilters {
   locations: string[];
@@ -29,6 +22,8 @@ const NetworkFilter = () => {
   const filterFromUrl = searchParams.get("filter");
 
   const [partners, setPartners] = useState<Partner[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
   const [showAll, setShowAll] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPartner, setSelectedPartner] = useState<Partner | null>(null);
@@ -38,17 +33,24 @@ const NetworkFilter = () => {
     activities: [],
   });
 
-  // Fetch partners from API
+  // Fetch partners using getPartners function
   useEffect(() => {
     const fetchPartners = async () => {
+      setIsLoading(true);
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_API}/partner`, {
-          cache: "no-store",
-        });
-        const data = await res.json();
-        setPartners(data.data || []);
+        const result = await getPartners({});
+
+        if ("error" in result) {
+          console.error("Failed to fetch partners:", result.error);
+          setPartners([]);
+        } else {
+          setPartners(result.data || []);
+        }
       } catch (err) {
         console.error("Failed to fetch partners:", err);
+        setPartners([]);
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchPartners();
@@ -68,23 +70,26 @@ const NetworkFilter = () => {
   let filteredPartners =
     activeFilter === "All"
       ? partners
-      : partners.filter((p) => p.category.title === activeFilter);
+      : partners.filter((p) => {
+          // Handle both string and PartnerCategory types
+          const categoryTitle = typeof p.category === "string" 
+            ? p.category 
+            : (p.category as PartnerCategory)?.title;
+          return categoryTitle === activeFilter;
+        });
 
   // Apply drawer filters
   if (appliedFilters.locations.length > 0) {
     filteredPartners = filteredPartners.filter((p) =>
-      appliedFilters.locations.includes(p.address)
+      p.address ? appliedFilters.locations.includes(p.address) : false
     );
   }
 
   if (appliedFilters.activities.length > 0) {
     filteredPartners = filteredPartners.filter((p) =>
-      appliedFilters.activities.includes(p.name)
+      p.activity ? appliedFilters.activities.includes(p.activity) : false
     );
   }
-
-  // Sort partners by position
-  filteredPartners.sort((a, b) => a.position - b.position);
 
   const handleFilterClick = (filter: string) => {
     setActiveFilter(filter);
@@ -137,48 +142,63 @@ const NetworkFilter = () => {
         ))}
       </div>
 
+      {/* Loading State */}
+      {isLoading && (
+        <div className="text-center py-10">
+          <p className="text-lg">Loading partners...</p>
+        </div>
+      )}
+
       {/* Partner Cards */}
-      <div className="space-y-10">
-        {filteredPartners.map((partner) => (
-          <div
-            key={partner._id}
-            onClick={() => {
-              setSelectedPartner(partner);
-              setIsModalOpen(true);
-            }}
-            className="relative w-full aspect-video rounded-xl overflow-hidden cursor-pointer shadow-lg hover:shadow-2xl transition-shadow duration-300"
-          >
-            <div
-              className="absolute inset-0 bg-cover bg-center"
-              style={{
-                backgroundImage: `url(${partner.thumbnail})`,
-                filter: "brightness(1.05) saturate(1.2)",
-              }}
-            >
-              <div className="absolute inset-0 bg-linear-to-t from-black/10 via-black/10 to-transparent"></div>
+      {!isLoading && (
+        <div className="space-y-10">
+          {filteredPartners.length === 0 ? (
+            <div className="text-center py-10">
+              <p className="text-lg opacity-70">No partners found</p>
+            </div>
+          ) : (
+            filteredPartners.map((partner) => (
+              <div
+                key={partner._id}
+                onClick={() => {
+                  setSelectedPartner(partner);
+                  setIsModalOpen(true);
+                }}
+                className="relative w-full aspect-video rounded-xl overflow-hidden cursor-pointer shadow-lg hover:shadow-2xl transition-shadow duration-300"
+              >
+                <div
+                  className="absolute inset-0 bg-cover bg-center"
+                  style={{
+                    backgroundImage: `url(${partner.thumbnail})`,
+                    filter: "brightness(1.05) saturate(1.2)",
+                  }}
+                >
+                  <div className="absolute inset-0 bg-linear-to-t from-black/10 via-black/10 to-transparent"></div>
 
-              <FavouriteButton
-                partnerId={partner._id}
-                className="left-64 bottom-14"
-              />
+                  <FavouriteButton
+                    partnerId={partner._id || ""}
+                    className="left-64 bottom-14"
+                  />
 
-              <div className="absolute bottom-0 left-0 p-6 text-white">
-                <h2 className="text-lg lg:text-3xl font-semibold mb-1 font-serif">
-                  {partner.name}
-                </h2>
+                  <div className="absolute bottom-0 left-0 p-6 text-white">
+                    <h2 className="text-lg lg:text-3xl font-semibold mb-1 font-serif">
+                      {partner.name}
+                    </h2>
 
-                <div className="flex items-center text-sm lg:text-lg gap-2 italic opacity-80">
-                  {partner.address}
-                  <ArrowRight />
+                    <div className="flex items-center text-sm lg:text-lg gap-2 italic opacity-80">
+                      {partner.address || "Location not specified"}
+                      <ArrowRight />
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
-        ))}
-      </div>
+            ))
+          )}
+        </div>
+      )}
 
       {/* Show All Arrow */}
-      {!showAll && (
+      {!showAll && !isLoading && filteredPartners.length > 0 && (
         <div className="mt-10 flex justify-center">
           <button
             onClick={() => setShowAll(true)}
@@ -199,11 +219,12 @@ const NetworkFilter = () => {
         </div>
       )}
 
-      {/* Filter Drawer */}
+      {/* Filter Drawer - Now receives all partners data */}
       <FilterDrawer
         isOpen={isFilterOpen}
         onClose={() => setIsFilterOpen(false)}
         onFilterChange={handleFilterChange}
+        partners={partners}
       />
     </div>
   );
@@ -211,24 +232,18 @@ const NetworkFilter = () => {
 
 export default NetworkFilter;
 
-
 // "use client";
 
-// import { useEffect, useState } from "react";
+// import { useEffect, useState, useCallback } from "react";
 // import { useSearchParams, useRouter } from "next/navigation";
 // import { Button } from "@/components/ui/button";
-// import { ArrowRight, ChevronDown, Heart, ListFilter } from "lucide-react";
+// import { ArrowRight, ChevronDown, ListFilter } from "lucide-react";
 // import { FilterDrawer } from "./FilterDrawer";
 // import PartnerDetailsModal from "../NetworkCardModal/PartnerDetailsModal";
 // import FavouriteButton from "./FavouriteButton";
 
-// interface Partner {
-//   _id: string;
-//   name: string;
-//   address: string;
-//   category: { title: string };
-//   thumbnail: string;
-// }
+// import { Partner } from "@/types/partner.types";
+// import { getPartnersFilter, IGetPartnersParams } from "@/services/partner/partner";
 
 // interface AppliedFilters {
 //   locations: string[];
@@ -239,71 +254,102 @@ export default NetworkFilter;
 //   const searchParams = useSearchParams();
 //   const router = useRouter();
 
-//   const filterFromUrl = searchParams.get("filter");
+//   const filterFromUrl = searchParams.get("filter") || "All";
 
 //   const [partners, setPartners] = useState<Partner[]>([]);
-
-//   console.log('partners',partners)
-
+//   const [allPartnersForFilters, setAllPartnersForFilters] = useState<Partner[]>([]);
+//   const [isLoading, setIsLoading] = useState(true);
 //   const [showAll, setShowAll] = useState(false);
 //   const [isModalOpen, setIsModalOpen] = useState(false);
 //   const [selectedPartner, setSelectedPartner] = useState<Partner | null>(null);
 //   const [isFilterOpen, setIsFilterOpen] = useState(false);
+//   const [activeFilter, setActiveFilter] = useState(filterFromUrl);
+  
+//   const [categoryMap, setCategoryMap] = useState<Record<string, string>>({});
+
 //   const [appliedFilters, setAppliedFilters] = useState<AppliedFilters>({
 //     locations: [],
 //     activities: [],
 //   });
 
-//   // Fetch partners from API
+//   // 1. Initial Load: Fetch everything once to build the Category Map and Drawer options
 //   useEffect(() => {
-//     const fetchPartners = async () => {
+//     const initialize = async () => {
+//       setIsLoading(true);
 //       try {
-//         const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_API}/partner`, {
-//           cache: "no-store",
-//         });
-//         const data = await res.json();
-//         setPartners(data.data || []);
+//         const result = await getPartnersFilter({});
+//         if (!("error" in result)) {
+//           const data = result.data || [];
+//           setAllPartnersForFilters(data);
+          
+//           const mapping: Record<string, string> = {};
+//           data.forEach((p: any) => {
+//             if (p.category?.title && p.category?._id) {
+//               mapping[p.category.title] = p.category._id;
+//             }
+//           });
+//           setCategoryMap(mapping);
+//         }
 //       } catch (err) {
-//         console.error("Failed to fetch partners:", err);
+//         console.error("Initialization error:", err);
+//       } finally {
+//         setIsLoading(false);
 //       }
 //     };
-//     fetchPartners();
+//     initialize();
 //   }, []);
 
-//   // Set active filter from URL after first render
-//   const [activeFilter, setActiveFilter] = useState("All");
-//   useEffect(() => {
-//     if (filterFromUrl) {
-//       setActiveFilter(filterFromUrl);
+//   // 2. Fetch partners from API with corrected parameters
+//   const fetchFilteredData = useCallback(async () => {
+//     setIsLoading(true);
+//     try {
+//       const params: any = {}; // Using any to match dynamic param keys
+      
+//       // Category Filter (Using the Map to get ID)
+//       if (activeFilter !== "All") {
+//         const categoryId = categoryMap[activeFilter];
+//         if (categoryId) {
+//           params.category = categoryId;
+//         } else {
+//           params.category = "000000000000000000000000"; 
+//         }
+//       }
+
+//       // Address Filter - CHANGED to use 'address' to match the drawer's output
+//       if (appliedFilters.locations.length > 0) {
+//         params.address = appliedFilters.locations[0]; 
+//       }
+
+//       // Activity Filter
+//       if (appliedFilters.activities.length > 0) {
+//         params.activity = appliedFilters.activities[0];
+//       }
+
+//       const result = await getPartnersFilter(params);
+
+//       if ("error" in result) {
+//         console.error(result.error);
+//         setPartners([]);
+//       } else {
+//         setPartners(result.data || []);
+//       }
+//     } catch (err) {
+//       console.error("Fetch error:", err);
+//       setPartners([]);
+//     } finally {
+//       setIsLoading(false);
 //     }
-//   }, [filterFromUrl]);
+//   }, [activeFilter, appliedFilters, categoryMap]);
+
+//   useEffect(() => {
+//     fetchFilteredData();
+//   }, [fetchFilteredData]);
 
 //   const filters = ["All", "Movement", "Recovery", "Radiance", "Taste"];
-
-//   // Filter partners by category
-//   let filteredPartners =
-//     activeFilter === "All"
-//       ? partners
-//       : partners.filter((p) => p.category.title === activeFilter);
-
-//   // Apply drawer filters
-//   if (appliedFilters.locations.length > 0) {
-//     filteredPartners = filteredPartners.filter((p) =>
-//       appliedFilters.locations.includes(p.address)
-//     );
-//   }
-
-//   if (appliedFilters.activities.length > 0) {
-//     filteredPartners = filteredPartners.filter((p) =>
-//       appliedFilters.activities.includes(p.name)
-//     );
-//   }
 
 //   const handleFilterClick = (filter: string) => {
 //     setActiveFilter(filter);
 //     setShowAll(false);
-
-//     // Update URL without full reload
 //     if (filter === "All") {
 //       router.push("/network");
 //     } else {
@@ -321,19 +367,17 @@ export default NetworkFilter;
 //         The Network
 //       </h2>
 
-//       {/* Filter Button */}
 //       <header className="flex justify-end mb-8">
 //         <Button
 //           variant="ghost"
 //           size="lg"
-//           className="text-white focus:outline-none hover:bg-gray-800 p-2 rounded transition [&_svg:not([class*='size-'])]:size-6"
+//           className="text-white focus:outline-none hover:bg-gray-800 p-2 rounded transition"
 //           onClick={() => setIsFilterOpen(true)}
 //         >
 //           <ListFilter className="h-6 w-6" />
 //         </Button>
 //       </header>
 
-//       {/* Category Filters */}
 //       <div className="flex gap-4 mb-8 overflow-x-auto pb-2 sm:grid sm:grid-cols-5 lg:overflow-visible">
 //         {filters.map((filter) => (
 //           <Button
@@ -350,85 +394,61 @@ export default NetworkFilter;
 //         ))}
 //       </div>
 
-//       {/* Partner Cards */}
-//       <div className="space-y-10">
-//         {filteredPartners.map((partner) => (
-//           <div
-//             key={partner._id}
-//             onClick={() => {
-//               setSelectedPartner(partner);
-//               setIsModalOpen(true);
-//             }}
-//             className="relative w-full aspect-video rounded-xl overflow-hidden cursor-pointer shadow-lg hover:shadow-2xl transition-shadow duration-300"
-//           >
-//             <div
-//               className="absolute inset-0 bg-cover bg-center"
-//               style={{
-//                 backgroundImage: `url(${partner.thumbnail})`,
-//                 filter: "brightness(1.05) saturate(1.2)",
-//               }}
-//             >
-//               <div className="absolute inset-0 bg-linear-to-t from-black/10 via-black/10 to-transparent"></div>
-
-//               {/* Heart button – clickable */}
-//               {/* <button
-//                 onClick={(e) => {
-//                   e.stopPropagation();
-//                   console.log("Heart clicked");
+//       {isLoading ? (
+//         <div className="text-center py-10"><p className="text-lg">Loading partners...</p></div>
+//       ) : (
+//         <div className="space-y-10">
+//           {partners.length === 0 ? (
+//             <div className="text-center py-10"><p className="text-lg opacity-70">No partners found</p></div>
+//           ) : (
+//             partners.map((partner) => (
+//               <div
+//                 key={partner._id}
+//                 onClick={() => {
+//                   setSelectedPartner(partner);
+//                   setIsModalOpen(true);
 //                 }}
-//                 className="absolute cursor-pointer left-64 bottom-14 z-10 text-white hover:text-red-400 p-1 bg-black/30 rounded-full"
+//                 className="relative w-full aspect-video rounded-xl overflow-hidden cursor-pointer shadow-lg hover:shadow-2xl transition-shadow duration-300"
 //               >
-//                 <Heart />
-//               </button> */}
-
-//               <FavouriteButton
-//                 partnerId={partner._id}
-//                 className="left-64 bottom-14"
-//               />
-
-//               <div className="absolute bottom-0 left-0 p-6 text-white">
-//                 <h2 className="text-lg lg:text-3xl font-semibold mb-1 font-serif">
-//                   {partner.name}
-//                 </h2>
-
-//                 <div className="flex items-center text-sm lg:text-lg gap-2 italic opacity-80">
-//                   {partner.address}
-//                   <ArrowRight />
+//                  <div
+//                   className="absolute inset-0 bg-cover bg-center"
+//                   style={{ backgroundImage: `url(${partner.thumbnail})` }}
+//                 >
+//                   <div className="absolute inset-0 bg-black/20"></div>
+//                   <FavouriteButton partnerId={partner._id || ""} className="absolute right-6 top-6" />
+//                   <div className="absolute bottom-0 left-0 p-6 text-white">
+//                     <h2 className="text-lg lg:text-3xl font-semibold mb-1 font-serif">{partner.name}</h2>
+//                     <div className="flex items-center text-sm lg:text-lg gap-2 italic opacity-80">
+//                       {partner.address || "Location not specified"} <ArrowRight />
+//                     </div>
+//                   </div>
 //                 </div>
 //               </div>
-//             </div>
-//           </div>
-//         ))}
-//       </div>
+//             ))
+//           )}
+//         </div>
+//       )}
 
-//       {/* Show All Arrow */}
-//       {!showAll && (
+//       {!showAll && !isLoading && partners.length > 0 && (
 //         <div className="mt-10 flex justify-center">
-//           <button
-//             onClick={() => setShowAll(true)}
-//             className="p-3 rounded-full hover:bg-black/50 cursor-pointer transition"
-//           >
+//           <button onClick={() => setShowAll(true)} className="p-3 rounded-full hover:bg-black/50 transition">
 //             <ChevronDown className="lg:w-10 lg:h-10" />
 //           </button>
 //         </div>
 //       )}
 
-//       {/* Partner Modal */}
-//       {isModalOpen && selectedPartner && (
-//         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-999 overflow-y-auto">
-//           <PartnerDetailsModal
-//             onClose={() => setIsModalOpen(false)}
-//             partner={selectedPartner}
-//           />
-//         </div>
-//       )}
-
-//       {/* Filter Drawer */}
 //       <FilterDrawer
 //         isOpen={isFilterOpen}
 //         onClose={() => setIsFilterOpen(false)}
 //         onFilterChange={handleFilterChange}
+//         partners={allPartnersForFilters} 
 //       />
+
+//       {isModalOpen && selectedPartner && (
+//         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[999] overflow-y-auto">
+//           <PartnerDetailsModal onClose={() => setIsModalOpen(false)} partner={selectedPartner} />
+//         </div>
+//       )}
 //     </div>
 //   );
 // };

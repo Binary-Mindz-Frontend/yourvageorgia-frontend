@@ -1,8 +1,11 @@
 
 
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { ChevronDown, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
+import { Partner } from "@/types/partner.types";
 
 interface FilterDrawerProps {
   isOpen: boolean;
@@ -11,14 +14,15 @@ interface FilterDrawerProps {
     locations: string[];
     activities: string[];
   }) => void;
+  partners: Partner[];
 }
 
 export function FilterDrawer({
   isOpen,
   onClose,
   onFilterChange,
+  partners,
 }: FilterDrawerProps) {
-  // ... [Keep your existing state and logic here] ...
   const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
   const [selectedActivities, setSelectedActivities] = useState<string[]>([]);
   const [isLocationsOpen, setIsLocationsOpen] = useState(true);
@@ -36,46 +40,30 @@ export function FilterDrawer({
     };
   }, [isOpen]);
 
-  const locations = [
-    "ALL",
-    "Jumeirah",
-    "Al Quoz",
-    "DIFC",
-    "Palm Jumeirah",
-    "Dubai Hills",
-    "City Walk",
-    "Creek Harbour",
-    "JVC",
-    "One Central",
-    "Business Bay",
-    "Al Barari",
-    "JLT",
-    "Downtown",
-    "Bluewaters",
-    "Mirdif",
-    "Arabian Ranches",
-    "Meadows",
-    "Lakes",
-    "Festival City",
-    "Production City",
-    "d3",
-    "Zabeel",
-    "Dubai Marina",
-  ];
+  // Extract unique locations from partners
+  const locations = useMemo(() => {
+    const uniqueLocations = new Set<string>();
+    partners.forEach((partner) => {
+      if (partner.address) {
+        uniqueLocations.add(partner.address);
+      }
+    });
+    return ["ALL", ...Array.from(uniqueLocations).sort()];
+  }, [partners]);
 
-  const activities = [
-    "ALL",
-    "Reformer Pilates",
-    "Sauna",
-    "Massage",
-    "Coffee",
-    "Gym",
-    "Spa",
-    "Padel",
-  ];
+  // Extract unique activities from partners (using the activity field)
+  const activities = useMemo(() => {
+    const uniqueActivities = new Set<string>();
+    partners.forEach((partner) => {
+      // Use the activity field from the API response
+      if (partner.activity) {
+        uniqueActivities.add(partner.activity);
+      }
+    });
+    return ["ALL", ...Array.from(uniqueActivities).sort()];
+  }, [partners]);
 
   const handleLocationToggle = (location: string) => {
-    // ... [Keep existing logic] ...
     if (location === "ALL") {
       setSelectedLocations([]);
     } else {
@@ -88,7 +76,6 @@ export function FilterDrawer({
   };
 
   const handleActivityToggle = (activity: string) => {
-    // ... [Keep existing logic] ...
     if (activity === "ALL") {
       setSelectedActivities([]);
     } else {
@@ -148,7 +135,7 @@ export function FilterDrawer({
           </Button>
         </div>
 
-        {/* NEW Scrollable Inner Container - UPDATED HERE */}
+        {/* Scrollable Inner Container */}
         <div className="h-full w-full overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           {/* Content */}
           <div className="space-y-1 md:w-2/3 mr-auto sm:px-6 py-8 mt-28">

@@ -179,6 +179,13 @@ export const logoutAdmin = () => {
   if (typeof window !== 'undefined') {
     localStorage.removeItem(ACCESS_TOKEN_KEY);
     localStorage.removeItem(REFRESH_TOKEN_KEY);
+    
+    // Clear any running intervals
+    if (window.tokenCheckInterval) {
+      clearInterval(window.tokenCheckInterval);
+      window.tokenCheckInterval = null;
+    }
+    
     // Redirect to login page
     window.location.href = "/dashboard/admin/login";
   }
@@ -195,15 +202,65 @@ export const isAuthenticated = (): boolean => {
     const decoded: { exp: number } = jwtDecode(token);
     const currentTime = Date.now() / 1000;
 
-    // Check if token is expired (with a 10-second buffer)
-    if (decoded.exp < currentTime + 10) {
-      logoutAdmin();
+    // Check if token is expired
+    if (decoded.exp < currentTime) {
       return false;
     }
     return true;
   } catch (error) {
     console.error("Token validation failed", error);
     return false;
+  }
+};
+
+/**
+ * Gets remaining time in seconds before token expires
+ */
+export const getTokenExpiryTime = (): number | null => {
+  const token = getAccessToken();
+  if (!token) return null;
+
+  try {
+    const decoded: { exp: number } = jwtDecode(token);
+    const currentTime = Date.now() / 1000;
+    const remainingTime = decoded.exp - currentTime;
+    return remainingTime > 0 ? remainingTime : 0;
+  } catch (error) {
+    return null;
+  }
+};
+
+
+export const startTokenExpiryMonitor = () => {
+  if (typeof window === 'undefined') return;
+
+  // Clear any existing interval
+  if (window.tokenCheckInterval) {
+    clearInterval(window.tokenCheckInterval);
+  }
+
+  // Check immediately
+  if (!isAuthenticated()) {
+    console.log("Token expired - logging out");
+    logoutAdmin();
+    return;
+  }
+
+  // Then check every 30 seconds
+  window.tokenCheckInterval = setInterval(() => {
+    console.log("Checking token validity...");
+    if (!isAuthenticated()) {
+      console.log("Token expired - logging out");
+      logoutAdmin();
+    }
+  }, 30000); 
+};
+
+
+export const stopTokenExpiryMonitor = () => {
+  if (typeof window !== 'undefined' && window.tokenCheckInterval) {
+    clearInterval(window.tokenCheckInterval);
+    window.tokenCheckInterval = null;
   }
 };
 
@@ -224,6 +281,10 @@ export const loginAdmin = async (payload: LoginPayload) => {
     if (response.ok && result.data?.accessToken) {
       localStorage.setItem(ACCESS_TOKEN_KEY, result.data.accessToken);
       localStorage.setItem(REFRESH_TOKEN_KEY, result.data.refreashToken);
+      
+      // Start monitoring token expiry after successful login
+      startTokenExpiryMonitor();
+      
       return result;
     }
 
@@ -239,10 +300,10 @@ export const fetchWithAuth = async (endpoint: string, options: RequestInit = {})
   const token = getAccessToken();
   const url = `${BASE_URL}${endpoint}`;
 
-  // 1. Client-side check BEFORE sending the request
+  // Check if token is valid before making request
   if (!isAuthenticated()) {
     logoutAdmin();
-    throw new Error("Session expired.");
+    throw new Error("Session expired. Please login again.");
   }
 
   const requestHeaders = new Headers(options.headers || {});
@@ -251,11 +312,18 @@ export const fetchWithAuth = async (endpoint: string, options: RequestInit = {})
 
   const response = await fetch(url, { ...options, headers: requestHeaders });
 
-  // 2. Server-side check: If the server says the token is invalid (401)
+  // If server says unauthorized, logout immediately
   if (response.status === 401 || response.status === 403) {
     logoutAdmin();
-    throw new Error("Unauthorized access.");
+    throw new Error("Unauthorized access. Please login again.");
   }
 
   return response;
+};
+
+// Extend Window interface for TypeScript
+declare global {
+  interface Window {
+    tokenCheckInterval: NodeJS.Timeout | null;
+  }
 };
