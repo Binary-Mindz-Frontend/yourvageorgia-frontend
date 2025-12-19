@@ -1,4 +1,6 @@
+
 // "use client";
+
 // import NetworkCardModal from "@/app/(main)/network/_components/NetworkCardModal/PartnerDetailsModal";
 // import { getPartners } from "@/services/partner/getpartner";
 // import { ArrowRight } from "lucide-react";
@@ -6,22 +8,32 @@
 // import PartnersMap from "../PartnersMap/PartnersMap";
 
 // export default function SolenneMembership() {
-//   const [isModalOpen, setIsModalOpen] = useState(false);
+//   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 //   const [partners, setPartners] = useState<any[]>([]);
+//   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+//   const [selectedPartner, setSelectedPartner] = useState<any | null>(null);
+//   const [showModal, setShowModal] = useState(false);
 
+//   // Load partners
 //   useEffect(() => {
-//     const loadPartners = async () => {
-//       const res = await getPartners();
+//   const loadPartners = async () => {
+//     const res = await getPartners();
+//     if ("data" in res) {
+//       setPartners(res.data);
 
-//       if ("data" in res) {
-//         setPartners(res.data);
-//       }
-//     };
+//       // ✅ Find the first partner with isFeaturedMap === "true"
+//       const featuredPartner = res.data.find(
+//         // eslint-disable-next-line @typescript-eslint/no-explicit-any
+//         (p: any) => p.isFeaturedMap === "true"
+//       );
 
-//     loadPartners();
-//   }, []);
+//       // ✅ If found, set as default selected partner; otherwise fallback to first
+//       setSelectedPartner(featuredPartner || res.data[0]);
+//     }
+//   };
 
-//   console.log("Partners:", partners);
+//   loadPartners();
+// }, []);
 
 //   return (
 //     <div className="text-white flex items-center justify-center my-16 lg:my-38 p-4 lg:px-12">
@@ -33,33 +45,43 @@
 //             {/* Background Image */}
 //             <div
 //               className="absolute inset-0 bg-cover bg-center"
-//               style={{ backgroundImage: "url('/assets/home/map_bg.svg')" }}
+//               style={{
+//                 backgroundImage: selectedPartner
+//                   ? `url(${selectedPartner.thumbnail})`
+//                   : "url('/assets/home/map_bg.svg')",
+//               }}
 //             >
 //               <div className="absolute inset-0 bg-linear-to-b from-black/60 via-transparent to-black/80"></div>
 //             </div>
 
-//             <div className="relative z-10 p-12 h-full flex flex-col justify-end min-h-[400px]">
+//             <div className="relative z-10 p-12 h-full flex flex-col justify-end min-h-100">
 //               <button
-//                 onClick={() => setIsModalOpen(true)}
+//                 onClick={() => selectedPartner && setShowModal(true)}
 //                 className="group inline-flex flex-col cursor-pointer text-left"
 //               >
 //                 <h2 className="text-3xl font-light mb-3 tracking-wide transition group-hover:text-white/90">
-//                   Lumé Aesthetics
+//                   {selectedPartner ? selectedPartner.name : "Lumé Aesthetics"}
 //                 </h2>
 
 //                 <div className="flex items-center gap-2 text-sm lg:text-base text-white">
 //                   <span className="transition group-hover:text-white/90">
-//                     15% off facial and rejuvenation treatments
+//                     {selectedPartner
+//                       ? selectedPartner.about?.title ||
+//                         selectedPartner.activity
+//                       : "15% off facial and rejuvenation treatments"}
 //                   </span>
-//                   <ArrowRight className="w-5 h-5 transition text-white " />
+//                   <ArrowRight className="w-5 h-5 transition text-white" />
 //                 </div>
 //               </button>
 //             </div>
 //           </div>
 
 //           {/* Right Section */}
-//           <div className="relative bg-gray-100 min-h-[400px] rounded-xl lg:rounded-none">
-//             <PartnersMap partners={partners} />
+//           <div className="relative bg-gray-100 min-h-100 rounded-xl lg:rounded-none">
+//             <PartnersMap
+//               partners={partners}
+//               onMarkerClick={(partner) => setSelectedPartner(partner)}
+//             />
 //           </div>
 //         </div>
 
@@ -75,15 +97,15 @@
 //         </div>
 //       </div>
 
-//       {/* Modal */}
-//       showModal && selectedPartner && (
-//               <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-999 overflow-y-auto scrollbar-hide">
-//                 <PartnerDetailsModal
-//                   onClose={() => setShowModal(false)}
-//                   partner={selectedPartner}
-//                 />
-//               </div>
-//             )}
+//       {/* Partner Modal */}
+//       {showModal && selectedPartner && (
+//         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-999 overflow-y-auto scrollbar-hide">
+//           <NetworkCardModal
+//             onClose={() => setShowModal(false)}
+//             partner={selectedPartner}
+//           />
+//         </div>
+//       )}
 //     </div>
 //   );
 // }
@@ -106,24 +128,33 @@ export default function SolenneMembership() {
 
   // Load partners
   useEffect(() => {
-  const loadPartners = async () => {
-    const res = await getPartners();
-    if ("data" in res) {
-      setPartners(res.data);
+    const loadPartners = async () => {
+      const res = await getPartners();
+      if ("data" in res) {
+        setPartners(res.data);
 
-      // ✅ Find the first partner with isFeaturedMap === "true"
-      const featuredPartner = res.data.find(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (p: any) => p.isFeaturedMap === "true"
-      );
+        // ✅ Find the first partner with isFeaturedMap === "true"
+        const featuredPartner = res.data.find(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (p: any) => p.isFeaturedMap === "true"
+        );
 
-      // ✅ If found, set as default selected partner; otherwise fallback to first
-      setSelectedPartner(featuredPartner || res.data[0]);
+        // ✅ If found, set as default selected partner; otherwise fallback to first
+        setSelectedPartner(featuredPartner || res.data[0]);
+      }
+    };
+
+    loadPartners();
+  }, []);
+
+  // Helper function to get activity title
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const getActivityTitle = (partner: any) => {
+    if (partner.activity && Array.isArray(partner.activity) && partner.activity.length > 0) {
+      return partner.activity[0].title;
     }
+    return "";
   };
-
-  loadPartners();
-}, []);
 
   return (
     <div className="text-white flex items-center justify-center my-16 lg:my-38 p-4 lg:px-12">
@@ -156,8 +187,7 @@ export default function SolenneMembership() {
                 <div className="flex items-center gap-2 text-sm lg:text-base text-white">
                   <span className="transition group-hover:text-white/90">
                     {selectedPartner
-                      ? selectedPartner.about?.title ||
-                        selectedPartner.activity
+                      ? selectedPartner.about || getActivityTitle(selectedPartner) || "Exclusive member benefits"
                       : "15% off facial and rejuvenation treatments"}
                   </span>
                   <ArrowRight className="w-5 h-5 transition text-white" />
@@ -178,11 +208,7 @@ export default function SolenneMembership() {
         {/* Bottom Description */}
         <div className="mt-12 lg:mt-38 text-center">
           <p className="text-gray-300 text-lg lg:text-2xl leading-relaxed font-light">
-            Solenne is a digital lifestyle membership for women in Dubai,
-            connecting members to a curated network of wellness, beauty and
-            lifestyle destinations across the city. Members exclusively have
-            access to enjoy preferred rates and experiences designed to elevate
-            everyday living.
+            Solenne is a digital lifestyle membership for women in Dubai, centred on a curated network of the city’s most considered wellness, beauty and lifestyle destinations. Members are extended preferred access and partner privileges, shaping a more elevated everyday.
           </p>
         </div>
       </div>
