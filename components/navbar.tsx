@@ -163,16 +163,16 @@ export function Navbar() {
                   }}
                 />
 
-                {/* {isSearchOpen && (
-                  <Button
+                {isSearchOpen && (
+                  <span
                     onClick={handleSearch}
-                    size="sm"
-                    className="absolute right-2 h-9 cursor-pointer px-4 bg-primary hover:bg-primary/90 text-primary-foreground rounded-full shadow-md hover:shadow-lg transition-all duration-200 font-medium"
+                    
+                    className="absolute right-1 cursor-pointer px-4"
                   >
-                    <Search className="mr-2 h-4 w-4" />
-                    Search
-                  </Button>
-                )} */}
+                    <Search className=" h-4 w-4" />
+                    
+                  </span>
+                )}
               </div>
             ) : (
               <Link

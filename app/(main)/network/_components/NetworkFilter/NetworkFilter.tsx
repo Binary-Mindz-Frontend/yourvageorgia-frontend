@@ -115,7 +115,7 @@ useEffect(() => {
     filteredPartners = filteredPartners.filter((partner) => {
       const nameMatches = partner.name.toLowerCase().includes(searchQuery.toLowerCase());
       const categoryMatches = typeof partner.category === "object" 
-        ? (partner.category as PartnerCategory).title.toLowerCase().includes(searchQuery.toLowerCase())
+        ? (partner.category as PartnerCategory)?.title.toLowerCase().includes(searchQuery.toLowerCase())
         : partner.category.toLowerCase().includes(searchQuery.toLowerCase());
 
       return nameMatches || categoryMatches;
