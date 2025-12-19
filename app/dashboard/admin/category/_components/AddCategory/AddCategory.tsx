@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Dialog,
   DialogContent,
@@ -42,6 +42,8 @@ export default function AddCategoryModal({
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
 
   const toastStyle = { background: "#000", color: "#fff", marginTop: "4rem" };
 
@@ -83,11 +85,17 @@ export default function AddCategoryModal({
       console.error("Upload error:", err);
     } finally {
       setUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
     }
   };
 
   const handleImageRemove = () => {
     setImage(""); // Remove the image
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   };
 
   const handleSubmit = async () => {
@@ -202,9 +210,8 @@ export default function AddCategoryModal({
 
             <label
               htmlFor="featureImage"
-              className={`border border-primary/50 rounded-md p-6 text-center bg-[#1a1a1a] cursor-pointer block mt-2 hover:bg-accent/10 transition-colors ${
-                uploading ? "opacity-50 pointer-events-none" : ""
-              }`}
+              className={`border border-primary/50 rounded-md p-6 text-center bg-[#1a1a1a] cursor-pointer block mt-2 hover:bg-accent/10 transition-colors ${uploading ? "opacity-50 pointer-events-none" : ""
+                }`}
             >
               <Upload className="mx-auto mb-2 text-gray-400" />
               <p className="text-sm text-gray-400">
@@ -215,16 +222,19 @@ export default function AddCategoryModal({
               <p className="text-xs text-gray-500">PNG, JPG up to 10MB</p>
 
               <input
+                ref={fileInputRef}
                 id="featureImage"
                 type="file"
                 accept="image/*"
                 className="hidden"
                 disabled={uploading}
                 onChange={(e) => {
-                  if (e.target.files && e.target.files[0])
+                  if (e.target.files && e.target.files[0]) {
                     handleFileChange(e.target.files[0]);
+                  }
                 }}
               />
+
             </label>
           </div>
 
@@ -262,10 +272,10 @@ export default function AddCategoryModal({
                 ? "Updating..."
                 : "Adding..."
               : uploading
-              ? "Uploading..."
-              : isEdit
-              ? "Update"
-              : "Add"}
+                ? "Uploading..."
+                : isEdit
+                  ? "Update"
+                  : "Add"}
           </Button>
         </DialogFooter>
       </DialogContent>
