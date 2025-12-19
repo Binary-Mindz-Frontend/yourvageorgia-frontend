@@ -106,20 +106,24 @@ export default function SolenneMembership() {
 
   // Load partners
   useEffect(() => {
-    const loadPartners = async () => {
-      const res = await getPartners();
-      if ("data" in res) {
-        setPartners(res.data);
+  const loadPartners = async () => {
+    const res = await getPartners();
+    if ("data" in res) {
+      setPartners(res.data);
 
-        // Optionally select the first partner as default
-        if (res.data.length > 0) {
-          setSelectedPartner(res.data[0]);
-        }
-      }
-    };
+      // ✅ Find the first partner with isFeaturedMap === "true"
+      const featuredPartner = res.data.find(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (p: any) => p.isFeaturedMap === "true"
+      );
 
-    loadPartners();
-  }, []);
+      // ✅ If found, set as default selected partner; otherwise fallback to first
+      setSelectedPartner(featuredPartner || res.data[0]);
+    }
+  };
+
+  loadPartners();
+}, []);
 
   return (
     <div className="text-white flex items-center justify-center my-16 lg:my-38 p-4 lg:px-12">
@@ -140,7 +144,7 @@ export default function SolenneMembership() {
               <div className="absolute inset-0 bg-linear-to-b from-black/60 via-transparent to-black/80"></div>
             </div>
 
-            <div className="relative z-10 p-12 h-full flex flex-col justify-end min-h-[400px]">
+            <div className="relative z-10 p-12 h-full flex flex-col justify-end min-h-100">
               <button
                 onClick={() => selectedPartner && setShowModal(true)}
                 className="group inline-flex flex-col cursor-pointer text-left"
@@ -163,7 +167,7 @@ export default function SolenneMembership() {
           </div>
 
           {/* Right Section */}
-          <div className="relative bg-gray-100 min-h-[400px] rounded-xl lg:rounded-none">
+          <div className="relative bg-gray-100 min-h-100 rounded-xl lg:rounded-none">
             <PartnersMap
               partners={partners}
               onMarkerClick={(partner) => setSelectedPartner(partner)}

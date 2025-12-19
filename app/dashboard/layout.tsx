@@ -260,16 +260,18 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { ReactNode, useState, useEffect, useRef } from "react";
-import { MdOutlineNotificationsNone } from "react-icons/md";
 import { AppSidebar } from "@/components/Shared/dashboard/sidebar/AppSidebar";
 import useScrollTrigger from "@/hooks/useScrollTrigger";
 import { LogOut, User } from "lucide-react";
 import { Toaster } from "sonner";
 import { useRouter, usePathname } from "next/navigation";
-
 import { toast } from "sonner";
-// --- CORRECTED IMPORT: Changed isAdminAuthenticated to isAuthenticated ---
-import { isAuthenticated, logoutAdmin } from "@/services/admin.auth/admin.auth";
+// Updated imports - added startTokenExpiryMonitor
+import { 
+  isAuthenticated, 
+  logoutAdmin, 
+  startTokenExpiryMonitor 
+} from "@/services/admin.auth/admin.auth";
 
 const DashboardLayout = ({ children }: { children: ReactNode }) => {
   const { scrolled } = useScrollTrigger();
@@ -289,10 +291,12 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
       }
 
       // Check if user is authenticated
-      if (!isAuthenticated()) { // <-- CORRECTED USAGE
+      if (!isAuthenticated()) {
         router.push("/dashboard/admin/login");
       } else {
         setIsChecking(false);
+        // ✅ START AUTOMATIC TOKEN MONITORING HERE
+        startTokenExpiryMonitor();
       }
     };
 
@@ -343,7 +347,6 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
   }
 
   return (
-    // ... (rest of your component remains the same)
     <div>
       <SidebarProvider>
         <AppSidebar />
@@ -361,13 +364,12 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
                 </h1>
               </div>
               <div className="flex items-center gap-4 mr-2">
-                <MdOutlineNotificationsNone className="text-xl text-white" />
+                
                 <div className="relative" ref={dropdownRef}>
                   <Avatar 
                     className="h-10 w-10 cursor-pointer" 
                     onClick={toggleLogout}
                   >
-                    {/* <AvatarImage src={avatar.src} alt="Solenne" /> */}
                     <AvatarFallback className="bg-gray-700 text-white">
                       <User />
                     </AvatarFallback>

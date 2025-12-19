@@ -1,12 +1,12 @@
 "use client";
 import React from "react";
 
-import img1 from "@/public/assets/partnership/1.svg";
-import img2 from "@/public/assets/partnership/2.svg";
-import img3 from "@/public/assets/partnership/3.svg";
-import img4 from "@/public/assets/partnership/4.svg";
-import img5 from "@/public/assets/partnership/5.svg";
-import img6 from "@/public/assets/partnership/6.svg";
+import img1 from "@/public/assets/partnership/1.png";
+import img2 from "@/public/assets/partnership/2.png";
+import img3 from "@/public/assets/partnership/3.png";
+import img4 from "@/public/assets/partnership/4.png";
+import img5 from "@/public/assets/partnership/5.png";
+import img6 from "@/public/assets/partnership/6.png";
 import Image from "next/image";
 
 interface GalleryItemProps {
@@ -21,7 +21,7 @@ const GalleryItem: React.FC<GalleryItemProps> = ({
   className = "",
 }) => (
   <div
-    className={`relative w-full h-[200px] lg:h-[424px] aspect-4/3 overflow-hidden rounded-lg ${className}`}
+    className={`relative w-full h-50 lg:h-106 aspect-4/3 overflow-hidden rounded-lg ${className}`}
   >
     <Image
       src={src}
@@ -29,7 +29,7 @@ const GalleryItem: React.FC<GalleryItemProps> = ({
       width={500}
       height={500}
       loading="lazy"
-      className="absolute inset-0 w-[424px] h-full lg:h-[424px] object-cover transition duration-300 ease-in-out hover:scale-105"
+      className="absolute inset-0 w-106 h-full lg:h-106 object-cover transition duration-300 ease-in-out hover:scale-105"
     />
     <div className="absolute inset-0 bg-black/10"></div>
   </div>
@@ -39,7 +39,7 @@ const WellnessGallery: React.FC = () => {
   return (
     <div className="min-h-screen text-white px-4 sm:px-8 lg:px-16 mt-10 lg:mt-30">
       {/* 6 Image Grid */}
-      <div className="max-w-[1320px] mx-auto grid grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
+      <div className="max-w-330 mx-auto grid grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
         <GalleryItem src={img1.src} alt="Sauna Interior" />
         <GalleryItem src={img2.src} alt="Bar Lounge Area" />
         <GalleryItem src={img3.src} alt="Cryotherapy Treatment" />

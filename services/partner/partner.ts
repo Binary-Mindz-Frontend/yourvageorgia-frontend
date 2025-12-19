@@ -231,7 +231,7 @@ export interface IGetPartnersParams {
   limit?: number;
   page?: number;
   search?: string;
-  address?: string;
+  addressUrl?: string;
   category?: string; // Should be category ID
   activity?: string; // Should be activity name or ID
   sortBy?: string;
@@ -470,5 +470,51 @@ export const updatePartnerPosition = async (
   } catch (error: any) {
     // Catch errors thrown by fetchWithAuth (e.g., token missing, 401/403)
     return { error: error.message || "An unexpected error occurred during position update" };
+  }
+};
+
+
+// GET FILTERED PARTNERS - Separate function for filtering in NetworkFilter
+export const getPartnersFilter = async (
+  params: IGetPartnersParams = {}
+): Promise<
+  { data: IGetAllPartnersResponse["data"]; meta: IGetAllPartnersResponse["meta"] } | { error: string }
+> => {
+  try {
+    const queryParams = new URLSearchParams();
+
+    // Force sorting by position ASC
+    queryParams.set("sortBy", "position");
+    queryParams.set("sortOrder", "asc");
+
+    // Add all filter parameters
+    (Object.keys(params) as Array<keyof IGetPartnersParams>).forEach((key) => {
+      // Prevent override of sortBy and sortOrder
+      if (key === "sortBy" || key === "sortOrder") return;
+
+      const value = params[key];
+      if (value !== undefined && value !== null && value !== "") {
+        queryParams.append(key, String(value));
+      }
+    });
+
+    const url = `${BASE_URL}/partner?${queryParams.toString()}`;
+    console.log("Fetching filtered partners with URL:", url);
+    
+    const res = await fetch(url, {
+      cache: "no-store", // Ensure fresh data for filters
+    });
+    const json = await res.json();
+
+    if (!res.ok) {
+      return { error: json.message || "Failed to fetch filtered partners" };
+    }
+
+    return {
+      data: json.data,
+      meta: json.meta,
+    };
+  } catch (error: any) {
+    return { error: error.message };
   }
 };
