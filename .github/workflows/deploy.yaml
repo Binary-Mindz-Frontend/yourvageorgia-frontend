@@ -62,6 +62,11 @@ jobs:
           context: .
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/${{ secrets.PACKAGE_NAME }}:latest
+          build-args: |
+                NEXT_PUBLIC_BASE_API=${{ secrets.NEXT_PUBLIC_BASE_API }}
+                NEXT_PUBLIC_ADMIN_EMAIL=${{ secrets.NEXT_PUBLIC_ADMIN_EMAIL }}
+                NEXT_PUBLIC_ADMIN_PASSWORD=${{ secrets.NEXT_PUBLIC_ADMIN_PASSWORD }}
+                NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=${{ secrets.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY }}
 
   deploy:
     name: Deploy
