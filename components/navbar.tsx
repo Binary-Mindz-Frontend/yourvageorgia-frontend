@@ -60,7 +60,7 @@ export function Navbar() {
     return partners.filter(
       (partner) =>
         partner.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        partner.category.title.toLowerCase().includes(searchQuery.toLowerCase())
+        partner.category?.title.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [searchQuery, partners]);
 
@@ -206,7 +206,7 @@ export function Navbar() {
                   <div>
                     <h3 className="text-base font-semibold">{partner.name}</h3>
                     <p className="text-xs text-gray-400">
-                      {partner.category.title}
+                      {partner?.category?.title}
                     </p>
                   </div>
                 </div>

@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
@@ -70,7 +70,9 @@ const NetworkFilter = () => {
   useEffect(() => {
     if (searchQuery) {
       // Check if the search query matches any of the category titles
-      const matchedCategory = filters.find((filter) => filter.toLowerCase() === searchQuery.toLowerCase());
+      const matchedCategory = filters.find(
+        (filter) => filter.toLowerCase() === searchQuery.toLowerCase()
+      );
       if (matchedCategory) {
         setActiveFilter(matchedCategory);
       }
@@ -85,9 +87,10 @@ const NetworkFilter = () => {
       ? partners
       : partners.filter((p) => {
           // Handle both string and PartnerCategory types
-          const categoryTitle = typeof p.category === "string" 
-            ? p.category 
-            : (p.category as PartnerCategory)?.title;
+          const categoryTitle =
+            typeof p.category === "string"
+              ? p.category
+              : (p.category as PartnerCategory)?.title;
           return categoryTitle === activeFilter;
         });
 
@@ -107,10 +110,15 @@ const NetworkFilter = () => {
   // Apply search query filter for both partner name and category title
   if (searchQuery) {
     filteredPartners = filteredPartners.filter((partner) => {
-      const nameMatches = partner.name.toLowerCase().includes(searchQuery.toLowerCase());
-      const categoryMatches = typeof partner.category === "object" 
-        ? (partner.category as PartnerCategory).title.toLowerCase().includes(searchQuery.toLowerCase())
-        : partner.category.toLowerCase().includes(searchQuery.toLowerCase());
+      const nameMatches = partner.name
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase());
+      const categoryMatches =
+        typeof partner.category === "object"
+          ? (partner.category as PartnerCategory).title
+              .toLowerCase()
+              .includes(searchQuery.toLowerCase())
+          : partner.category.toLowerCase().includes(searchQuery.toLowerCase());
 
       return nameMatches || categoryMatches;
     });
