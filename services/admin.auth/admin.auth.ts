@@ -122,7 +122,7 @@
 //   endpoint: string,
 //   options: RequestInit = {}
 // ): Promise<Response> => {
-   
+
 //     const token = getAccessToken();
 //     const url = `${BASE_URL}${endpoint}`;
 
@@ -130,13 +130,13 @@
 //     if (!token) {
 //         throw new Error("No authentication token found. Please log in.");
 //     }
-   
+
 //     const requestHeaders = new Headers(options.headers || {});
 //     requestHeaders.set('Content-Type', 'application/json');
-   
+
 //     // FIX: Send token without 'Bearer ' prefix as required by your API
 //     requestHeaders.set('Authorization', token);
-   
+
 //     const response = await fetch(url, {
 //         ...options,
 //         headers: requestHeaders,
@@ -148,7 +148,7 @@
 //         // logoutAdmin();
 //         throw new Error("Session expired or unauthorized. Please log in again.");
 //     }
-   
+
 //     return response;
 // };
 
@@ -179,13 +179,13 @@
 //   if (typeof window !== 'undefined') {
 //     localStorage.removeItem(ACCESS_TOKEN_KEY);
 //     localStorage.removeItem(REFRESH_TOKEN_KEY);
-    
+
 //     // Clear any running intervals
 //     if (window.tokenCheckInterval) {
 //       clearInterval(window.tokenCheckInterval);
 //       window.tokenCheckInterval = null;
 //     }
-    
+
 //     // Redirect to login page
 //     window.location.href = "/dashboard/admin/login";
 //   }
@@ -281,10 +281,10 @@
 //     if (response.ok && result.data?.accessToken) {
 //       localStorage.setItem(ACCESS_TOKEN_KEY, result.data.accessToken);
 //       localStorage.setItem(REFRESH_TOKEN_KEY, result.data.refreashToken);
-      
+
 //       // Start monitoring token expiry after successful login
 //       startTokenExpiryMonitor();
-      
+
 //       return result;
 //     }
 
@@ -443,7 +443,7 @@ export const stopTokenExpiryMonitor = () => {
 
 export const loginAdmin = async (payload: LoginPayload) => {
   const url = `${BASE_URL}${LOGIN_ENDPOINT}`;
-
+  console.log(url, "debug url")
   try {
     const response = await fetch(url, {
       method: "POST",
