@@ -11,7 +11,7 @@ export default function HomePage() {
       <WellnessHero />
       <CTAButton/>
       <WellnessCards />
-      <SolenneMembership />
+      {/* <SolenneMembership /> */}
       <FeaturedPartners />
     </div>
   );
