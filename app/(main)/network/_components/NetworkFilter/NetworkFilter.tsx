@@ -34,30 +34,36 @@ const NetworkFilter = () => {
     activities: [],
   });
 
-  const [activeFilter, setActiveFilter] = useState("All"); // Keep track of active category filter
+  const [activeFilter, setActiveFilter] = useState<string>("All");
 
   // Fetch partners using getPartners function
-  useEffect(() => {
-    const fetchPartners = async () => {
-      setIsLoading(true);
-      try {
-        const result = await getPartners({});
+useEffect(() => {
+  const fetchPartners = async () => {
+    setIsLoading(true);
+    try {
+      const result = await getPartners({});
 
-        if ("error" in result) {
-          console.error("Failed to fetch partners:", result.error);
-          setPartners([]);
-        } else {
-          setPartners(result.data || []);
-        }
-      } catch (err) {
-        console.error("Failed to fetch partners:", err);
+      if ("error" in result) {
+        console.error("Failed to fetch partners:", result.error);
         setPartners([]);
-      } finally {
-        setIsLoading(false);
+      } else {
+        const sortedPartners = [...(result.data || [])].sort(
+          (a, b) => (a.position ?? 0) - (b.position ?? 0)
+        );
+
+        setPartners(sortedPartners);
       }
-    };
-    fetchPartners();
-  }, []);
+    } catch (err) {
+      console.error("Failed to fetch partners:", err);
+      setPartners([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  fetchPartners();
+}, []);
+
 
   // Set active filter from URL after first render
   useEffect(() => {
