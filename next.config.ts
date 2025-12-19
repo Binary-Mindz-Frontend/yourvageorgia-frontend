@@ -20,6 +20,12 @@ images: {
         hostname: "api.solenneuae.com",
         pathname: "/**",
       },
+
+      {  protocol: "https",
+        hostname: "maps.google.com",
+        pathname: "/**",
+      },
+      
     ],
   },
 // --- ADD THIS SECTION ---

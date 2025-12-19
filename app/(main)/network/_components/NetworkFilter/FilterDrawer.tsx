@@ -363,7 +363,7 @@ export function FilterDrawer({
                 onClick={() => setIsLocationsOpen(!isLocationsOpen)}
                 className="flex items-center justify-between w-full text-foreground font-medium text-sm tracking-wider mb-4 px-4 py-2"
               >
-                LOCATIONS
+                LOCATION
                 <ChevronDown
                   className={`h-5 w-5 transition-transform ${
                     isLocationsOpen ? "rotate-180" : ""
