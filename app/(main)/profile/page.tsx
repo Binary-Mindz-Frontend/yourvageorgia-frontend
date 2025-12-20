@@ -2,7 +2,9 @@ import membership from "@/public/assets/profile/profile.jpg";
 import { getCurrentUser } from "@/services/auth";
 import { Suspense } from "react";
 import Logout from "./_component/Logout";
-
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+const apiUrl = process.env.NEXT_PUBLIC_BASE_API;
 // Convert UNIX timestamp to date-only format (no time)
 const convertTimestampToDateOnly = (timestamp: number) => {
   const date = new Date(timestamp * 1000);
@@ -61,7 +63,17 @@ const ProfilePage = async () => {
       </div>
 
       {/* Log out Button */}
+
+
+      <div className="mt-6">
+        <Button asChild>
+          <Link href={`${apiUrl}/wallet/membership`}>Add to Apple Wallet</Link>
+        </Button>
+      </div>
+
       <Logout />
+
+
     </div>
   );
 };

@@ -350,14 +350,14 @@ export const startForceLogoutTimer = () => {
     const remainingTime = FORCE_LOGOUT_TIME - elapsedTime;
 
 
-    console.log(
-      `⏳ Remaining Time: ${Math.ceil(remainingTime / 1000)} seconds`
-    );
+    // console.log(
+    //   ` Remaining Time: ${Math.ceil(remainingTime / 1000)} seconds`
+    // );
 
 
     if (remainingTime <= 0) {
       clearInterval(interval);
-      console.warn("🚨 Force logout triggered");
+      console.warn(" Force logout triggered");
       logoutAdmin();
     }
   }, 1000);
