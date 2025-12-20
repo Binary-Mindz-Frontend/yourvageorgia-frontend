@@ -104,16 +104,6 @@ export default function PartnerDetailPage() {
                     </div>
                 </div>
 
-                {/* About Section */}
-                <div className="p-8 border-b">
-                    <h2 className="text-2xl font-semibold mb-4">
-                        {loading ? <Skeleton className="w-32 h-4" /> : partner?.about?.title}
-                    </h2>
-                    <p className="text-gray leading-relaxed">
-                        {loading ? <Skeleton className="w-full h-4" /> : partner?.about?.description}
-                    </p>
-                </div>
-
                 {/* Offer Section */}
                 {partner.offer && (
                     <div className="p-8 bg-gray-900 border-b">
