@@ -92,7 +92,7 @@ export const loginUserWithToken = async (token: any) => {
       const decodedUser: any = jwtDecode(result?.data?.accessToken);
       cookieStore.set("user", JSON.stringify(decodedUser), {
         httpOnly: false,
-        secure: true,
+        secure: false,
         path: "/",
       });
     }
