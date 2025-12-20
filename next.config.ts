@@ -17,6 +17,11 @@ images: {
       },
       {
         protocol: "https",
+        hostname: "solenneuae.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
         hostname: "api.solenneuae.com",
         pathname: "/**",
       },
