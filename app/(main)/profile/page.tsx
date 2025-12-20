@@ -34,6 +34,7 @@ const ProfilePage = async () => {
     return redirect("/login")
   }
 
+
   return (
     <div className="min-h-screen max-w-218 mx-auto text-white flex flex-col items-center justify-center px-4 lg:p-0 mt-10 lg:mt-25">
       {/* Header Info */}
