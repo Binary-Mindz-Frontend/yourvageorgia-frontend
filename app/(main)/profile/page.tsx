@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import Logout from "./_component/Logout";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 const apiUrl = process.env.NEXT_PUBLIC_BASE_API;
 // Convert UNIX timestamp to date-only format (no time)
 const convertTimestampToDateOnly = (timestamp: number) => {
@@ -29,8 +30,8 @@ const formatExpiryDate = (timestamp: number) => {
 const ProfilePage = async () => {
   const memberData = await getCurrentUser();
 
-  if (!memberData) {
-    return <div className="text-center text-white">Loading...</div>;
+  if(!memberData) {
+    return redirect("/login")
   }
 
   return (
