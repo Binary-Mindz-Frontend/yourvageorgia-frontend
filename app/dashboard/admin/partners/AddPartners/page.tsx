@@ -65,6 +65,9 @@ interface AddPartnerPageProps {
   initialCategoryId?: string;
 }
 
+
+
+
 export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPartnerPageProps) {
   const isEditMode = !!partnerId;
 
@@ -82,7 +85,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
   const galleryInputRef = useRef<HTMLInputElement | null>(null);
   const thumbnailInputRef = useRef<HTMLInputElement | null>(null);
   const logoInputRef = useRef<HTMLInputElement | null>(null);
-
+  const hasInitialized = useRef(false);
   const router = useRouter();
 
   const {
@@ -152,83 +155,78 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
     }
   };
   // Fetch partner data if in edit mode
-  useEffect(() => {
-    if (!partnerId) return;
+ useEffect(() => {
+  if (!partnerId || hasInitialized.current) return;
 
-    const fetchPartnerData = async () => {
-      setLoadingPartner(true);
-      try {
-        // Construct the correct API URL
-        const apiUrl = process.env.NEXT_PUBLIC_BASE_API;
-        const fetchUrl = `${apiUrl}/partner/${partnerId}`;
+  const fetchPartnerData = async () => {
+    setLoadingPartner(true);
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_BASE_API;
+      const res = await fetch(`${apiUrl}/partner/${partnerId}`);
+      const json = await res.json();
 
-        const res = await fetch(fetchUrl);
-        const json = await res.json();
+      if (!res.ok) return;
 
-        if (!res.ok) {
-          toast.error(json.message || "Failed to fetch partner data", {
-            style: { background: "#000", color: "#fff" },
-          });
-          return;
-        }
+      const partner = json.data;
 
-        const partner = json.data;
+      setValue("categoryId", partner.category?._id || partner.category || "");
+      setValue("name", partner.name || "");
+      setValue("thumbnailUrl", partner.thumbnail || "");
+      setValue("logoUrl", partner.logo || "");
+      setValue("activity", partner.activity || []);
+      setValue("isFeatured", partner.isFeatured === true || partner.isFeatured === "true");
+      setValue("isFeaturedMap", partner.isFeaturedMap === true || partner.isFeaturedMap === "true");
 
-        // Populate form with existing data
-        setValue("categoryId", partner.category?._id || partner.category || "");
-        setValue("name", partner.name || "");
-        setValue("thumbnailUrl", partner.thumbnail || "");
-        setValue("logoUrl", partner.logo || "");
-        setValue("activity", partner.activity || [], { shouldValidate: true });
-        const isFeaturedValue = partner.isFeatured === true || partner.isFeatured === "true";
-        setValue("isFeatured", isFeaturedValue, { shouldValidate: true });
-        const isFeaturedMapValue = partner.isFeaturedMap === true || partner.isFeaturedMap === "true";
-        setValue("isFeaturedMap", isFeaturedMapValue, { shouldValidate: true });
-        setValue("about", partner.about || "");
-        setValue("terms", partner.terms && partner.terms.length > 0 ? partner.terms : [""]);
-        setValue("contacts", partner.contacts && partner.contacts.length > 0 ? partner.contacts : [{ officeName: "Head Office" }]);
-        setValue("website", partner.socials?.website || "");
-        setValue("instagram", partner.socials?.instagram || "");
-        setValue("whatsapp", partner.socials?.whatsapp || "");
+      // ✅ ABOUT — SAFE NOW
+      setValue("about", partner.about || "");
 
-        // Set offers data, ensuring proper default values
-        if (partner.offer && partner.offer.length > 0) {
-          setValue("offers", partner.offer.map((o: any) => ({
-            title: o.title || "",
-            percentage: o.offerPercentage?.toString() || "",
-            description: o.description || "",
-            validUntil: o.validUntil ? o.validUntil.split('T')[0] : "",
-          })));
-        } else {
-          setValue("offers", [{ title: "", percentage: "", description: "", validUntil: "" }]);
-        }
+      setValue("terms", partner.terms?.length ? partner.terms : [""]);
+      setValue(
+        "contacts",
+        partner.contacts?.length ? partner.contacts : [{ officeName: "Head Office" }]
+      );
 
-        // Set previews for images
-        if (partner.thumbnail) setThumbnailPreview(partner.thumbnail);
-        if (partner.logo) setLogoPreview(partner.logo);
+      setValue("website", partner.socials?.website || "");
+      setValue("instagram", partner.socials?.instagram || "");
+      setValue("whatsapp", partner.socials?.whatsapp || "");
 
-        // Set gallery images
-        if (partner.gallery && partner.gallery.length > 0) {
-          const galleryItems = partner.gallery.map((url: string) => ({
+      setValue(
+        "offers",
+        partner.offer?.length
+          ? partner.offer.map((o: any) => ({
+              title: o.title || "",
+              percentage: o.offerPercentage?.toString() || "",
+              description: o.description || "",
+              validUntil: o.validUntil ? o.validUntil.split("T")[0] : "",
+            }))
+          : [{ title: "", percentage: "", description: "", validUntil: "" }]
+      );
+
+      if (partner.thumbnail) setThumbnailPreview(partner.thumbnail);
+      if (partner.logo) setLogoPreview(partner.logo);
+
+      if (partner.gallery?.length) {
+        setGallery(
+          partner.gallery.map((url: string) => ({
             url,
             preview: url,
             file: null,
-          }));
-          setGallery(galleryItems);
-        }
-
-      } catch (err) {
-        console.error("Error fetching partner:", err);
-        toast.error("Failed to fetch partner data", {
-          style: { background: "#000", color: "#fff" }
-        });
-      } finally {
-        setLoadingPartner(false);
+          }))
+        );
       }
-    };
 
-    fetchPartnerData();
-  }, [partnerId, setValue]);
+      // 🔐 MARK INITIALIZATION COMPLETE
+      hasInitialized.current = true;
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoadingPartner(false);
+    }
+  };
+
+  fetchPartnerData();
+}, [partnerId, setValue]);
+
 
 
   const removeThumbnail = () => {
@@ -394,9 +392,11 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
           validUntil: o.validUntil,
           offerPercentage: o.percentage === "" ? undefined : Number(o.percentage)
         })),
-        about: data.about,
+        about: data.about || "",
         terms: data.terms.filter((t) => t.trim()),
-        contacts: data.contacts.filter((c) => Object.values(c).some((v) => v && v.trim())),
+        contacts: data.contacts.filter((c) => {
+          return c.officeName || c.phone || c.address || c.area || c.email;
+        }),
         socials: {
           website: data.website,
           instagram: data.instagram,
@@ -807,15 +807,23 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
         </div>
 
         {/* ABOUT */}
-        {/* ABOUT */}
         <div>
           <Label className="text-white mb-1">About *</Label>
-          <Textarea
-            {...register("about", { required: "About description is required" })}
-            className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
-            rows={5}
-            placeholder="Describe the partner..."
-          />
+          <Controller
+  name="about"
+  control={control}
+  defaultValue=""
+  rules={{ required: "About description is required" }}
+  render={({ field }) => (
+    <Textarea
+      {...field}
+      className="bg-neutral-900 text-white border border-primary/50"
+      rows={5}
+      placeholder="Describe the partner..."
+    />
+  )}
+/>
+
           {errors.about && (
             <p className="text-red-500 text-sm mt-1">{errors.about.message}</p>
           )}
