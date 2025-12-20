@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 const apiUrl = process.env.NEXT_PUBLIC_BASE_API;
+
 // Convert UNIX timestamp to date-only format (no time)
 const convertTimestampToDateOnly = (timestamp: number) => {
   const date = new Date(timestamp * 1000);
@@ -33,6 +34,7 @@ const ProfilePage = async () => {
   if(!memberData) {
     return redirect("/login")
   }
+
 
 
   return (
@@ -69,7 +71,7 @@ const ProfilePage = async () => {
 
       <div className="mt-6">
         <Button asChild>
-          <Link href={`${apiUrl}/wallet/membership`}>Add to Apple Wallet</Link>
+            <a href={`${apiUrl}/wallet/membership?token=${memberData.accessToken}`} target="_blank"> Add to Apple Wallet </a>
         </Button>
       </div>
 

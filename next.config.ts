@@ -33,17 +33,6 @@ images: {
       
     ],
   },
-// --- ADD THIS SECTION ---
-  async redirects() {
-    return [
-      {
-        source: '/admin',
-        destination: '/dashboard/admin/login',
-        permanent: true, 
-      },
-    ];
-  },
-
 };
 
 export default nextConfig;
