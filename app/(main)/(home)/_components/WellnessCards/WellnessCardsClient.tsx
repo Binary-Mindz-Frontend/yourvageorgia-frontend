@@ -30,6 +30,7 @@ export default function WellnessCardsClient({ categories }: Props) {
             <Image
               src={card?.image}
               alt={card.title}
+              unoptimized
               fill
               className="object-cover transition-all duration-500 group-hover:blur-sm group-hover:scale-105 "
             />

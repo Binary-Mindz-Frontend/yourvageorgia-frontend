@@ -28,6 +28,7 @@ const GalleryItem: React.FC<GalleryItemProps> = ({
       alt={alt}
       width={500}
       height={500}
+      unoptimized
       loading="lazy"
       className="absolute inset-0 w-106 h-full lg:h-106 object-cover transition duration-300 ease-in-out hover:scale-105"
     />

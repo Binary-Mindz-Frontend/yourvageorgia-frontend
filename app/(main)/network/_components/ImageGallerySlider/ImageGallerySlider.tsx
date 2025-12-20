@@ -93,6 +93,7 @@ export default function ImageGallerySlider({ images }: ImageGallerySliderProps) 
         >
           <Image
             src={images[index]}
+            unoptimized
             alt="Gallery"
             fill
             className="object-cover cursor-pointer hover:scale-105 transition-transform duration-300 ease-in-out"
@@ -151,6 +152,7 @@ export default function ImageGallerySlider({ images }: ImageGallerySliderProps) 
               )}
             >
               <Image
+              unoptimized
                 src={img}
                 alt={`Thumbnail ${i + 1}`}
                 fill
@@ -215,6 +217,7 @@ export default function ImageGallerySlider({ images }: ImageGallerySliderProps) 
             )}
 
             <Image
+            unoptimized
               src={images[zoomIndex]}
               alt="Zoomed Gallery"
               width={1200}
