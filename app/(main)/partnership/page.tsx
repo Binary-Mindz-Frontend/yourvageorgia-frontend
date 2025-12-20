@@ -1,10 +1,10 @@
 "use client";
 import React from "react";
 
-import img1 from "@/public/assets/partnership/1.png";
-import img2 from "@/public/assets/partnership/2.png";
+import img1 from "@/public/assets/partnership/4.png";
+import img2 from "@/public/assets/partnership/1.png";
 import img3 from "@/public/assets/partnership/3.png";
-import img4 from "@/public/assets/partnership/4.png";
+import img4 from "@/public/assets/partnership/2.png";
 import img5 from "@/public/assets/partnership/5.png";
 import img6 from "@/public/assets/partnership/6.png";
 import Image from "next/image";

@@ -89,9 +89,9 @@ export default function PartnerDetailsModal({
 
           {/* About Section */}
           <div className="mt-10">
-            <h2 className="lg:text-xl mb-6">About {partner.about?.title}</h2>
+            <h2 className="lg:text-xl mb-6">About</h2>
             <p className="text-[#FFFFFFB3] leading-relaxed text-base">
-              {partner.about?.description}
+              {partner?.about}
             </p>
           </div>
 

@@ -58,7 +58,7 @@ export function Navbar() {
     return partners.filter(
       (partner) =>
         partner.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        partner.category.title.toLowerCase().includes(searchQuery.toLowerCase())
+        partner.category?.title.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [searchQuery, partners]);
 
@@ -75,21 +75,47 @@ export function Navbar() {
   };
 
   // Handle click outside to close search results
+  // useEffect(() => {
+  //   const handleClickOutside = (event: MouseEvent) => {
+  //     const target = event.target as HTMLElement;
+  //     const searchContainer = document.querySelector('.search-container');
+  //     const searchResults = document.getElementById('search-results-container');
+
+  //     // If click is outside both search input and results, close search
+  //     if (
+  //       isSearchOpen &&
+  //       searchContainer &&
+  //       !searchContainer.contains(target) &&
+  //       searchResults &&
+  //       !searchResults.contains(target)
+  //     ) {
+  //       setIsSearchOpen(false);
+  //     }
+  //   };
+
+  //   document.addEventListener('mousedown', handleClickOutside);
+  //   return () => document.removeEventListener('mousedown', handleClickOutside);
+  // }, [isSearchOpen]);
+  // Handle click outside to close search results
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
       const searchContainer = document.querySelector('.search-container');
       const searchResults = document.getElementById('search-results-container');
-      
-      // If click is outside both search input and results, close search
+      const searchToggleButton = document.querySelector('[aria-label="Close Search"], [aria-label="Open Search"]');
+
+      // If click is outside search input, results, AND the toggle button, close search
       if (
-        isSearchOpen && 
-        searchContainer && 
+        isSearchOpen &&
+        searchContainer &&
         !searchContainer.contains(target) &&
-        searchResults && 
-        !searchResults.contains(target)
+        searchResults &&
+        !searchResults.contains(target) &&
+        searchToggleButton &&
+        !searchToggleButton.contains(target)
       ) {
         setIsSearchOpen(false);
+        setSearchQuery(""); // Clear search when closing
       }
     };
 
@@ -130,7 +156,7 @@ export function Navbar() {
                   autoFocus
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-6 pr-14 py-3 rounded-full bg-background/80 backdrop-blur-sm border-2 border-border/50 hover:border-border focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary text-sm transition-all duration-200 shadow-lg shadow-black/5"
+                  className="w-full pl-6 pr-14 py-3 rounded-full bg-background/80 backdrop-blur-sm border-2 border-border/50 hover:border-border focus:outline-none focus:ring-[1px] focus:ring-primary/15 focus:border-primary text-sm transition-all duration-200 shadow-lg shadow-black/5"
                   onKeyDown={(e) => {
                     if (e.key === "Escape") setIsSearchOpen(false);
                     if (e.key === "Enter") handleSearch();
@@ -138,14 +164,14 @@ export function Navbar() {
                 />
 
                 {isSearchOpen && (
-                  <Button
+                  <span
                     onClick={handleSearch}
-                    size="sm"
-                    className="absolute right-2 h-9 cursor-pointer px-4 bg-primary hover:bg-primary/90 text-primary-foreground rounded-full shadow-md hover:shadow-lg transition-all duration-200 font-medium"
+                    
+                    className="absolute right-1 cursor-pointer px-4"
                   >
-                    <Search className="mr-2 h-4 w-4" />
-                    Search
-                  </Button>
+                    <Search className=" h-4 w-4" />
+                    
+                  </span>
                 )}
               </div>
             ) : (
@@ -162,7 +188,15 @@ export function Navbar() {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => setIsSearchOpen(!isSearchOpen)}
+            // onClick={() => setIsSearchOpen(!isSearchOpen)}
+            onClick={() => {
+              if (isSearchOpen) {
+                setIsSearchOpen(false);
+                setSearchQuery(""); // Optional: clear search query when closing
+              } else {
+                setIsSearchOpen(true);
+              }
+            }}
             className="text-foreground hover:bg-accent/20 transition-colors [&_svg:not([class*='size-'])]:size-5 cursor-pointer"
             aria-label={isSearchOpen ? "Close Search" : "Open Search"}
           >
@@ -177,40 +211,40 @@ export function Navbar() {
 
       {/* Partner Cards Display Below Search */}
       {isSearchOpen && (
-       <div 
-  id="search-results-container"
-  className="mt-4 space-y-4 max-w-xl mx-auto bg-black absolute left-0 right-0 z-10 border backdrop-blur-md p-4 rounded-lg shadow-lg max-h-96 overflow-y-auto"
->
-  {filteredPartners.length === 0 ? (
-    <div className="text-center text-white opacity-70 py-4">
-      No results found
-    </div>
-  ) : (
-    <div className="space-y-2">
-      {filteredPartners.map((partner) => (
         <div
-          key={partner._id}
-          onClick={() => handlePartnerClick(partner)}
-          className="flex items-center border space-x-4 p-3 bg-accent/10 rounded-lg shadow-md cursor-pointer hover:bg-accent/20 transition-colors"
+          id="search-results-container"
+          className="mt-4 space-y-4 max-w-xl mx-auto bg-black absolute left-0 right-0 z-10 border backdrop-blur-md p-4 rounded-lg shadow-lg max-h-96 overflow-y-auto"
         >
-          <Image
-            width={48}
-            height={48}
-            src={partner.thumbnail}
-            alt={partner.name}
-            className="w-12 h-12 rounded-full object-cover"
-          />
-          <div>
-            <h3 className="text-base font-semibold">{partner.name}</h3>
-            <p className="text-xs text-gray-400">
-              {partner.category.title}
-            </p>
-          </div>
+          {filteredPartners.length === 0 ? (
+            <div className="text-center text-white opacity-70 py-4">
+              No results found
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {filteredPartners.map((partner) => (
+                <div
+                  key={partner._id}
+                  onClick={() => handlePartnerClick(partner)}
+                  className="flex items-center border space-x-4 p-3 bg-accent/10 rounded-lg shadow-md cursor-pointer hover:bg-accent/20 transition-colors"
+                >
+                  <Image
+                    width={48}
+                    height={48}
+                    src={partner.thumbnail}
+                    alt={partner.name}
+                    className="w-12 h-12 rounded-full object-cover"
+                  />
+                  <div>
+                    <h3 className="text-base font-semibold">{partner.name}</h3>
+                    <p className="text-xs text-gray-400">
+                      {partner.category?.title}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
-      ))}
-    </div>
-  )}
-</div>
       )}
 
       {/* Partner Modal */}

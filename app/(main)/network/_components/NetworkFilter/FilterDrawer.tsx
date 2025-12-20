@@ -256,30 +256,38 @@ export function FilterDrawer({
     };
   }, [isOpen]);
 
-  // Extract unique locations from partners (short version for display)
-  const locations = useMemo(() => {
-    const uniqueLocations = new Set<string>();
-    partners.forEach((partner) => {
-      if (partner.address) {
-        // Extract the part before the first "-" and trim whitespace
-        const shortAddress = partner.address.split("-")[0].trim();
-        uniqueLocations.add(shortAddress);
-      }
-    });
-    return ["ALL", ...Array.from(uniqueLocations).sort()];
-  }, [partners]);
+// Extract unique areas from partners' contacts
+const locations = useMemo(() => {
+  const uniqueLocations = new Set<string>();
+  partners.forEach((partner) => {
+    if (partner.contacts && Array.isArray(partner.contacts)) {
+      partner.contacts.forEach((contact) => {
+        const area = contact.area || contact.address;
+        if (area) {
+          uniqueLocations.add(area);
+        }
+      });
+    }
+  });
+  return ["ALL", ...Array.from(uniqueLocations).sort()];
+}, [partners]);
 
-  // Extract unique activities from partners (using the activity field)
-  const activities = useMemo(() => {
-    const uniqueActivities = new Set<string>();
-    partners.forEach((partner) => {
-      // Use the activity field from the API response
-      if (partner.activity) {
-        uniqueActivities.add(partner.activity);
-      }
-    });
-    return ["ALL", ...Array.from(uniqueActivities).sort()];
-  }, [partners]);
+// Extract unique activities from partners (using the activity field)
+const activities = useMemo(() => {
+  const uniqueActivities = new Set<string>();
+  partners.forEach((partner) => {
+    // Use the activity field from the API response
+    if (partner.activity && Array.isArray(partner.activity)) {
+      partner.activity.forEach((act) => {
+        if (typeof act === 'object' && act !== null && 'title' in act) {
+          const activityObj = act as { title: string };
+          uniqueActivities.add(activityObj.title);
+        }
+      });
+    }
+  });
+  return ["ALL", ...Array.from(uniqueActivities).sort()];
+}, [partners]);
 
   const handleLocationToggle = (location: string) => {
     if (location === "ALL") {
@@ -363,7 +371,7 @@ export function FilterDrawer({
                 onClick={() => setIsLocationsOpen(!isLocationsOpen)}
                 className="flex items-center justify-between w-full text-foreground font-medium text-sm tracking-wider mb-4 px-4 py-2"
               >
-                LOCATIONS
+                LOCATION
                 <ChevronDown
                   className={`h-5 w-5 transition-transform ${
                     isLocationsOpen ? "rotate-180" : ""

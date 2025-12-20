@@ -62,34 +62,48 @@ export default function AddCategoryModal({
 
   // Handle file selection and upload
   const handleFileChange = async (file: File) => {
-    setUploading(true);
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
+  // Block SVG
+  if (
+    file.type === "image/svg+xml" ||
+    file.name.toLowerCase().endsWith(".svg")
+  ) {
+    toast.error("Please upload image PNG, JPG, JPEG", { style: toastStyle });
 
-      const res = await fetch(`${BACKEND_BASE_URL}/upload`, {
-        method: "POST",
-        body: formData,
-      });
-
-      const data = await res.json();
-
-      if (!res.ok || !data.success) {
-        console.error(data.message || "Failed to upload image");
-        return;
-      }
-
-      // Set image preview immediately
-      setImage(data.data.url);
-    } catch (err) {
-      console.error("Upload error:", err);
-    } finally {
-      setUploading(false);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
+    // reset input so same file can be selected again
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
     }
-  };
+    return;
+  }
+
+  setUploading(true);
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const res = await fetch(`${BACKEND_BASE_URL}/upload`, {
+      method: "POST",
+      body: formData,
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || !data.success) {
+      console.error(data.message || "Failed to upload image");
+      return;
+    }
+
+    setImage(data.data.url);
+  } catch (err) {
+    console.error("Upload error:", err);
+  } finally {
+    setUploading(false);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  }
+};
+
 
   const handleImageRemove = () => {
     setImage(""); // Remove the image
