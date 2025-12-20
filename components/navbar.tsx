@@ -38,20 +38,23 @@ export function Navbar() {
   }, []);
 
   useEffect(() => {
-    const fetchPartners = async () => {
-      try {
-        const response = await fetch("https://api.solenneuae.com/api/partner");
-        const data = await response.json();
-        if (data.success) {
-          setPartners(data.data);
-        }
-      } catch (error) {
-        console.error("Failed to fetch partner data:", error);
+  const fetchPartners = async () => {
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_BASE_API;
+      const response = await fetch(`${apiUrl}/partner`, {
+        cache: 'no-store', // Prevent caching
+      });
+      const data = await response.json();
+      if (data.success) {
+        setPartners(data.data);
       }
-    };
+    } catch (error) {
+      console.error("Failed to fetch partner data:", error);
+    }
+  };
 
-    fetchPartners();
-  }, []);
+  fetchPartners();
+}, [])
 
   const filteredPartners = useMemo(() => {
     if (!searchQuery) return partners;
