@@ -102,16 +102,22 @@
 
 "use client";
 
-import { GoogleMap, Marker, LoadScript, OverlayView } from "@react-google-maps/api";
-import { useMemo, useState } from "react";
+import { GoogleMap, Marker, LoadScript } from "@react-google-maps/api";
+import { useMemo, useState, useCallback } from "react";
 
 interface Partner {
   _id: string;
   name: string;
-  coordinates?: {
-    lat: number;
-    lng: number;
-  };
+  contacts?: Array<{
+    coordinates: {
+      lat: number;
+      lng: number;
+    };
+    officeName: string;
+    phone?: string;
+    address?: string;
+    email?: string;
+  }>;
 }
 
 interface PartnersMapProps {
@@ -129,11 +135,18 @@ export default function PartnersMap({
   onMarkerClick,
 }: PartnersMapProps) {
   const [mapLoaded, setMapLoaded] = useState(false);
+  const [map, setMap] = useState<google.maps.Map | null>(null);
 
-  const locations = useMemo(
-    () => partners.filter((p) => p.coordinates),
-    [partners]
-  );
+  const locations = useMemo(() => {
+    return partners.flatMap((partner) =>
+      (partner.contacts || []).map((contact) => ({
+        ...partner,
+        coordinates: contact.coordinates,
+        officeName: contact.officeName,
+        address: contact.address,
+      }))
+    );
+  }, [partners]);
 
   const markerIcon = useMemo(() => {
     if (!mapLoaded || typeof window === "undefined" || !window.google) {
@@ -150,6 +163,26 @@ export default function PartnersMap({
     };
   }, [mapLoaded]);
 
+  // Fit map bounds to show all markers
+  const onMapLoad = useCallback((map: google.maps.Map) => {
+    setMap(map);
+  }, []);
+
+  // Update bounds when locations change
+  useMemo(() => {
+    if (map && locations.length > 0) {
+      const bounds = new window.google.maps.LatLngBounds();
+      locations.forEach((location) => {
+        bounds.extend(location.coordinates);
+      });
+      map.fitBounds(bounds);
+      
+      // Add padding to the bounds
+      const padding = { top: 50, right: 50, bottom: 50, left: 50 };
+      map.fitBounds(bounds, padding);
+    }
+  }, [map, locations]);
+
   return (
     <LoadScript
       googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!}
@@ -158,30 +191,20 @@ export default function PartnersMap({
       <GoogleMap
         mapContainerStyle={{ width: "100%", height: "100%" }}
         center={
-          locations.length
-            ? locations[0].coordinates!
+          locations.length > 0
+            ? locations[0].coordinates
             : DEFAULT_MAP_CENTER
         }
         zoom={13}
+        onLoad={onMapLoad}
       >
-        {locations.map((partner) => (
-          <div key={partner._id}>
-            {/* Marker */}
-            <Marker
-              position={partner.coordinates!}
-              icon={markerIcon}
-              onClick={() => onMarkerClick?.(partner)}
-            />
-            {/* OverlayView for name */}
-            <OverlayView
-              position={partner.coordinates!}
-              mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
-            >
-              <div className=" text-black font-bold text-xs px-4 py-1 rounded shadow-md -translate-y-8">
-                {partner.name}
-              </div>
-            </OverlayView>
-          </div>
+        {locations.map((location, idx) => (
+          <Marker
+            key={`${location._id}-${idx}`}
+            position={location.coordinates}
+            icon={markerIcon}
+            onClick={() => onMarkerClick?.(location)}
+          />
         ))}
       </GoogleMap>
     </LoadScript>

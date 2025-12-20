@@ -21,8 +21,8 @@ const SolenneMembership = () => {
 
             <h3 className=" text-center lg:text-lg mb-6 leading-relaxed text-gray-300">Founding Circle · Limited Capacity</h3>
 
-            <p className="text-3xl lg:text-[50px] font-semibold font-serif tracking-wide text-center text-white ">
-              900 <span className="text-3xl lg:text-[35px]">AED/Year</span>
+            <p className=" lg:text-lg font-semibold text-center text-white ">
+              900 <span className="lg:text-lg">AED</span>
             </p>
             <p className=" text-center lg:text-lg mb-6 leading-relaxed text-gray-300">12-month membership</p>
 
