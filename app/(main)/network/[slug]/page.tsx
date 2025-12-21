@@ -25,6 +25,7 @@ export default function DetailsPage() {
         <div>
           <div className="relative w-full h-[350px] lg:h-[435px] overflow-hidden rounded-xl">
             <Image
+            unoptimized
               src={img5}
               alt="Wellness Centre"
               fill

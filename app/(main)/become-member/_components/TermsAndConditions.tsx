@@ -47,7 +47,7 @@ export default function TermsAndConditions() {
         {/* Title */}
         <button
           onClick={() => setOpen(!open)}
-          className="w-full text-center font-serif text-3xl lg:text-5xl font-semibold mb-8 flex justify-center items-center gap-2"
+          className="w-full text-center font-serif text-2xl lg:text-3xl font-semibold mb-8 flex justify-center items-center gap-2"
         >
           Terms & Conditions
           <span
@@ -64,8 +64,8 @@ export default function TermsAndConditions() {
           <div className="mt-6">
             {sections.map((sec, index) => (
               <div key={index} className="text-center mb-12">
-                <h3 className="text-xl lg:text-[32px] font-medium pb-5  border-b-2 border-neutral-700">{sec.title}</h3>
-                <p className="text-sm lg:text-xl text-[#FFFFFFB3] leading-relaxed px-4 pt-5">
+                <h3 className="text-xl lg:text-2xlfont-medium pb-2  border-b-2 border-neutral-700">{sec.title}</h3>
+                <p className="text-sm lg:text-base text-[#FFFFFFB3] leading-relaxed px-4 pt-2">
                   {sec.text}
                 </p>
               </div>

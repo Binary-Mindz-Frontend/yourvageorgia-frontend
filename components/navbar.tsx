@@ -1,4 +1,4 @@
-"use client";
+'use client'
 
 import { Button } from "@/components/ui/button";
 import { Menu, Search, X } from "lucide-react";
@@ -38,22 +38,23 @@ export function Navbar() {
   }, []);
 
   useEffect(() => {
-    const fetchPartners = async () => {
-      try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_BASE_API}/partner`
-        );
-        const data = await response.json();
-        if (data.success) {
-          setPartners(data.data);
-        }
-      } catch (error) {
-        console.error("Failed to fetch partner data:", error);
+  const fetchPartners = async () => {
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_BASE_API;
+      const response = await fetch(`${apiUrl}/partner`, {
+        cache: 'no-store', // Prevent caching
+      });
+      const data = await response.json();
+      if (data.success) {
+        setPartners(data.data);
       }
-    };
+    } catch (error) {
+      console.error("Failed to fetch partner data:", error);
+    }
+  };
 
-    fetchPartners();
-  }, []);
+  fetchPartners();
+}, [])
 
   const filteredPartners = useMemo(() => {
     if (!searchQuery) return partners;
@@ -77,26 +78,52 @@ export function Navbar() {
   };
 
   // Handle click outside to close search results
+  // useEffect(() => {
+  //   const handleClickOutside = (event: MouseEvent) => {
+  //     const target = event.target as HTMLElement;
+  //     const searchContainer = document.querySelector('.search-container');
+  //     const searchResults = document.getElementById('search-results-container');
+
+  //     // If click is outside both search input and results, close search
+  //     if (
+  //       isSearchOpen &&
+  //       searchContainer &&
+  //       !searchContainer.contains(target) &&
+  //       searchResults &&
+  //       !searchResults.contains(target)
+  //     ) {
+  //       setIsSearchOpen(false);
+  //     }
+  //   };
+
+  //   document.addEventListener('mousedown', handleClickOutside);
+  //   return () => document.removeEventListener('mousedown', handleClickOutside);
+  // }, [isSearchOpen]);
+  // Handle click outside to close search results
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
-      const searchContainer = document.querySelector(".search-container");
-      const searchResults = document.getElementById("search-results-container");
+      const searchContainer = document.querySelector('.search-container');
+      const searchResults = document.getElementById('search-results-container');
+      const searchToggleButton = document.querySelector('[aria-label="Close Search"], [aria-label="Open Search"]');
 
-      // If click is outside both search input and results, close search
+      // If click is outside search input, results, AND the toggle button, close search
       if (
         isSearchOpen &&
         searchContainer &&
         !searchContainer.contains(target) &&
         searchResults &&
-        !searchResults.contains(target)
+        !searchResults.contains(target) &&
+        searchToggleButton &&
+        !searchToggleButton.contains(target)
       ) {
         setIsSearchOpen(false);
+        setSearchQuery(""); // Clear search when closing
       }
     };
 
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isSearchOpen]);
 
   return (
@@ -104,10 +131,9 @@ export function Navbar() {
       <nav
         className={`
           sticky top-0 z-20 w-full transition-all duration-300 ease-in-out
-          ${
-            scrolled
-              ? "bg-background/50 backdrop-blur-md border-b border-border/40 shadow-sm py-2"
-              : "bg-transparent py-4 border-transparent"
+          ${scrolled
+            ? "bg-background/50 backdrop-blur-md border-b border-border/40 shadow-sm py-2"
+            : "bg-transparent py-4 border-transparent"
           }
         `}
       >
@@ -133,7 +159,7 @@ export function Navbar() {
                   autoFocus
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-6 pr-14 py-3 rounded-full bg-background/80 backdrop-blur-sm border-2 border-border/50 hover:border-border focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary text-sm transition-all duration-200 shadow-lg shadow-black/5"
+                  className="w-full pl-6 pr-14 py-3 rounded-full bg-background/80 backdrop-blur-sm border-2 border-border/50 hover:border-border focus:outline-none focus:ring-[1px] focus:ring-primary/15 focus:border-primary text-sm transition-all duration-200 shadow-lg shadow-black/5"
                   onKeyDown={(e) => {
                     if (e.key === "Escape") setIsSearchOpen(false);
                     if (e.key === "Enter") handleSearch();
@@ -141,14 +167,14 @@ export function Navbar() {
                 />
 
                 {isSearchOpen && (
-                  <Button
+                  <span
                     onClick={handleSearch}
-                    size="sm"
-                    className="absolute right-2 h-9 cursor-pointer px-4 bg-primary hover:bg-primary/90 text-primary-foreground rounded-full shadow-md hover:shadow-lg transition-all duration-200 font-medium"
+                    
+                    className="absolute right-1 cursor-pointer px-4"
                   >
-                    <Search className="mr-2 h-4 w-4" />
-                    Search
-                  </Button>
+                    <Search className=" h-4 w-4" />
+                    
+                  </span>
                 )}
               </div>
             ) : (
@@ -165,7 +191,15 @@ export function Navbar() {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => setIsSearchOpen(!isSearchOpen)}
+            // onClick={() => setIsSearchOpen(!isSearchOpen)}
+            onClick={() => {
+              if (isSearchOpen) {
+                setIsSearchOpen(false);
+                setSearchQuery(""); // Optional: clear search query when closing
+              } else {
+                setIsSearchOpen(true);
+              }
+            }}
             className="text-foreground hover:bg-accent/20 transition-colors [&_svg:not([class*='size-'])]:size-5 cursor-pointer"
             aria-label={isSearchOpen ? "Close Search" : "Open Search"}
           >
@@ -206,7 +240,7 @@ export function Navbar() {
                   <div>
                     <h3 className="text-base font-semibold">{partner.name}</h3>
                     <p className="text-xs text-gray-400">
-                      {partner?.category?.title}
+                      {partner.category?.title}
                     </p>
                   </div>
                 </div>

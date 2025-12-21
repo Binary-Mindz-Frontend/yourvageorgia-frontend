@@ -1,4 +1,4 @@
-"use client";
+'use client'
 
 import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
@@ -37,32 +37,32 @@ const NetworkFilter = () => {
   const [activeFilter, setActiveFilter] = useState<string>("All");
 
   // Fetch partners using getPartners function
-useEffect(() => {
-  const fetchPartners = async () => {
-    setIsLoading(true);
-    try {
-      const result = await getPartners({});
+  useEffect(() => {
+    const fetchPartners = async () => {
+      setIsLoading(true);
+      try {
+        const result = await getPartners({});
 
-      if ("error" in result) {
-        console.error("Failed to fetch partners:", result.error);
+        if ("error" in result) {
+          console.error("Failed to fetch partners:", result.error);
+          setPartners([]);
+        } else {
+          const sortedPartners = [...(result.data || [])].sort(
+            (a, b) => (a.position ?? 0) - (b.position ?? 0)
+          );
+
+          setPartners(sortedPartners);
+        }
+      } catch (err) {
+        console.error("Failed to fetch partners:", err);
         setPartners([]);
-      } else {
-        const sortedPartners = [...(result.data || [])].sort(
-          (a, b) => (a.position ?? 0) - (b.position ?? 0)
-        );
-
-        setPartners(sortedPartners);
+      } finally {
+        setIsLoading(false);
       }
-    } catch (err) {
-      console.error("Failed to fetch partners:", err);
-      setPartners([]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    };
 
-  fetchPartners();
-}, []);
+    fetchPartners();
+  }, []);
 
 
   // Set active filter from URL after first render
@@ -76,9 +76,7 @@ useEffect(() => {
   useEffect(() => {
     if (searchQuery) {
       // Check if the search query matches any of the category titles
-      const matchedCategory = filters.find(
-        (filter) => filter.toLowerCase() === searchQuery.toLowerCase()
-      );
+      const matchedCategory = filters.find((filter) => filter.toLowerCase() === searchQuery.toLowerCase());
       if (matchedCategory) {
         setActiveFilter(matchedCategory);
       }
@@ -92,39 +90,49 @@ useEffect(() => {
     activeFilter === "All"
       ? partners
       : partners.filter((p) => {
-          // Handle both string and PartnerCategory types
-          const categoryTitle =
-            typeof p.category === "string"
-              ? p.category
-              : (p.category as PartnerCategory)?.title;
-          return categoryTitle === activeFilter;
-        });
+        // Handle both string and PartnerCategory types
+        const categoryTitle = typeof p.category === "string"
+          ? p.category
+          : (p.category as PartnerCategory)?.title;
+        return categoryTitle === activeFilter;
+      });
 
   // Apply drawer filters
   if (appliedFilters.locations.length > 0) {
-    filteredPartners = filteredPartners.filter((p) =>
-      p.address ? appliedFilters.locations.includes(p.address) : false
-    );
-  }
+  filteredPartners = filteredPartners.filter((p) => {
+    if (!p.contacts || !Array.isArray(p.contacts) || p.contacts.length === 0) return false;
+    
+    // Check if any of the partner's contact areas match the applied filters
+    return p.contacts.some((contact) => {
+      const location = contact.area || contact.address;
+      return location !== undefined && appliedFilters.locations.includes(location);
+    });
+  });
+}
 
-  if (appliedFilters.activities.length > 0) {
-    filteredPartners = filteredPartners.filter((p) =>
-      p.activity ? appliedFilters.activities.includes(p.activity) : false
-    );
-  }
+if (appliedFilters.activities.length > 0) {
+  filteredPartners = filteredPartners.filter((p) => {
+    if (!p.activity || !Array.isArray(p.activity) || p.activity.length === 0) return false;
+    
+    // Check if any of the partner's activities match the applied filters
+    return p.activity.some((act) => {
+      // Type guard to ensure act is an object with a title property
+      if (typeof act === 'object' && act !== null && 'title' in act) {
+        const activityObj = act as { title: string };
+        return appliedFilters.activities.includes(activityObj.title);
+      }
+      return false;
+    });
+  });
+}
 
   // Apply search query filter for both partner name and category title
   if (searchQuery) {
     filteredPartners = filteredPartners.filter((partner) => {
-      const nameMatches = partner.name
-        .toLowerCase()
-        .includes(searchQuery.toLowerCase());
-      const categoryMatches =
-        typeof partner.category === "object"
-          ? (partner.category as PartnerCategory).title
-              .toLowerCase()
-              .includes(searchQuery.toLowerCase())
-          : partner.category.toLowerCase().includes(searchQuery.toLowerCase());
+      const nameMatches = partner.name.toLowerCase().includes(searchQuery.toLowerCase());
+      const categoryMatches = typeof partner.category === "object"
+        ? (partner.category as PartnerCategory)?.title.toLowerCase().includes(searchQuery.toLowerCase())
+        : partner.category.toLowerCase().includes(searchQuery.toLowerCase());
 
       return nameMatches || categoryMatches;
     });
@@ -170,11 +178,10 @@ useEffect(() => {
           <Button
             key={filter}
             onClick={() => handleFilterClick(filter)}
-            className={`md:py-2.5 rounded lg:rounded-lg whitespace-nowrap min-w-max ${
-              activeFilter === filter && !showAll
+            className={`md:py-2.5 rounded lg:rounded-lg whitespace-nowrap min-w-max ${activeFilter === filter && !showAll
                 ? "bg-white text-black hover:bg-white"
                 : "text-white"
-            }`}
+              }`}
           >
             {filter}
           </Button>
@@ -225,7 +232,9 @@ useEffect(() => {
                     </h2>
 
                     <div className="flex items-center text-sm lg:text-lg gap-2 italic opacity-80">
-                      {partner.address || "Location not specified"}
+                      {partner.contacts && partner.contacts.length > 0
+                        ? (partner.contacts[0].area || partner.contacts[0].address || "Location not specified")
+                        : "Location not specified"}
                       <ArrowRight />
                     </div>
                   </div>

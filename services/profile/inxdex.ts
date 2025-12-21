@@ -35,3 +35,11 @@ export const getMyProfile = async (): Promise<IProfileResponse | { error: string
     return { error: error.message };
   }
 };
+
+export const downloadWallet = async (token: string) => {
+  return await fetch(`${BASE_URL}/wallet/membership`, {
+      headers: {
+          "Authorization": token
+      },
+  });
+}

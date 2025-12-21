@@ -2,6 +2,10 @@ import membership from "@/public/assets/profile/profile.jpg";
 import { getCurrentUser } from "@/services/auth";
 import { Suspense } from "react";
 import Logout from "./_component/Logout";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { redirect } from "next/navigation";
+const apiUrl = process.env.NEXT_PUBLIC_BASE_API;
 
 // Convert UNIX timestamp to date-only format (no time)
 const convertTimestampToDateOnly = (timestamp: number) => {
@@ -27,9 +31,11 @@ const formatExpiryDate = (timestamp: number) => {
 const ProfilePage = async () => {
   const memberData = await getCurrentUser();
 
-  if (!memberData) {
-    return <div className="text-center text-white">Loading...</div>;
+  if(!memberData) {
+    return redirect("/login")
   }
+
+
 
   return (
     <div className="min-h-screen max-w-218 mx-auto text-white flex flex-col items-center justify-center px-4 lg:p-0 mt-10 lg:mt-25">
@@ -61,7 +67,17 @@ const ProfilePage = async () => {
       </div>
 
       {/* Log out Button */}
+
+
+      <div className="mt-6">
+        <Button asChild>
+            <a href={`${apiUrl}/wallet/membership?token=${memberData.accessToken}`} target="_blank"> Add to Apple Wallet </a>
+        </Button>
+      </div>
+
       <Logout />
+
+
     </div>
   );
 };
