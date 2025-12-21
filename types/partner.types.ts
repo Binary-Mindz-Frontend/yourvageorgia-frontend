@@ -30,7 +30,7 @@ export interface PartnerCategory {
 
 export interface Partner {
   _id?: string;
-  category: string | PartnerCategory; 
+  categories: string[];
   title?: string;
   name: string;
   thumbnail?: string;
