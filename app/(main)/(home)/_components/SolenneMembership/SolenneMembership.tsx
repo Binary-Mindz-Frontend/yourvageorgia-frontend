@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 // "use client";
 
@@ -124,6 +125,8 @@ export default function SolenneMembership() {
   const [partners, setPartners] = useState<any[]>([]);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [selectedPartner, setSelectedPartner] = useState<any | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [hoveredPartner, setHoveredPartner] = useState<any | null>(null);
   const [showModal, setShowModal] = useState(false);
 
   // Load partners
@@ -156,6 +159,9 @@ export default function SolenneMembership() {
     return "";
   };
 
+  // Use hovered partner if available, otherwise use selected partner
+  const displayPartner = hoveredPartner || selectedPartner;
+
   return (
     <div className="text-white flex items-center justify-center my-16 lg:my-38 p-4 lg:px-12">
       <div className="w-full">
@@ -165,10 +171,10 @@ export default function SolenneMembership() {
           <div className="relative bg-black order-1 lg:order-0 border-t-2 border-black">
             {/* Background Image */}
             <div
-              className="absolute inset-0 bg-cover bg-center"
+              className="absolute inset-0 bg-cover bg-center transition-all duration-500"
               style={{
-                backgroundImage: selectedPartner
-                  ? `url(${selectedPartner.thumbnail})`
+                backgroundImage: displayPartner
+                  ? `url(${displayPartner.thumbnail})`
                   : "url('/assets/home/map_bg.svg')",
               }}
             >
@@ -177,17 +183,17 @@ export default function SolenneMembership() {
 
             <div className="relative z-10 p-12 h-full flex flex-col justify-end min-h-100">
               <button
-                onClick={() => selectedPartner && setShowModal(true)}
+                onClick={() => displayPartner && setShowModal(true)}
                 className="group inline-flex flex-col cursor-pointer text-left"
               >
-                <h2 className="text-3xl font-light mb-3 tracking-wide transition group-hover:text-white/90">
-                  {selectedPartner ? selectedPartner.name : "Lumé Aesthetics"}
+                <h2 className="text-3xl font-light mb-3 tracking-wide transition-all duration-300 group-hover:text-white/90">
+                  {displayPartner ? displayPartner.name : "Lumé Aesthetics"}
                 </h2>
 
                 <div className="flex items-center gap-2 text-sm lg:text-base text-white">
-                  <span className="transition group-hover:text-white/90">
-                    {selectedPartner
-                      ? selectedPartner.about || getActivityTitle(selectedPartner) || "Exclusive member benefits"
+                  <span className="transition-all duration-300 group-hover:text-white/90">
+                    {displayPartner
+                      ? displayPartner.about || getActivityTitle(displayPartner) || "Exclusive member benefits"
                       : "15% off facial and rejuvenation treatments"}
                   </span>
                   <ArrowRight className="w-5 h-5 transition text-white" />
@@ -201,6 +207,7 @@ export default function SolenneMembership() {
             <PartnersMap
               partners={partners}
               onMarkerClick={(partner) => setSelectedPartner(partner)}
+              onMarkerHover={(partner:any) => setHoveredPartner(partner)}
             />
           </div>
         </div>
@@ -208,17 +215,17 @@ export default function SolenneMembership() {
         {/* Bottom Description */}
         <div className="mt-12 lg:mt-38 text-center">
           <p className="text-gray-300 text-lg lg:text-2xl leading-relaxed font-light">
-            Solenne is a digital lifestyle membership for women in Dubai, centred on a curated network of the city’s most considered wellness, beauty and lifestyle destinations. Members are extended preferred access and partner privileges, shaping a more elevated everyday.
+            {"Solenne is a digital lifestyle membership for women in Dubai, centred on a curated network of the city's most considered wellness, beauty and lifestyle destinations. Members are extended preferred access and partner privileges, shaping a more elevated everyday."}
           </p>
         </div>
       </div>
 
       {/* Partner Modal */}
-      {showModal && selectedPartner && (
+      {showModal && displayPartner && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-999 overflow-y-auto scrollbar-hide">
           <NetworkCardModal
             onClose={() => setShowModal(false)}
-            partner={selectedPartner}
+            partner={displayPartner}
           />
         </div>
       )}
