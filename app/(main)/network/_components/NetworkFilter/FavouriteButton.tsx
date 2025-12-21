@@ -110,12 +110,12 @@ export default function FavouriteButton({
       }}
       disabled={loading}
       className={`absolute z-10 cursor-pointer p-1 rounded-full
-        bg-black/30
-        ${favourited ? "text-red-500" : "text-white hover:text-red-400"}
+        
+        ${favourited ? "text-white" : "text-white "}
         ${loading ? "opacity-50 cursor-not-allowed" : ""}
         ${className}`}
     >
-      <Heart className={`w-5 h-5 ${favourited ? "fill-current" : ""}`} />
+      <Heart className={`w-6 h-6 ${favourited ? "fill-current" : ""}`} />
     </button>
   );
 }
