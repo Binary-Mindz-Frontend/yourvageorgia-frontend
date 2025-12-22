@@ -15,6 +15,7 @@ import {
   BriefcaseBusiness,
   LayoutGrid,
   Users,
+  Activity
 } from "lucide-react";
 
 import { NavMain } from "./Nabmain";
@@ -45,6 +46,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       title: "Members",
       Icon: Users,
       url: "/dashboard/admin/members",
+      show: true,
+    },
+    {
+      title: "Activities",
+      Icon: Activity,
+      url: "/dashboard/admin/activities",
       show: true,
     },
   ];

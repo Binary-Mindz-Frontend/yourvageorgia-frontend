@@ -3,6 +3,7 @@
 import { ArrowRight, ChevronDown, Heart } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getCurrentUser } from "@/services/auth";
+import PartnerDetailsModal from "@/app/(main)/network/_components/NetworkCardModal/PartnerDetailsModal"; // Import the modal
 
 const BASE_API = process.env.NEXT_PUBLIC_BASE_API;
 
@@ -12,15 +13,17 @@ interface FavouriteItem {
     _id: string;
     name: string;
     thumbnail: string;
+    address?: string;
   };
 }
 
 const MyEdit = () => {
   const [data, setData] = useState<FavouriteItem[]>([]);
-  console.log('myfavourite',data)
   const [loading, setLoading] = useState(true);
-
-
+  const [selectedPartner, setSelectedPartner] = useState<
+    FavouriteItem["partner"] | null
+  >(null); // State for selected partner
+  const [isModalOpen, setIsModalOpen] = useState(false); // State to control modal visibility
 
   useEffect(() => {
     const fetchFavourites = async () => {
@@ -52,6 +55,15 @@ const MyEdit = () => {
     fetchFavourites();
   }, []);
 
+  const handleCardClick = (partner: FavouriteItem["partner"]) => {
+    setSelectedPartner(partner); // Set the selected partner
+    setIsModalOpen(true); // Open the modal
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false); // Close the modal
+  };
+
   if (loading) {
     return (
       <div className="text-center mt-20 text-gray-500">
@@ -73,6 +85,7 @@ const MyEdit = () => {
           <div
             key={item._id}
             className="relative w-full aspect-video rounded-xl overflow-hidden shadow-2xl cursor-pointer"
+            onClick={() => handleCardClick(item.partner)} // Open modal on card click
           >
             <div
               className="absolute inset-0 bg-cover bg-center"
@@ -89,16 +102,14 @@ const MyEdit = () => {
                       {item.partner.name}
                     </h2>
 
-                    {/* <div className="flex items-center text-sm lg:text-lg gap-2 italic opacity-80">
-                      View details
+                    <div className="flex items-center text-sm lg:text-lg gap-2 italic opacity-80">
+                      {item.partner.address || "Location not specified"}
                       <ArrowRight />
-                    </div> */}
-                   
+                    </div>
                   </div>
 
-                  {/*  Always filled (this page = favourites) */}
                   <button className="p-2">
-                    <Heart className="w-5 h-5 lg:w-6 lg:h-6 text-red-500 fill-current" />
+                    <Heart className="w-5 h-5 lg:w-6 lg:h-6 text-white fill-current" />
                   </button>
                 </div>
               </div>
@@ -112,6 +123,19 @@ const MyEdit = () => {
           <button className="p-3 rounded-full hover:bg-black/50 transition">
             <ChevronDown className="lg:w-10 lg:h-10" />
           </button>
+        </div>
+      )}
+
+      {/* Display modal when isModalOpen is true */}
+      {isModalOpen && selectedPartner && (
+        <div className="fixed top-0 left-0 right-0 bottom-0 z-50 bg-transparent backdrop-blur-2xl bg-opacity-50 flex items-center justify-center">
+          {/* PartnerDetailsModal content */}
+          <div className="w-full -lg overflow-hidden max-h-[90vh]  overflow-y-auto scrollbar-hide">
+            <PartnerDetailsModal
+              onClose={handleCloseModal}
+              partner={selectedPartner}
+            />
+          </div>
         </div>
       )}
     </div>

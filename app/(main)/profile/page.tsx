@@ -1,37 +1,48 @@
 import membership from "@/public/assets/profile/profile.jpg";
-import { getCurrentUser } from "@/services/auth"; // Assuming this is the function to get the current user
+import { getCurrentUser } from "@/services/auth";
 import { Suspense } from "react";
-import Link from "next/link";
 import Logout from "./_component/Logout";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { redirect } from "next/navigation";
+const apiUrl = process.env.NEXT_PUBLIC_BASE_API;
 
-// Convert UNIX timestamp to human-readable date format
-const convertTimestampToDate = (timestamp: number) => {
-  return new Date(timestamp * 1000).toLocaleString(); // Convert UNIX timestamp to Date string
+// Convert UNIX timestamp to date-only format (no time)
+const convertTimestampToDateOnly = (timestamp: number) => {
+  const date = new Date(timestamp * 1000);
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+};
+
+// Format for expiry date if you want a different format
+const formatExpiryDate = (timestamp: number) => {
+  const date = new Date(timestamp * 1000);
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  });
 };
 
 // Server Component for fetching member data
 const ProfilePage = async () => {
-  const memberData = await getCurrentUser(); // Fetching the current user data
+  const memberData = await getCurrentUser();
 
-  // If the user is not authenticated, redirect to the login page
-
-
-  // If member data is not available, return loading state
-  if (!memberData) {
-    return <div className="text-center text-white">Loading...</div>;
+  if(!memberData) {
+    return redirect("/login")
   }
 
-  
+
 
   return (
     <div className="min-h-screen max-w-218 mx-auto text-white flex flex-col items-center justify-center px-4 lg:p-0 mt-10 lg:mt-25">
       {/* Header Info */}
       <div className="text-center mb-18">
-        {/* <h1 className="text-4xl lg:text-5xl text-[#FFF] font-semibold font-serif text-center tracking-wider mb-8">
-          {memberData.firstName} {memberData.lastName}
-        </h1> */}
         <p className="text-xl lg:text-3xl text-[#FFFFFF]/70">
-          Member Since: {convertTimestampToDate(memberData.startDate)} {/* Format the startDate */}
+          Member Since: {convertTimestampToDateOnly(memberData.startDate)}
         </p>
       </div>
 
@@ -41,7 +52,7 @@ const ProfilePage = async () => {
         <div
           className="w-full h-72 lg:h-155 bg-cover bg-center rounded-xl flex flex-col justify-end items-center p-6"
           style={{
-            backgroundImage: `url(${membership.src})`, // Background image
+            backgroundImage: `url(${membership.src})`,
           }}
         >
           {/* Member Info On Image Bottom */}
@@ -50,13 +61,23 @@ const ProfilePage = async () => {
           </h1>
           <p className="text-sm lg:text-2xl text-[#FFFFFF]/80">ID: {memberData.memberShipId}</p>
           <p className="text-sm lg:text-2xl text-[#FFFFFF]/80">
-            Expiry: {convertTimestampToDate(memberData.exp)} {/* Format the expiry timestamp */}
+            Expiry: {formatExpiryDate(memberData.exp)}
           </p>
         </div>
       </div>
 
       {/* Log out Button */}
+
+
+      <div className="mt-6">
+        <Button asChild>
+            <a href={`${apiUrl}/wallet/membership?token=${memberData.accessToken}`} target="_blank"> Add to Apple Wallet </a>
+        </Button>
+      </div>
+
       <Logout />
+
+
     </div>
   );
 };

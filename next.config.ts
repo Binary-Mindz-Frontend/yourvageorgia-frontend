@@ -17,22 +17,22 @@ images: {
       },
       {
         protocol: "https",
+        hostname: "solenneuae.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
         hostname: "api.solenneuae.com",
         pathname: "/**",
       },
+
+      {  protocol: "https",
+        hostname: "maps.google.com",
+        pathname: "/**",
+      },
+      
     ],
   },
-// --- ADD THIS SECTION ---
-  async redirects() {
-    return [
-      {
-        source: '/admin',
-        destination: '/dashboard/admin/login',
-        permanent: true, 
-      },
-    ];
-  },
-
 };
 
 export default nextConfig;

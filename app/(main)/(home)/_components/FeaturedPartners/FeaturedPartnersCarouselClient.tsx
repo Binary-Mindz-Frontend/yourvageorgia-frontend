@@ -54,6 +54,7 @@ export default function FeaturedPartnersCarouselClient({
                         height={250}
                         alt={partner.name}
                         className="w-full h-full object-cover"
+                        unoptimized
                       />
                     </div>
                   </CardContent>

@@ -7,16 +7,13 @@ export interface PartnerOffer {
   offerPercentage?: number;
 }
 
-export interface PartnerAbout {
-  title: string;
-  description: string;
-}
 
 export interface PartnerContact {
   officeName?: string;
   phone?: string;
   addressUrl?: string;
   address?: string;
+  area?: string;
   email?: string;
   mobile?: string;
 }
@@ -33,19 +30,20 @@ export interface PartnerCategory {
 
 export interface Partner {
   _id?: string;
-  category: string | PartnerCategory; 
+  category?: string | { _id: string; title: string };  // Old single category
+  categories?: Array<string | { _id: string; title: string }>; 
   title?: string;
   name: string;
   thumbnail?: string;
   address?: string;
-  activity?: string;
+  activity?: string[];
   position?: number;
   gallery?: string[];
   logo?: string;
   isFeatured?: boolean;
   isFeaturedMap?: boolean;
   offer?: PartnerOffer[];  
-  about?: PartnerAbout;
+  about?: string;
   terms?: string[];
   contacts?: PartnerContact[];
   socials?: PartnerSocials;
