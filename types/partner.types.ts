@@ -30,7 +30,8 @@ export interface PartnerCategory {
 
 export interface Partner {
   _id?: string;
-  categories: string[];
+  category?: string | { _id: string; title: string };  // Old single category
+  categories?: Array<string | { _id: string; title: string }>; 
   title?: string;
   name: string;
   thumbnail?: string;
