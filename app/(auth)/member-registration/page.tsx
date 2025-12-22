@@ -12,8 +12,6 @@ import { registerUser } from "@/services/auth";
 import toast from "react-hot-toast";
 
 const MembershipRegister = () => {
-
-
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -46,9 +44,6 @@ const MembershipRegister = () => {
   const handleCheckboxChange = (name: string, checked: boolean) => {
     setFormData((prev) => ({ ...prev, [name]: checked }));
   };
-
-
- 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -92,12 +87,16 @@ const MembershipRegister = () => {
 
     try {
       const response = await registerUser(payload);
-      console.log(response);
+      console.log("response:", response);
 
-      toast.success(response.message);
+      if (response?.error) {
+        toast.error("User already registered");
+      } else {
+        toast.success(response.message);
 
-      if (response?.data?.onBoardingLink) {
-        window.location.href = response.data.onBoardingLink;
+        if (response?.data?.onBoardingLink) {
+          window.location.href = response.data.onBoardingLink;
+        }
       }
 
       setLoading(false);

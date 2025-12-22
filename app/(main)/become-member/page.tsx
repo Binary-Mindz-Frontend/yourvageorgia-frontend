@@ -19,27 +19,32 @@ const SolenneMembership = () => {
               Membership
             </h2>
 
-            <h3 className=" text-center lg:text-lg mb-6 leading-relaxed text-gray-300">Founding Circle · Limited Capacity</h3>
+            <h3 className=" text-center lg:text-lg mb-6 leading-relaxed text-gray-300">
+              Founding Circle · Limited Capacity
+            </h3>
 
             <p className=" lg:text-lg font-semibold text-center text-white ">
               900 <span className="lg:text-lg">AED</span>
             </p>
-            <p className=" text-center lg:text-lg mb-6 leading-relaxed text-gray-300">12-month membership</p>
+            <p className=" text-center lg:text-lg mb-6 leading-relaxed text-gray-300">
+              12-month membership
+            </p>
 
             <div className="space-y-4">
               <p className="text-center lg:text-lg leading-relaxed text-gray-300">
-              Preferred rates across Dubai is most considered wellness, beauty,
-              and lifestyle destinations.
-            </p>
+                {
+                 "Preferred rates across Dubai's most considered wellness, beauty, and lifestyle destinations."
+                }
+              </p>
 
-            <p className="px-10 lg:px-0 text-center lg:text-lg text-gray-300">
-              Invitations to intimate member gatherings and partner-led
-              engagements
-            </p>
-            <p className="px-10 lg:px-0 text-center lg:text-lg text-gray-300">
-              A discreet digital membership ID, recognized across our partner
-              network.
-            </p>
+              <p className="px-10 lg:px-0 text-center lg:text-lg text-gray-300">
+                Invitations to intimate member gatherings and partner-led
+                engagements
+              </p>
+              <p className="px-10 lg:px-0 text-center lg:text-lg text-gray-300">
+                A discreet digital membership ID, recognized across our partner
+                network.
+              </p>
             </div>
           </div>
         </div>
