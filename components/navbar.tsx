@@ -166,7 +166,7 @@ export function Navbar() {
                   }}
                 />
 
-                {isSearchOpen && (
+                {/* {isSearchOpen && (
                   <span
                     onClick={handleSearch}
                     
@@ -175,7 +175,7 @@ export function Navbar() {
                     <Search className=" h-4 w-4" />
                     
                   </span>
-                )}
+                )} */}
               </div>
             ) : (
               <Link

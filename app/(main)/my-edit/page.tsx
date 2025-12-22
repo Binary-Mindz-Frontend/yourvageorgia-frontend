@@ -109,7 +109,7 @@ const MyEdit = () => {
                   </div>
 
                   <button className="p-2">
-                    <Heart className="w-5 h-5 lg:w-6 lg:h-6 text-red-500 fill-current" />
+                    <Heart className="w-5 h-5 lg:w-6 lg:h-6 text-white fill-current" />
                   </button>
                 </div>
               </div>
