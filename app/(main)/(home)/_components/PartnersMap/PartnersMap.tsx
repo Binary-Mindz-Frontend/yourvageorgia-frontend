@@ -1,109 +1,9 @@
-// "use client";
-
-// import { GoogleMap, Marker, LoadScript } from "@react-google-maps/api";
-// import { useEffect, useMemo, useState } from "react";
-
-// interface Partner {
-//   _id: string;
-//   name: string;
-//   coordinates?: {
-//     lat: number;
-//     lng: number;
-//   };
-//   address: string;
-//   addressUrl: string;
-// }
-
-// interface PartnersMapProps {
-//   partners: Partner[];
-//   onMarkerClick?: (partner: Partner) => void;
-// }
-
-// export const DEFAULT_MAP_CENTER = {
-//   lat: 25.2048, // Dubai
-//   lng: 55.2708,
-// };
-// const BLACK_MARKER_ICON = {
-//   path: "M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z",
-//   fillColor: "#000000",
-//   fillOpacity: 1,
-//   strokeColor: "#ffffff",
-//   strokeWeight: 1,
-//   scale: 1.5,
-//   anchor: new google.maps.Point(12, 24),
-// };
-
-
-// export default function PartnersMap({
-//   partners,
-//   onMarkerClick,
-// }: PartnersMapProps) {
-//   const [map, setMap] = useState<google.maps.Map | null>(null);
-
-//   // ✅ Extract valid locations
-//   const locations = useMemo(
-//     () =>
-//       partners.filter(
-//         (p) =>
-//           p.coordinates &&
-//           typeof p.coordinates.lat === "number" &&
-//           typeof p.coordinates.lng === "number"
-//       ),
-//     [partners]
-//   );
-
-//   // ✅ Fit map to markers automatically
-//   useEffect(() => {
-//     if (!map || locations.length === 0) return;
-
-//     const bounds = new google.maps.LatLngBounds();
-
-//     locations.forEach((p) => {
-//       bounds.extend({
-//         lat: p.coordinates!.lat,
-//         lng: p.coordinates!.lng,
-//       });
-//     });
-
-//     map.fitBounds(bounds);
-//   }, [map, locations]);
-
-//   return (
-//     <LoadScript googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!}>
-//       <GoogleMap
-//         mapContainerStyle={{ width: "100%", height: "100%" }}
-//         center={
-//           locations.length > 0
-//             ? {
-//                 lat: locations[0].coordinates!.lat,
-//                 lng: locations[0].coordinates!.lng,
-//               }
-//             : DEFAULT_MAP_CENTER
-//         }
-//         zoom={locations.length > 0 ? 13 : 11}
-//         onLoad={(mapInstance) => setMap(mapInstance)} 
-//       >
-//         {locations.map((partner) => (
-//           <Marker
-//             key={partner._id}
-//             position={{
-//               lat: partner.coordinates!.lat,
-//               lng: partner.coordinates!.lng,
-//             }}
-//             icon={BLACK_MARKER_ICON}
-//             onClick={() => onMarkerClick?.(partner)}
-//           />
-//         ))}
-//       </GoogleMap>
-//     </LoadScript>
-//   );
-// }
-
 
 "use client";
 
 import { GoogleMap, Marker, LoadScript } from "@react-google-maps/api";
 import { useMemo, useState, useCallback, useEffect } from "react";
+import { Maximize, Map as MapIcon } from "lucide-react";
 
 interface Partner {
   _id: string;
@@ -132,8 +32,8 @@ interface PartnersMapProps {
 }
 
 export const DEFAULT_MAP_CENTER = {
-  lat: 25.2048,
-  lng: 55.2708,
+  lat: 25.0964811,
+  lng: 55.1192343,
 };
 
 export default function PartnersMap({
@@ -174,52 +74,97 @@ export default function PartnersMap({
     setMap(map);
   }, []);
 
-  useEffect(() => {
-    if (map && locations.length > 0) {
-      const bounds = new window.google.maps.LatLngBounds();
-      locations.forEach((location) => {
-        bounds.extend(location.coordinates);
-      });
-      
-      const padding = { top: 100, right: 100, bottom: 100, left: 100 };
-      map.fitBounds(bounds, padding);
-      
-      const listener = window.google.maps.event.addListenerOnce(map, 'bounds_changed', () => {
-        const currentZoom = map.getZoom();
-        if (currentZoom) {
-          map.setZoom(currentZoom - 1);
-        }
-      });
-    }
+  // Auto-fit logic removed as per request to keep specific initial view
+  // useEffect(() => {
+  //   if (map && locations.length > 0) {
+  //     const bounds = new window.google.maps.LatLngBounds();
+  //     locations.forEach((location) => {
+  //       bounds.extend(location.coordinates);
+  //     });
+
+  //     const padding = { top: 100, right: 100, bottom: 100, left: 100 };
+  //     map.fitBounds(bounds, padding);
+
+  //     const listener = window.google.maps.event.addListenerOnce(map, 'bounds_changed', () => {
+  //       const currentZoom = map.getZoom();
+  //       if (currentZoom) {
+  //         map.setZoom(currentZoom - 1);
+  //       }
+  //     });
+  //   }
+  // }, [map, locations]);
+
+  // Function to fit all markers
+  const handleFitBounds = useCallback(() => {
+    if (!map || locations.length === 0) return;
+    const bounds = new window.google.maps.LatLngBounds();
+    locations.forEach((location) => {
+      bounds.extend(location.coordinates);
+    });
+    const padding = { top: 50, right: 50, bottom: 50, left: 50 };
+    map.fitBounds(bounds, padding);
   }, [map, locations]);
 
+  // Function to reset to initial view
+  const handleResetView = useCallback(() => {
+    if (!map) return;
+    map.setCenter(DEFAULT_MAP_CENTER);
+    map.setZoom(11);
+  }, [map]);
+
   return (
-    <LoadScript
-      googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!}
-      onLoad={() => setMapLoaded(true)}
-    >
-      <GoogleMap
-        mapContainerStyle={{ width: "100%", height: "100%" }}
-        center={
-          locations.length > 0
-            ? locations[0].coordinates
-            : DEFAULT_MAP_CENTER
-        }
-        zoom={locations.length === 0 ? 13 : undefined}
-        onLoad={onMapLoad}
+    <div className="relative w-full h-full">
+      <LoadScript
+        googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!}
+        onLoad={() => setMapLoaded(true)}
       >
-        {locations.map((location, idx) => (
-          <Marker
-            key={`${location._id}-${idx}`}
-            position={location.coordinates}
-            icon={markerIcon}
-            onClick={() => onMarkerClick?.(location)}
-            onMouseOver={() => onMarkerHover?.(location)}
-            onMouseOut={() => onMarkerHover?.(null)}
-          />
-        ))}
-      </GoogleMap>
-    </LoadScript>
+        <GoogleMap
+          options={{
+            mapId: "DEMO_MAP_ID",
+            disableDefaultUI: false, // Keep default UI or set to true if you want total custom control
+            zoomControl: false, // We can hide default zoom if we want our own, or keep it. Let's keep it simple.
+            streetViewControl: false,
+            mapTypeControl: false,
+            fullscreenControl: false,
+          }}
+          mapContainerStyle={{ width: "100%", height: "100%" }}
+          center={DEFAULT_MAP_CENTER}
+          zoom={11}
+          onLoad={onMapLoad}
+        >
+          {locations.map((location, idx) => (
+            <Marker
+              key={`${location._id}-${idx}`}
+              position={location.coordinates}
+              icon={markerIcon}
+              onClick={() => onMarkerClick?.(location)}
+              onMouseOver={() => onMarkerHover?.(location)}
+              onMouseOut={() => onMarkerHover?.(null)}
+            />
+          ))}
+        </GoogleMap>
+      </LoadScript>
+
+      {/* Floating Control Buttons */}
+      <div className="absolute top-4 right-4 flex flex-col gap-2">
+        <button
+          onClick={handleFitBounds}
+          className="bg-white text-black px-4 py-2 rounded-lg shadow-md hover:bg-gray-50 transition-colors text-xs font-medium flex items-center gap-2"
+          title="Show all partners"
+        >
+          <Maximize size={16} />
+          <span>Show All</span>
+        </button>
+        <button
+          onClick={handleResetView}
+          className="bg-white text-black px-4 py-2 rounded-lg shadow-md hover:bg-gray-50 transition-colors text-xs font-medium flex items-center gap-2"
+          title="Reset to default view"
+        >
+          <MapIcon size={16} />
+          <span>Reset View</span>
+        </button>
+      </div>
+    </div>
   );
 }
 

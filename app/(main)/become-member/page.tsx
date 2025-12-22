@@ -33,7 +33,7 @@ const SolenneMembership = () => {
             <div className="space-y-4">
               <p className="text-center lg:text-lg leading-relaxed text-gray-300">
                 {
-                 "Preferred rates across Dubai's most considered wellness, beauty, and lifestyle destinations."
+                 "Preferred rates across Dubai's most considered wellness, beauty and lifestyle destinations."
                 }
               </p>
 
