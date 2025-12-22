@@ -3,6 +3,7 @@
 
 import { GoogleMap, Marker, LoadScript } from "@react-google-maps/api";
 import { useMemo, useState, useCallback, useEffect } from "react";
+import { Maximize, Map as MapIcon } from "lucide-react";
 
 interface Partner {
   _id: string;
@@ -93,29 +94,77 @@ export default function PartnersMap({
   //   }
   // }, [map, locations]);
 
+  // Function to fit all markers
+  const handleFitBounds = useCallback(() => {
+    if (!map || locations.length === 0) return;
+    const bounds = new window.google.maps.LatLngBounds();
+    locations.forEach((location) => {
+      bounds.extend(location.coordinates);
+    });
+    const padding = { top: 50, right: 50, bottom: 50, left: 50 };
+    map.fitBounds(bounds, padding);
+  }, [map, locations]);
+
+  // Function to reset to initial view
+  const handleResetView = useCallback(() => {
+    if (!map) return;
+    map.setCenter(DEFAULT_MAP_CENTER);
+    map.setZoom(11);
+  }, [map]);
+
   return (
-    <LoadScript
-      googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!}
-      onLoad={() => setMapLoaded(true)}
-    >
-      <GoogleMap
-        mapContainerStyle={{ width: "100%", height: "100%" }}
-        center={DEFAULT_MAP_CENTER}
-        zoom={11.3}
-        onLoad={onMapLoad}
+    <div className="relative w-full h-full">
+      <LoadScript
+        googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!}
+        onLoad={() => setMapLoaded(true)}
       >
-        {locations.map((location, idx) => (
-          <Marker
-            key={`${location._id}-${idx}`}
-            position={location.coordinates}
-            icon={markerIcon}
-            onClick={() => onMarkerClick?.(location)}
-            onMouseOver={() => onMarkerHover?.(location)}
-            onMouseOut={() => onMarkerHover?.(null)}
-          />
-        ))}
-      </GoogleMap>
-    </LoadScript>
+        <GoogleMap
+          options={{
+            mapId: "DEMO_MAP_ID",
+            disableDefaultUI: false, // Keep default UI or set to true if you want total custom control
+            zoomControl: false, // We can hide default zoom if we want our own, or keep it. Let's keep it simple.
+            streetViewControl: false,
+            mapTypeControl: false,
+            fullscreenControl: false,
+          }}
+          mapContainerStyle={{ width: "100%", height: "100%" }}
+          center={DEFAULT_MAP_CENTER}
+          zoom={11}
+          onLoad={onMapLoad}
+        >
+          {locations.map((location, idx) => (
+            <Marker
+              key={`${location._id}-${idx}`}
+              position={location.coordinates}
+              icon={markerIcon}
+              onClick={() => onMarkerClick?.(location)}
+              onMouseOver={() => onMarkerHover?.(location)}
+              onMouseOut={() => onMarkerHover?.(null)}
+            />
+          ))}
+        </GoogleMap>
+      </LoadScript>
+
+      {/* Floating Control Buttons */}
+      <div className="absolute top-4 right-4 flex flex-col gap-2">
+        <button
+          onClick={handleFitBounds}
+          className="bg-white text-black px-4 py-2 rounded-lg shadow-md hover:bg-gray-50 transition-colors text-xs font-medium flex items-center gap-2"
+          title="Show all partners"
+        >
+          <Maximize size={16} />
+          <span>Show All</span>
+        </button>
+        <button
+          onClick={handleResetView}
+          className="bg-white text-black px-4 py-2 rounded-lg shadow-md hover:bg-gray-50 transition-colors text-xs font-medium flex items-center gap-2"
+          title="Reset to default view"
+        >
+          <MapIcon size={16} />
+          <span>Reset View</span>
+        </button>
+      </div>
+    </div>
   );
 }
 
