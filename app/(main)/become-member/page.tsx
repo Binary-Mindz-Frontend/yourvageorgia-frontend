@@ -33,13 +33,13 @@ const SolenneMembership = () => {
             <div className="space-y-4">
               <p className="text-center lg:text-lg leading-relaxed text-gray-300">
                 {
-                 "Preferred rates across Dubai's most considered wellness, beauty and lifestyle destinations."
+                  "Preferred rates across Dubai's most considered wellness, beauty and lifestyle destinations."
                 }
               </p>
 
               <p className="px-10 lg:px-0 text-center lg:text-lg text-gray-300">
                 Invitations to intimate member gatherings and partner-led
-                engagements
+                engagements.
               </p>
               <p className="px-10 lg:px-0 text-center lg:text-lg text-gray-300">
                 A discreet digital membership ID, recognized across our partner

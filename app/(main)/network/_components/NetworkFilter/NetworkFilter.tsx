@@ -102,7 +102,7 @@
 //   if (appliedFilters.locations.length > 0) {
 //   filteredPartners = filteredPartners.filter((p) => {
 //     if (!p.contacts || !Array.isArray(p.contacts) || p.contacts.length === 0) return false;
-    
+
 //     // Check if any of the partner's contact areas match the applied filters
 //     return p.contacts.some((contact) => {
 //       const location = contact.area || contact.address;
@@ -114,7 +114,7 @@
 // if (appliedFilters.activities.length > 0) {
 //   filteredPartners = filteredPartners.filter((p) => {
 //     if (!p.activity || !Array.isArray(p.activity) || p.activity.length === 0) return false;
-    
+
 //     // Check if any of the partner's activities match the applied filters
 //     return p.activity.some((act) => {
 //       // Type guard to ensure act is an object with a title property
@@ -371,11 +371,11 @@ const NetworkFilter = () => {
   const getCategoryTitles = (partner: Partner): string[] => {
     // Handle new multi-category format
     if (partner.categories && Array.isArray(partner.categories)) {
-      return partner.categories.map(cat => 
+      return partner.categories.map(cat =>
         typeof cat === "string" ? cat : cat.title
       );
     }
-    
+
     // Handle old single category format (backward compatibility)
     if (partner.category) {
       const categoryTitle = typeof partner.category === "string"
@@ -383,7 +383,7 @@ const NetworkFilter = () => {
         : (partner.category as PartnerCategory)?.title;
       return categoryTitle ? [categoryTitle] : [];
     }
-    
+
     return [];
   };
 
@@ -392,16 +392,16 @@ const NetworkFilter = () => {
     activeFilter === "All"
       ? partners
       : partners.filter((p) => {
-          const categoryTitles = getCategoryTitles(p);
-          // Check if any of the partner's categories match the active filter
-          return categoryTitles.includes(activeFilter);
-        });
+        const categoryTitles = getCategoryTitles(p);
+        // Check if any of the partner's categories match the active filter
+        return categoryTitles.includes(activeFilter);
+      });
 
   // Apply drawer filters
   if (appliedFilters.locations.length > 0) {
     filteredPartners = filteredPartners.filter((p) => {
       if (!p.contacts || !Array.isArray(p.contacts) || p.contacts.length === 0) return false;
-      
+
       return p.contacts.some((contact) => {
         const location = contact.area || contact.address;
         return location !== undefined && appliedFilters.locations.includes(location);
@@ -412,7 +412,7 @@ const NetworkFilter = () => {
   if (appliedFilters.activities.length > 0) {
     filteredPartners = filteredPartners.filter((p) => {
       if (!p.activity || !Array.isArray(p.activity) || p.activity.length === 0) return false;
-      
+
       return p.activity.some((act) => {
         if (typeof act === 'object' && act !== null && 'title' in act) {
           const activityObj = act as { title: string };
@@ -427,10 +427,10 @@ const NetworkFilter = () => {
   if (searchQuery) {
     filteredPartners = filteredPartners.filter((partner) => {
       const nameMatches = partner.name.toLowerCase().includes(searchQuery.toLowerCase());
-      
+
       // Check if search query matches any of the partner's categories
       const categoryTitles = getCategoryTitles(partner);
-      const categoryMatches = categoryTitles.some(title => 
+      const categoryMatches = categoryTitles.some(title =>
         title.toLowerCase().includes(searchQuery.toLowerCase())
       );
 
@@ -478,11 +478,10 @@ const NetworkFilter = () => {
           <Button
             key={filter}
             onClick={() => handleFilterClick(filter)}
-            className={`md:py-2.5 rounded lg:rounded-lg whitespace-nowrap min-w-max ${
-              activeFilter === filter && !showAll
-                ? "bg-white text-black hover:bg-white"
-                : "text-white"
-            }`}
+            className={`md:py-2.5 rounded lg:rounded-lg whitespace-nowrap min-w-max ${activeFilter === filter && !showAll
+              ? "bg-white text-black hover:bg-white"
+              : "text-white"
+              }`}
           >
             {filter}
           </Button>
@@ -522,14 +521,15 @@ const NetworkFilter = () => {
                 >
                   <div className="absolute inset-0 bg-linear-to-t from-black/10 via-black/10 to-transparent"></div>
 
-                  <FavouriteButton
-                    partnerId={partner._id || ""}
-                    className="left-64 bottom-14"
-                  />
+
 
                   <div className="absolute bottom-0 left-0 p-6 text-white">
                     <h2 className="text-lg lg:text-3xl font-semibold mb-1 font-serif">
                       {partner.name}
+                      <FavouriteButton
+                        partnerId={partner._id || ""}
+                        className="ml-2.5  bottom-14"
+                      />
                     </h2>
 
                     <div className="flex items-center text-sm lg:text-lg gap-2 italic opacity-80">
