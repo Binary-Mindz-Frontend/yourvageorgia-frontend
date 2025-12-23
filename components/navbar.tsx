@@ -1,7 +1,7 @@
 'use client'
 
 import { Button } from "@/components/ui/button";
-import { Menu, Search, X } from "lucide-react";
+import { ArrowRight, FileQuestion, Menu, Search, X } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState, useMemo } from "react";
 import { HeaderLogo } from "./icons";
@@ -38,23 +38,23 @@ export function Navbar() {
   }, []);
 
   useEffect(() => {
-  const fetchPartners = async () => {
-    try {
-      const apiUrl = process.env.NEXT_PUBLIC_BASE_API;
-      const response = await fetch(`${apiUrl}/partner`, {
-        cache: 'no-store', // Prevent caching
-      });
-      const data = await response.json();
-      if (data.success) {
-        setPartners(data.data);
+    const fetchPartners = async () => {
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_BASE_API;
+        const response = await fetch(`${apiUrl}/partner`, {
+          cache: 'no-store', // Prevent caching
+        });
+        const data = await response.json();
+        if (data.success) {
+          setPartners(data.data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch partner data:", error);
       }
-    } catch (error) {
-      console.error("Failed to fetch partner data:", error);
-    }
-  };
+    };
 
-  fetchPartners();
-}, [])
+    fetchPartners();
+  }, [])
 
   const filteredPartners = useMemo(() => {
     if (!searchQuery) return partners;
@@ -210,45 +210,53 @@ export function Navbar() {
             )}
           </Button>
         </div>
-      </nav>
-
-      {/* Partner Cards Display Below Search */}
-      {isSearchOpen && (
-        <div
-          id="search-results-container"
-          className="mt-4 space-y-4 max-w-xl mx-auto bg-black absolute left-0 right-0 z-10 border backdrop-blur-md p-4 rounded-lg shadow-lg max-h-96 overflow-y-auto"
-        >
-          {filteredPartners.length === 0 ? (
-            <div className="text-center text-white opacity-70 py-4">
-              No results found
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {filteredPartners.map((partner) => (
-                <div
-                  key={partner._id}
-                  onClick={() => handlePartnerClick(partner)}
-                  className="flex items-center border space-x-4 p-3 bg-accent/10 rounded-lg shadow-md cursor-pointer hover:bg-accent/20 transition-colors"
-                >
-                  <Image
-                    width={48}
-                    height={48}
-                    src={partner.thumbnail}
-                    alt={partner.name}
-                    className="w-12 h-12 rounded-full object-cover"
-                  />
-                  <div>
-                    <h3 className="text-base font-semibold">{partner.name}</h3>
-                    <p className="text-xs text-gray-400">
-                      {partner.category?.title}
-                    </p>
+        {/* Partner Cards Display Below Search - Moved INSIDE nav for sticky behavior */}
+        {isSearchOpen && (
+          <div
+            id="search-results-container"
+            className="absolute top-full left-0 right-0 z-50 mt-2 max-w-lg mx-4 md:mx-auto p-2 rounded-xl border border-white/10 bg-zinc-950/80 backdrop-blur-2xl shadow-2xl animate-in fade-in slide-in-from-top-2 overflow-hidden"
+          >
+            {filteredPartners.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-10 text-center text-muted-foreground/60">
+                <FileQuestion className="h-10 w-10 mb-3 opacity-50" />
+                <p className="text-sm font-medium">No results found</p>
+                <p className="text-xs">Try searching for something else</p>
+              </div>
+            ) : (
+              <div className="max-h-[60vh] overflow-y-auto custom-scrollbar p-1 space-y-1">
+                {filteredPartners.map((partner) => (
+                  <div
+                    key={partner._id}
+                    onClick={() => handlePartnerClick(partner)}
+                    className="group flex items-center space-x-4 p-3 rounded-lg cursor-pointer transition-all duration-200 hover:bg-white/10 active:scale-[0.98]"
+                  >
+                    <div className="relative overflow-hidden rounded-full border border-white/10 group-hover:border-white/20 transition-colors">
+                      <Image
+                        width={48}
+                        height={48}
+                        src={partner.thumbnail}
+                        alt={partner.name}
+                        className="w-10 h-10 object-cover"
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-sm font-medium text-foreground group-hover:text-primary transition-colors truncate">
+                        {partner.name}
+                      </h3>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {partner.category?.title}
+                      </p>
+                    </div>
+                    <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                      <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </nav>
 
       {/* Partner Modal */}
       {isModalOpen && selectedPartner && (
