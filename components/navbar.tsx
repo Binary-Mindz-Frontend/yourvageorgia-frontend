@@ -237,6 +237,7 @@ export function Navbar() {
                         src={partner.thumbnail}
                         alt={partner.name}
                         className="w-10 h-10 object-cover"
+                        unoptimized
                       />
                     </div>
                     <div className="flex-1 min-w-0">
