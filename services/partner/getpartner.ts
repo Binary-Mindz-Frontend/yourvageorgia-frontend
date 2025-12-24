@@ -20,16 +20,16 @@ export interface IPartnerResponse {
   success: boolean;
   statusCode: number;
   message: string;
-  data: Partner & { 
-    _id: string; 
-    createdAt: string; 
-    updatedAt: string; 
+  data: Partner & {
+    _id: string;
+    createdAt: string;
+    updatedAt: string;
     __v: number;
   };
 }
 
 export interface IPositionUpdateData {
-    position: number; // Assuming 'position' is a number
+  position: number; // Assuming 'position' is a number
 }
 
 export interface IGetAllPartnersResponse {
@@ -73,7 +73,9 @@ export const getPartners = async (
     });
 
     const url = `${BASE_URL}/partner?${queryParams.toString()}`;
-    const res = await fetch(url);
+    const res = await fetch(url, {
+      next: { revalidate: 3600 }, // Cache for 1 hour
+    });
     const json = await res.json();
 
     if (!res.ok) {
@@ -84,7 +86,7 @@ export const getPartners = async (
       data: json.data,
       meta: json.meta,
     };
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     return { error: error.message };
   }

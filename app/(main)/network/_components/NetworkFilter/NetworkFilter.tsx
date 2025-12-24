@@ -285,6 +285,7 @@
 
 import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ChevronDown, ListFilter } from "lucide-react";
 import { FilterDrawer } from "./FilterDrawer";
@@ -503,7 +504,7 @@ const NetworkFilter = () => {
               <p className="text-lg opacity-70">No partners found</p>
             </div>
           ) : (
-            filteredPartners.map((partner) => (
+            filteredPartners.map((partner, index) => (
               <div
                 key={partner._id}
                 onClick={() => {
@@ -512,14 +513,24 @@ const NetworkFilter = () => {
                 }}
                 className="relative w-full aspect-video rounded-xl overflow-hidden cursor-pointer shadow-lg hover:shadow-2xl transition-shadow duration-300"
               >
-                <div
-                  className="absolute inset-0 bg-cover bg-center"
-                  style={{
-                    backgroundImage: `url(${partner.thumbnail})`,
-                    filter: "brightness(1.05) saturate(1.2)",
-                  }}
-                >
+                <div className="absolute inset-0">
+                  <Image
+                    src={partner.thumbnail || ""}
+                    alt={partner.name}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    priority={index < 4}
+                    style={{
+                      filter: "brightness(1.05) saturate(1.2)",
+                    }}
+                  />
                   <div className="absolute inset-0 bg-linear-to-t from-black/10 via-black/10 to-transparent"></div>
+
+                  <FavouriteButton
+                    partnerId={partner._id || ""}
+                    className="top-4 right-4 block lg:hidden"
+                  />
 
 
 
@@ -528,7 +539,7 @@ const NetworkFilter = () => {
                       {partner.name}
                       <FavouriteButton
                         partnerId={partner._id || ""}
-                        className="ml-2.5  bottom-14"
+                        className="ml-4 bottom-14 hidden lg:inline-block"
                       />
                     </h2>
 
