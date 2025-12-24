@@ -521,6 +521,11 @@ const NetworkFilter = () => {
                 >
                   <div className="absolute inset-0 bg-linear-to-t from-black/10 via-black/10 to-transparent"></div>
 
+                  <FavouriteButton
+                    partnerId={partner._id || ""}
+                    className="top-4 right-4 block lg:hidden"
+                  />
+
 
 
                   <div className="absolute bottom-0 left-0 p-6 text-white">
@@ -528,7 +533,7 @@ const NetworkFilter = () => {
                       {partner.name}
                       <FavouriteButton
                         partnerId={partner._id || ""}
-                        className="ml-2.5  bottom-14"
+                        className="ml-4 bottom-14 hidden lg:inline-block"
                       />
                     </h2>
 
