@@ -468,6 +468,7 @@ const NetworkFilter = () => {
           size="lg"
           className="text-white focus:outline-none hover:bg-gray-800 p-2 rounded transition [&_svg:not([class*='size-'])]:size-6"
           onClick={() => setIsFilterOpen(true)}
+
         >
           <ListFilter className="h-6 w-6" />
         </Button>
@@ -517,7 +518,7 @@ const NetworkFilter = () => {
                   <Image
                     src={partner.thumbnail || ""}
                     alt={partner.name}
-                    fill
+                    layout="fill"
                     className="object-cover"
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                     priority={index < 4}
