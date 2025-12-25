@@ -290,6 +290,7 @@ import { ArrowRight, ChevronDown, ListFilter } from "lucide-react";
 import { FilterDrawer } from "./FilterDrawer";
 import PartnerDetailsModal from "../NetworkCardModal/PartnerDetailsModal";
 import FavouriteButton from "./FavouriteButton";
+import PartnerCard from "./PartnerCard";
 import { getPartners } from "@/services/partner/getpartner";
 import { Partner, PartnerCategory } from "@/types/partner.types";
 
@@ -495,7 +496,6 @@ const NetworkFilter = () => {
         </div>
       )}
 
-      {/* Partner Cards */}
       {!isLoading && (
         <div className="space-y-10">
           {filteredPartners.length === 0 ? (
@@ -504,48 +504,14 @@ const NetworkFilter = () => {
             </div>
           ) : (
             filteredPartners.map((partner) => (
-              <div
+              <PartnerCard
                 key={partner._id}
-                onClick={() => {
-                  setSelectedPartner(partner);
+                partner={partner}
+                onClick={(p) => {
+                  setSelectedPartner(p);
                   setIsModalOpen(true);
                 }}
-                className="relative w-full aspect-video rounded-xl overflow-hidden cursor-pointer shadow-lg hover:shadow-2xl transition-shadow duration-300"
-              >
-                <div
-                  className="absolute inset-0 bg-cover bg-center"
-                  style={{
-                    backgroundImage: `url(${partner.thumbnail})`,
-                    filter: "brightness(1.05) saturate(1.2)",
-                  }}
-                >
-                  <div className="absolute inset-0 bg-linear-to-t from-black/10 via-black/10 to-transparent"></div>
-
-                  <FavouriteButton
-                    partnerId={partner._id || ""}
-                    className="top-4 right-4 block lg:hidden"
-                  />
-
-
-
-                  <div className="absolute bottom-0 left-0 p-6 text-white">
-                    <h2 className="text-lg lg:text-3xl font-semibold mb-1 font-serif">
-                      {partner.name}
-                      <FavouriteButton
-                        partnerId={partner._id || ""}
-                        className="ml-4 bottom-14 hidden lg:inline-block"
-                      />
-                    </h2>
-
-                    <div className="flex items-center text-sm lg:text-lg gap-2 italic opacity-80">
-                      {partner.contacts && partner.contacts.length > 0
-                        ? (partner.contacts[0].area || partner.contacts[0].address || "Location not specified")
-                        : "Location not specified"}
-                      <ArrowRight />
-                    </div>
-                  </div>
-                </div>
-              </div>
+              />
             ))
           )}
         </div>
