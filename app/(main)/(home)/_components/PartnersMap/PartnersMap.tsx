@@ -1,9 +1,10 @@
 
 "use client";
-
+import { GrLocationPin } from "react-icons/gr";
 import { GoogleMap, Marker, LoadScript } from "@react-google-maps/api";
 import { useMemo, useState, useCallback, useEffect } from "react";
 import { Maximize, Map as MapIcon } from "lucide-react";
+import { renderToStaticMarkup } from "react-dom/server";
 
 interface Partner {
   _id: string;
@@ -32,8 +33,8 @@ interface PartnersMapProps {
 }
 
 export const DEFAULT_MAP_CENTER = {
-  lat: 25.0964811,
-  lng: 55.1192343,
+  lat: 25.1257824,
+  lng: 55.2279979,
 };
 
 export default function PartnersMap({
@@ -60,39 +61,28 @@ export default function PartnersMap({
       return undefined;
     }
 
+    const iconMarkup = renderToStaticMarkup(
+      <GrLocationPin
+        style={{
+          width: '30px',
+          height: '30px',
+          color: '#F54927'
+        }}
+      />
+    );
+
+    const svgString = encodeURIComponent(iconMarkup);
+
     return {
-      url: `data:image/svg+xml;utf8,
-      <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'>
-        <path d='M32 5a21 21 0 0 0-21 21c0 17 21 33 21 33s21-16 21-33A21 21 0 0 0 32 5zm0 31a10 10 0 1 1 10-10 10 10 0 0 1-10 10z'/>
-      </svg>`,
-      scaledSize: new window.google.maps.Size(40, 40),
-      anchor: new window.google.maps.Point(20, 40),
+      url: `data:image/svg+xml;utf8, ${svgString}`,
+      scaledSize: new window.google.maps.Size(30, 30),
+      anchor: new window.google.maps.Point(20, 30),
     };
   }, [mapLoaded]);
 
   const onMapLoad = useCallback((map: google.maps.Map) => {
     setMap(map);
   }, []);
-
-  // Auto-fit logic removed as per request to keep specific initial view
-  // useEffect(() => {
-  //   if (map && locations.length > 0) {
-  //     const bounds = new window.google.maps.LatLngBounds();
-  //     locations.forEach((location) => {
-  //       bounds.extend(location.coordinates);
-  //     });
-
-  //     const padding = { top: 100, right: 100, bottom: 100, left: 100 };
-  //     map.fitBounds(bounds, padding);
-
-  //     const listener = window.google.maps.event.addListenerOnce(map, 'bounds_changed', () => {
-  //       const currentZoom = map.getZoom();
-  //       if (currentZoom) {
-  //         map.setZoom(currentZoom - 1);
-  //       }
-  //     });
-  //   }
-  // }, [map, locations]);
 
   // Function to fit all markers
   const handleFitBounds = useCallback(() => {
