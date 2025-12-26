@@ -18,6 +18,7 @@ import {
 } from "@/services/category/category";
 import { ICategory } from "@/types/category.types";
 import Image from "next/image";
+import { BeautifulLoader } from "@/components/Shared/Loading/BeautifulLoader";
 
 // Backend base URL
 const BACKEND_BASE_URL = process.env.NEXT_PUBLIC_BASE_API;
@@ -62,47 +63,47 @@ export default function AddCategoryModal({
 
   // Handle file selection and upload
   const handleFileChange = async (file: File) => {
-  // Block SVG
-  if (
-    file.type === "image/svg+xml" ||
-    file.name.toLowerCase().endsWith(".svg")
-  ) {
-    toast.error("Please upload image PNG, JPG, JPEG", { style: toastStyle });
+    // Block SVG
+    if (
+      file.type === "image/svg+xml" ||
+      file.name.toLowerCase().endsWith(".svg")
+    ) {
+      toast.error("Please upload image PNG, JPG, JPEG", { style: toastStyle });
 
-    // reset input so same file can be selected again
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-    return;
-  }
-
-  setUploading(true);
-  try {
-    const formData = new FormData();
-    formData.append("file", file);
-
-    const res = await fetch(`${BACKEND_BASE_URL}/upload`, {
-      method: "POST",
-      body: formData,
-    });
-
-    const data = await res.json();
-
-    if (!res.ok || !data.success) {
-      console.error(data.message || "Failed to upload image");
+      // reset input so same file can be selected again
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
       return;
     }
 
-    setImage(data.data.url);
-  } catch (err) {
-    console.error("Upload error:", err);
-  } finally {
-    setUploading(false);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch(`${BACKEND_BASE_URL}/upload`, {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        console.error(data.message || "Failed to upload image");
+        return;
+      }
+
+      setImage(data.data.url);
+    } catch (err) {
+      console.error("Upload error:", err);
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
     }
-  }
-};
+  };
 
 
   const handleImageRemove = () => {
@@ -228,11 +229,11 @@ export default function AddCategoryModal({
                 }`}
             >
               <Upload className="mx-auto mb-2 text-gray-400" />
-              <p className="text-sm text-gray-400">
+              <div className="text-sm text-gray-400">
                 {uploading
-                  ? "Uploading..."
+                  ? <BeautifulLoader size="sm" text="Uploading..." />
                   : "Click to upload or drag and drop"}
-              </p>
+              </div>
               <p className="text-xs text-gray-500">PNG, JPG up to 10MB</p>
 
               <input
@@ -282,9 +283,7 @@ export default function AddCategoryModal({
             disabled={loading || uploading}
           >
             {loading
-              ? isEdit
-                ? "Updating..."
-                : "Adding..."
+              ? <BeautifulLoader size="sm" text={isEdit ? "Updating..." : "Adding..."} />
               : uploading
                 ? "Uploading..."
                 : isEdit

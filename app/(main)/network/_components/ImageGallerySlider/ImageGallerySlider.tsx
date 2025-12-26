@@ -2,6 +2,7 @@ import Image, { StaticImageData } from "next/image";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import clsx from "clsx";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface ImageGallerySliderProps {
   images: (string | StaticImageData)[];
@@ -12,7 +13,8 @@ export default function ImageGallerySlider({ images }: ImageGallerySliderProps) 
   const [fade, setFade] = useState(false);
   const [isZoomed, setIsZoomed] = useState(false);
   const [zoomIndex, setZoomIndex] = useState(0);
-  const [zoomVisible, setZoomVisible] = useState(false); // Separate state for zoom visibility animation
+  const [zoomVisible, setZoomVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const changeSlide = (newIndex: number) => {
     setFade(true);
@@ -20,6 +22,7 @@ export default function ImageGallerySlider({ images }: ImageGallerySliderProps) 
     setTimeout(() => {
       setIndex(newIndex);
       setFade(false);
+      setIsLoading(true); // Reset loading state for new image
     }, 180);
   };
 
@@ -81,10 +84,21 @@ export default function ImageGallerySlider({ images }: ImageGallerySliderProps) 
     };
   }, [isZoomed, zoomIndex, images.length]);
 
+  // Reset when images change
+  useEffect(() => {
+    setIndex(0);
+    setIsLoading(true);
+  }, [images]);
+
   return (
     <div>
       {/* IMAGE VIEW */}
-      <div className="relative w-full h-[242px] lg:h-[435px] overflow-hidden rounded-xl">
+      <div className="relative w-full h-[242px] lg:h-[435px] overflow-hidden rounded-xl bg-gray-900/10">
+        {isLoading && (
+          <div className="absolute inset-0 z-10 flex items-center justify-center bg-transparent">
+            <div className="w-8 h-8 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+          </div>
+        )}
         <div
           className={clsx(
             "relative w-full h-full transition-opacity duration-300 ease-in-out",
@@ -95,9 +109,14 @@ export default function ImageGallerySlider({ images }: ImageGallerySliderProps) 
             src={images[index]}
             unoptimized
             alt="Gallery"
+            id="gallery-main-image"
             fill
+            sizes="(max-width: 768px) 100vw, 800px"
             className="object-cover cursor-pointer hover:scale-105 transition-transform duration-300 ease-in-out"
             onClick={() => openZoom(index)}
+            onLoad={() => setIsLoading(false)}
+            preload={true}
+            loading="eager"
           />
         </div>
 
@@ -125,14 +144,14 @@ export default function ImageGallerySlider({ images }: ImageGallerySliderProps) 
 
       {/* Desktop Arrows */}
       <div className="hidden lg:flex justify-between items-center mt-3 px-1">
-        <button 
-          onClick={prevSlide} 
+        <button
+          onClick={prevSlide}
           className="pt-2 rounded-full cursor-pointer hover:bg-white/10 transition-all duration-200 ease-in-out p-1"
         >
           <ChevronLeft className="w-6 h-6" />
         </button>
-        <button 
-          onClick={nextSlide} 
+        <button
+          onClick={nextSlide}
           className="pt-2 rounded-full cursor-pointer hover:bg-white/10 transition-all duration-200 ease-in-out p-1"
         >
           <ChevronRight className="w-6 h-6" />
@@ -152,11 +171,13 @@ export default function ImageGallerySlider({ images }: ImageGallerySliderProps) 
               )}
             >
               <Image
-              unoptimized
+                unoptimized
                 src={img}
                 alt={`Thumbnail ${i + 1}`}
                 fill
                 className="object-cover"
+                preload={true}
+                loading="eager"
               />
             </button>
           ))}
@@ -172,7 +193,7 @@ export default function ImageGallerySlider({ images }: ImageGallerySliderProps) 
           )}
           onClick={closeZoom}
         >
-          <div 
+          <div
             className={clsx(
               "relative transition-all duration-300 ease-in-out transform",
               zoomVisible ? "scale-100 opacity-100" : "scale-95 opacity-0"
@@ -209,7 +230,7 @@ export default function ImageGallerySlider({ images }: ImageGallerySliderProps) 
                 >
                   <ChevronRight className="w-8 h-8" />
                 </button>
-                
+
                 <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/70 text-white px-4 py-2 rounded-full">
                   {zoomIndex + 1} / {images.length}
                 </div>
@@ -217,7 +238,7 @@ export default function ImageGallerySlider({ images }: ImageGallerySliderProps) 
             )}
 
             <Image
-            unoptimized
+              unoptimized
               src={images[zoomIndex]}
               alt="Zoomed Gallery"
               width={1200}

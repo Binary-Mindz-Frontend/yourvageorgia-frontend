@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
 import { verifyForgetOtp } from "@/services/auth";
+import { BeautifulLoader } from "@/components/Shared/Loading/BeautifulLoader";
 
 export default function VerifyOtpPage() {
   const [otp, setOtp] = useState("");
@@ -53,7 +54,7 @@ export default function VerifyOtpPage() {
             className="bg-black cursor-pointer px-10 text-white border-white mt-4 md:mt-0 hover:bg-white hover:text-black hover:border-black transition-colors duration-200"
             type="submit"
           >
-            {loading ? "Verifying..." : "Verify OTP"}
+            {loading ? <BeautifulLoader size="sm" text="Verifying..." /> : "Verify OTP"}
           </Button>
         </div>
       </form>

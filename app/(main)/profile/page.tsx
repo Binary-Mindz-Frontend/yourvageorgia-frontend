@@ -31,7 +31,7 @@ const formatExpiryDate = (timestamp: number) => {
 const ProfilePage = async () => {
   const memberData = await getCurrentUser();
 
-  if(!memberData) {
+  if (!memberData) {
     return redirect("/login")
   }
 
@@ -71,7 +71,7 @@ const ProfilePage = async () => {
 
       <div className="mt-6">
         <Button asChild>
-            <a href={`${apiUrl}/wallet/membership?token=${memberData.accessToken}`} target="_blank"> Add to Apple Wallet </a>
+          <a href={`${apiUrl}/wallet/membership?token=${memberData.accessToken}`} target="_blank"> Add to Apple Wallet </a>
         </Button>
       </div>
 
@@ -82,10 +82,12 @@ const ProfilePage = async () => {
   );
 };
 
+import { BeautifulLoader } from "@/components/Shared/Loading/BeautifulLoader";
+
 // Wrapping the component in Suspense for loading state
 const ProfilePageWithSuspense = () => {
   return (
-    <Suspense fallback={<div className="text-center text-white">Loading...</div>}>
+    <Suspense fallback={<BeautifulLoader fullScreen text="Loading Profile" />}>
       <ProfilePage />
     </Suspense>
   );

@@ -20,10 +20,8 @@ const cormorant = Cormorant_Garamond({
 export const metadata: Metadata = {
   title: "Solenne - Luxury Wellness Membership",
   description: "A lifestyle membership redefining how women experience wellness in Dubai",
-  icons: {
-    icon: "/favicon.svg",
-    shortcut: "/favicon.svg",
-    apple: "/apple-touch-icon.png",
+  appleWebApp: {
+    title: "Solenne",
   },
 };
 
@@ -37,7 +35,7 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${cormorant.variable} font-sans antialiased`}
       >
-         <Providers>{children}</Providers>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

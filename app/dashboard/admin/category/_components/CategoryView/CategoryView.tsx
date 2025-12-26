@@ -6,6 +6,8 @@ import { getCategoryById } from "@/services/category/category";
 import { ICategory } from "@/types/category.types";
 import { toast } from "sonner";
 
+import { BeautifulLoader } from "@/components/Shared/Loading/BeautifulLoader";
+
 interface CategoryViewProps {
   categoryId: string;
 }
@@ -29,7 +31,7 @@ const CategoryView: React.FC<CategoryViewProps> = ({ categoryId }) => {
     fetchCategory();
   }, [categoryId]);
 
-  if (loading) return <p className="text-white">Loading...</p>;
+  if (loading) return <BeautifulLoader text="Loading Category" />;
   if (!category) return <p className="text-white">No category found.</p>;
 
   return (
@@ -47,15 +49,15 @@ const CategoryView: React.FC<CategoryViewProps> = ({ categoryId }) => {
           />
         </div>
       )}
-     <div className="text-sm text-gray-400">
-  Created At: {category.createdAt
-    ? new Date(category.createdAt).toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "2-digit",
-      })
-    : "-"}
-</div>
+      <div className="text-sm text-gray-400">
+        Created At: {category.createdAt
+          ? new Date(category.createdAt).toLocaleDateString("en-GB", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "2-digit",
+          })
+          : "-"}
+      </div>
 
     </div>
   );

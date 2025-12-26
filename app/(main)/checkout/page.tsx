@@ -82,6 +82,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import toast from "react-hot-toast";
 import { createStripeSession } from "@/services/stripe";
+import { BeautifulLoader } from "@/components/Shared/Loading/BeautifulLoader";
 
 export default function CheckoutPage() {
   const [email, setEmail] = useState("");
@@ -126,7 +127,7 @@ export default function CheckoutPage() {
     <div className="h-[90vh] flex items-center justify-center px-4">
       <div className="w-full max-w-sm shadow-lg p-6 rounded-xl space-y-6">
         <h1 className="text-4xl lg:text-5xl text-[#FFF] font-semibold font-serif text-center mb-10">
-           Checkout
+          Checkout
         </h1>
         <Input
           placeholder="Enter Email*"
@@ -150,7 +151,7 @@ export default function CheckoutPage() {
             onClick={handleCheckout}
             disabled={loading}
           >
-            {loading ? "Processing..." : "Proceed to Payment"}
+            {loading ? <BeautifulLoader size="sm" text="Processing..." /> : "Proceed to Payment"}
           </Button>
         </div>
       </div>

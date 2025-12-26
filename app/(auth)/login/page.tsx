@@ -9,6 +9,7 @@ import { loginUser } from "@/services/auth";
 import toast from "react-hot-toast";
 import useUser from "@/hooks/useUser";
 import Link from "next/link";
+import { BeautifulLoader } from "@/components/Shared/Loading/BeautifulLoader";
 
 const MemberLogin = () => {
   const router = useRouter();
@@ -16,12 +17,12 @@ const MemberLogin = () => {
   // Form States
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  
+
 
   // UI States
- 
+
   const [isLoading] = useState(false);
-   const { setUser, setIsLoading } = useUser();
+  const { setUser, setIsLoading } = useUser();
 
   // Handle submit
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -94,13 +95,12 @@ const MemberLogin = () => {
             <Button
               type="submit"
               disabled={isLoading}
-              className={`bg-black cursor-pointer px-10 text-white border-white mt-4 md:mt-0 hover:bg-white hover:text-black hover:border-black transition-colors duration-200 ${
-                isLoading
+              className={`bg-black cursor-pointer px-10 text-white border-white mt-4 md:mt-0 hover:bg-white hover:text-black hover:border-black transition-colors duration-200 ${isLoading
                   ? "border-gray-600 bg-gray-900 cursor-not-allowed"
                   : "border-white"
-              }`}
+                }`}
             >
-              {isLoading ? "Processing..." : "Login"}
+              {isLoading ? <BeautifulLoader size="sm" text="Processing..." /> : "Login"}
             </Button>
           </div>
         </form>

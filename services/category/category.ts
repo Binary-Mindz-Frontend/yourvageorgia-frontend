@@ -46,7 +46,9 @@ export const getCategories = async (): Promise<
   { data: ICategoryResponse["data"][] } | { error: string }
 > => {
   try {
-    const res = await fetch(`${BASE_URL}/category`);
+    const res = await fetch(`${BASE_URL}/category`, {
+      next: { revalidate: 3600 },
+    });
     const json = await res.json();
     if (!res.ok) return { error: json.message || "Failed to fetch categories" };
     return { data: json.data };

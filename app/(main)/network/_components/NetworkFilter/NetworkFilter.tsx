@@ -7,6 +7,7 @@
 // import { FilterDrawer } from "./FilterDrawer";
 // import PartnerDetailsModal from "../NetworkCardModal/PartnerDetailsModal";
 // import FavouriteButton from "./FavouriteButton";
+// import PartnerCard from "./PartnerCard";
 // import { getPartners } from "@/services/partner/getpartner";
 // import { Partner, PartnerCategory } from "@/types/partner.types";
 
@@ -65,18 +66,16 @@
 //     fetchPartners();
 //   }, []);
 
-
 //   // Set active filter from URL after first render
 //   useEffect(() => {
 //     if (filterFromUrl) {
-//       setActiveFilter(filterFromUrl); // Set filter when URL query is present
+//       setActiveFilter(filterFromUrl);
 //     }
 //   }, [filterFromUrl]);
 
 //   // Update activeFilter if search query matches category title
 //   useEffect(() => {
 //     if (searchQuery) {
-//       // Check if the search query matches any of the category titles
 //       const matchedCategory = filters.find((filter) => filter.toLowerCase() === searchQuery.toLowerCase());
 //       if (matchedCategory) {
 //         setActiveFilter(matchedCategory);
@@ -86,61 +85,79 @@
 
 //   const filters = ["All", "Movement", "Recovery", "Radiance", "Taste"];
 
+//   // Helper function to get category titles from partner
+//   const getCategoryTitles = (partner: Partner): string[] => {
+//     // Handle new multi-category format
+//     if (partner.categories && Array.isArray(partner.categories)) {
+//       return partner.categories.map(cat =>
+//         typeof cat === "string" ? cat : cat.title
+//       );
+//     }
+
+//     // Handle old single category format (backward compatibility)
+//     if (partner.category) {
+//       const categoryTitle = typeof partner.category === "string"
+//         ? partner.category
+//         : (partner.category as PartnerCategory)?.title;
+//       return categoryTitle ? [categoryTitle] : [];
+//     }
+
+//     return [];
+//   };
+
 //   // Filter partners by category
 //   let filteredPartners =
 //     activeFilter === "All"
 //       ? partners
 //       : partners.filter((p) => {
-//         // Handle both string and PartnerCategory types
-//         const categoryTitle = typeof p.category === "string"
-//           ? p.category
-//           : (p.category as PartnerCategory)?.title;
-//         return categoryTitle === activeFilter;
+//         const categoryTitles = getCategoryTitles(p);
+//         // Check if any of the partner's categories match the active filter
+//         return categoryTitles.includes(activeFilter);
 //       });
 
 //   // Apply drawer filters
 //   if (appliedFilters.locations.length > 0) {
-//   filteredPartners = filteredPartners.filter((p) => {
-//     if (!p.contacts || !Array.isArray(p.contacts) || p.contacts.length === 0) return false;
+//     filteredPartners = filteredPartners.filter((p) => {
+//       if (!p.contacts || !Array.isArray(p.contacts) || p.contacts.length === 0) return false;
 
-//     // Check if any of the partner's contact areas match the applied filters
-//     return p.contacts.some((contact) => {
-//       const location = contact.area || contact.address;
-//       return location !== undefined && appliedFilters.locations.includes(location);
+//       return p.contacts.some((contact) => {
+//         const location = contact.area || contact.address;
+//         return location !== undefined && appliedFilters.locations.includes(location);
+//       });
 //     });
-//   });
-// }
+//   }
 
-// if (appliedFilters.activities.length > 0) {
-//   filteredPartners = filteredPartners.filter((p) => {
-//     if (!p.activity || !Array.isArray(p.activity) || p.activity.length === 0) return false;
+//   if (appliedFilters.activities.length > 0) {
+//     filteredPartners = filteredPartners.filter((p) => {
+//       if (!p.activity || !Array.isArray(p.activity) || p.activity.length === 0) return false;
 
-//     // Check if any of the partner's activities match the applied filters
-//     return p.activity.some((act) => {
-//       // Type guard to ensure act is an object with a title property
-//       if (typeof act === 'object' && act !== null && 'title' in act) {
-//         const activityObj = act as { title: string };
-//         return appliedFilters.activities.includes(activityObj.title);
-//       }
-//       return false;
+//       return p.activity.some((act) => {
+//         if (typeof act === 'object' && act !== null && 'title' in act) {
+//           const activityObj = act as { title: string };
+//           return appliedFilters.activities.includes(activityObj.title);
+//         }
+//         return false;
+//       });
 //     });
-//   });
-// }
+//   }
 
-//   // Apply search query filter for both partner name and category title
+//   // Apply search query filter for both partner name and category titles
 //   if (searchQuery) {
 //     filteredPartners = filteredPartners.filter((partner) => {
 //       const nameMatches = partner.name.toLowerCase().includes(searchQuery.toLowerCase());
-//       const categoryMatches = typeof partner.category === "object"
-//         ? (partner.category as PartnerCategory)?.title.toLowerCase().includes(searchQuery.toLowerCase())
-//         : partner.categories[0].toLowerCase().includes(searchQuery.toLowerCase());
+
+//       // Check if search query matches any of the partner's categories
+//       const categoryTitles = getCategoryTitles(partner);
+//       const categoryMatches = categoryTitles.some(title =>
+//         title.toLowerCase().includes(searchQuery.toLowerCase())
+//       );
 
 //       return nameMatches || categoryMatches;
 //     });
 //   }
 
 //   const handleFilterClick = (filter: string) => {
-//     setActiveFilter(filter); // Set the active filter to the selected category
+//     setActiveFilter(filter);
 //     setShowAll(false);
 
 //     // Update URL without full reload
@@ -180,8 +197,8 @@
 //             key={filter}
 //             onClick={() => handleFilterClick(filter)}
 //             className={`md:py-2.5 rounded lg:rounded-lg whitespace-nowrap min-w-max ${activeFilter === filter && !showAll
-//                 ? "bg-white text-black hover:bg-white"
-//                 : "text-white"
+//               ? "bg-white text-black hover:bg-white"
+//               : "text-white"
 //               }`}
 //           >
 //             {filter}
@@ -196,7 +213,6 @@
 //         </div>
 //       )}
 
-//       {/* Partner Cards */}
 //       {!isLoading && (
 //         <div className="space-y-10">
 //           {filteredPartners.length === 0 ? (
@@ -205,42 +221,14 @@
 //             </div>
 //           ) : (
 //             filteredPartners.map((partner) => (
-//               <div
+//               <PartnerCard
 //                 key={partner._id}
-//                 onClick={() => {
-//                   setSelectedPartner(partner);
+//                 partner={partner}
+//                 onClick={(p) => {
+//                   setSelectedPartner(p);
 //                   setIsModalOpen(true);
 //                 }}
-//                 className="relative w-full aspect-video rounded-xl overflow-hidden cursor-pointer shadow-lg hover:shadow-2xl transition-shadow duration-300"
-//               >
-//                 <div
-//                   className="absolute inset-0 bg-cover bg-center"
-//                   style={{
-//                     backgroundImage: `url(${partner.thumbnail})`,
-//                     filter: "brightness(1.05) saturate(1.2)",
-//                   }}
-//                 >
-//                   <div className="absolute inset-0 bg-linear-to-t from-black/10 via-black/10 to-transparent"></div>
-
-//                   <FavouriteButton
-//                     partnerId={partner._id || ""}
-//                     className="left-64 bottom-14"
-//                   />
-
-//                   <div className="absolute bottom-0 left-0 p-6 text-white">
-//                     <h2 className="text-lg lg:text-3xl font-semibold mb-1 font-serif">
-//                       {partner.name}
-//                     </h2>
-
-//                     <div className="flex items-center text-sm lg:text-lg gap-2 italic opacity-80">
-//                       {partner.contacts && partner.contacts.length > 0
-//                         ? (partner.contacts[0].area || partner.contacts[0].address || "Location not specified")
-//                         : "Location not specified"}
-//                       <ArrowRight />
-//                     </div>
-//                   </div>
-//                 </div>
-//               </div>
+//               />
 //             ))
 //           )}
 //         </div>
@@ -268,7 +256,7 @@
 //         </div>
 //       )}
 
-//       {/* Filter Drawer - Now receives all partners data */}
+//       {/* Filter Drawer */}
 //       <FilterDrawer
 //         isOpen={isFilterOpen}
 //         onClose={() => setIsFilterOpen(false)}
@@ -290,8 +278,11 @@ import { ArrowRight, ChevronDown, ListFilter } from "lucide-react";
 import { FilterDrawer } from "./FilterDrawer";
 import PartnerDetailsModal from "../NetworkCardModal/PartnerDetailsModal";
 import FavouriteButton from "./FavouriteButton";
+import PartnerCard from "./PartnerCard";
 import { getPartners } from "@/services/partner/getpartner";
 import { Partner, PartnerCategory } from "@/types/partner.types";
+import { NetworkSkeleton } from "@/components/Shared/Loading/NetworkSkeleton";
+import { BeautifulLoader } from "@/components/Shared/Loading/BeautifulLoader";
 
 interface AppliedFilters {
   locations: string[];
@@ -302,13 +293,13 @@ const NetworkFilter = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const filterFromUrl = searchParams.get("filter"); // Category filter from URL
-  const searchQuery = searchParams.get("search"); // Search query from URL
+  const filterFromUrl = searchParams.get("filter");
+  const searchQuery = searchParams.get("search");
 
   const [partners, setPartners] = useState<Partner[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [displayCount, setDisplayCount] = useState(10); // Display er jonno count
 
-  const [showAll, setShowAll] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPartner, setSelectedPartner] = useState<Partner | null>(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -319,12 +310,13 @@ const NetworkFilter = () => {
 
   const [activeFilter, setActiveFilter] = useState<string>("All");
 
-  // Fetch partners using getPartners function
+  // Fetch ALL partners at once (no limit)
   useEffect(() => {
     const fetchPartners = async () => {
       setIsLoading(true);
       try {
-        const result = await getPartners({});
+        // Fetch without limit to get all partners for filtering
+        const result = await getPartners({ limit: 1000 }); // Large limit or modify API to fetch all
         console.log(result);
 
         if ("error" in result) {
@@ -348,14 +340,14 @@ const NetworkFilter = () => {
     fetchPartners();
   }, []);
 
-  // Set active filter from URL after first render
+  // Set active filter from URL
   useEffect(() => {
     if (filterFromUrl) {
       setActiveFilter(filterFromUrl);
     }
   }, [filterFromUrl]);
 
-  // Update activeFilter if search query matches category title
+  // Update activeFilter if search query matches category
   useEffect(() => {
     if (searchQuery) {
       const matchedCategory = filters.find((filter) => filter.toLowerCase() === searchQuery.toLowerCase());
@@ -367,16 +359,14 @@ const NetworkFilter = () => {
 
   const filters = ["All", "Movement", "Recovery", "Radiance", "Taste"];
 
-  // Helper function to get category titles from partner
+  // Helper function to get category titles
   const getCategoryTitles = (partner: Partner): string[] => {
-    // Handle new multi-category format
     if (partner.categories && Array.isArray(partner.categories)) {
       return partner.categories.map(cat =>
         typeof cat === "string" ? cat : cat.title
       );
     }
 
-    // Handle old single category format (backward compatibility)
     if (partner.category) {
       const categoryTitle = typeof partner.category === "string"
         ? partner.category
@@ -387,13 +377,12 @@ const NetworkFilter = () => {
     return [];
   };
 
-  // Filter partners by category
+  // COMPLETE FILTERING (on all partners)
   let filteredPartners =
     activeFilter === "All"
       ? partners
       : partners.filter((p) => {
         const categoryTitles = getCategoryTitles(p);
-        // Check if any of the partner's categories match the active filter
         return categoryTitles.includes(activeFilter);
       });
 
@@ -423,12 +412,10 @@ const NetworkFilter = () => {
     });
   }
 
-  // Apply search query filter for both partner name and category titles
+  // Apply search query filter
   if (searchQuery) {
     filteredPartners = filteredPartners.filter((partner) => {
       const nameMatches = partner.name.toLowerCase().includes(searchQuery.toLowerCase());
-
-      // Check if search query matches any of the partner's categories
       const categoryTitles = getCategoryTitles(partner);
       const categoryMatches = categoryTitles.some(title =>
         title.toLowerCase().includes(searchQuery.toLowerCase())
@@ -438,11 +425,14 @@ const NetworkFilter = () => {
     });
   }
 
+  // PAGINATION: Display only first 'displayCount' items
+  const displayedPartners = filteredPartners.slice(0, displayCount);
+  const hasMore = displayCount < filteredPartners.length;
+
   const handleFilterClick = (filter: string) => {
     setActiveFilter(filter);
-    setShowAll(false);
+    setDisplayCount(10); // Reset to 10 when filter changes
 
-    // Update URL without full reload
     if (filter === "All") {
       router.push("/network");
     } else {
@@ -452,6 +442,11 @@ const NetworkFilter = () => {
 
   const handleFilterChange = (filters: AppliedFilters) => {
     setAppliedFilters(filters);
+    setDisplayCount(10); // Reset to 10 when drawer filter changes
+  };
+
+  const handleLoadMore = () => {
+    setDisplayCount(prev => prev + 10);
   };
 
   return (
@@ -478,7 +473,7 @@ const NetworkFilter = () => {
           <Button
             key={filter}
             onClick={() => handleFilterClick(filter)}
-            className={`md:py-2.5 rounded lg:rounded-lg whitespace-nowrap min-w-max ${activeFilter === filter && !showAll
+            className={`md:py-2.5 rounded lg:rounded-lg whitespace-nowrap min-w-max ${activeFilter === filter
               ? "bg-white text-black hover:bg-white"
               : "text-white"
               }`}
@@ -489,77 +484,51 @@ const NetworkFilter = () => {
       </div>
 
       {/* Loading State */}
-      {isLoading && (
-        <div className="text-center py-10">
-          <p className="text-lg">Loading partners...</p>
+      {isLoading && partners.length === 0 && (
+        <div className="py-10">
+          <NetworkSkeleton />
         </div>
       )}
 
-      {/* Partner Cards */}
       {!isLoading && (
         <div className="space-y-10">
-          {filteredPartners.length === 0 ? (
+          {displayedPartners.length === 0 ? (
             <div className="text-center py-10">
               <p className="text-lg opacity-70">No partners found</p>
             </div>
           ) : (
-            filteredPartners.map((partner) => (
-              <div
+            displayedPartners.map((partner) => (
+              <PartnerCard
                 key={partner._id}
-                onClick={() => {
-                  setSelectedPartner(partner);
+                partner={partner}
+                onClick={(p) => {
+                  setSelectedPartner(p);
                   setIsModalOpen(true);
                 }}
-                className="relative w-full aspect-video rounded-xl overflow-hidden cursor-pointer shadow-lg hover:shadow-2xl transition-shadow duration-300"
-              >
-                <div
-                  className="absolute inset-0 bg-cover bg-center"
-                  style={{
-                    backgroundImage: `url(${partner.thumbnail})`,
-                    filter: "brightness(1.05) saturate(1.2)",
-                  }}
-                >
-                  <div className="absolute inset-0 bg-linear-to-t from-black/10 via-black/10 to-transparent"></div>
-
-                  <FavouriteButton
-                    partnerId={partner._id || ""}
-                    className="top-4 right-4 block lg:hidden"
-                  />
-
-
-
-                  <div className="absolute bottom-0 left-0 p-6 text-white">
-                    <h2 className="text-lg lg:text-3xl font-semibold mb-1 font-serif">
-                      {partner.name}
-                      <FavouriteButton
-                        partnerId={partner._id || ""}
-                        className="ml-4 bottom-14 hidden lg:inline-block"
-                      />
-                    </h2>
-
-                    <div className="flex items-center text-sm lg:text-lg gap-2 italic opacity-80">
-                      {partner.contacts && partner.contacts.length > 0
-                        ? (partner.contacts[0].area || partner.contacts[0].address || "Location not specified")
-                        : "Location not specified"}
-                      <ArrowRight />
-                    </div>
-                  </div>
-                </div>
-              </div>
+              />
             ))
           )}
         </div>
       )}
 
-      {/* Show All Arrow */}
-      {!showAll && !isLoading && filteredPartners.length > 0 && (
-        <div className="mt-10 flex justify-center">
+      {/* Load More Button */}
+      {!isLoading && hasMore && (
+        <div className="mt-10 flex flex-col items-center gap-2">
           <button
-            onClick={() => setShowAll(true)}
+            onClick={handleLoadMore}
             className="p-3 rounded-full hover:bg-black/50 cursor-pointer transition"
           >
             <ChevronDown className="lg:w-10 lg:h-10" />
           </button>
+          <p className="text-sm opacity-70">
+            Showing {displayedPartners.length} of {filteredPartners.length}
+          </p>
+        </div>
+      )}
+
+      {isLoading && partners.length > 0 && (
+        <div className="mt-10 flex justify-center">
+          <BeautifulLoader size="sm" text="Loading more partners" />
         </div>
       )}
 

@@ -10,13 +10,14 @@ import { AppSidebar } from "@/components/Shared/dashboard/sidebar/AppSidebar";
 import useScrollTrigger from "@/hooks/useScrollTrigger";
 import { LogOut, User } from "lucide-react";
 import { Toaster } from "sonner";
+import { BeautifulLoader } from "@/components/Shared/Loading/BeautifulLoader";
 import { useRouter, usePathname } from "next/navigation";
 import { toast } from "sonner";
 // Updated imports - added startTokenExpiryMonitor
-import { 
-  isAuthenticated, 
-  logoutAdmin, 
-  startTokenExpiryMonitor 
+import {
+  isAuthenticated,
+  logoutAdmin,
+  startTokenExpiryMonitor
 } from "@/services/admin.auth/admin.auth";
 
 const DashboardLayout = ({ children }: { children: ReactNode }) => {
@@ -85,11 +86,7 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
 
   // Show loading while checking auth
   if (isChecking) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-black">
-        <p className="text-white text-xl">Loading...</p>
-      </div>
-    );
+    return <BeautifulLoader fullScreen text="Authenticating" />;
   }
 
   return (
@@ -98,9 +95,8 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
         <AppSidebar />
         <SidebarInset className="">
           <header
-            className={`flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 sticky top-0 bg-primary-200 z-10 shadow-sm bg-black ${
-              scrolled && "shadow-md"
-            }`}
+            className={`flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 sticky top-0 bg-primary-200 z-10 shadow-sm bg-black ${scrolled && "shadow-md"
+              }`}
           >
             <div className="flex items-center justify-between gap-2 px-4 w-full">
               <div className="flex items-center gap-2">
@@ -110,17 +106,17 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
                 </h1>
               </div>
               <div className="flex items-center gap-4 mr-2">
-                
+
                 <div className="relative" ref={dropdownRef}>
-                  <Avatar 
-                    className="h-10 w-10 cursor-pointer" 
+                  <Avatar
+                    className="h-10 w-10 cursor-pointer"
                     onClick={toggleLogout}
                   >
                     <AvatarFallback className="bg-gray-700 text-white">
                       <User />
                     </AvatarFallback>
                   </Avatar>
-                  
+
                   {showLogout && (
                     <div className="absolute right-0 top-11 bg-black border border-gray-700 rounded-md shadow-lg min-w-40 z-50">
                       <button

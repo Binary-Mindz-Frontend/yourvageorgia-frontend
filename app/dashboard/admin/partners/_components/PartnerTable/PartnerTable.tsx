@@ -78,7 +78,7 @@ const PartnerPage = () => {
     const fetchGlobalCounts = useCallback(async () => {
         setGlobalLoading(true);
         try {
-            
+
             const params: IGetPartnersParams = { limit: 10000 }; // Get a large enough limit or use a dedicated stats endpoint
 
             const res = await getPartners(params);
@@ -88,7 +88,7 @@ const PartnerPage = () => {
             } else {
                 const allPartners = res.data as PartnerRow[];
                 setGlobalTotalPartners(res.meta.total || allPartners.length);
-                
+
                 const featuredCount = allPartners.filter((p) =>
                     p.isFeatured === true ||
                     (typeof p.isFeatured === "string" && p.isFeatured === "true")
@@ -135,12 +135,12 @@ const PartnerPage = () => {
             };
 
             const res = await getPartners(params);
-
+            console.log(res, "res");
             if ("error" in res) {
                 toast.error(res.error, { style: toastStyle });
             } else {
                 setPartners(res.data as PartnerRow[]);
-                setFilteredTotalItems(res.meta.total || 0); // 💡 RENAME state for clarity
+                setFilteredTotalItems(res?.meta?.total || 0); // 💡 RENAME state for clarity
             }
         } catch (err) {
             console.error(err);
@@ -186,7 +186,7 @@ const PartnerPage = () => {
 
     const handlePositionUpdateSuccess = () => {
         // Refetch the table data to show the updated position
-        fetchPartners(); 
+        fetchPartners();
         // We generally don't need to refetch global counts unless position affects them.
     };
     // ----------------------------
@@ -201,7 +201,7 @@ const PartnerPage = () => {
             } else {
                 toast.success(res.message, { style: toastStyle });
                 // Refetch both table and global counts after deletion
-                fetchPartners(); 
+                fetchPartners();
                 fetchGlobalCounts(); // 💡 RE-FETCH GLOBAL COUNTS
             }
         } catch (err) {
@@ -285,7 +285,7 @@ const PartnerPage = () => {
                                 className="flex items-center gap-2 cursor-pointer"
                                 onClick={() => handleOpenPositionDialog(row)}
                             >
-                                <Pen size={16} /> 
+                                <Pen size={16} />
                                 Change Position
                             </DropdownMenuItem>
                             {/* ---------------------------------------------- */}
@@ -317,7 +317,7 @@ const PartnerPage = () => {
         <div>
             <UsersSummary
                 // USE THE NEW GLOBAL STATE HERE
-                totalPartners={globalTotalPartners} 
+                totalPartners={globalTotalPartners}
                 featuredPartners={globalFeaturedPartners}
                 loading={globalLoading} // Use the loading state for the summary section
             />
@@ -344,7 +344,7 @@ const PartnerPage = () => {
             <CustomTable columns={columns} data={partners} loading={tableLoading} />
 
             <CustomPagination
-                totalItems={filteredTotalItems} 
+                totalItems={filteredTotalItems}
                 pageSize={pageSize}
                 currentPage={filters.page}
                 onPageChange={handlePageChange}

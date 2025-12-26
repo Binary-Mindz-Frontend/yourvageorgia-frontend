@@ -17,6 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Upload, X } from "lucide-react";
 import { toast } from "sonner";
+import { BeautifulLoader } from "@/components/Shared/Loading/BeautifulLoader";
 import {
   Select,
   SelectTrigger,
@@ -59,13 +60,13 @@ interface FormData {
   website: string;
   instagram: string;
   whatsapp: string;
-  
+
 }
 
 interface AddPartnerPageProps {
   partnerId?: string;
   initialCategoryId?: string;
-  
+
 }
 
 export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPartnerPageProps) {
@@ -169,7 +170,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
 
         // Handle categories array
         if (partner.categories && Array.isArray(partner.categories)) {
-          setValue("categories", partner.categories.map((cat: any) => 
+          setValue("categories", partner.categories.map((cat: any) =>
             typeof cat === 'string' ? cat : cat._id
           ));
         } else if (partner.category) {
@@ -199,11 +200,11 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
           "offers",
           partner.offer?.length
             ? partner.offer.map((o: any) => ({
-                title: o.title || "",
-                percentage: o.offerPercentage?.toString() || "",
-                description: o.description || "",
-                validUntil: o.validUntil ? o.validUntil.split("T")[0] : "",
-              }))
+              title: o.title || "",
+              percentage: o.offerPercentage?.toString() || "",
+              description: o.description || "",
+              validUntil: o.validUntil ? o.validUntil.split("T")[0] : "",
+            }))
             : [{ title: "", percentage: "", description: "", validUntil: "" }]
         );
 
@@ -451,7 +452,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
     return (
       <div className="max-w-5xl mx-auto p-6 bg-neutral-950 min-h-screen">
         <div className="flex items-center justify-center h-64">
-          <p className="text-white text-xl">Loading partner data...</p>
+          <BeautifulLoader text="Loading partner data" />
         </div>
       </div>
     );
@@ -497,7 +498,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
                     }}
                   >
                     <SelectTrigger className="mt-1 w-full bg-neutral-900 border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50 text-white h-auto min-h-12 py-3 items-start">
-                      <SelectValue placeholder={loadingCategories ? "Loading..." : "Select categories"} />
+                      <SelectValue placeholder={loadingCategories ? <BeautifulLoader size="sm" /> : "Select categories"} />
                     </SelectTrigger>
                     <SelectContent className="bg-neutral-900 text-white border">
                       {categories
@@ -615,7 +616,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
             render={({ field }) => (
               <div className="mt-1 w-full bg-neutral-900 border border-primary/50 rounded-md p-3 min-h-12">
                 {loadingActivities ? (
-                  <p className="text-white">Loading activities...</p>
+                  <BeautifulLoader size="sm" text="Loading activities" />
                 ) : (
                   <div className="flex flex-wrap gap-2">
                     {activities.map((activity) => {
@@ -813,7 +814,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
               />
             )}
           />
-         
+
           {errors.about && (
             <p className="text-red-500 text-sm mt-1">{errors.about.message}</p>
           )}

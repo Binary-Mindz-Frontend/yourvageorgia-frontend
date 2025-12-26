@@ -1,4 +1,4 @@
-export const dynamic = 'force-dynamic';
+// export const dynamic = 'force-dynamic';
 import WellnessHero from "./_components/Banner/WellnessHero";
 import CTAButton from "./_components/CTA/CTAButton";
 import FeaturedPartners from "./_components/FeaturedPartners/FeaturedPartners";
@@ -9,7 +9,7 @@ export default function HomePage() {
   return (
     <div className="container min-w-full mx-auto">
       <WellnessHero />
-      <CTAButton/>
+      <CTAButton />
       <WellnessCards />
       <SolenneMembership />
       <FeaturedPartners />
