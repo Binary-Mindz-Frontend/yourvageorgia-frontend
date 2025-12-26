@@ -66,7 +66,7 @@ export default function PartnersMap({
         style={{
           width: '30px',
           height: '30px',
-          color: '#F54927'
+          color: '#000000'
         }}
       />
     );
