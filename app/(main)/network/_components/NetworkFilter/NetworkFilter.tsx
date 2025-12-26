@@ -281,6 +281,8 @@ import FavouriteButton from "./FavouriteButton";
 import PartnerCard from "./PartnerCard";
 import { getPartners } from "@/services/partner/getpartner";
 import { Partner, PartnerCategory } from "@/types/partner.types";
+import { NetworkSkeleton } from "@/components/Shared/Loading/NetworkSkeleton";
+import { BeautifulLoader } from "@/components/Shared/Loading/BeautifulLoader";
 
 interface AppliedFilters {
   locations: string[];
@@ -472,8 +474,8 @@ const NetworkFilter = () => {
             key={filter}
             onClick={() => handleFilterClick(filter)}
             className={`md:py-2.5 rounded lg:rounded-lg whitespace-nowrap min-w-max ${activeFilter === filter
-                ? "bg-white text-black hover:bg-white"
-                : "text-white"
+              ? "bg-white text-black hover:bg-white"
+              : "text-white"
               }`}
           >
             {filter}
@@ -482,9 +484,9 @@ const NetworkFilter = () => {
       </div>
 
       {/* Loading State */}
-      {isLoading && (
-        <div className="text-center py-10">
-          <p className="text-lg">Loading partners...</p>
+      {isLoading && partners.length === 0 && (
+        <div className="py-10">
+          <NetworkSkeleton />
         </div>
       )}
 
@@ -521,6 +523,12 @@ const NetworkFilter = () => {
           <p className="text-sm opacity-70">
             Showing {displayedPartners.length} of {filteredPartners.length}
           </p>
+        </div>
+      )}
+
+      {isLoading && partners.length > 0 && (
+        <div className="mt-10 flex justify-center">
+          <BeautifulLoader size="sm" text="Loading more partners" />
         </div>
       )}
 
