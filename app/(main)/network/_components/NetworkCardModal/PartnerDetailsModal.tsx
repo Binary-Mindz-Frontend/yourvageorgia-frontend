@@ -14,6 +14,7 @@ export default function PartnerDetailsModal({
   partner: any;
 }) {
   const [modalVisible, setModalVisible] = useState(false);
+  console.log(partner);
 
   const galleryImages =
     partner?.gallery?.length > 0 ? partner.gallery : partner?.thumbnail;
@@ -117,7 +118,7 @@ export default function PartnerDetailsModal({
                 ))}
               </ul>
             </div>
-
+           
             {/* Contact & Locations */}
             <div className="mt-10 ">
               <h2 className="lg:text-xl mb-6">Contact & Locations</h2>
@@ -130,7 +131,7 @@ export default function PartnerDetailsModal({
                   </p>
                 ))}
               </div>
-
+              
               {/* Social Icons */}
               <div className="flex justify-center items-center md:justify-start gap-6 mt-10">
                 {partner.socials?.website && (
@@ -154,8 +155,9 @@ export default function PartnerDetailsModal({
                 )}
 
                 {hasWhatsapp && (
+                  
                   <Link
-                    href={`https://wa.me/${partner.socials.whatsapp}`}
+                    href={`https://${partner.socials.whatsapp}`}
                     target="_blank"
                     className="p-3 rounded-full hover:bg-white/10 transition"
                   >
