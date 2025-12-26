@@ -17,6 +17,23 @@ export interface IActivityResponse {
     __v: number;
   };
 }
+export interface IActivitiesListResponse {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  data: (IActivity & {
+    _id: string;
+    createdAt: string;
+    updatedAt: string;
+    __v: number;
+  })[];
+  meta: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPage: number;
+  };
+}
 
 // Create new activity (WITH AUTH)
 export const createActivity = async (
@@ -45,9 +62,12 @@ export const createActivity = async (
 };
 
 // Get all activities (NO AUTH NEEDED - Public endpoint)
-export const getActivities = async (): Promise<{ data: IActivityResponse["data"][] } | { error: string }> => {
+export const getActivities = async (
+  page: number = 1,
+  limit: number = 10
+): Promise<IActivitiesListResponse | { error: string }> => {
   try {
-    const res = await fetch(`${BASE_URL}/activity`, {
+    const res = await fetch(`${BASE_URL}/activity?page=${page}&limit=${limit}`, {
       cache: "no-store",
     });
     const json = await res.json();
@@ -56,7 +76,7 @@ export const getActivities = async (): Promise<{ data: IActivityResponse["data"]
       return { error: json.message || "Failed to fetch activities" };
     }
 
-    return { data: json.data };
+    return json;
   } catch (error: any) {
     return { error: error.message };
   }

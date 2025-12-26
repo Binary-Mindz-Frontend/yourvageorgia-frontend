@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { SquarePen, Trash2, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -19,6 +19,7 @@ const ActivityPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
   const [activities, setActivities] = useState<IActivity[]>([]);
+  const [totalActivities, setTotalActivities] = useState(0);
   const [loading, setLoading] = useState(false);
   const [tableLoading, setTableLoading] = useState(true);
 
@@ -31,40 +32,38 @@ const ActivityPage = () => {
   const [inputValue, setInputValue] = useState("");
   const [selectedActivity, setSelectedActivity] = useState<IActivity | null>(null);
 
-  // Fetch activities on component mount
-  useEffect(() => {
-    fetchActivities();
-  }, []);
-
-  // Fetch all activities
-  const fetchActivities = async () => {
-    setTableLoading(true);
-    try {
-      const result = await getActivities();
-      
-      if ("error" in result) {
-        toast.error(result.error, { style: { background: "#000", color: "#fff", marginTop: "4rem" } });
-        setActivities([]);
-      } else {
-        setActivities(result.data);
-      }
-    } catch (error) {
-      toast.error("Failed to fetch activities", { style: { background: "#000", color: "#fff", marginTop: "4rem" } });
+ // Fetch activities on component mount
+const fetchActivities = useCallback(async () => {
+  setTableLoading(true);
+  try {
+    const result = await getActivities(currentPage, pageSize);
+    
+    if ("error" in result) {
+      toast.error(result.error, { style: { background: "#000", color: "#fff", marginTop: "4rem" } });
       setActivities([]);
-    } finally {
-      setTableLoading(false);
+      setTotalActivities(0);
+    } else {
+      setActivities(result.data);
+      setTotalActivities(result.meta.total);
     }
-  };
+  } catch (error) {
+    toast.error("Failed to fetch activities", { style: { background: "#000", color: "#fff", marginTop: "4rem" } });
+    setActivities([]);
+    setTotalActivities(0);
+  } finally {
+    setTableLoading(false);
+  }
+}, [currentPage, pageSize]);
+
+useEffect(() => {
+  fetchActivities();
+}, [fetchActivities]);
 
   // Pagination
-  const indexOfLastItem = currentPage * pageSize;
-  const indexOfFirstItem = indexOfLastItem - pageSize;
-  const currentActivities: TActivityRow[] = activities
-    .slice(indexOfFirstItem, indexOfLastItem)
-    .map((item, index) => ({
-      ...item,
-      _index: indexOfFirstItem + index + 1,
-    }));
+  const currentActivities: TActivityRow[] = activities.map((item, index) => ({
+    ...item,
+    _index: (currentPage - 1) * pageSize + index + 1,
+  }));
 
   // Table columns
   const activityColumn: Column<TActivityRow>[] = [
@@ -107,7 +106,7 @@ const ActivityPage = () => {
   ];
 
   // Handle Add
-  const handleAdd = async () => {
+ const handleAdd = async () => {
     if (inputValue.trim() === "") {
       toast.error("Please enter activity title", { style: { background: "#000", color: "#fff", marginTop: "4rem" } });
       return;
@@ -125,7 +124,7 @@ const ActivityPage = () => {
         toast.success("Activity created successfully!", { style: { background: "#000", color: "#fff", marginTop: "4rem" } });
         setInputValue("");
         setOpenAdd(false);
-        // Refresh the activities list
+        setCurrentPage(1); // Reset to first page
         await fetchActivities();
       }
     } catch (error) {
@@ -213,7 +212,7 @@ const ActivityPage = () => {
       <CustomTable columns={activityColumn} data={currentActivities} loading={tableLoading} />
 
       <CustomPagination
-        totalItems={activities.length}
+        totalItems={totalActivities}
         pageSize={pageSize}
         currentPage={currentPage}
         onPageChange={setCurrentPage}
