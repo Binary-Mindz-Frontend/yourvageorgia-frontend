@@ -1,17 +1,17 @@
+
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
 import { SquarePen, Trash2, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import CustomTable, { Column } from "@/components/Shared/dashboard/customtable/CustomTable";
 import CustomPagination from "@/components/Shared/dashboard/custompagination/CustomPagination";
 import { toast } from "sonner";
 
 import { IActivity } from "@/types/activity.types";
 import { createActivity, deleteActivity, getActivities, updateActivity } from "@/services/activity/activity";
+import ActivityDialog from "../ActivityDialog/ActivityDialog";
 
 type TActivityRow = IActivity & { _index: number };
 
@@ -32,32 +32,32 @@ const ActivityPage = () => {
   const [inputValue, setInputValue] = useState("");
   const [selectedActivity, setSelectedActivity] = useState<IActivity | null>(null);
 
- // Fetch activities on component mount
-const fetchActivities = useCallback(async () => {
-  setTableLoading(true);
-  try {
-    const result = await getActivities(currentPage, pageSize);
-    
-    if ("error" in result) {
-      toast.error(result.error, { style: { background: "#000", color: "#fff", marginTop: "4rem" } });
+  // Fetch activities on component mount
+  const fetchActivities = useCallback(async () => {
+    setTableLoading(true);
+    try {
+      const result = await getActivities(currentPage, pageSize);
+
+      if ("error" in result) {
+        toast.error(result.error, { style: { background: "#000", color: "#fff", marginTop: "4rem" } });
+        setActivities([]);
+        setTotalActivities(0);
+      } else {
+        setActivities(result.data);
+        setTotalActivities(result.meta.total);
+      }
+    } catch (error) {
+      toast.error("Failed to fetch activities", { style: { background: "#000", color: "#fff", marginTop: "4rem" } });
       setActivities([]);
       setTotalActivities(0);
-    } else {
-      setActivities(result.data);
-      setTotalActivities(result.meta.total);
+    } finally {
+      setTableLoading(false);
     }
-  } catch (error) {
-    toast.error("Failed to fetch activities", { style: { background: "#000", color: "#fff", marginTop: "4rem" } });
-    setActivities([]);
-    setTotalActivities(0);
-  } finally {
-    setTableLoading(false);
-  }
-}, [currentPage, pageSize]);
+  }, [currentPage, pageSize]);
 
-useEffect(() => {
-  fetchActivities();
-}, [fetchActivities]);
+  useEffect(() => {
+    fetchActivities();
+  }, [fetchActivities]);
 
   // Pagination
   const currentActivities: TActivityRow[] = activities.map((item, index) => ({
@@ -106,7 +106,7 @@ useEffect(() => {
   ];
 
   // Handle Add
- const handleAdd = async () => {
+  const handleAdd = async () => {
     if (inputValue.trim() === "") {
       toast.error("Please enter activity title", { style: { background: "#000", color: "#fff", marginTop: "4rem" } });
       return;
@@ -124,7 +124,7 @@ useEffect(() => {
         toast.success("Activity created successfully!", { style: { background: "#000", color: "#fff", marginTop: "4rem" } });
         setInputValue("");
         setOpenAdd(false);
-        setCurrentPage(1); // Reset to first page
+        setCurrentPage(1);
         await fetchActivities();
       }
     } catch (error) {
@@ -154,7 +154,6 @@ useEffect(() => {
         setSelectedActivity(null);
         setInputValue("");
         setOpenEdit(false);
-        // Refresh the activities list
         await fetchActivities();
       }
     } catch (error) {
@@ -178,7 +177,6 @@ useEffect(() => {
         toast.success("Activity deleted successfully!", { style: { background: "#000", color: "#fff", marginTop: "4rem" } });
         setSelectedActivity(null);
         setOpenDelete(false);
-        // Refresh the activities list
         await fetchActivities();
       }
     } catch (error) {
@@ -218,97 +216,37 @@ useEffect(() => {
         onPageChange={setCurrentPage}
       />
 
-      {/* Add Activity Dialog */}
-      <Dialog open={openAdd} onOpenChange={setOpenAdd}>
-        <DialogContent className="sm:max-w-md p-6 rounded-2xl bg-[#1a1a1a] text-white">
-          <DialogHeader>
-            <DialogTitle>Add Activity</DialogTitle>
-          </DialogHeader>
-          <Input
-            placeholder="Enter activity title"
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            className="mt-4"
-            disabled={loading}
-          />
-          <DialogFooter className="mt-4 flex justify-end gap-2">
-            <Button 
-              className="cursor-pointer bg-black text-white hover:bg-black hover:text-white" 
-              variant="outline" 
-              onClick={() => setOpenAdd(false)}
-              disabled={loading}
-            >
-              Cancel
-            </Button>
-            <Button 
-              className="rounded-md cursor-pointer bg-white text-black" 
-              onClick={handleAdd}
-              disabled={loading}
-            >
-              {loading ? "Adding..." : "Add"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* Activity Dialogs */}
+      <ActivityDialog
+        open={openAdd}
+        onOpenChange={setOpenAdd}
+        mode="add"
+        inputValue={inputValue}
+        onInputChange={setInputValue}
+        onConfirm={handleAdd}
+        loading={loading}
+      />
 
-      {/* Edit Activity Dialog */}
-      <Dialog open={openEdit} onOpenChange={setOpenEdit}>
-        <DialogContent className="sm:max-w-md p-6 rounded-2xl bg-[#1a1a1a] text-white">
-          <DialogHeader>
-            <DialogTitle>Edit Activity</DialogTitle>
-          </DialogHeader>
-          <Input
-            placeholder="Edit activity title"
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            className="mt-4"
-            disabled={loading}
-          />
-          <DialogFooter className="mt-4 flex justify-end gap-2">
-            <Button 
-              className="cursor-pointer bg-white text-black hover:bg-white hover:text-black" 
-              variant="outline" 
-              onClick={() => setOpenEdit(false)}
-              disabled={loading}
-            >
-              Cancel
-            </Button>
-            <Button 
-              className="cursor-pointer rounded-md bg-black" 
-              onClick={handleEdit}
-              disabled={loading}
-            >
-              {loading ? "Updating..." : "Update"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <ActivityDialog
+        open={openEdit}
+        onOpenChange={setOpenEdit}
+        mode="edit"
+        inputValue={inputValue}
+        onInputChange={setInputValue}
+        onConfirm={handleEdit}
+        loading={loading}
+      />
 
-      {/* Delete Confirmation Dialog */}
-      <Dialog open={openDelete} onOpenChange={setOpenDelete}>
-        <DialogContent className="sm:max-w-md p-6 rounded-2xl bg-[#1a1a1a] text-white">
-          <DialogHeader>
-            <DialogTitle>Confirm Delete</DialogTitle>
-          </DialogHeader>
-          <p className="mt-4">Are you sure you want to delete {selectedActivity?.title}?</p>
-          <DialogFooter className="mt-4 flex justify-end gap-2">
-            <Button 
-              variant="outline" 
-              onClick={() => setOpenDelete(false)}
-              disabled={loading}
-            >
-              Cancel
-            </Button>
-            <Button 
-              variant="destructive" 
-              onClick={handleDelete}
-              disabled={loading}
-            >
-              {loading ? "Deleting..." : "Delete"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <ActivityDialog
+        open={openDelete}
+        onOpenChange={setOpenDelete}
+        mode="delete"
+        inputValue=""
+        onInputChange={() => {}}
+        onConfirm={handleDelete}
+        loading={loading}
+        activityTitle={selectedActivity?.title}
+      />
     </div>
   );
 };
