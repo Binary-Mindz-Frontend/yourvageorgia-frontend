@@ -18,7 +18,7 @@ import {
     IGetPartnersParams,
 } from "@/services/partner/partner";
 
-import { getCategoriesForSelect, ICategory } from "@/services/category/category";
+import { getCategoriesForSelect, ICategoryWithId } from "@/services/category/category";
 import { Partner } from "@/types/partner.types";
 import { useRouter } from "next/navigation";
 import UsersSummary from "../UsersSummarySection/UsersSummary";
@@ -26,10 +26,8 @@ import PartnerFilterSection from "../PartnerFilterSection/PartnerFilterSection";
 import PartnerPositionDialog from "../PartnerPositionDialog/PartnerPositionDialog";
 
 
-type Category = ICategory;
-
 type PartnerRow = Partner & {
-    categories?: (ICategory | string)[] | ICategory | string;
+    categories?: (ICategoryWithId | string)[] | ICategoryWithId | string;
     _id: string;
 };
 
@@ -60,7 +58,7 @@ const PartnerPage = () => {
     });
 
     const [partners, setPartners] = useState<PartnerRow[]>([]);
-    const [categories, setCategories] = useState<Category[]>([]);
+    const [categories, setCategories] = useState<ICategoryWithId[]>([]);
     const [filteredTotalItems, setFilteredTotalItems] = useState(0); // Total items for the CURRENTLY FILTERED TABLE
     const [tableLoading, setTableLoading] = useState(false);
     const [deleting, setDeleting] = useState<string | null>(null);
@@ -70,8 +68,8 @@ const PartnerPage = () => {
     
     // Add this before the columns definition
     const getCategoryTitles = (
-        categoryData: (ICategory | string)[] | ICategory | string | undefined,
-        allCategories: ICategory[]
+        categoryData: (ICategoryWithId | string)[] | ICategoryWithId | string | undefined,
+         allCategories: ICategoryWithId[]
     ): string => {
         if (!categoryData) return "N/A";
 

@@ -20,8 +20,7 @@ import AddCategoryModal from "../AddCategory/AddCategory";
 import CustomTable, { Column } from "@/components/Shared/dashboard/customtable/CustomTable";
 import CustomPagination from "@/components/Shared/dashboard/custompagination/CustomPagination";
 import Image from "next/image";
-import { getCategories, deleteCategory } from "@/services/category/category";
-import { ICategory } from "@/types/category.types";
+import { getCategories, deleteCategory, ICategoryWithId } from "@/services/category/category";
 import { toast } from "sonner";
 
 
@@ -43,7 +42,7 @@ const CategoryPage = () => {
     const [openEdit, setOpenEdit] = useState(false);
     const [totalCategories, setTotalCategories] = useState(0);
 
-    const [categories, setCategories] = useState<ICategory[]>([]);
+    const [categories, setCategories] = useState<ICategoryWithId[]>([]);
     const [loading, setLoading] = useState(false);
     const [deleting, setDeleting] = useState<string | null>(null);
 
@@ -51,7 +50,7 @@ const CategoryPage = () => {
     const [openView, setOpenView] = useState(false);
     const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
 
-    const [selectedCategory, setSelectedCategory] = useState<ICategory | null>(null);
+    const [selectedCategory, setSelectedCategory] = useState<ICategoryWithId | null>(null);
 
     // Fetch categories from API
     useEffect(() => {
@@ -97,7 +96,7 @@ const CategoryPage = () => {
     };
 
     // Table columns
-    const categoryColumn: Column<ICategory>[] = [
+    const categoryColumn: Column<ICategoryWithId>[] = [
         {
             header: "Image",
             accessor: "image",
