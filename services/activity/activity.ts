@@ -61,10 +61,30 @@ export const createActivity = async (
   }
 };
 
-// Get all activities (NO AUTH NEEDED - Public endpoint)
+// Get all activities
 export const getActivities = async (
   page: number = 1,
   limit: number = 10
+): Promise<IActivitiesListResponse | { error: string }> => {
+  try {
+    const res = await fetch(`${BASE_URL}/activity?page=${page}&limit=${limit}`, {
+      cache: "no-store",
+    });
+    const json = await res.json();
+
+    if (!res.ok) {
+      return { error: json.message || "Failed to fetch activities" };
+    }
+
+    return json;
+  } catch (error: any) {
+    return { error: error.message };
+  }
+};
+// Get all activities 
+export const getActivitiesForSelect = async (
+  page: number = 1,
+  limit: number = 1000
 ): Promise<IActivitiesListResponse | { error: string }> => {
   try {
     const res = await fetch(`${BASE_URL}/activity?page=${page}&limit=${limit}`, {

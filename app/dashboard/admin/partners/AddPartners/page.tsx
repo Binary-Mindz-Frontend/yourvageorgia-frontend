@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/select";
 import LogoUploadWithCrop from "../_components/LogoUploadWithCrop/LogoUploadWithCrop";
 import { PartnerContact } from "@/types/partner.types";
-import { getActivities } from "@/services/activity/activity";
+import {getActivitiesForSelect } from "@/services/activity/activity";
 
 type CategoryOption = { _id: string; title: string };
 
@@ -119,7 +119,6 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
   const terms = watch("terms");
   const contacts = watch("contacts");
   const offers = watch("offers");
-  const selectedCategories = watch("categories");
 
   const uploadImageToServer = async (file: File | Blob, originalFileName?: string): Promise<string> => {
     const formData = new FormData();
@@ -258,7 +257,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
     const fetchActivities = async () => {
       setLoadingActivities(true);
       try {
-        const res = await getActivities();
+        const res = await getActivitiesForSelect();
         if ("error" in res) {
           toast.error(res.error, { style: { background: "#000", color: "#fff" } });
         } else {
@@ -607,48 +606,68 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
         </div>
 
         {/* ACTIVITY */}
-        <div>
-          <Label className="text-white mb-1">Activity *</Label>
-          <Controller
-            name="activity"
-            control={control}
-            rules={{ required: "At least one activity is required" }}
-            render={({ field }) => (
-              <div className="mt-1 w-full bg-neutral-900 border border-primary/50 rounded-md p-3 min-h-12">
-                {loadingActivities ? (
-                  <BeautifulLoader size="sm" text="Loading activities" />
-                ) : (
-                  <div className="flex flex-wrap gap-2">
-                    {activities.map((activity) => {
-                      const isSelected = field.value.includes(activity._id);
-                      return (
-                        <button
-                          key={activity._id}
-                          type="button"
-                          onClick={() => {
-                            const newValue = isSelected
-                              ? field.value.filter((id: string) => id !== activity._id)
-                              : [...field.value, activity._id];
-                            field.onChange(newValue);
-                          }}
-                          className={`px-3 py-1 rounded-full text-sm transition ${isSelected
-                            ? "bg-primary text-white"
-                            : "bg-neutral-800 text-neutral-300 hover:bg-neutral-700"
-                            }`}
-                        >
-                          {activity.title}
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            )}
-          />
-          {errors.activity && (
-            <p className="text-red-500 text-sm mt-1">{errors.activity.message}</p>
-          )}
-        </div>
+<div>
+  <Label className="text-white mb-1">Activity *</Label>
+  <Controller
+    name="activity"
+    control={control}
+    rules={{ required: "At least one activity is required" }}
+    render={({ field }) => (
+      <div>
+        <Select
+          disabled={loadingActivities}
+          onValueChange={(value) => {
+            if (!field.value.includes(value)) {
+              field.onChange([...field.value, value]);
+            }
+          }}
+        >
+          <SelectTrigger className="mt-1 w-full bg-neutral-900 border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50 text-white h-auto min-h-12 py-3 items-start">
+            <SelectValue placeholder={loadingActivities ? <BeautifulLoader size="sm" /> : "Select activities"} />
+          </SelectTrigger>
+          <SelectContent className="bg-neutral-900 text-white border">
+            {activities
+              .filter(a => !field.value.includes(a._id))
+              .map((a) => (
+                <SelectItem key={a._id} value={a._id} className="cursor-pointer">
+                  {a.title}
+                </SelectItem>
+              ))}
+          </SelectContent>
+        </Select>
+
+        {/* Selected Activities Display */}
+        {field.value.length > 0 && (
+          <div className="flex flex-wrap gap-2 mt-2">
+            {field.value.map((actId) => {
+              const activity = activities.find(a => a._id === actId);
+              return (
+                <div
+                  key={actId}
+                  className="flex items-center gap-2 bg-black border text-white px-3 py-1 rounded-full text-sm"
+                >
+                  <span>{activity?.title || actId}</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      field.onChange(field.value.filter(id => id !== actId));
+                    }}
+                    className="hover:bg-primary/80 cursor-pointer rounded-full"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    )}
+  />
+  {errors.activity && (
+    <p className="text-red-500 text-sm mt-1">{errors.activity.message}</p>
+  )}
+</div>
 
         {/* GALLERY */}
         <div className="mt-6">
