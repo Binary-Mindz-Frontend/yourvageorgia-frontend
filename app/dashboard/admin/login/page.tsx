@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { toast } from "sonner";
+import toast from "react-hot-toast";
 import { loginAdmin } from "@/services/admin.auth/admin.auth";
 
 const AdminLogin = () => {
@@ -15,22 +15,21 @@ const AdminLogin = () => {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+ const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     toast.loading("Logging in...", { id: "admin-login" });
-
     const res = await loginAdmin({ email, password });
 
     if (res?.success) {
-      toast.success("Login successful! Redirecting...", { id: "admin-login" });
+      toast.success("Login successful! Redirecting...", { id: "admin-login" }); // ✅ Same syntax
       setTimeout(() => {
         router.push("/dashboard/admin/overview");
         router.refresh();
       }, 500);
     } else {
       toast.error(res?.message || "Invalid email or password.", {
-        id: "admin-login",
+        id: "admin-login", 
       });
       setIsLoading(false);
     }
