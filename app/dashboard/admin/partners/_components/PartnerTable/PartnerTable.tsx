@@ -18,7 +18,7 @@ import {
     IGetPartnersParams,
 } from "@/services/partner/partner";
 
-import { getCategories, ICategoryResponse } from "@/services/category/category";
+import { getCategoriesForSelect, ICategory } from "@/services/category/category";
 import { Partner } from "@/types/partner.types";
 import { useRouter } from "next/navigation";
 import UsersSummary from "../UsersSummarySection/UsersSummary";
@@ -26,13 +26,12 @@ import PartnerFilterSection from "../PartnerFilterSection/PartnerFilterSection";
 import PartnerPositionDialog from "../PartnerPositionDialog/PartnerPositionDialog";
 
 
-// --- Type Definitions ---
-type Category = ICategoryResponse["data"];
+type Category = ICategory;
 
 type PartnerRow = Partner & {
-    category?: Category | string;
+    categories?: (ICategory | string)[] | ICategory | string;
     _id: string;
-}
+};
 
 export interface IPartnerFilters {
     search: string;
@@ -40,7 +39,6 @@ export interface IPartnerFilters {
     limit: number;
     page: number;
 }
-// -----------------------------------------------------
 
 const toastStyle = { background: "#000", color: "#fff", marginTop: "4rem" };
 const pageSize = 10;
@@ -67,13 +65,42 @@ const PartnerPage = () => {
     const [tableLoading, setTableLoading] = useState(false);
     const [deleting, setDeleting] = useState<string | null>(null);
 
-    // --- 2. NEW STATE FOR POSITION DIALOG ---
     const [isPositionDialogOpen, setIsPositionDialogOpen] = useState(false);
     const [partnerToUpdatePosition, setPartnerToUpdatePosition] = useState<PartnerRow | null>(null);
-    // ----------------------------------------
+    // Add this before the columns definition
+    const getCategoryTitles = (
+        categoryData: (ICategory | string)[] | ICategory | string | undefined,
+        allCategories: ICategory[]
+    ): string => {
+        if (!categoryData) return "N/A";
 
-    // --- Data Fetching Functions ---
+        // Case 1: Array
+        if (Array.isArray(categoryData)) {
+            return categoryData
+                .map(cat => {
+                    if (typeof cat === "object" && "title" in cat) {
+                        return cat.title;
+                    }
+                    if (typeof cat === "string") {
+                        return allCategories.find(c => c._id === cat)?.title || "N/A";
+                    }
+                    return "N/A";
+                })
+                .join(", ");
+        }
 
+        // Case 2: Single object
+        if (typeof categoryData === "object" && "title" in categoryData) {
+            return categoryData.title;
+        }
+
+        // Case 3: Single string (ID)
+        if (typeof categoryData === "string") {
+            return allCategories.find(c => c._id === categoryData)?.title || "N/A";
+        }
+
+        return "N/A";
+    };
     // Function to get the GLOBAL, UNFILTERED COUNTS (Runs once on mount)
     const fetchGlobalCounts = useCallback(async () => {
         setGlobalLoading(true);
@@ -106,12 +133,13 @@ const PartnerPage = () => {
     // 1. Fetch Categories and Global Counts on Mount
     useEffect(() => {
         fetchCategoriesList();
-        fetchGlobalCounts(); // 💡 TRIGGER GLOBAL FETCH
+        fetchGlobalCounts();
     }, [fetchGlobalCounts]);
 
     const fetchCategoriesList = async () => {
         try {
-            const res = await getCategories();
+            const res = await getCategoriesForSelect();
+            console.log(res)
             if ("error" in res) {
                 toast.error(res.error, { style: toastStyle });
             } else {
@@ -150,21 +178,16 @@ const PartnerPage = () => {
         }
     }, [filters]);
 
-    // Data Fetch Trigger: Runs whenever 'filters' changes (for the table)
     useEffect(() => {
         fetchPartners();
     }, [fetchPartners]);
 
-
-    // --- Handlers ---
-
-    // Handler for general filter changes (from the FilterSection)
     const handleFilterChange = useCallback(
         (newFilters: Partial<IPartnerFilters>) => {
             setFilters((prev) => ({
                 ...prev,
                 ...newFilters,
-                page: 1, // Reset page on search or category change
+                page: 1,
             }));
         },
         []
@@ -200,9 +223,8 @@ const PartnerPage = () => {
                 toast.error(res.error, { style: toastStyle });
             } else {
                 toast.success(res.message, { style: toastStyle });
-                // Refetch both table and global counts after deletion
                 fetchPartners();
-                fetchGlobalCounts(); // 💡 RE-FETCH GLOBAL COUNTS
+                fetchGlobalCounts();
             }
         } catch (err) {
             console.error(err);
@@ -220,27 +242,13 @@ const PartnerPage = () => {
         },
         {
             header: "Category",
-            cell: (row) => {
-                let categoryTitle = "N/A";
-
-                const categoryData = row.category;
-
-                if (typeof categoryData === "object" && categoryData !== null && 'title' in categoryData) {
-                    categoryTitle = categoryData.title;
-                } else if (typeof categoryData === "string") {
-                    const foundCategory = categories.find(c => c._id === categoryData);
-                    if (foundCategory) {
-                        categoryTitle = foundCategory.title;
-                    }
-                }
-
-                return (
-                    <span className="text-white">
-                        {categoryTitle}
-                    </span>
-                );
-            },
+            cell: (row) => (
+                <span className="text-white">
+                    {getCategoryTitles(row.categories, categories)}
+                </span>
+            ),
         },
+
         {
             header: "Is Featured",
             cell: (row) => {
@@ -280,7 +288,7 @@ const PartnerPage = () => {
                                 View
                             </DropdownMenuItem>
 
-                            {/* --- 4. UPDATED: CHANGE POSITION MENU ITEM --- */}
+                            {/* --- HANGE POSITION MENU ITEM --- */}
                             <DropdownMenuItem
                                 className="flex items-center gap-2 cursor-pointer"
                                 onClick={() => handleOpenPositionDialog(row)}
@@ -316,10 +324,10 @@ const PartnerPage = () => {
     return (
         <div>
             <UsersSummary
-                // USE THE NEW GLOBAL STATE HERE
+
                 totalPartners={globalTotalPartners}
                 featuredPartners={globalFeaturedPartners}
-                loading={globalLoading} // Use the loading state for the summary section
+                loading={globalLoading}  
             />
 
             <header className="flex justify-between items-center mb-4 flex-wrap gap-5">
@@ -350,14 +358,13 @@ const PartnerPage = () => {
                 onPageChange={handlePageChange}
             />
 
-            {/* --- 5. RENDER THE DIALOG COMPONENT --- */}
+            {/* --- RENDER THE DIALOG COMPONENT --- */}
             <PartnerPositionDialog
                 partner={partnerToUpdatePosition}
                 open={isPositionDialogOpen}
                 onOpenChange={setIsPositionDialogOpen}
                 onUpdateSuccess={handlePositionUpdateSuccess}
             />
-            {/* -------------------------------------- */}
         </div>
     );
 };

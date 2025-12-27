@@ -7,7 +7,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useForm, Controller } from "react-hook-form";
 
-import { getCategories } from "@/services/category/category";
+import { getCategoriesForSelect } from "@/services/category/category";
 import { ICategory } from "@/types/category.types";
 import { createPartner, updatePartner } from "@/services/partner/partner";
 
@@ -46,7 +46,7 @@ type Offer = {
 type ActivityOption = { _id: string; title: string };
 
 interface FormData {
-  categories: string[]; // Changed from categoryId to categories array
+  categories: string[];
   name: string;
   thumbnailUrl: string;
   logoUrl: string;
@@ -282,7 +282,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
     const fetchCategories = async () => {
       setLoadingCategories(true);
       try {
-        const res = await getCategories();
+        const res = await getCategoriesForSelect();
         if ("error" in res) {
           toast.error(res.error, { style: { background: "#000", color: "#fff" } });
         } else {

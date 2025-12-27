@@ -1,21 +1,21 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use server";
 
-import { ICategory } from "@/types/category.types";
-
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_API;
+
+export interface ICategory {
+  _id: string;
+  title: string;
+  image: string;
+}
 
 export interface ICategoryResponse {
   success: boolean;
   statusCode: number;
   message: string;
-  data: ICategory & {
-    _id: string;
-    createdAt: string;
-    updatedAt: string;
-    __v: number;
-  };
+  data: ICategory[];
 }
+
 
 export interface ICategoriesListResponse {
   success: boolean;
@@ -129,7 +129,7 @@ export const deleteCategory = async (
 // get single category by id
 export const getCategoryById = async (
   categoryId: string
-): Promise<ICategoryResponse["data"] | { error: string }> => {
+): Promise<ICategory | { error: string }> => {
   try {
     const res = await fetch(`${BASE_URL}/category/${categoryId}`);
     const json = await res.json();
