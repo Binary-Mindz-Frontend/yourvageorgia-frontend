@@ -248,7 +248,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
     setGallery((prev) => [...prev, ...newImages]);
 
     if (galleryInputRef.current) galleryInputRef.current.value = "";
-  };
+  }
 
   const removeGalleryImage = (indexToRemove: number) => {
     setGallery((prev) => prev.filter((_, index) => index !== indexToRemove));
@@ -1003,7 +1003,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
             <Input
               {...register("whatsapp")}
               className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
-              placeholder="https://wa.me/..."
+              placeholder="9123......"
             />
             {errors.whatsapp && (
               <p className="text-red-500 text-sm mt-1">
