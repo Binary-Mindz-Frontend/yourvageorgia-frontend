@@ -15,8 +15,9 @@ import {
   createCategory,
   updateCategory,
   ICategoryResponse,
+  ICategory,
+  ICategoryWithId,
 } from "@/services/category/category";
-import { ICategory } from "@/types/category.types";
 import Image from "next/image";
 import { BeautifulLoader } from "@/components/Shared/Loading/BeautifulLoader";
 
@@ -27,8 +28,8 @@ type AddCategoryProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   isEdit?: boolean;
-  initialData?: ICategory;
-  onCategoryAdded?: (newCategory: ICategory) => void;
+  initialData?: ICategoryWithId;
+  onCategoryAdded?: (newCategory: ICategoryWithId) => void;
 };
 
 export default function AddCategoryModal({
