@@ -41,6 +41,7 @@ const CategoryPage = () => {
 
     const [openAdd, setOpenAdd] = useState(false);
     const [openEdit, setOpenEdit] = useState(false);
+    const [totalCategories, setTotalCategories] = useState(0);
 
     const [categories, setCategories] = useState<ICategory[]>([]);
     const [loading, setLoading] = useState(false);
@@ -57,11 +58,12 @@ const CategoryPage = () => {
         const fetchCategories = async () => {
             setLoading(true);
             try {
-                const res = await getCategories();
+                const res = await getCategories(currentPage, pageSize); // ✅ Pass page and limit
                 if ("error" in res) {
                     toast.error(res.error, { style: { background: "#000", color: "#fff", marginTop: "4rem" } });
                 } else {
                     setCategories(res.data);
+                    setTotalCategories(res.meta.total);
                 }
             } catch (err: unknown) {
                 console.error(err);
@@ -72,12 +74,7 @@ const CategoryPage = () => {
         };
 
         fetchCategories();
-    }, []);
-
-    // Compute paginated data
-    const indexOfLastItem = currentPage * pageSize;
-    const indexOfFirstItem = indexOfLastItem - pageSize;
-    const currentCategories = categories.slice(indexOfFirstItem, indexOfLastItem);
+    }, [currentPage]); // ✅ Add currentPage as dependency
 
     // Handle delete category
     const handleDelete = async (categoryId: string) => {
@@ -187,7 +184,7 @@ const CategoryPage = () => {
         },
     ];
 
-    const totalCategory = categories.length;
+    const totalCategory = totalCategories;
 
     return (
         <div>
@@ -213,10 +210,10 @@ const CategoryPage = () => {
             </header>
 
             {/* Show paginated data */}
-            <CustomTable columns={categoryColumn} data={currentCategories} loading={loading} />
+            <CustomTable columns={categoryColumn} data={categories} loading={loading} />
 
             <CustomPagination
-                totalItems={categories.length}
+                totalItems={totalCategories}
                 pageSize={pageSize}
                 currentPage={currentPage}
                 onPageChange={setCurrentPage}

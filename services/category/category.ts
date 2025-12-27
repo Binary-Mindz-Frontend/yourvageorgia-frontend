@@ -17,6 +17,24 @@ export interface ICategoryResponse {
   };
 }
 
+export interface ICategoriesListResponse {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  data: (ICategory & {
+    _id: string;
+    createdAt: string;
+    updatedAt: string;
+    __v: number;
+  })[];
+  meta: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPage: number;
+  };
+}
+
 export const createCategory = async (
   data: ICategory
 ): Promise<ICategoryResponse | { error: string }> => {
@@ -42,25 +60,52 @@ export const createCategory = async (
 };
 
 // get all categories
-export const getCategories = async (): Promise<
-  { data: ICategoryResponse["data"][] } | { error: string }
-> => {
+export const getCategories = async (
+  page: number = 1,
+  limit: number = 10
+): Promise<ICategoriesListResponse | { error: string }> => {
   try {
-    const res = await fetch(`${BASE_URL}/category`, {
-      next: { revalidate: 3600 },
+    const res = await fetch(`${BASE_URL}/category?page=${page}&limit=${limit}`, {
+      cache: "no-store",
     });
     const json = await res.json();
-    if (!res.ok) return { error: json.message || "Failed to fetch categories" };
-    return { data: json.data };
+
+    if (!res.ok) {
+      return { error: json.message || "Failed to fetch categories" };
+    }
+
+    return json;
   } catch (error: any) {
     return { error: error.message };
   }
 };
 
+export const getCategoriesForSelect = async (
+  page: number = 1,
+  limit: number = 1000
+): Promise<ICategoriesListResponse | { error: string }> => {
+  try {
+    const res = await fetch(`${BASE_URL}/category?page=${page}&limit=${limit}`, {
+      cache: "no-store",
+    });
+    const json = await res.json();
+
+    if (!res.ok) {
+      return { error: json.message || "Failed to fetch categories" };
+    }
+
+    return json;
+  } catch (error: any) {
+    return { error: error.message };
+  }
+};
+
+
 // delete category by id
 export const deleteCategory = async (
   categoryId: string
 ): Promise<{ success: boolean; message: string } | { error: string }> => {
+  console.log({categoryId})
   try {
     const res = await fetch(`${BASE_URL}/category/${categoryId}`, {
       method: "DELETE",

@@ -81,6 +81,7 @@ export const getActivities = async (
     return { error: error.message };
   }
 };
+
 // Get all activities 
 export const getActivitiesForSelect = async (
   page: number = 1,
