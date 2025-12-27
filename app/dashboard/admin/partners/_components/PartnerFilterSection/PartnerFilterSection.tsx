@@ -15,7 +15,6 @@ import { IPartnerFilters } from "../PartnerTable/PartnerTable";
 interface Category {
     _id: string;
     title: string;
-    // Add other relevant properties if necessary
 }
 
 interface PartnerFilterSectionProps {
@@ -32,28 +31,34 @@ const PartnerFilterSection: React.FC<PartnerFilterSectionProps> = ({
     // Local state for the search input (allows immediate UI update)
     const [localSearch, setLocalSearch] = useState(currentFilters.search);
 
+    const getSelectedCategoryId = useCallback(() => {
+        if (!currentFilters.category) return "all";
+        
+        const foundCategory = categories.find(cat => cat.title === currentFilters.category);
+        return foundCategory?._id || "all";
+    }, [currentFilters.category, categories]);
+
     // --- Search Debouncing Logic ---
     useEffect(() => {
-        // Debounce timer: waits 500ms after the user stops typing
         const delaySearch = setTimeout(() => {
-            // Only update parent filters if the value has actually changed
             if (localSearch !== currentFilters.search) {
                 onFilterChange({ search: localSearch });
             }
         }, 500);
 
-        // Cleanup function: clear the timer if localSearch changes before 500ms is up
         return () => clearTimeout(delaySearch);
     }, [localSearch, onFilterChange, currentFilters.search]);
-    // --------------------------------
 
     const handleCategoryChange = useCallback(
         (value: string) => {
-            // Maps 'all' to undefined, which is what the API likely needs for no filter
-            const categoryId = value === 'all' ? undefined : value;
-            onFilterChange({ category: categoryId });
+            if (value === 'all') {
+                onFilterChange({ category: undefined });
+            } else {
+                const selectedCategory = categories.find(cat => cat._id === value);
+                onFilterChange({ category: selectedCategory?.title });
+            }
         },
-        [onFilterChange]
+        [onFilterChange, categories]
     );
 
     return (
@@ -61,9 +66,9 @@ const PartnerFilterSection: React.FC<PartnerFilterSectionProps> = ({
             {/* Category Select */}
             <Select
                 onValueChange={handleCategoryChange}
-                value={currentFilters.category || "all"} // Display 'all' if category is undefined
+                value={getSelectedCategoryId()}
             >
-                <SelectTrigger className="w-full sm:w-[180px] bg-[#1a1a1a] border border-gray-700 text-white h-12!">
+                <SelectTrigger className="w-full sm:w-45 bg-[#1a1a1a]! border border-gray-700 text-white h-12!">
                     <SelectValue placeholder="Select Category" />
                 </SelectTrigger>
                 <SelectContent className="bg-[#1a1a1a] border border-gray-700 text-white">
@@ -82,7 +87,6 @@ const PartnerFilterSection: React.FC<PartnerFilterSectionProps> = ({
                     type="text"
                     placeholder="Search partners by title..."
                     value={localSearch}
-                    // Update local state immediately on keystroke
                     onChange={(e) => setLocalSearch(e.target.value)}
                     className="bg-[#1a1a1a] border border-gray-700 text-white"
                 />

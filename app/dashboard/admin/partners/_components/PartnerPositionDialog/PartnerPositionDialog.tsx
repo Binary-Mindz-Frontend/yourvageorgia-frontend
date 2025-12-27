@@ -89,7 +89,7 @@ const PartnerPositionDialog: React.FC<PartnerPositionDialogProps> = ({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[425px] bg-[#1a1a1a] border-gray-700 text-white">
+            <DialogContent className="sm:max-w-106.25 bg-[#1a1a1a] border-gray-700 text-white">
                 <DialogHeader>
                     <DialogTitle>Update Partner Position</DialogTitle>
                     <DialogDescription className="text-white">

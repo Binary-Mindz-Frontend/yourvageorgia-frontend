@@ -232,8 +232,8 @@ export interface IGetPartnersParams {
   page?: number;
   search?: string;
   addressUrl?: string;
-  category?: string; // Should be category ID
-  activity?: string; // Should be activity name or ID
+  category?: string;  
+  activity?: string;  
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
 }

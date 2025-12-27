@@ -107,9 +107,6 @@ export const getTokenExpiryTime = (): number | null => {
 };
 
 
-// -------------------- EXPIRY MONITOR --------------------
-
-
 export const startTokenExpiryMonitor = () => {
   if (typeof window === "undefined") return;
 
@@ -124,7 +121,6 @@ export const startTokenExpiryMonitor = () => {
     logoutAdmin();
     return;
   }
-
 
   // Check every 30 seconds
   window.tokenCheckInterval = setInterval(() => {
@@ -176,12 +172,6 @@ export const startForceLogoutTimer = () => {
 
 
 
-
-
-
-// -------------------- LOGIN --------------------
-
-
 export const loginAdmin = async (payload: LoginPayload) => {
   const url = `${BASE_URL}${LOGIN_ENDPOINT}`;
   console.log(url, "debug url")
@@ -223,10 +213,6 @@ export const loginAdmin = async (payload: LoginPayload) => {
   }
 };
 
-
-// -------------------- AUTH FETCH --------------------
-
-
 export const fetchWithAuth = async (
   endpoint: string,
   options: RequestInit = {}
@@ -260,9 +246,6 @@ export const fetchWithAuth = async (
 
   return response;
 };
-
-
-// -------------------- WINDOW TYPE --------------------
 
 
 declare global {

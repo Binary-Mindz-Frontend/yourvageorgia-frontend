@@ -3,8 +3,9 @@ import { getCurrentUser } from "@/services/auth";
 import { Suspense } from "react";
 import Logout from "./_component/Logout";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
 import { redirect } from "next/navigation";
+import Image from "next/image";
+import appleWallet from "../../../public/assets/member/Apple_Wallet_Icon.svg"
 const apiUrl = process.env.NEXT_PUBLIC_BASE_API;
 
 // Convert UNIX timestamp to date-only format (no time)
@@ -41,7 +42,7 @@ const ProfilePage = async () => {
     <div className="min-h-screen max-w-218 mx-auto text-white flex flex-col items-center justify-center px-4 lg:p-0 mt-10 lg:mt-25">
       {/* Header Info */}
       <div className="text-center mb-18">
-        <p className="text-xl lg:text-3xl text-[#FFFFFF]/70">
+        <p className="text-xl lg:text-2xl text-[#FFFFFF]/70">
           Member Since: {convertTimestampToDateOnly(memberData.startDate)}
         </p>
       </div>
@@ -61,7 +62,7 @@ const ProfilePage = async () => {
           </h1>
           <p className="text-sm lg:text-2xl text-[#FFFFFF]/80">ID: {memberData.memberShipId}</p>
           <p className="text-sm lg:text-2xl text-[#FFFFFF]/80">
-            Expiry: {formatExpiryDate(memberData.exp)}
+            Expiry: {formatExpiryDate(memberData.endDate)}
           </p>
         </div>
       </div>
@@ -70,10 +71,20 @@ const ProfilePage = async () => {
 
 
       <div className="mt-6">
-        <Button asChild>
-          <a href={`${apiUrl}/wallet/membership?token=${memberData.accessToken}`} target="_blank"> Add to Apple Wallet </a>
-        </Button>
-      </div>
+  <Button asChild className="flex items-center gap-2"> 
+    <a href={`${apiUrl}/wallet/membership?token=${memberData.accessToken}`} target="_blank">
+      {/* Add the Image component here */}
+      <Image 
+        src={appleWallet} 
+        alt="Apple Wallet" 
+        width={24} 
+        height={24} 
+        unoptimized
+      />
+      Add to Apple Wallet
+    </a>
+  </Button>
+</div>
 
       <Logout />
 
