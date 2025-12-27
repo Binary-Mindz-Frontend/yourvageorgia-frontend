@@ -3,7 +3,6 @@ import { getCurrentUser } from "@/services/auth";
 import { Suspense } from "react";
 import Logout from "./_component/Logout";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import Image from "next/image";
 import appleWallet from "../../../public/assets/member/Apple_Wallet_Icon.svg"
