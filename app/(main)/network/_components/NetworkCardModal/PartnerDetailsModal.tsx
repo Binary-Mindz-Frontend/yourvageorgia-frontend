@@ -157,7 +157,7 @@ export default function PartnerDetailsModal({
                 {hasWhatsapp && (
                   
                   <Link
-                    href={`https://${partner.socials.whatsapp}`}
+                    href={`https://wa.me/${partner.socials.whatsapp}`}
                     target="_blank"
                     className="p-3 rounded-full hover:bg-white/10 transition"
                   >
