@@ -67,6 +67,7 @@ const PartnerPage = () => {
 
     const [isPositionDialogOpen, setIsPositionDialogOpen] = useState(false);
     const [partnerToUpdatePosition, setPartnerToUpdatePosition] = useState<PartnerRow | null>(null);
+    
     // Add this before the columns definition
     const getCategoryTitles = (
         categoryData: (ICategory | string)[] | ICategory | string | undefined,
@@ -101,6 +102,7 @@ const PartnerPage = () => {
 
         return "N/A";
     };
+
     // Function to get the GLOBAL, UNFILTERED COUNTS (Runs once on mount)
     const fetchGlobalCounts = useCallback(async () => {
         setGlobalLoading(true);
@@ -168,7 +170,7 @@ const PartnerPage = () => {
                 toast.error(res.error, { style: toastStyle });
             } else {
                 setPartners(res.data as PartnerRow[]);
-                setFilteredTotalItems(res?.meta?.total || 0); // 💡 RENAME state for clarity
+                setFilteredTotalItems(res?.meta?.total || 0);
             }
         } catch (err) {
             console.error(err);
@@ -210,10 +212,7 @@ const PartnerPage = () => {
     const handlePositionUpdateSuccess = () => {
         // Refetch the table data to show the updated position
         fetchPartners();
-        // We generally don't need to refetch global counts unless position affects them.
     };
-    // ----------------------------
-
 
     const handleDelete = async (partnerId: string) => {
         setDeleting(partnerId);
