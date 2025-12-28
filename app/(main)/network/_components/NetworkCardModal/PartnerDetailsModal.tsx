@@ -83,7 +83,7 @@ export default function PartnerDetailsModal({
               <p className="lg:text-lg mb-4 lg:mb-6">{partner.offer[0].title}</p>
             )}
 
-            <p className="leading-relaxed text-sm lg:text-base text-[#FFFFFFB3]">
+            <p className="description leading-relaxed text-sm lg:text-base text-[#FFFFFFB3]">
               {partner.offer?.[0]?.description}
             </p>
 
@@ -102,7 +102,7 @@ export default function PartnerDetailsModal({
             {/* About Section */}
             <div className="mt-10">
               <h2 className="lg:text-xl mb-6">About</h2>
-              <p className="text-[#FFFFFFB3] leading-relaxed text-base">
+              <p className="text-[#FFFFFFB3] leading-relaxed text-base description">
                 {partner?.about}
               </p>
             </div>
@@ -118,7 +118,7 @@ export default function PartnerDetailsModal({
                 ))}
               </ul>
             </div>
-           
+
             {/* Contact & Locations */}
             <div className="mt-10 ">
               <h2 className="lg:text-xl mb-6">Contact & Locations</h2>
@@ -131,7 +131,7 @@ export default function PartnerDetailsModal({
                   </p>
                 ))}
               </div>
-              
+
               {/* Social Icons */}
               <div className="flex justify-center items-center md:justify-start gap-6 mt-10">
                 {partner.socials?.website && (
@@ -155,7 +155,7 @@ export default function PartnerDetailsModal({
                 )}
 
                 {hasWhatsapp && (
-                  
+
                   <Link
                     href={`https://wa.me/${partner.socials.whatsapp}`}
                     target="_blank"
