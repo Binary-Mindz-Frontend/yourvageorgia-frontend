@@ -132,7 +132,10 @@ export default function SolenneMembership() {
   // Load partners
   useEffect(() => {
     const loadPartners = async () => {
-      const res = await getPartners();
+      const res = await getPartners({
+        limit: 10000,
+        page: 1,
+      });
       if ("data" in res) {
         setPartners(res.data);
 
