@@ -316,7 +316,7 @@ export const getPartners = async (
 
 
     // Force sorting by position ASC
-    console.log({ params })
+    // console.log({ params })
     queryParams.set("sortBy", "position");
     queryParams.set("sortOrder", "asc");
 
@@ -334,7 +334,7 @@ export const getPartners = async (
 
 
     const url = `${BASE_URL}/partner?${queryParams.toString()}`;
-    console.log("Fetching partners with URL:", url);
+    // console.log("Fetching partners with URL:", url);
     const res = await fetch(url);
     const json = await res.json();
 
@@ -499,7 +499,7 @@ export const getPartnersFilter = async (
     });
 
     const url = `${BASE_URL}/partner?${queryParams.toString()}`;
-    console.log("Fetching filtered partners with URL:", url);
+    // console.log("Fetching filtered partners with URL:", url);
     
     const res = await fetch(url, {
       cache: "no-store", // Ensure fresh data for filters

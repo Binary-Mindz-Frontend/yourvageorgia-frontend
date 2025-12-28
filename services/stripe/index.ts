@@ -23,7 +23,7 @@ export const createStripeSession = async ({
     const result = await res.json();
     return result;
   } catch (error: any) {
-    console.log("Stripe Session Error:", error);
+    // console.log("Stripe Session Error:", error);
     return { success: false, message: error.message };
   }
 };
@@ -42,7 +42,7 @@ export const saveSubscription = async ({ sessionId }: { sessionId: string }) => 
     );
 
     const result = await res.json();
-    console.log('session_infosave', result);
+    // console.log('session_infosave', result);
     return result;
     
   } catch (error: any) {

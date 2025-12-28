@@ -135,13 +135,13 @@ const Payment = () => {
   };
 
   const handleAccessCodeRefresh = () => {
-    console.log("Refreshing access code logic triggered.");
+    // console.log("Refreshing access code logic triggered.");
     // Add logic here to re-validate the access code
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Confirming payment with data:", formData);
+    // console.log("Confirming payment with data:", formData);
     // Add payment processing logic here
   };
 

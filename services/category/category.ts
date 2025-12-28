@@ -281,7 +281,7 @@ export const getCategoriesForSelect = async (
 export const deleteCategory = async (
   categoryId: string
 ): Promise<{ success: boolean; message: string } | { error: string }> => {
-  console.log({categoryId})
+  // console.log({categoryId})
   try {
     const res = await fetch(`${BASE_URL}/category/${categoryId}`, {
       method: "DELETE",
