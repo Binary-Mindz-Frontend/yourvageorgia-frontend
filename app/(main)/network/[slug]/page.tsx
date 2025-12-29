@@ -23,7 +23,7 @@ export default function DetailsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-[55%_40%] gap-10">
         {/* Left Section (Image Slider Area) */}
         <div>
-          <div className="relative w-full h-[350px] lg:h-[435px] overflow-hidden rounded-xl">
+          <div className="relative w-fullh-87.5 lg:h-108.75 overflow-hidden rounded-xl">
             <Image
             unoptimized
               src={img5}

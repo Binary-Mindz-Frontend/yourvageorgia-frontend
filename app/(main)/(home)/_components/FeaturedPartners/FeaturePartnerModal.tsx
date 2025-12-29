@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import {
-  MapPin,
   Globe,
   Instagram,
   ChevronLeft,
@@ -98,7 +97,7 @@ export default function FeaturePartnerModal({
               {partner.contacts?.map((contact: any, index: number) => (
                 <p key={index} className="flex items-center gap-2">
                   {index + 1}. {contact.address} {contact.phone}
-                  <MapPin className="w-4 h-4" />
+                  {/* <MapPin className="w-4 h-4" /> */}
                 </p>
               ))}
             </div>

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { MapPin, Globe, Instagram, ChevronLeft } from "lucide-react";
+import { Globe, Instagram, ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { WhatsappIcon } from "@/app/(main)/network/_components/NetworkCardModal/Icon/Icons";
 import ImageGallerySlider from "@/app/(main)/network/_components/ImageGallerySlider/ImageGallerySlider";
@@ -127,7 +127,7 @@ export default function PartnerDetailsModal({
                 {partner.contacts?.map((contact: any, index: number) => (
                   <p key={index} className="flex items-center gap-2">
                     {index + 1}. {contact.address} {contact.phone}
-                    <MapPin className="w-4 h-4" />
+                    {/* <MapPin className="w-4 h-4" /> */}
                   </p>
                 ))}
               </div>
