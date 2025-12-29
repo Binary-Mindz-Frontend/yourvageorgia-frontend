@@ -38,21 +38,27 @@ export function FilterDrawer({
     };
   }, [isOpen]);
 
-  // Extract unique areas from partners' contacts
-  const locations = useMemo(() => {
-    const uniqueLocations = new Set<string>();
-    partners.forEach((partner) => {
-      if (partner.contacts && Array.isArray(partner.contacts)) {
-        partner.contacts.forEach((contact) => {
-          const area = contact.area || contact.address;
-          if (area) {
-            uniqueLocations.add(area);
+// Extract unique areas from partners' contacts
+const locations = useMemo(() => {
+  const locationMap = new Map<string, string>(); // Track lowercase -> original casing
+  
+  partners.forEach((partner) => {
+    if (partner.contacts && Array.isArray(partner.contacts)) {
+      partner.contacts.forEach((contact) => {
+        const area = contact.area || contact.address;
+        if (area) {
+          const lowerArea = area.toLowerCase().trim(); // Added trim() to handle whitespace
+          // Keep the first occurrence's casing
+          if (!locationMap.has(lowerArea)) {
+            locationMap.set(lowerArea, area.trim());
           }
-        });
-      }
-    });
-    return ["ALL", ...Array.from(uniqueLocations).sort()];
-  }, [partners]);
+        }
+      });
+    }
+  });
+  
+  return ["ALL", ...Array.from(locationMap.values()).sort()];
+}, [partners]);
 
   // Extract unique activities from partners (using the activity field)
   const activities = useMemo(() => {
