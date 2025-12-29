@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { MapPin, Globe, Instagram, ChevronLeft } from "lucide-react";
+import { Globe, Instagram, ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { WhatsappIcon } from "@/app/(main)/network/_components/NetworkCardModal/Icon/Icons";
 import ImageGallerySlider from "@/app/(main)/network/_components/ImageGallerySlider/ImageGallerySlider";

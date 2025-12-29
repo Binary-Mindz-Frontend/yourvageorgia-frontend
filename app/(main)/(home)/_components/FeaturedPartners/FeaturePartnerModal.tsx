@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import {
-  MapPin,
   Globe,
   Instagram,
   ChevronLeft,
