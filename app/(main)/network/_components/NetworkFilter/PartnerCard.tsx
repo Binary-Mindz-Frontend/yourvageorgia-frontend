@@ -52,7 +52,7 @@ const PartnerCard = ({ partner, onClick }: PartnerCardProps) => {
                 className="absolute top-4 right-4 z-20 md:hidden"
             />
 
-            <div className="absolute bottom-0 left-0 p-6 text-white z-20 w-full">
+            <div className="absolute bottom-0 left-0 p-6 text-white z-10 w-full">
                 <div className="flex items-start gap-3 mb-1">
                     <h2 className="text-lg lg:text-3xl font-semibold mb-1 font-serif">
                         {partner.name}

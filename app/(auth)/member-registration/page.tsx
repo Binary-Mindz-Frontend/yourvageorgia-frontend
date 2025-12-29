@@ -87,7 +87,7 @@ const MembershipRegister = () => {
 
     try {
       const response = await registerUser(payload);
-      console.log("response:", response);
+      // console.log("response:", response);
 
       if (response?.error) {
         toast.error("User already registered");

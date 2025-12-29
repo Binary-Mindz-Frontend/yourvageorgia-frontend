@@ -36,7 +36,7 @@ const StatesSection = () => {
                     toast.error(result.error, { style: toastStyle });
                 } else {
                     // Success - set the data
-                    console.log("Admin Stats Data:", result);
+                    // console.log("Admin Stats Data:", result);
                     setAdminStats(result); // This assignment will now work without type error
                 }
             } catch (err) {

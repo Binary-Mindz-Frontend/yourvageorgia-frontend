@@ -69,7 +69,7 @@ export const loginUser = async (userData: FieldValues) => {
 
 export const loginUserWithToken = async (token: any) => {
   const cookieStore = await cookies();
-  console.log({ token });
+  // console.log({ token });
   try {
     // Prepare the request URL with the accessToken in the query
     const url = `${process.env.NEXT_PUBLIC_BASE_API}/user/login-with-token`;
@@ -83,7 +83,7 @@ export const loginUserWithToken = async (token: any) => {
     });
 
     const result = await res.json();
-    console.log({ result });
+    // console.log({ result });
     if (result?.success) {
       // Save token in cookies
       cookieStore.set("accessToken", result?.data?.accessToken);
@@ -170,7 +170,7 @@ export const forgetPassword = async ({ email }: { email: string }) => {
     );
 
     const result = await res.json();
-    console.log(result);
+    // console.log(result);
     return result;
   } catch (error: any) {
     console.log("Forget Password Error:", error);
