@@ -1,7 +1,7 @@
 'use client'
 
 import { Button } from "@/components/ui/button";
-import { ArrowRight, FileQuestion, Menu, Search, X } from "lucide-react";
+import { ArrowRight, FileQuestion, Menu, Search, X, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState, useMemo } from "react";
 import { HeaderLogo } from "./icons";
@@ -9,6 +9,8 @@ import { useRouter } from "next/navigation";
 import { NavigationDrawer } from "./navigation-drawer";
 import Image from "next/image";
 import PartnerDetailsModal from "@/app/(main)/network/_components/NetworkCardModal/PartnerDetailsModal";
+import { getPartners } from "@/services/partner/partner";
+import { useDebounce } from "@/hooks/useDebounce";
 
 interface Partner {
   _id: string;
@@ -25,9 +27,14 @@ export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [partners, setPartners] = useState<Partner[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
   const [selectedPartner, setSelectedPartner] = useState<Partner | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const router = useRouter();
+
+  // Debounce the search query to avoid too many API calls
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -37,68 +44,51 @@ export function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Fetch partners when debounced query changes
   useEffect(() => {
     const fetchPartners = async () => {
+      if (!debouncedSearchQuery.trim()) {
+        setPartners([]); // Clear results if empty
+        return;
+      }
+
+      setIsLoading(true);
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_BASE_API;
-        const response = await fetch(`${apiUrl}/partner`, {
-          cache: 'no-store', // Prevent caching
+        const result = await getPartners({
+          search: debouncedSearchQuery,
+          limit: 5 // Limit to top 5 results for dropdown
         });
-        const data = await response.json();
-        if (data.success) {
-          setPartners(data.data);
+
+        if ("error" in result) {
+          console.error("Failed to fetch partners:", result.error);
+          setPartners([]);
+        } else {
+          setPartners(result.data as any[]);
         }
       } catch (error) {
         console.error("Failed to fetch partner data:", error);
+        setPartners([]);
+      } finally {
+        setIsLoading(false);
       }
     };
 
     fetchPartners();
-  }, [])
-
-  const filteredPartners = useMemo(() => {
-    if (!searchQuery) return partners;
-    return partners.filter(
-      (partner) =>
-        partner.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        partner.category?.title.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }, [searchQuery, partners]);
+  }, [debouncedSearchQuery]);
 
   const handleSearch = () => {
     if (searchQuery) {
       router.push(`/network?search=${searchQuery}`);
+      setIsSearchOpen(false);
     }
   };
 
   const handlePartnerClick = (partner: Partner) => {
     setSelectedPartner(partner);
     setIsModalOpen(true);
-    setIsSearchOpen(false); // ADD THIS LINE: Close search results when card is clicked
+    setIsSearchOpen(false);
   };
 
-  // Handle click outside to close search results
-  // useEffect(() => {
-  //   const handleClickOutside = (event: MouseEvent) => {
-  //     const target = event.target as HTMLElement;
-  //     const searchContainer = document.querySelector('.search-container');
-  //     const searchResults = document.getElementById('search-results-container');
-
-  //     // If click is outside both search input and results, close search
-  //     if (
-  //       isSearchOpen &&
-  //       searchContainer &&
-  //       !searchContainer.contains(target) &&
-  //       searchResults &&
-  //       !searchResults.contains(target)
-  //     ) {
-  //       setIsSearchOpen(false);
-  //     }
-  //   };
-
-  //   document.addEventListener('mousedown', handleClickOutside);
-  //   return () => document.removeEventListener('mousedown', handleClickOutside);
-  // }, [isSearchOpen]);
   // Handle click outside to close search results
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -165,17 +155,12 @@ export function Navbar() {
                     if (e.key === "Enter") handleSearch();
                   }}
                 />
-
-                {/* {isSearchOpen && (
-                  <span
-                    onClick={handleSearch}
-                    
-                    className="absolute right-1 cursor-pointer px-4"
-                  >
-                    <Search className=" h-4 w-4" />
-                    
-                  </span>
-                )} */}
+                {/* Loading Indicator inside input */}
+                {isLoading && (
+                  <div className="absolute right-12 top-1/2 -translate-y-1/2">
+                    <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                  </div>
+                )}
               </div>
             ) : (
               <Link
@@ -191,11 +176,11 @@ export function Navbar() {
           <Button
             variant="ghost"
             size="icon"
-            // onClick={() => setIsSearchOpen(!isSearchOpen)}
             onClick={() => {
               if (isSearchOpen) {
                 setIsSearchOpen(false);
-                setSearchQuery(""); // Optional: clear search query when closing
+                setSearchQuery("");
+                setPartners([]);
               } else {
                 setIsSearchOpen(true);
               }
@@ -210,21 +195,28 @@ export function Navbar() {
             )}
           </Button>
         </div>
+
         {/* Partner Cards Display Below Search - Moved INSIDE nav for sticky behavior */}
-        {isSearchOpen && (
+        {isSearchOpen && (searchQuery.trim().length > 0 || partners.length > 0) && (
           <div
             id="search-results-container"
             className="absolute top-full left-0 right-0 z-50 mt-2 max-w-lg mx-4 md:mx-auto p-2 rounded-xl border border-white/10 bg-zinc-950/80 backdrop-blur-2xl shadow-2xl animate-in fade-in slide-in-from-top-2 overflow-hidden"
           >
-            {filteredPartners.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-10 text-center text-muted-foreground/60">
-                <FileQuestion className="h-10 w-10 mb-3 opacity-50" />
-                <p className="text-sm font-medium">No results found</p>
-                <p className="text-xs">Try searching for something else</p>
+            {isLoading ? (
+              <div className="flex justify-center py-4 text-muted-foreground text-sm">
+                Searching...
               </div>
+            ) : partners.length === 0 ? (
+              searchQuery.trim().length > 0 ? (
+                <div className="flex flex-col items-center justify-center py-10 text-center text-muted-foreground/60">
+                  <FileQuestion className="h-10 w-10 mb-3 opacity-50" />
+                  <p className="text-sm font-medium">No results found</p>
+                  <p className="text-xs">Try searching for something else</p>
+                </div>
+              ) : null
             ) : (
               <div className="max-h-[60vh] overflow-y-auto custom-scrollbar p-1 space-y-1">
-                {filteredPartners.map((partner) => (
+                {partners.map((partner) => (
                   <div
                     key={partner._id}
                     onClick={() => handlePartnerClick(partner)}

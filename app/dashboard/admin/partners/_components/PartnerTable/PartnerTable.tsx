@@ -139,7 +139,7 @@ const PartnerPage = () => {
     const fetchCategoriesList = async () => {
         try {
             const res = await getCategoriesForSelect();
-            console.log(res)
+            // console.log(res)
             if ("error" in res) {
                 toast.error(res.error, { style: toastStyle });
             } else {
@@ -163,7 +163,7 @@ const PartnerPage = () => {
             };
 
             const res = await getPartners(params);
-            console.log(res, "res");
+            // console.log(res, "res");
             if ("error" in res) {
                 toast.error(res.error, { style: toastStyle });
             } else {

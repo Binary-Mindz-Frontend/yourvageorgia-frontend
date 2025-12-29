@@ -174,7 +174,7 @@ export const startForceLogoutTimer = () => {
 
 export const loginAdmin = async (payload: LoginPayload) => {
   const url = `${BASE_URL}${LOGIN_ENDPOINT}`;
-  console.log(url, "debug url")
+  // console.log(url, "debug url")
   try {
     const response = await fetch(url, {
       method: "POST",

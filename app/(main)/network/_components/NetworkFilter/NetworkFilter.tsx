@@ -317,7 +317,7 @@ const NetworkFilter = () => {
       try {
         // Fetch without limit to get all partners for filtering
         const result = await getPartners({ limit: 1000 }); // Large limit or modify API to fetch all
-        console.log(result);
+        // console.log(result);
 
         if ("error" in result) {
           console.error("Failed to fetch partners:", result.error);

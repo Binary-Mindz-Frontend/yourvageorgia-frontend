@@ -4,17 +4,24 @@ import { getPartners } from "@/services/partner/getpartner";
 import FeaturedPartnersCarouselClient from "./FeaturedPartnersCarouselClient";
 
 export default async function FeaturedPartnersCarousel() {
-  const res = await getPartners();
+  const res = await getPartners({
+    limit: 10000,
+    page: 1,
+  });
+
+
 
   if ("error" in res) {
     return null; // or error UI
   }
 
   // only featured partners
- const featuredPartners = res.data.filter(
-  (partner) =>
-    partner.isFeatured === true || partner.isFeatured === "true" as any
-);
+  const featuredPartners = res.data.filter(
+    (partner) =>
+      partner.isFeatured === true || partner.isFeatured === "true" as any
+  );
+
+  // console.log("featuredPartners",featuredPartners);
 
 
 

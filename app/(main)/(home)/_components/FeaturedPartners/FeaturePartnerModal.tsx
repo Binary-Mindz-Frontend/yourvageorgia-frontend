@@ -20,7 +20,7 @@ export default function FeaturePartnerModal({
   const galleryImages =
     partner.gallery;
 
-    console.log('galleryImages',galleryImages)
+    // console.log('galleryImages',galleryImages)
 
   return (
     <div className="min-h-screen container mx-auto text-white px-4 lg:px-0 py-10 overflow-y-auto scrollbar-hide">

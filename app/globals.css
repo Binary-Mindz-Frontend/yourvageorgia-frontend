@@ -114,6 +114,7 @@
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
   --selected-filter: oklch(42.67, 33.4, 270);
+  color-scheme: dark;
 }
 
 @layer base {
@@ -135,4 +136,8 @@
   /* IE and Edge */
   scrollbar-width: none;
   /* Firefox */
+}
+
+.description {
+  white-space: pre-line;
 }
