@@ -75,7 +75,7 @@ export default function DetailsPage() {
             <div className="space-y-3 text-[#FFFFFFB3] text-base">
               <p className="flex items-center gap-2">
                 1. Jumeirah 1, Dubai. Phone– 04 344 7333{" "}
-                <MapPin className="w-4 h-4" />
+                {/* <MapPin className="w-4 h-4" /> */}
               </p>
 
               <p className="flex items-center gap-2">
