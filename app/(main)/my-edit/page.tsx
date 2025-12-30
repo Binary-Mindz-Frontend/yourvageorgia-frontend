@@ -4,17 +4,13 @@ import { ArrowRight, ChevronDown, Heart } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getCurrentUser } from "@/services/auth";
 import PartnerDetailsModal from "@/app/(main)/network/_components/NetworkCardModal/PartnerDetailsModal"; // Import the modal
+import { Partner } from "@/types/partner.types";
 
 const BASE_API = process.env.NEXT_PUBLIC_BASE_API;
 
 interface FavouriteItem {
   _id: string;
-  partner: {
-    _id: string;
-    name: string;
-    thumbnail: string;
-    address?: string;
-  };
+  partner: Partner;
 }
 
 const MyEdit = () => {
@@ -54,7 +50,7 @@ const MyEdit = () => {
 
     fetchFavourites();
   }, []);
-
+  
   const handleCardClick = (partner: FavouriteItem["partner"]) => {
     setSelectedPartner(partner); // Set the selected partner
     setIsModalOpen(true); // Open the modal
@@ -102,8 +98,17 @@ const MyEdit = () => {
                       {item.partner.name}
                     </h2>
 
-                    <div className="flex items-center text-sm lg:text-lg gap-2 italic opacity-80">
+                    {/* <div className="flex items-center text-sm lg:text-lg gap-2 italic opacity-80">
                       {item.partner.address || "Location not specified"}
+                      <ArrowRight />
+                    </div> */}
+
+                    <div className="flex items-center text-sm lg:text-lg gap-2 italic opacity-80">
+                      <span className="truncate">
+                        {item.partner.contacts && item.partner.contacts.length > 0
+                          ? (item.partner.contacts[0].area || item.partner.contacts[0].address || "Location not specified")
+                          : "Location not specified"}
+                      </span>
                       <ArrowRight />
                     </div>
                   </div>
