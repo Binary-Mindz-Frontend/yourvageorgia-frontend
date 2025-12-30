@@ -50,7 +50,7 @@ const MyEdit = () => {
 
     fetchFavourites();
   }, []);
-  console.log(data);
+  
   const handleCardClick = (partner: FavouriteItem["partner"]) => {
     setSelectedPartner(partner); // Set the selected partner
     setIsModalOpen(true); // Open the modal
