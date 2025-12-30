@@ -18,8 +18,8 @@ const cormorant = Cormorant_Garamond({
 });
 
 export const metadata: Metadata = {
-  title: "Solenne - Luxury Wellness Membership",
-  description: "A lifestyle membership redefining how women experience wellness in Dubai",
+  title: "Solenne - A Curated Lifestyle & Wellness Membership for Women in Dubai",
+  description: "A considered membership connecting modern women in Dubai to an exclusive network of wellness, beauty and lifestyle destinations.",
   appleWebApp: {
     title: "Solenne",
   },
