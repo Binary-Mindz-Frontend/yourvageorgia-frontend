@@ -111,10 +111,10 @@ export function NavigationDrawer({ isOpen, onClose }: NavigationDrawerProps) {
               <Link href="/profile" passHref className="ml-2">
                 <button
                   onClick={onClose}
-                  className="group cursor-pointer border rounded-full flex w-full items-center justify-between p-1.5 text-sm font-light tracking-wide text-foreground transition-colors hover:bg-accent/10"
+                  className="group cursor-pointer flex w-full items-center justify-between rounded-md px-4 py-4 text-sm font-light tracking-wide text-foreground transition-colors hover:bg-accent/10"
                 >
                   {/* <User className="h-5 w-5" /> */}
-                  <CircleUserRound className="h-5 w-5" />
+                  <User className="h-5 w-5" />
                 </button>
               </Link>
             )}
