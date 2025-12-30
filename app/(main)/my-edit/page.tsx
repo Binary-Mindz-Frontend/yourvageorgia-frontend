@@ -1,9 +1,10 @@
 "use client";
 
-import { ArrowRight, ChevronDown, Heart } from "lucide-react";
+import { ArrowRight, ChevronDown } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getCurrentUser } from "@/services/auth";
 import PartnerDetailsModal from "@/app/(main)/network/_components/NetworkCardModal/PartnerDetailsModal"; // Import the modal
+import FavouriteButton from "../network/_components/NetworkFilter/FavouriteButton";
 
 const BASE_API = process.env.NEXT_PUBLIC_BASE_API;
 
@@ -108,9 +109,18 @@ const MyEdit = () => {
                     </div>
                   </div>
 
-                  <button className="p-2">
-                    <Heart className="w-5 h-5 lg:w-6 lg:h-6 text-white fill-current" />
-                  </button>
+                  <FavouriteButton
+                    partnerId={item.partner._id}
+                    className="p-2"
+                    initialFavourited={true}
+                    onToggle={(isFav) => {
+                      if (!isFav) {
+                        setData((prev) =>
+                          prev.filter((p) => p.partner._id !== item.partner._id)
+                        );
+                      }
+                    }}
+                  />
                 </div>
               </div>
             </div>

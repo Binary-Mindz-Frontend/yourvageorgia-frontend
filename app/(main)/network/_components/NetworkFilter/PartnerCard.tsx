@@ -58,7 +58,7 @@ const PartnerCard = ({ partner, onClick }: PartnerCardProps) => {
                         {partner.name}
                         <FavouriteButton
                             partnerId={partner._id || ""}
-                            className="ml-4 bottom-14.5 hidden lg:inline-block"
+                            className="absolute ml-4 bottom-14.5 hidden lg:inline-block"
                         />
                     </h2>
                 </div>
