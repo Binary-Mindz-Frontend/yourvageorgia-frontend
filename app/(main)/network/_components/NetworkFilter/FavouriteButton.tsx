@@ -9,6 +9,8 @@ import toast from "react-hot-toast";
 interface FavouriteButtonProps {
   partnerId: string;
   className?: string;
+  initialFavourited?: boolean;
+  onToggle?: (isFavourited: boolean) => void;
 }
 
 const STORAGE_KEY = "favourites";
@@ -16,9 +18,11 @@ const STORAGE_KEY = "favourites";
 export default function FavouriteButton({
   partnerId,
   className = "",
+  initialFavourited = false,
+  onToggle,
 }: FavouriteButtonProps) {
   const [loading, setLoading] = useState(false);
-  const [favourited, setFavourited] = useState(false);
+  const [favourited, setFavourited] = useState(initialFavourited);
   const [user, setUser] = useState<any>(null);
 
   // 🔹 Load user + localStorage favourite
@@ -29,14 +33,26 @@ export default function FavouriteButton({
 
       // localStorage check
       const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
+
+      // If initialFavourited is true, ensure it's in localStorage
+      if (initialFavourited) {
+        setFavourited(true);
+        if (stored) {
+          const favourites: string[] = JSON.parse(stored);
+          if (!favourites.includes(partnerId)) {
+            updateLocalStorage(true);
+          }
+        } else {
+          updateLocalStorage(true);
+        }
+      } else if (stored) {
         const favourites: string[] = JSON.parse(stored);
         setFavourited(favourites.includes(partnerId));
       }
     };
 
     init();
-  }, [partnerId]);
+  }, [partnerId, initialFavourited]);
 
   const token = user?.accessToken;
 
@@ -63,20 +79,36 @@ export default function FavouriteButton({
 
     if (loading) return;
 
+    // Optimistic Update
+    const previousState = favourited;
+    const newState = !previousState;
+
+    setFavourited(newState);
+    updateLocalStorage(newState);
+    if (onToggle) onToggle(newState);
+
+    // We don't show toast immediately to avoid spam, or we can show "Processing..." 
+    // But for better UX, let's just assume success and revert on failure.
+    // Or we can keep the toast but make it instant? 
+    // User requested "efficiency", usually implies speed. 
+    // Let's keep toast but maybe less intrusive or just rely on the icon state.
+    // I will keep the toast as it was but maybe debounced or just standard.
+    // Actually, let's keep it simple: Update UI -> API Call -> Revert if error.
+
     try {
       setLoading(true);
 
       const res = await fetch(
-        favourited
+        previousState
           ? `${process.env.NEXT_PUBLIC_BASE_API}/favourite/${partnerId}`
           : `${process.env.NEXT_PUBLIC_BASE_API}/favourite`,
         {
-          method: favourited ? "DELETE" : "POST",
+          method: previousState ? "DELETE" : "POST",
           headers: {
             "Content-Type": "application/json",
             Authorization: `${token}`,
           },
-          body: favourited
+          body: previousState
             ? undefined
             : JSON.stringify({ program: partnerId }),
         }
@@ -88,15 +120,16 @@ export default function FavouriteButton({
         throw new Error(data?.message || "Something went wrong");
       }
 
-      //  update UI + localStorage
-      updateLocalStorage(!favourited);
-      setFavourited(!favourited);
-
       toast.success(
-        favourited ? "Removed from favourites" : "Added to favourites"
+        newState ? "Added to favourites" : "Removed from favourites"
       );
     } catch (error: any) {
-      toast.error(error.message || "Failed");
+      // Revert optimization
+      console.error(error);
+      setFavourited(previousState);
+      updateLocalStorage(previousState);
+      if (onToggle) onToggle(previousState);
+      toast.error(error.message || "Failed to update favourite");
     } finally {
       setLoading(false);
     }
@@ -109,10 +142,9 @@ export default function FavouriteButton({
         handleClick();
       }}
       disabled={loading}
-      className={`absolute z-10 cursor-pointer p-1 rounded-full
-        
-        ${favourited ? "text-white" : "text-white "}
-        ${loading ? "opacity-50 cursor-not-allowed" : ""}
+      className={`cursor-pointer p-1 rounded-full transition-all active:scale-95
+        ${favourited ? "text-white" : "text-white"}
+        ${loading ? "opacity-70" : ""}
         ${className}`}
     >
       <Heart className={`w-6 h-6 ${favourited ? "fill-current" : ""}`} />
