@@ -227,9 +227,12 @@ const MembershipRegister = () => {
               onChange={handleChange}
               className="text-white border-neutral-700 focus:border-neutral-500"
             />
-            <p className="text-[#FFFFFFB3] text-sm italic mt-2">
+            <Link
+              href="mailto:info@solenneuae.com"
+              className="text-[#FFFFFFB3] text-sm italic mt-2 hover:text-white/80 transition-all"
+            >
               No Code? DM us for access.
-            </p>
+            </Link>
           </div>
 
           {/* Checkboxes */}
