@@ -220,12 +220,16 @@ const MembershipRegister = () => {
 
           <div className="grow">
             <Input
-              placeholder="Access code"
+              placeholder="Access code*"
               name="accessCode"
+              required
               value={formData.accessCode}
               onChange={handleChange}
               className="text-white border-neutral-700 focus:border-neutral-500"
             />
+            <p className="text-[#FFFFFFB3] text-sm italic mt-2">
+              No Code? DM us for access.
+            </p>
           </div>
 
           {/* Checkboxes */}
