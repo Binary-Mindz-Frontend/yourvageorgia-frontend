@@ -218,7 +218,7 @@ export default function SolenneMembership() {
         {/* Bottom Description */}
         <div className="mt-12 lg:mt-38 text-center">
           <p className="text-gray-300 text-lg lg:text-2xl leading-relaxed font-light">
-            {"Solenne is a digital lifestyle membership for women in Dubai, centred on a curated network of the city's most considered wellness, beauty and lifestyle destinations. Members are extended preferred access and partner privileges, shaping a more elevated everyday."}
+            {"Solenne is an invitation-only lifestyle membership for women in Dubai, centred on a curated network of the city's most considered wellness, beauty and lifestyle destinations. Members are extended preferred access and partner privileges, shaping a more elevated everyday."}
           </p>
         </div>
       </div>
