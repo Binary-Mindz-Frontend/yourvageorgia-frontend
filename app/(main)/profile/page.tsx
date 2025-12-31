@@ -77,8 +77,8 @@ const ProfilePage = async () => {
       <Image 
         src={appleWallet} 
         alt="Apple Wallet" 
-        width={24} 
-        height={24} 
+        width={20} 
+        height={20} 
         unoptimized
       />
       Add to Apple Wallet
