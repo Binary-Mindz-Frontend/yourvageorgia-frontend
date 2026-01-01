@@ -20,9 +20,9 @@ export const registerUser = async (userData: Record<string, any>) => {
       }
     );
 
-    if (!res.ok) {
-      throw new Error(`Failed to register: ${res.statusText}`);
-    }
+    // if (!res.ok) {
+    //   throw new Error(`Failed to register: ${res.statusText}`);
+    // }
     const user = await res.json();
 
     return user;
