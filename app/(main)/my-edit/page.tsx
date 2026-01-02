@@ -79,7 +79,7 @@ const MyEdit = () => {
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center p-4">
         <h2 className="text-xl lg:text-2xl font-medium pb-2">Members access</h2>
         <p className="text-sm lg:text-base text-[#FFFFFFB3] leading-relaxed px-4 pt-2">
-          <Link href="/login" className="hover:text-white hover:underline transition-colors duration-200">
+          <Link href="/login" className="underline hover:text-white transition-colors duration-200">
             Log in
           </Link>
           {" "}to view your saved destinations.
