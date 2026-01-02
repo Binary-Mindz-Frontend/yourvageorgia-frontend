@@ -77,13 +77,18 @@ const MyEdit = () => {
   if (!isLoggedIn) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center p-4">
-        <h2 className="text-2xl font-serif font-bold mb-4">Please login first</h2>
-        <p className="text-gray-600 mb-6">You need to be logged in to view your favorite items.</p>
+        <h2 className="text-xl lg:text-2xl font-medium pb-2">Members access</h2>
+        <p className="text-sm lg:text-base text-[#FFFFFFB3] leading-relaxed px-4 pt-2">
+          <Link href="/login" className="underline hover:text-white transition-colors duration-200">
+            Log in
+          </Link>
+          {" "}to view your saved destinations.
+        </p>
         <Link
           href="/login"
           className="mt-12 px-6 py-2 cursor-pointer text-gray-400 hover:text-white transition-colors duration-200 lg:text-2xl focus:outline-none focus:ring-1 focus:ring-gray-600 rounded-full p-2"
         >
-          Go to Login
+          Sign in
         </Link>
       </div>
     );
@@ -109,7 +114,7 @@ const MyEdit = () => {
 
           <Link href="/network" passHref className="inline-flex mt-6">
             <button
-              className="group cursor-pointer flex w-[200px] items-center justify-between rounded-md px-4 py-3 font-medium tracking-wide text-md text-foreground transition-colors bg-accent/20 border border-accent/30 hover:bg-accent/30"
+              className="group cursor-pointer flex w-50 items-center justify-between rounded-md px-4 py-3 font-medium tracking-wide text-md text-foreground transition-colors bg-accent/20 border border-accent/30 hover:bg-accent/30"
             >
               <span>Back to Network</span>
               <ArrowRight className="h-5 w-5" />
