@@ -84,12 +84,12 @@ const MyEdit = () => {
           </Link>
           {" "}to view your saved destinations.
         </p>
-        <Link
+        {/* <Link
           href="/login"
           className="mt-12 px-6 py-2 cursor-pointer text-gray-400 hover:text-white transition-colors duration-200 lg:text-2xl focus:outline-none focus:ring-1 focus:ring-gray-600 rounded-full p-2"
         >
           Sign in
-        </Link>
+        </Link> */}
       </div>
     );
   }
