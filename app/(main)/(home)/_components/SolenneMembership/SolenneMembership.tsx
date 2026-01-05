@@ -138,7 +138,7 @@ export default function SolenneMembership() {
                       )}
                   </span>
 
-                  <ArrowRight className="w-5 h-5 transition text-white shrink-0" />
+                  <ArrowRight className="w-5 h-5 hidden md:block transition text-white shrink-0" />
                 </div>
               </button>
             </div>
