@@ -30,7 +30,7 @@ const MemberLogin = () => {
     e.preventDefault();
 
     setIsLoading(true);
-    toast.loading("Logging in...", { id: "login" });
+    // toast.loading("Logging in...", { id: "login" });
 
     const payload = {
       email,
@@ -40,7 +40,15 @@ const MemberLogin = () => {
     const res = await loginUser(payload);
 
     if (res?.success) {
-      toast.success("Login successful!", { id: "login" });
+    toast.success("Login successful!", { 
+      id: "login",
+      style: {
+        background: 'rgba(0, 0, 0, 0.8)',
+        color: '#fff',
+        backdropFilter: 'blur(10px)',
+      },
+      icon: null,
+    });
       setUser(res?.data?.user);
       setIsLoading(false);
 
@@ -48,10 +56,16 @@ const MemberLogin = () => {
         router.push("/profile");
       }, 500);
     } else {
-      toast.error(res?.message || "Invalid email or password.", {
-        id: "login",
-      });
-    }
+    toast.error(res?.message || "Invalid email or password.", {
+      id: "login",
+      style: {
+        background: 'rgba(0, 0, 0, 0.8)',
+        color: '#fff',
+        backdropFilter: 'blur(10px)',
+      },
+      icon: null, 
+    });
+  }
 
     setIsLoading(false);
   };
@@ -87,7 +101,7 @@ const MemberLogin = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             disabled={isLoading}
-            className="rounded-full px-6"
+            className="rounded-full px-6 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
           />
 
           {/* Button */}

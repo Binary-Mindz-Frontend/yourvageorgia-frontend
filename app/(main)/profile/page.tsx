@@ -42,7 +42,7 @@ const ProfilePage = async () => {
     <div className="min-h-screen max-w-218 mx-auto text-white flex flex-col items-center justify-center px-4 lg:p-0 mt-10 lg:mt-25">
       {/* Header Info */}
       <div className="text-center mb-18">
-        <p className="text-xl lg:text-2xl text-[#FFFFFF]/70">
+        <p className="lg:text-2xl text-[#FFFFFF]/70">
           Member Since: {convertTimestampToDateOnly(memberData.startDate)}
         </p>
       </div>
