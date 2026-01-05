@@ -6,7 +6,6 @@ import { useState } from "react";
 // import { loginUser } from "@/app/actions/auth";
 import { useRouter } from "next/navigation";
 import { loginUser } from "@/services/auth";
-import toast from "react-hot-toast";
 import useUser from "@/hooks/useUser";
 import Link from "next/link";
 import { BeautifulLoader } from "@/components/Shared/Loading/BeautifulLoader";
@@ -30,7 +29,6 @@ const MemberLogin = () => {
     e.preventDefault();
 
     setIsLoading(true);
-    toast.loading("Logging in...", { id: "login" });
 
     const payload = {
       email,
@@ -40,7 +38,7 @@ const MemberLogin = () => {
     const res = await loginUser(payload);
 
     if (res?.success) {
-      toast.success("Login successful!", { id: "login" });
+    
       setUser(res?.data?.user);
       setIsLoading(false);
 
@@ -48,9 +46,7 @@ const MemberLogin = () => {
         router.push("/profile");
       }, 500);
     } else {
-      toast.error(res?.message || "Invalid email or password.", {
-        id: "login",
-      });
+      console.error("Login failed", res?.message);
     }
 
     setIsLoading(false);
