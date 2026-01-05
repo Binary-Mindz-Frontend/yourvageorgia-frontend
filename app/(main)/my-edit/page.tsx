@@ -121,14 +121,6 @@ const MyEdit = () => {
             </button>
           </Link>
 
-
-
-
-
-
-
-
-
         </div>
       ) : (
         <div className="space-y-5 lg:space-y-10">
