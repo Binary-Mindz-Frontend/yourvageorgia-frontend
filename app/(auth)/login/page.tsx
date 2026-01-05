@@ -40,15 +40,6 @@ const MemberLogin = () => {
     const res = await loginUser(payload);
 
     if (res?.success) {
-    toast.success("Login successful!", { 
-      id: "login",
-      style: {
-        background: 'rgba(0, 0, 0, 0.8)',
-        color: '#fff',
-        backdropFilter: 'blur(10px)',
-      },
-      icon: null,
-    });
       setUser(res?.data?.user);
       setIsLoading(false);
 
