@@ -101,7 +101,7 @@ const MemberLogin = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             disabled={isLoading}
-            className="rounded-full px-6"
+            className="rounded-full px-6 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
           />
 
           {/* Button */}
