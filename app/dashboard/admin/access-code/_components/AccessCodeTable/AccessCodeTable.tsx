@@ -38,21 +38,20 @@ const AccessCodeTable = () => {
     const [openEdit, setOpenEdit] = useState(false);
     const [selectedCode, setSelectedCode] = useState<IAccessCode | null>(null);
 
-    const toastStyle = { background: "#000", color: "#fff", marginTop: "4rem" };
 
     const fetchAccessCodes = async () => {
         setLoading(true);
         try {
             const res = await getAccessCodes(currentPage, pageSize, search);
             if ("error" in res) {
-                toast.error(res.error, { style: toastStyle });
+                toast.error(res.error);
             } else {
                 setAccessCodes(res.data);
                 setTotalCodes(res.meta.total);
             }
         } catch (err: unknown) {
             console.error(err);
-            toast.error("Failed to fetch access codes", { style: toastStyle });
+            toast.error("Failed to fetch access codes");
         } finally {
             setLoading(false);
         }
@@ -69,15 +68,15 @@ const AccessCodeTable = () => {
         try {
             const res = await deleteAccessCode(id);
             if ("error" in res) {
-                toast.error(res.error, { style: toastStyle });
+                toast.error(res.error);
             } else {
-                toast.success(res.message, { style: toastStyle });
+                toast.success(res.message);
                 setAccessCodes(prev => prev.filter(item => item._id !== id));
                 setTotalCodes(prev => prev - 1);
             }
         } catch (err: unknown) {
             console.error(err);
-            toast.error("Failed to delete access code", { style: toastStyle });
+            toast.error("Failed to delete access code");
         } finally {
             setDeleting(null);
         }
@@ -94,11 +93,11 @@ const AccessCodeTable = () => {
             accessor: "maxUses",
             cell: (row) => <span className="text-white">{row.maxUses ?? "Unlimited"}</span>,
         },
-        {
-            header: "Current Uses",
-            accessor: "currentUses",
-            cell: (row) => <span className="text-white">{row.currentUses}</span>,
-        },
+        // {
+        //     header: "Current Uses",
+        //     accessor: "currentUses",
+        //     cell: (row) => <span className="text-white">{row.currentUses}</span>,
+        // },
         {
             header: "Status",
             accessor: "isActive",

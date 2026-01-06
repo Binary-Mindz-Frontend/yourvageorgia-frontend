@@ -2,15 +2,15 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
-import { SquarePen, Trash2, Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import CustomTable, { Column } from "@/components/Shared/dashboard/customtable/CustomTable";
 import CustomPagination from "@/components/Shared/dashboard/custompagination/CustomPagination";
+import CustomTable, { Column } from "@/components/Shared/dashboard/customtable/CustomTable";
+import { Button } from "@/components/ui/button";
+import { Plus, SquarePen, Trash2 } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
-import { IActivity } from "@/types/activity.types";
 import { createActivity, deleteActivity, getActivities, updateActivity } from "@/services/activity/activity";
+import { IActivity } from "@/types/activity.types";
 import ActivityDialog from "../ActivityDialog/ActivityDialog";
 
 type TActivityRow = IActivity & { _index: number };
@@ -39,7 +39,7 @@ const ActivityPage = () => {
       const result = await getActivities(currentPage, pageSize);
 
       if ("error" in result) {
-        toast.error(result.error, { style: { background: "#000", color: "#fff", marginTop: "4rem" } });
+        toast.error(result.error);
         setActivities([]);
         setTotalActivities(0);
       } else {
@@ -47,7 +47,7 @@ const ActivityPage = () => {
         setTotalActivities(result.meta.total);
       }
     } catch (error) {
-      toast.error("Failed to fetch activities", { style: { background: "#000", color: "#fff", marginTop: "4rem" } });
+      toast.error("Failed to fetch activities");
       setActivities([]);
       setTotalActivities(0);
     } finally {
@@ -108,7 +108,7 @@ const ActivityPage = () => {
   // Handle Add
   const handleAdd = async () => {
     if (inputValue.trim() === "") {
-      toast.error("Please enter activity title", { style: { background: "#000", color: "#fff", marginTop: "4rem" } });
+      toast.error("Please enter activity title");
       return;
     }
 
@@ -119,16 +119,16 @@ const ActivityPage = () => {
       });
 
       if ("error" in result) {
-        toast.error(result.error, { style: { background: "#000", color: "#fff", marginTop: "4rem" } });
+        toast.error(result.error);
       } else {
-        toast.success("Activity created successfully!", { style: { background: "#000", color: "#fff", marginTop: "4rem" } });
+        toast.success("Activity created successfully!");
         setInputValue("");
         setOpenAdd(false);
         setCurrentPage(1);
         await fetchActivities();
       }
     } catch (error) {
-      toast.error("Failed to create activity", { style: { background: "#000", color: "#fff", marginTop: "4rem" } });
+      toast.error("Failed to create activity");
     } finally {
       setLoading(false);
     }
@@ -137,7 +137,7 @@ const ActivityPage = () => {
   // Handle Edit
   const handleEdit = async () => {
     if (!selectedActivity || inputValue.trim() === "") {
-      toast.error("Please enter activity title", { style: { background: "#000", color: "#fff", marginTop: "4rem" } });
+      toast.error("Please enter activity title");
       return;
     }
 
@@ -148,16 +148,16 @@ const ActivityPage = () => {
       });
 
       if ("error" in result) {
-        toast.error(result.error, { style: { background: "#000", color: "#fff", marginTop: "4rem" } });
+        toast.error(result.error);
       } else {
-        toast.success("Activity updated successfully!", { style: { background: "#000", color: "#fff", marginTop: "4rem" } });
+        toast.success("Activity updated successfully!");
         setSelectedActivity(null);
         setInputValue("");
         setOpenEdit(false);
         await fetchActivities();
       }
     } catch (error) {
-      toast.error("Failed to update activity", { style: { background: "#000", color: "#fff", marginTop: "4rem" } });
+      toast.error("Failed to update activity");
     } finally {
       setLoading(false);
     }
@@ -172,15 +172,15 @@ const ActivityPage = () => {
       const result = await deleteActivity(selectedActivity._id!);
 
       if ("error" in result) {
-        toast.error(result.error, { style: { background: "#000", color: "#fff", marginTop: "4rem" } });
+        toast.error(result.error);
       } else {
-        toast.success("Activity deleted successfully!", { style: { background: "#000", color: "#fff", marginTop: "4rem" } });
+        toast.success("Activity deleted successfully!");
         setSelectedActivity(null);
         setOpenDelete(false);
         await fetchActivities();
       }
     } catch (error) {
-      toast.error("Failed to delete activity", { style: { background: "#000", color: "#fff", marginTop: "4rem" } });
+      toast.error("Failed to delete activity");
     } finally {
       setLoading(false);
     }
@@ -242,7 +242,7 @@ const ActivityPage = () => {
         onOpenChange={setOpenDelete}
         mode="delete"
         inputValue=""
-        onInputChange={() => {}}
+        onInputChange={() => { }}
         onConfirm={handleDelete}
         loading={loading}
         activityTitle={selectedActivity?.title}

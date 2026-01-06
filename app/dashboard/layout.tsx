@@ -1,17 +1,16 @@
 "use client";
+import { AppSidebar } from "@/components/Shared/dashboard/sidebar/AppSidebar";
+import { BeautifulLoader } from "@/components/Shared/Loading/BeautifulLoader";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { ReactNode, useState, useEffect, useRef } from "react";
-import { AppSidebar } from "@/components/Shared/dashboard/sidebar/AppSidebar";
 import useScrollTrigger from "@/hooks/useScrollTrigger";
 import { LogOut, User } from "lucide-react";
-import { Toaster } from "sonner";
-import { BeautifulLoader } from "@/components/Shared/Loading/BeautifulLoader";
-import { useRouter, usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 // Updated imports - added startTokenExpiryMonitor
 import {
@@ -134,7 +133,6 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
           </header>
           <div className="bg-black min-h-[calc(100vh)] z-0">
             <div className="">{children}</div>
-            <Toaster position="top-right" />
           </div>
         </SidebarInset>
       </SidebarProvider>

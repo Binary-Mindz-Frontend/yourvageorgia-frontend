@@ -41,7 +41,6 @@ export default function AddAccessCodeModal({
     const [isActive, setIsActive] = useState(true);
     const [loading, setLoading] = useState(false);
 
-    const toastStyle = { background: "#000", color: "#fff", marginTop: "4rem" };
 
     useEffect(() => {
         if (isEdit && initialData) {
@@ -63,7 +62,7 @@ export default function AddAccessCodeModal({
     const handleSubmit = async () => {
         // Validation for create
         if (!isEdit && (!code || !expiresAt)) {
-            toast.error("Code and Expiry Date are required", { style: toastStyle });
+            toast.error("Code and Expiry Date are required");
             return;
         }
 
@@ -86,17 +85,15 @@ export default function AddAccessCodeModal({
             }
 
             if ("error" in res) {
-                toast.error(res.error, { style: toastStyle });
+                toast.error(res.error);
             } else {
-                toast.success(`Access code ${isEdit ? "updated" : "created"} successfully!`, {
-                    style: toastStyle,
-                });
+                toast.success(`Access code ${isEdit ? "updated" : "created"} successfully!`);
                 if (onSuccess) onSuccess();
                 onOpenChange(false);
             }
         } catch (err) {
             console.error(err);
-            toast.error("An error occurred", { style: toastStyle });
+            toast.error("An error occurred");
         } finally {
             setLoading(false);
         }

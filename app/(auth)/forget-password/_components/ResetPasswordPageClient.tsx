@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { useRouter, useSearchParams } from "next/navigation";
-import toast from "react-hot-toast";
-import { resetPassword } from "@/services/auth";
 import { BeautifulLoader } from "@/components/Shared/Loading/BeautifulLoader";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { resetPassword } from "@/services/auth";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
+import { toast } from "sonner";
 
 export default function ResetPasswordPageClient() {
   const [password, setPassword] = useState("");

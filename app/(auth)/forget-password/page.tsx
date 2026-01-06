@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
-import toast from "react-hot-toast";
+import { Input } from "@/components/ui/input";
 import { forgetPassword } from "@/services/auth";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { toast } from "sonner";
 
 export default function ForgetPasswordPage() {
   const [email, setEmail] = useState("");
@@ -44,11 +44,11 @@ export default function ForgetPasswordPage() {
           className="rounded-full px-6"
         />
 
-      <div className="flex justify-center">
+        <div className="flex justify-center">
           <Button className="bg-black cursor-pointer px-10 text-white border-white mt-4 md:mt-0 hover:bg-white hover:text-black hover:border-black transition-colors duration-200" type="submit">
-          {loading ? "Sending..." : "Send OTP"}
-        </Button>
-      </div>
+            {loading ? "Sending..." : "Send OTP"}
+          </Button>
+        </div>
       </form>
     </div>
   );
