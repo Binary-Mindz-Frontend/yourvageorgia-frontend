@@ -43,6 +43,7 @@ const MemberLogin = () => {
       setUser(res?.data?.user);
       setIsLoading(false);
 
+      toast.success("Login successful!");
       setTimeout(() => {
         router.push("/profile");
       }, 500);

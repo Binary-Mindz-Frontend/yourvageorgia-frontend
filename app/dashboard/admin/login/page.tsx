@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { loginAdmin } from "@/services/admin.auth/admin.auth";
+import { loginUser, logout } from "@/services/auth";
+import { jwtDecode } from "jwt-decode";
 import { toast } from "sonner";
 
 const AdminLogin = () => {
@@ -19,10 +20,21 @@ const AdminLogin = () => {
     e.preventDefault();
     setIsLoading(true);
     toast.loading("Logging in...", { id: "admin-login" });
-    const res = await loginAdmin({ email, password });
+    const res = await loginUser({ email, password });
 
     if (res?.success) {
-      toast.success("Login successful! Redirecting...", { id: "admin-login" }); // ✅ Same syntax
+      const accessToken = res?.data?.accessToken;
+      const decoded: any = jwtDecode(accessToken);
+      const userRole = decoded?.role?.toLowerCase();
+
+      if (userRole !== "admin") {
+        toast.error("Access denied: You do not have administrator privileges.", { id: "admin-login" });
+        await logout(); // Clear the standard cookies set by loginUser
+        setIsLoading(false);
+        return;
+      }
+
+      toast.success("Login successful!", { id: "admin-login" });
       setTimeout(() => {
         router.push("/dashboard/admin/overview");
         router.refresh();

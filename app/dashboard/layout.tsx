@@ -1,6 +1,5 @@
 "use client";
 import { AppSidebar } from "@/components/Shared/dashboard/sidebar/AppSidebar";
-import { BeautifulLoader } from "@/components/Shared/Loading/BeautifulLoader";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   SidebarInset,
@@ -8,49 +7,21 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import useScrollTrigger from "@/hooks/useScrollTrigger";
+import { logout } from "@/services/auth";
 import { LogOut, User } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { ReactNode, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-// Updated imports - added startTokenExpiryMonitor
-import {
-  isAuthenticated,
-  logoutAdmin,
-  startTokenExpiryMonitor
-} from "@/services/admin.auth/admin.auth";
 
 const DashboardLayout = ({ children }: { children: ReactNode }) => {
   const { scrolled } = useScrollTrigger();
   const [showLogout, setShowLogout] = useState(false);
-  const [isChecking, setIsChecking] = useState(true);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const pathname = usePathname();
 
-  // Check authentication on mount
-  useEffect(() => {
-    const checkAuth = () => {
-      // Skip auth check for login page
-      if (pathname === "/dashboard/admin/login") {
-        setIsChecking(false);
-        return;
-      }
-
-      // Check if user is authenticated
-      if (!isAuthenticated()) {
-        router.push("/dashboard/admin/login");
-      } else {
-        setIsChecking(false);
-        // ✅ START AUTOMATIC TOKEN MONITORING HERE
-        startTokenExpiryMonitor();
-      }
-    };
-
-    checkAuth();
-  }, [router, pathname]);
-
-  const handleLogout = () => {
-    logoutAdmin();
+  const handleLogout = async () => {
+    await logout();
     toast.success("Logged out successfully!");
     setShowLogout(false);
     router.push("/dashboard/admin/login");
@@ -81,11 +52,6 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
   // If on login page, show only the children (login form) without layout
   if (pathname === "/dashboard/admin/login") {
     return <>{children}</>;
-  }
-
-  // Show loading while checking auth
-  if (isChecking) {
-    return <BeautifulLoader fullScreen text="Authenticating" />;
   }
 
   return (
