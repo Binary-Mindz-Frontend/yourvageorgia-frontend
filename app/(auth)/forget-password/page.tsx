@@ -34,7 +34,7 @@ export default function ForgetPasswordPage() {
         onSubmit={handleSubmit}
         className="space-y-6 p-6 shadow-md rounded-xl"
       >
-        <h1 className="text-3xl lg:text-5xl text-center font-serif font-semibold text-white tracking-wider mb-10">Forgot Password</h1>
+        <h1 className="text-3xl lg:text-5xl text-center font-serif font-semibold text-white tracking-wider mb-10">Recover Password</h1>
 
         <Input
           placeholder="Enter email..."
