@@ -13,9 +13,10 @@ export async function proxy(request: NextRequest) {
     if (accessToken) {
         try {
             const decoded: any = jwtDecode(accessToken);
-            userRole = decoded?.role?.toLowerCase();
+            userRole = decoded?.role ? decoded.role.toLowerCase() : null;
         } catch (e) {
-            console.error('Middleware JWT decode failed');
+            console.error('Middleware JWT decode failed:', e);
+            userRole = null;
         }
     }
 

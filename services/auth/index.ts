@@ -54,14 +54,16 @@ export const loginUser = async (userData: FieldValues) => {
         path: "/",
         httpOnly: false, // Middleware needs to read this
         secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
       });
 
       // Save user in cookies
       const decodedUser: any = jwtDecode(result?.data?.accessToken);
       cookieStore.set("user", JSON.stringify(decodedUser), {
+        path: "/",
         httpOnly: false,
         secure: process.env.NODE_ENV === "production",
-        path: "/",
+        sameSite: "lax",
       });
     }
 
