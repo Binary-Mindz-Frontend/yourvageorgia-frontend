@@ -70,11 +70,11 @@ const ProfilePage = async () => {
       {/* Log out Button */}
 
 
-      <div className="mt-6">
+      {/* <div className="mt-6">
         <Button asChild className="flex items-center gap-2">
-          <a href={`${apiUrl}/wallet/membership?token=${memberData.accessToken}`} target="_blank">
+          <a href={`${apiUrl}/wallet/membership?token=${memberData.accessToken}`} target="_blank"> */}
             {/* Add the Image component here */}
-            <Image
+            {/* <Image
               src={appleWallet}
               alt="Apple Wallet"
               width={20}
@@ -82,9 +82,9 @@ const ProfilePage = async () => {
               unoptimized
             />
             Add to Apple Wallet
-          </a>
-        </Button>
-      </div>
+          </a> */}
+        {/* </Button>
+      </div> */}
 
       <Logout />
 
