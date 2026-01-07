@@ -53,8 +53,6 @@ export const loginUser = async (userData: FieldValues) => {
       cookieStore.set("accessToken", result?.data?.accessToken, {
         path: "/",
         httpOnly: false, // Middleware needs to read this
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
       });
 
       // Save user in cookies
@@ -62,8 +60,6 @@ export const loginUser = async (userData: FieldValues) => {
       cookieStore.set("user", JSON.stringify(decodedUser), {
         path: "/",
         httpOnly: false,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
       });
     }
 

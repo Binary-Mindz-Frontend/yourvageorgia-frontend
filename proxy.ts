@@ -20,8 +20,10 @@ export async function proxy(request: NextRequest) {
         }
     }
 
+    // console.log(`Proxy Intercept: ${pathname} | Token: ${!!accessToken} | Role: ${userRole}`);
+
     // 1. If hitting auth routes (login pages)
-    if (authRoutes.some((route) => pathname.startsWith(route))) {
+    if (authRoutes.some((route) => pathname === route || pathname.startsWith(route + '/'))) {
         if (accessToken) {
             if (userRole === 'admin') {
                 return NextResponse.redirect(new URL('/dashboard/admin/overview', request.url));
@@ -32,7 +34,7 @@ export async function proxy(request: NextRequest) {
     }
 
     // 2. Protect Admin Routes
-    if (pathname.startsWith('/dashboard/admin')) {
+    if (pathname === '/dashboard/admin' || pathname.startsWith('/dashboard/admin/')) {
         if (!accessToken || userRole !== 'admin') {
             return NextResponse.redirect(new URL('/dashboard/admin/login', request.url));
         }
@@ -40,7 +42,7 @@ export async function proxy(request: NextRequest) {
     }
 
     // 3. Protect User Routes
-    if (userRoutes.some((route) => pathname.startsWith(route))) {
+    if (pathname === '/profile' || pathname.startsWith('/profile/')) {
         if (!accessToken) {
             return NextResponse.redirect(new URL('/login', request.url));
         }
@@ -54,6 +56,7 @@ export const config = {
     matcher: [
         '/dashboard/admin/:path*',
         '/profile/:path*',
+        '/login/:path*',
         '/login',
     ],
 };
