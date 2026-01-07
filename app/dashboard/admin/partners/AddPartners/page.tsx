@@ -950,6 +950,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
                   })}
                   placeholder="Email"
                   type="email"
+                  spellCheck={false}
                   className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
                 />
 

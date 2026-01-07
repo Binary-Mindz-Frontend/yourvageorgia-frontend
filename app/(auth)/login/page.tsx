@@ -71,6 +71,7 @@ const MemberLogin = () => {
             id="email"
             type="email"
             placeholder="Email"
+            spellCheck={false}
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}

@@ -116,6 +116,7 @@ const MembershipRegister = () => {
             <Input
               placeholder="First name*"
               name="firstName"
+              spellCheck={false}
               value={formData.firstName}
               onChange={handleChange}
               required
@@ -125,6 +126,7 @@ const MembershipRegister = () => {
               placeholder="Last name*"
               name="lastName"
               value={formData.lastName}
+              spellCheck={false}
               onChange={handleChange}
               required
               className="text-white border-neutral-700"
@@ -137,6 +139,7 @@ const MembershipRegister = () => {
               placeholder="Email*"
               type="email"
               name="email"
+              spellCheck={false}
               value={formData.email}
               onChange={handleChange}
               required
@@ -146,6 +149,7 @@ const MembershipRegister = () => {
               placeholder="Phone number*"
               type="tel"
               name="phone"
+              spellCheck={false}
               value={formData.phone}
               onChange={handleChange}
               required
@@ -167,6 +171,7 @@ const MembershipRegister = () => {
               type={showPassword ? "text" : "password"}
               name="password"
               value={formData.password}
+              spellCheck={false}
               onChange={handleChange}
               required
               className="text-white border-neutral-700 pr-10"
@@ -218,6 +223,7 @@ const MembershipRegister = () => {
               // required
               value={formData.accessCode}
               onChange={handleChange}
+              spellCheck={false}
               className="text-white border-neutral-700"
             />
             <p className="text-[#FFFFFFB3] text-sm italic mt-2">
