@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useState } from "react";
 // import { verifyForgetOtp } from "@/app/actions/auth";
-import { useRouter, useSearchParams } from "next/navigation";
-import toast from "react-hot-toast";
-import { verifyForgetOtp } from "@/services/auth";
 import { BeautifulLoader } from "@/components/Shared/Loading/BeautifulLoader";
+import { verifyForgetOtp } from "@/services/auth";
+import { useRouter, useSearchParams } from "next/navigation";
+import { toast } from "sonner";
 
 export default function VerifyOtpPage() {
   const [otp, setOtp] = useState("");

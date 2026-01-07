@@ -3,7 +3,7 @@
 // import { useState } from "react";
 // import { Input } from "@/components/ui/input";
 // import { Button } from "@/components/ui/button";
-// import toast from "react-hot-toast";
+// import { toast } from "sonner";
 // import { createStripeSession } from "@/services/stripe";
 
 // export default function CheckoutPage() {
@@ -77,12 +77,12 @@
 // }
 "use client";
 
-import { useState } from "react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import toast from "react-hot-toast";
-import { createStripeSession } from "@/services/stripe";
 import { BeautifulLoader } from "@/components/Shared/Loading/BeautifulLoader";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { createStripeSession } from "@/services/stripe";
+import { useState } from "react";
+import { toast } from "sonner";
 
 export default function CheckoutPage() {
   const [email, setEmail] = useState("");

@@ -1,6 +1,5 @@
 // app/dashboard/admin/members/_components/userModal/userModal.tsx
 
-import React, { useState, useEffect, useCallback } from "react";
 import {
     Dialog,
     DialogContent,
@@ -9,7 +8,8 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog";
 import { getUserById, IUserResponse } from "@/services/users/users";
-import toast from "react-hot-toast";
+import React, { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 
 type UserDetail = IUserResponse["data"];
 
@@ -74,9 +74,9 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({ userId, isOpen, onClo
     const handleDialogClose = useCallback((open: boolean) => {
         if (!open) {
             // Clear the local state (user data) immediately when the dialog starts to close.
-            setUser(null); 
+            setUser(null);
             // Then call the parent's handler to close the modal (set isOpen: false).
-            onClose(); 
+            onClose();
         }
     }, [onClose]);
 
@@ -90,7 +90,7 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({ userId, isOpen, onClo
                         Detailed profile information for the selected user.
                     </DialogDescription>
                 </DialogHeader>
-                
+
                 {loading && <p className="text-center py-8 text-gray-400">Loading user data...</p>}
 
                 {user && !loading && (
@@ -100,7 +100,7 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({ userId, isOpen, onClo
                         <DetailRow label="Role" value={user.role} />
                         <DetailRow label="Phone" value={user.phone} />
                         <DetailRow label="Date of Birth" value={user.dateOfBirth} />
-                        
+
                         <div className="mt-4 border-t border-gray-700 pt-4">
                             <DetailRow label="Membership" value={user.isMembership} />
                             <DetailRow label="Partner" value={user.isPartner} />
@@ -110,7 +110,7 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({ userId, isOpen, onClo
                         </div>
                     </div>
                 )}
-                
+
                 {!user && !loading && userId && (
                     <p className="text-center py-8 text-red-400">Failed to load user details.</p>
                 )}

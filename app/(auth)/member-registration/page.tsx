@@ -1,14 +1,14 @@
 "use client";
 
-import { Eye, EyeOff } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { useState } from "react";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-import { MemberShipDate } from "./_components/MemberShipDate/MemberShipDate";
-import Link from "next/link";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
 import { registerUser } from "@/services/auth";
-import toast from "react-hot-toast";
+import { Eye, EyeOff } from "lucide-react";
+import Link from "next/link";
+import { useState } from "react";
+import { toast } from "sonner";
+import { MemberShipDate } from "./_components/MemberShipDate/MemberShipDate";
 
 const MembershipRegister = () => {
   const [formData, setFormData] = useState({
@@ -75,7 +75,7 @@ const MembershipRegister = () => {
       password: formData.password,
       dateOfBirth: formData.dob,
       phone: formData.phone,
-      coupon: formData.accessCode, // backend validation
+      accessCode: formData.accessCode, // backend validation
     };
 
     try {
@@ -294,7 +294,7 @@ export default MembershipRegister;
 // import Link from "next/link";
 
 // import { registerUser } from "@/services/auth";
-// import toast from "react-hot-toast";
+// import { toast } from "sonner";
 
 // const MembershipRegister = () => {
 //   const [formData, setFormData] = useState({

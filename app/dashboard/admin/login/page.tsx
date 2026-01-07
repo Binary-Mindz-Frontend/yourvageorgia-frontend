@@ -3,11 +3,12 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
-import toast from "react-hot-toast";
-import { loginAdmin } from "@/services/admin.auth/admin.auth";
+import { loginUser, logout } from "@/services/auth";
+import { jwtDecode } from "jwt-decode";
+import { toast } from "sonner";
 
 const AdminLogin = () => {
   const router = useRouter();
@@ -15,21 +16,32 @@ const AdminLogin = () => {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
- const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     toast.loading("Logging in...", { id: "admin-login" });
-    const res = await loginAdmin({ email, password });
+    const res = await loginUser({ email, password });
 
     if (res?.success) {
-      toast.success("Login successful! Redirecting...", { id: "admin-login" }); // ✅ Same syntax
+      const accessToken = res?.data?.accessToken;
+      const decoded: any = jwtDecode(accessToken);
+      const userRole = decoded?.role?.toLowerCase();
+
+      if (userRole !== "admin") {
+        toast.error("Access denied: You do not have administrator privileges.", { id: "admin-login" });
+        await logout(); // Clear the standard cookies set by loginUser
+        setIsLoading(false);
+        return;
+      }
+
+      toast.success("Login successful!", { id: "admin-login" });
       setTimeout(() => {
         router.push("/dashboard/admin/overview");
         router.refresh();
       }, 500);
     } else {
       toast.error(res?.message || "Invalid email or password.", {
-        id: "admin-login", 
+        id: "admin-login",
       });
       setIsLoading(false);
     }
@@ -67,9 +79,8 @@ const AdminLogin = () => {
             <Button
               type="submit"
               disabled={isLoading}
-              className={`bg-black cursor-pointer px-10 text-white border-white mt-4 md:mt-0 hover:bg-white hover:text-black hover:border-black transition-colors duration-200 ${
-                isLoading ? "border-gray-600 bg-gray-900 cursor-not-allowed" : "border-white"
-              }`}
+              className={`bg-black cursor-pointer px-10 text-white border-white mt-4 md:mt-0 hover:bg-white hover:text-black hover:border-black transition-colors duration-200 ${isLoading ? "border-gray-600 bg-gray-900 cursor-not-allowed" : "border-white"
+                }`}
             >
               {isLoading ? "Processing..." : "Login"}
             </Button>

@@ -1,22 +1,21 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import {
-    Users,
     Activity,
     DollarSign,
+    Users,
 } from "lucide-react";
+import { useEffect, useState } from "react";
 import StateCard from "../_components/StateCard";
 
 import { toast } from "sonner";
 // --- FIX: Import the IAdminStats interface along with the function ---
-import { getAdminStats, IAdminStats } from "@/services/users/users"; 
+import { getAdminStats, IAdminStats } from "@/services/users/users";
 
-const toastStyle = { background: "#000", color: "#fff", marginTop: "4rem" };
 
 const StatesSection = () => {
     // State now uses the correctly imported IAdminStats
-    const [adminStats, setAdminStats] = useState<IAdminStats | null>(null); 
+    const [adminStats, setAdminStats] = useState<IAdminStats | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -25,15 +24,15 @@ const StatesSection = () => {
         const fetchAdminStats = async () => {
             setLoading(true);
             setError(null);
-            
+
             try {
                 const result = await getAdminStats();
-                
+
                 if ("error" in result) {
                     // Handle error response
                     console.error("Error fetching admin stats:", result.error);
                     setError(result.error);
-                    toast.error(result.error, { style: toastStyle });
+                    toast.error(result.error);
                 } else {
                     // Success - set the data
                     // console.log("Admin Stats Data:", result);
@@ -43,7 +42,7 @@ const StatesSection = () => {
                 console.error("Unexpected error:", err);
                 const errorMessage = "An unexpected error occurred while fetching stats";
                 setError(errorMessage);
-                toast.error(errorMessage, { style: toastStyle });
+                toast.error(errorMessage);
             } finally {
                 setLoading(false);
             }
@@ -82,8 +81,8 @@ const StatesSection = () => {
         return (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 pb-7 pt-3 sm:pt-8">
                 {[1, 2, 3].map((i) => (
-                    <div 
-                        key={i} 
+                    <div
+                        key={i}
                         className="animate-pulse bg-gray-200 h-32 rounded-lg"
                     />
                 ))}

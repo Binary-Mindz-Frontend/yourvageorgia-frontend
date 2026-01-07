@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use server";
 
-import { jwtDecode } from "jwt-decode";
 import { getValidToken } from "@/lib/verifyToken";
+import { jwtDecode } from "jwt-decode";
 import { cookies } from "next/headers";
 import { FieldValues } from "react-hook-form";
 
@@ -50,13 +50,17 @@ export const loginUser = async (userData: FieldValues) => {
 
     if (result?.success) {
       // Save token in cookies
-      cookieStore.set("accessToken", result?.data?.accessToken);
+      cookieStore.set("accessToken", result?.data?.accessToken, {
+        path: "/",
+        httpOnly: false, // Middleware needs to read this
+        secure: process.env.NODE_ENV === "production",
+      });
 
       // Save user in cookies
       const decodedUser: any = jwtDecode(result?.data?.accessToken);
       cookieStore.set("user", JSON.stringify(decodedUser), {
         httpOnly: false,
-        secure: false,
+        secure: process.env.NODE_ENV === "production",
         path: "/",
       });
     }

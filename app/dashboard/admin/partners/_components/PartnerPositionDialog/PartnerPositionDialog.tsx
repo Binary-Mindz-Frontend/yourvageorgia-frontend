@@ -1,22 +1,22 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
 import {
     Dialog,
     DialogContent,
+    DialogDescription,
     DialogHeader,
     DialogTitle,
-    DialogDescription,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { toast } from "sonner";
-import { Partner } from "@/types/partner.types";
 import {
-    updatePartnerPosition,
     IPositionUpdateData,
+    updatePartnerPosition,
 } from "@/services/partner/partner";
+import { Partner } from "@/types/partner.types";
+import React, { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 // --- Type Definition ---
 // Pass the full Partner data to the dialog so it can read the current position
@@ -27,7 +27,6 @@ interface PartnerPositionDialogProps {
     onUpdateSuccess: () => void; // Callback to refresh data in the parent
 }
 
-const toastStyle = { background: "#000", color: "#fff", marginTop: "4rem" };
 
 const PartnerPositionDialog: React.FC<PartnerPositionDialogProps> = ({
     partner,
@@ -42,7 +41,7 @@ const PartnerPositionDialog: React.FC<PartnerPositionDialogProps> = ({
     useEffect(() => {
         if (partner && open) {
             // Ensure position is treated as a string for the input value
-            setNewPosition(String(partner.position ?? "")); 
+            setNewPosition(String(partner.position ?? ""));
         } else {
             setNewPosition(""); // Clear state when dialog is closed
         }
@@ -52,14 +51,14 @@ const PartnerPositionDialog: React.FC<PartnerPositionDialogProps> = ({
         e.preventDefault();
 
         if (!partner?._id) {
-            toast.error("Partner ID is missing.", { style: toastStyle });
+            toast.error("Partner ID is missing.");
             return;
         }
 
         const positionValue = parseInt(newPosition, 10);
 
         if (isNaN(positionValue) || positionValue < 0) {
-            toast.error("Please enter a valid position number.", { style: toastStyle });
+            toast.error("Please enter a valid position number.");
             return;
         }
 
@@ -73,15 +72,15 @@ const PartnerPositionDialog: React.FC<PartnerPositionDialogProps> = ({
             const res = await updatePartnerPosition(partner._id, data);
 
             if ("error" in res) {
-                toast.error(res.error, { style: toastStyle });
+                toast.error(res.error);
             } else {
-                toast.success("Partner position updated successfully!", { style: toastStyle });
+                toast.success("Partner position updated successfully!");
                 onUpdateSuccess(); // Call the parent's success handler to refresh table/counts
                 onOpenChange(false); // Close the dialog
             }
         } catch (err) {
             console.error(err);
-            toast.error("An unexpected error occurred.", { style: toastStyle });
+            toast.error("An unexpected error occurred.");
         } finally {
             setLoading(false);
         }
@@ -111,7 +110,7 @@ const PartnerPositionDialog: React.FC<PartnerPositionDialogProps> = ({
                             required
                         />
                     </div>
-                    
+
                     <div className="flex justify-end pt-4">
                         <Button className="cursor-pointer" type="submit" disabled={loading}>
                             {loading ? "Saving..." : "Save changes"}
