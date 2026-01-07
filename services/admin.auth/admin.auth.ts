@@ -51,7 +51,7 @@ export const syncTokenToLocalStorage = (accessToken: string, refreshToken: strin
   localStorage.setItem(LOGIN_TIME_KEY, Date.now().toString());
 
   // Also ensure cookie is set if not already (though the server should handle this)
-  document.cookie = `accessToken=${accessToken}; path=/; max-age=86400; SameSite=Lax`;
+  document.cookie = `accessToken=${accessToken}; path=/; max-age=86400;`;
 };
 
 
