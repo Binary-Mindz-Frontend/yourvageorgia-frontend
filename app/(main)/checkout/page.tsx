@@ -133,6 +133,7 @@ export default function CheckoutPage() {
           placeholder="Enter Email*"
           type="email"
           required
+          spellCheck={false}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           className="rounded-full px-6"

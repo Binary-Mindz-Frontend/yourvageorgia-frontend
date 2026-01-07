@@ -39,6 +39,7 @@ export default function ForgetPasswordPage() {
         <Input
           placeholder="Enter email..."
           value={email}
+          spellCheck={false}
           onChange={(e) => setEmail(e.target.value)}
           required
           className="rounded-full px-6"

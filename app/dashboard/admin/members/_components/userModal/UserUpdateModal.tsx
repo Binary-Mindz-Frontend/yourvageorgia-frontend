@@ -191,6 +191,7 @@ const UserUpdateModal: React.FC<UserUpdateModalProps> = ({ userId, isOpen, onClo
                                             onChange={handleInputChange}
                                             className="bg-gray-800/50 border-gray-700 text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
                                             type="email"
+                                            spellCheck={false}
                                             placeholder="email@example.com"
                                         />
                                     </div>
