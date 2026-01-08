@@ -143,7 +143,7 @@ export const changePassword = async (userData: any) => {
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_BASE_API}/auth/change-password`,
       {
-        method: "POST",
+        method: "PATCH",
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -228,6 +228,50 @@ export const resetPassword = async ({
     return result;
   } catch (error: any) {
     console.log("Reset Password Error:", error);
+    return { success: false, message: error.message };
+  }
+};
+// Verify Registration OTP
+export const verifyRegistrationOtp = async ({
+  email,
+  otp,
+}: {
+  email: string;
+  otp: string;
+}) => {
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_API}/user/verify-otp`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, otp }),
+      }
+    );
+
+    const result = await res.json();
+    return result;
+  } catch (error: any) {
+    console.log("Verify Registration OTP Error:", error);
+    return { success: false, message: error.message };
+  }
+};
+// Generate/Resend OTP
+export const generateOtp = async ({ email }: { email: string }) => {
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_API}/user/generate-otp`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      }
+    );
+
+    const result = await res.json();
+    return result;
+  } catch (error: any) {
+    console.log("Generate OTP Error:", error);
     return { success: false, message: error.message };
   }
 };

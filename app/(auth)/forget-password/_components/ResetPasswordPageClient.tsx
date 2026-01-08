@@ -47,13 +47,14 @@ export default function ResetPasswordPageClient() {
           onChange={(e) => setPassword(e.target.value)}
           required
           className="rounded-full px-6"
+          autoComplete="new-password"
         />
         <div className="flex justify-center">
           <Button
             className="bg-black cursor-pointer px-6 text-white border-white mt-4 md:mt-0 hover:bg-white hover:text-black hover:border-black transition-colors duration-200"
             type="submit"
           >
-            {loading ? <BeautifulLoader size="sm" text="Resetting..." /> : "Reset Password"}
+            {loading ? "Resetting..." : "Reset Password"}
           </Button>
         </div>
       </form>
