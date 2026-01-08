@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { registerUser } from "@/services/auth";
 import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { MemberShipDate } from "./_components/MemberShipDate/MemberShipDate";
@@ -26,6 +27,7 @@ const MembershipRegister = () => {
 
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState("");
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -75,21 +77,20 @@ const MembershipRegister = () => {
       password: formData.password,
       dateOfBirth: formData.dob,
       phone: formData.phone,
-      accessCode: formData.accessCode, // backend validation
+      accessCode: formData.accessCode,
     };
 
     try {
       const response = await registerUser(payload);
       console.log(response, "response")
 
-      if (response?.error) {
-        toast.error(response.message || "Invalid access code");
-      } else {
+      if (response?.success === true) {
         toast.success(response.message);
-
-        if (response?.data?.onBoardingLink) {
-          window.location.href = response.data.onBoardingLink;
-        }
+        // Redirect to OTP verification page
+        router.push(`/member-reg-otp?email=${formData.email}`);
+      }
+      else {
+        toast.error(response.message || "Invalid access code");
       }
     } catch (error) {
       console.error("Registration error:", error);
@@ -97,6 +98,22 @@ const MembershipRegister = () => {
     } finally {
       setLoading(false);
     }
+
+
+    //   if (response?.error) {
+    //     toast.error(response.message || "Invalid access code");
+    //   } else {
+    //     toast.success(response.message);
+
+    //     // Redirect to OTP verification page
+    //     router.push(`/member-reg-otp?email=${formData.email}`);
+    //   }
+    // } catch (error) {
+    //   console.error("Registration error:", error);
+    //   setApiError("Registration failed. Please try again.");
+    // } finally {
+    //   setLoading(false);
+    // }
   };
 
   return (
@@ -275,9 +292,9 @@ const MembershipRegister = () => {
             <Button
               type="submit"
               disabled={loading}
-              className="bg-black text-white border border-white px-10 py-3.5 rounded-full hover:bg-white hover:text-black transition"
+              className="bg-black cursor-pointer text-white border border-white px-10 py-3.5 rounded-full hover:bg-white hover:text-black transition"
             >
-              {loading ? "Processing..." : "Proceed to Payment"}
+              {loading ? "Registering..." : "Register"}
             </Button>
           </div>
         </form>
