@@ -39,6 +39,8 @@ const MemberLogin = () => {
 
     const res = await loginUser(payload);
 
+
+
     if (res?.success) {
       setUser(res?.data?.user);
       setIsLoading(false);
@@ -48,6 +50,11 @@ const MemberLogin = () => {
         router.push("/profile");
       }, 500);
     } else {
+      if (res.message === "Please verify your email first") {
+        router.push(`/member-reg-otp?email=${email}`);
+      } else if (res.data?.redirectUrl) {
+        router.push(res.data?.redirectUrl)
+      }
       toast.error(res?.message || "Invalid email or password.", {
         id: "login",
       });
