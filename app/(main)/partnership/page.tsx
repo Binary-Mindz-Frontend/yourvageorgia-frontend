@@ -1,12 +1,12 @@
 "use client";
 import React from "react";
 
-import img1 from "@/public/assets/partnership/4.png";
-import img2 from "@/public/assets/partnership/1.png";
-import img3 from "@/public/assets/partnership/3.png";
-import img4 from "@/public/assets/partnership/2.png";
-import img5 from "@/public/assets/partnership/5.png";
-import img6 from "@/public/assets/partnership/6.png";
+import img1 from "@/public/assets/partnership/1st Image.jpg";
+import img2 from "@/public/assets/partnership/2nd Image .jpg";
+import img3 from "@/public/assets/partnership/3rd Image.jpg";
+import img4 from "@/public/assets/partnership/4th Image .jpg";
+import img5 from "@/public/assets/partnership/5th image .jpg";
+import img6 from "@/public/assets/partnership/6th image .jpg";
 import Image from "next/image";
 
 interface GalleryItemProps {
