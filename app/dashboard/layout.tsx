@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/sidebar";
 import useScrollTrigger from "@/hooks/useScrollTrigger";
 import { logout } from "@/services/auth";
-import { LogOut, User } from "lucide-react";
+import { Key, LogOut, User } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { ReactNode, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
