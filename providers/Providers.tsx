@@ -1,18 +1,16 @@
 "use client";
-import { Toaster } from "react-hot-toast";
-import UserProvider from "@/context/UserContext";
-import { ThemeProvider } from "@/components/theme-provider";
-import { Navbar } from "@/components/navbar";
 import FavouriteSync from "@/components/FavouriteSync";
+import { ThemeProvider } from "@/components/theme-provider";
+import { Toaster } from "@/components/ui/sonner";
+import UserProvider from "@/context/UserContext";
 // import Footer from "@/components/Shared/Footer/Footer";
 
-// import { Toaster } from "react-hot-toast";
 const Providers = ({ children }: { children: React.ReactNode }) => {
   return (
     <>
       <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>
         <UserProvider>
-          <Toaster position="top-center" />
+          <Toaster position="top-right" expand={true} richColors />
           <FavouriteSync />
           {children}
         </UserProvider>

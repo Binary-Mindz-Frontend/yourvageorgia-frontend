@@ -12,15 +12,16 @@ import {
 } from "@/components/ui/sidebar";
 
 import {
+  Activity,
   BriefcaseBusiness,
+  Key,
   LayoutGrid,
-  Users,
-  Activity
+  Users
 } from "lucide-react";
 
-import { NavMain } from "./Nabmain";
 import { HeaderLogo } from "@/components/icons";
 import Link from "next/link";
+import { NavMain } from "./Nabmain";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const navMain = [
@@ -54,6 +55,18 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       url: "/dashboard/admin/activities",
       show: true,
     },
+    {
+      title: "Access Codes",
+      Icon: Key,
+      url: "/dashboard/admin/access-code",
+      show: true,
+    },
+    {
+      title: "Change Password",
+      Icon: Key,
+      url: "/dashboard/admin/change-password",
+      show: true,
+    },
   ];
 
   return (
@@ -66,11 +79,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild
-            className="hover:bg-transparent focus:bg-transparent active:bg-transparent"
+              className="hover:bg-transparent focus:bg-transparent active:bg-transparent"
             >
               <div className="mt-2">
                 <div className="text-2xl font-bold text-white">
-                    <Link href={"/"}><HeaderLogo /></Link>
+                  <Link href={"/"}><HeaderLogo /></Link>
                 </div>
               </div>
             </SidebarMenuButton>

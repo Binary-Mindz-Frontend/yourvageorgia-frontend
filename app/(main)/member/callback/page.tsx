@@ -1,11 +1,11 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { loginUserWithToken } from "@/services/auth";
 import { CheckCircle } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState, Suspense } from "react";
-import { loginUserWithToken } from "@/services/auth";
-import toast from "react-hot-toast";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { toast } from "sonner";
 
 import { BeautifulLoader } from "@/components/Shared/Loading/BeautifulLoader";
 

@@ -141,3 +141,10 @@
 .description {
   white-space: pre-line;
 }
+
+
+input:focus {
+    outline: none !important;
+    box-shadow: none !important;
+    -webkit-tap-highlight-color: transparent;
+}

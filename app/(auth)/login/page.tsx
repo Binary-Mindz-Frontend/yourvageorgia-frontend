@@ -4,12 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 // import { loginUser } from "@/app/actions/auth";
-import { useRouter } from "next/navigation";
-import { loginUser } from "@/services/auth";
-import toast from "react-hot-toast";
-import useUser from "@/hooks/useUser";
-import Link from "next/link";
 import { BeautifulLoader } from "@/components/Shared/Loading/BeautifulLoader";
+import useUser from "@/hooks/useUser";
+import { loginUser } from "@/services/auth";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 const MemberLogin = () => {
   const router = useRouter();
@@ -39,24 +39,26 @@ const MemberLogin = () => {
 
     const res = await loginUser(payload);
 
+
+
     if (res?.success) {
       setUser(res?.data?.user);
       setIsLoading(false);
 
+      toast.success("Login successful!");
       setTimeout(() => {
         router.push("/profile");
       }, 500);
     } else {
-    toast.error(res?.message || "Invalid email or password.", {
-      id: "login",
-      style: {
-        background: 'rgba(0, 0, 0, 0.8)',
-        color: '#fff',
-        backdropFilter: 'blur(10px)',
-      },
-      icon: null, 
-    });
-  }
+      if (res.message === "Please verify your email first") {
+        router.push(`/member-reg-otp?email=${email}`);
+      } else if (res.data?.redirectUrl) {
+        router.push(res.data?.redirectUrl)
+      }
+      toast.error(res?.message || "Invalid email or password.", {
+        id: "login",
+      });
+    }
 
     setIsLoading(false);
   };
@@ -76,6 +78,7 @@ const MemberLogin = () => {
             id="email"
             type="email"
             placeholder="Email"
+            spellCheck={false}
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -101,8 +104,8 @@ const MemberLogin = () => {
               type="submit"
               disabled={isLoading}
               className={`bg-black cursor-pointer px-10 text-white border-white mt-4 md:mt-0 hover:bg-white hover:text-black hover:border-black transition-colors duration-200 ${isLoading
-                  ? "border-gray-600 bg-gray-900 cursor-not-allowed"
-                  : "border-white"
+                ? "border-gray-600 bg-gray-900 cursor-not-allowed"
+                : "border-white"
                 }`}
             >
               {isLoading ? <BeautifulLoader size="sm" text="Processing..." /> : "Login"}

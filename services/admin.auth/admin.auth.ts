@@ -30,7 +30,28 @@ interface LoginPayload {
 
 export const getAccessToken = (): string | null => {
   if (typeof window === "undefined") return null;
+
+  // Try to get from cookie first (New System)
+  const cookieValue = document.cookie
+    .split("; ")
+    .find((row) => row.startsWith("accessToken="))
+    ?.split("=")[1];
+
+  if (cookieValue) return cookieValue;
+
+  // Fallback to localStorage (Legacy System - will eventually be phased out)
   return localStorage.getItem(ACCESS_TOKEN_KEY);
+};
+
+
+export const syncTokenToLocalStorage = (accessToken: string, refreshToken: string) => {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
+  localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
+  localStorage.setItem(LOGIN_TIME_KEY, Date.now().toString());
+
+  // Also ensure cookie is set if not already (though the server should handle this)
+  document.cookie = `accessToken=${accessToken}; path=/; max-age=86400;`;
 };
 
 
@@ -43,6 +64,9 @@ export const logoutAdmin = () => {
 
   localStorage.removeItem(ACCESS_TOKEN_KEY);
   localStorage.removeItem(REFRESH_TOKEN_KEY);
+
+  // Clear cookie as well
+  document.cookie = "accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT;";
 
 
   if (window.tokenCheckInterval) {
@@ -64,12 +88,19 @@ export const isAuthenticated = (): boolean => {
 
 
   try {
-    const decoded: { exp: number } = jwtDecode(token);
+    const decoded: any = jwtDecode(token);
     const currentTime = Math.floor(Date.now() / 1000);
-
 
     // TOKEN EXPIRED
     if (decoded.exp <= currentTime) {
+      localStorage.removeItem(ACCESS_TOKEN_KEY);
+      localStorage.removeItem(REFRESH_TOKEN_KEY);
+      return false;
+    }
+
+    // Role check - must be admin (case-insensitive)
+    if (decoded.role?.toLowerCase() !== "admin") {
+      console.warn("Access denied: User is not an admin");
       localStorage.removeItem(ACCESS_TOKEN_KEY);
       localStorage.removeItem(REFRESH_TOKEN_KEY);
       return false;
@@ -187,6 +218,16 @@ export const loginAdmin = async (payload: LoginPayload) => {
 
 
     if (response.ok && result.data?.accessToken) {
+      const decoded: any = jwtDecode(result.data.accessToken);
+
+      // Verify role before saving token (case-insensitive)
+      if (decoded.role?.toLowerCase() !== "admin") {
+        return {
+          success: false,
+          message: "Access denied: You do not have administrator privileges.",
+        };
+      }
+
       localStorage.setItem(ACCESS_TOKEN_KEY, result.data.accessToken);
       localStorage.setItem(REFRESH_TOKEN_KEY, result.data.refreashToken);
       localStorage.setItem(LOGIN_TIME_KEY, Date.now().toString());

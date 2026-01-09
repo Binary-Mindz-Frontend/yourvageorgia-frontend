@@ -1,11 +1,10 @@
+import { Button } from "@/components/ui/button";
 import membership from "@/public/assets/profile/profile.jpg";
 import { getCurrentUser } from "@/services/auth";
-import { Suspense } from "react";
-import Logout from "./_component/Logout";
-import { Button } from "@/components/ui/button";
-import { redirect } from "next/navigation";
 import Image from "next/image";
-import appleWallet from "../../../public/assets/member/Apple_Wallet_Icon.svg"
+import { Suspense } from "react";
+import appleWallet from "../../../public/assets/member/Apple_Wallet_Icon.svg";
+import Logout from "./_component/Logout";
 const apiUrl = process.env.NEXT_PUBLIC_BASE_API;
 
 // Convert UNIX timestamp to date-only format (no time)
@@ -33,7 +32,8 @@ const ProfilePage = async () => {
   const memberData = await getCurrentUser();
 
   if (!memberData) {
-    return redirect("/login")
+    // Middleware handles redirection, but we keep a safe fallback for type safety
+    return <BeautifulLoader fullScreen text="Session Expired" />;
   }
 
 
@@ -70,21 +70,21 @@ const ProfilePage = async () => {
       {/* Log out Button */}
 
 
-      <div className="mt-6">
-  <Button asChild className="flex items-center gap-2"> 
-    <a href={`${apiUrl}/wallet/membership?token=${memberData.accessToken}`} target="_blank">
-      {/* Add the Image component here */}
-      <Image 
-        src={appleWallet} 
-        alt="Apple Wallet" 
-        width={20} 
-        height={20} 
-        unoptimized
-      />
-      Add to Apple Wallet
-    </a>
-  </Button>
-</div>
+      {/* <div className="mt-6">
+        <Button asChild className="flex items-center gap-2">
+          <a href={`${apiUrl}/wallet/membership?token=${memberData.accessToken}`} target="_blank"> */}
+            {/* Add the Image component here */}
+            {/* <Image
+              src={appleWallet}
+              alt="Apple Wallet"
+              width={20}
+              height={20}
+              unoptimized
+            />
+            Add to Apple Wallet
+          </a> */}
+        {/* </Button>
+      </div> */}
 
       <Logout />
 

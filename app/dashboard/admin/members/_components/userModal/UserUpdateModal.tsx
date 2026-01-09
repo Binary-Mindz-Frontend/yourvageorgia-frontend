@@ -2,22 +2,22 @@
 
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import { Button } from "@/components/ui/button";
 import {
     Dialog,
     DialogContent,
     DialogDescription,
+    DialogFooter,
     DialogHeader,
-    DialogTitle,
-    DialogFooter 
+    DialogTitle
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { getUserById, IUserResponse, IUserUpdatePayload, updateUserById } from "@/services/users/users";
-import toast from "react-hot-toast";
-import { User, Mail, Phone, Calendar, Shield, CheckCircle, Users, Award } from "lucide-react";
+import { Award, Calendar, CheckCircle, Mail, Phone, Shield, User, Users } from "lucide-react";
+import React, { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 
 // Helper type for the user data structure
 type UserDetail = IUserResponse["data"];
@@ -27,7 +27,7 @@ interface UserUpdateModalProps {
     isOpen: boolean;
     onClose: () => void;
     // Callback to refresh the parent table after update
-    onUpdateSuccess: () => void; 
+    onUpdateSuccess: () => void;
 }
 
 const UserUpdateModal: React.FC<UserUpdateModalProps> = ({ userId, isOpen, onClose, onUpdateSuccess }) => {
@@ -59,7 +59,7 @@ const UserUpdateModal: React.FC<UserUpdateModalProps> = ({ userId, isOpen, onClo
         if (isOpen && userId) {
             fetchUserData(userId);
         }
-        
+
         // Cleanup function
         return () => {
             ignore = true;
@@ -96,7 +96,7 @@ const UserUpdateModal: React.FC<UserUpdateModalProps> = ({ userId, isOpen, onClo
             lastName: formData.lastName,
             email: formData.email,
             phone: formData.phone,
-            dateOfBirth: formData.dateOfBirth, 
+            dateOfBirth: formData.dateOfBirth,
             role: formData.role as 'user' | 'admin',
             isVerified: formData.isVerified,
             isMembership: formData.isMembership,
@@ -127,7 +127,7 @@ const UserUpdateModal: React.FC<UserUpdateModalProps> = ({ userId, isOpen, onClo
                         Edit user details for <span className="text-blue-400 font-semibold">{formData.firstName} {formData.lastName}</span>
                     </DialogDescription>
                 </DialogHeader>
-                
+
                 <div className="overflow-y-auto max-h-[calc(90vh-200px)] px-1">
                     {loading && (
                         <div className="flex flex-col items-center justify-center py-12 space-y-4">
@@ -144,7 +144,7 @@ const UserUpdateModal: React.FC<UserUpdateModalProps> = ({ userId, isOpen, onClo
                                     <User size={16} className="text-blue-400" />
                                     Personal Information
                                 </h3>
-                                
+
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     {/* First Name */}
                                     <div className="space-y-2">
@@ -191,6 +191,7 @@ const UserUpdateModal: React.FC<UserUpdateModalProps> = ({ userId, isOpen, onClo
                                             onChange={handleInputChange}
                                             className="bg-gray-800/50 border-gray-700 text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
                                             type="email"
+                                            spellCheck={false}
                                             placeholder="email@example.com"
                                         />
                                     </div>
@@ -204,7 +205,7 @@ const UserUpdateModal: React.FC<UserUpdateModalProps> = ({ userId, isOpen, onClo
                                         <Input
                                             id="phone"
                                             name="phone"
-                                            value={formData.phone || ''} 
+                                            value={formData.phone || ''}
                                             onChange={handleInputChange}
                                             className="bg-gray-800/50 border-gray-700 text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
                                             type="tel"
@@ -221,7 +222,7 @@ const UserUpdateModal: React.FC<UserUpdateModalProps> = ({ userId, isOpen, onClo
                                         <Input
                                             id="dateOfBirth"
                                             name="dateOfBirth"
-                                            value={formData.dateOfBirth || ''} 
+                                            value={formData.dateOfBirth || ''}
                                             onChange={handleInputChange}
                                             className="bg-gray-800/50 border-gray-700 text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
                                             type="text"
@@ -338,11 +339,11 @@ const UserUpdateModal: React.FC<UserUpdateModalProps> = ({ userId, isOpen, onClo
                         </div>
                     )}
                 </div>
-                
+
                 <DialogFooter className="border-t border-gray-700/50 pt-6 flex justify-center">
-                    <Button 
-                        type="button" 
-                        onClick={handleUpdate} 
+                    <Button
+                        type="button"
+                        onClick={handleUpdate}
                         disabled={loading || isUpdating || !userId}
                         className="bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold px-8 py-2.5 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                     >

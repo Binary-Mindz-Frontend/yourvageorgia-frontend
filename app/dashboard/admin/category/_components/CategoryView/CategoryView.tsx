@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import Image from "next/image";
 import { getCategoryById } from "@/services/category/category";
 import { ICategory } from "@/types/category.types";
+import Image from "next/image";
+import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { BeautifulLoader } from "@/components/Shared/Loading/BeautifulLoader";
@@ -21,7 +21,7 @@ const CategoryView: React.FC<CategoryViewProps> = ({ categoryId }) => {
       setLoading(true);
       const res = await getCategoryById(categoryId);
       if ("error" in res) {
-        toast.error(res.error, { style: { background: "#000", color: "#fff" } });
+        toast.error(res.error);
       } else {
         setCategory(res);
       }

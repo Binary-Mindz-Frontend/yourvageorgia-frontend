@@ -1,14 +1,15 @@
 "use client";
 
-import { Eye, EyeOff } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { useState } from "react";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-import { MemberShipDate } from "./_components/MemberShipDate/MemberShipDate";
-import Link from "next/link";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
 import { registerUser } from "@/services/auth";
-import toast from "react-hot-toast";
+import { Eye, EyeOff } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { toast } from "sonner";
+import { MemberShipDate } from "./_components/MemberShipDate/MemberShipDate";
 
 const MembershipRegister = () => {
   const [formData, setFormData] = useState({
@@ -26,6 +27,7 @@ const MembershipRegister = () => {
 
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState("");
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -75,21 +77,20 @@ const MembershipRegister = () => {
       password: formData.password,
       dateOfBirth: formData.dob,
       phone: formData.phone,
-      coupon: formData.accessCode, // backend validation
+      accessCode: formData.accessCode,
     };
 
     try {
       const response = await registerUser(payload);
       console.log(response, "response")
 
-      if (response?.error) {
-        toast.error(response.message || "Invalid access code");
-      } else {
+      if (response?.success === true) {
         toast.success(response.message);
-
-        if (response?.data?.onBoardingLink) {
-          window.location.href = response.data.onBoardingLink;
-        }
+        // Redirect to OTP verification page
+        router.push(`/member-reg-otp?email=${formData.email}`);
+      }
+      else {
+        toast.error(response.message || "Invalid access code");
       }
     } catch (error) {
       console.error("Registration error:", error);
@@ -97,6 +98,22 @@ const MembershipRegister = () => {
     } finally {
       setLoading(false);
     }
+
+
+    //   if (response?.error) {
+    //     toast.error(response.message || "Invalid access code");
+    //   } else {
+    //     toast.success(response.message);
+
+    //     // Redirect to OTP verification page
+    //     router.push(`/member-reg-otp?email=${formData.email}`);
+    //   }
+    // } catch (error) {
+    //   console.error("Registration error:", error);
+    //   setApiError("Registration failed. Please try again.");
+    // } finally {
+    //   setLoading(false);
+    // }
   };
 
   return (
@@ -116,6 +133,7 @@ const MembershipRegister = () => {
             <Input
               placeholder="First name*"
               name="firstName"
+              spellCheck={false}
               value={formData.firstName}
               onChange={handleChange}
               required
@@ -125,6 +143,7 @@ const MembershipRegister = () => {
               placeholder="Last name*"
               name="lastName"
               value={formData.lastName}
+              spellCheck={false}
               onChange={handleChange}
               required
               className="text-white border-neutral-700"
@@ -137,6 +156,7 @@ const MembershipRegister = () => {
               placeholder="Email*"
               type="email"
               name="email"
+              spellCheck={false}
               value={formData.email}
               onChange={handleChange}
               required
@@ -146,6 +166,7 @@ const MembershipRegister = () => {
               placeholder="Phone number*"
               type="tel"
               name="phone"
+              spellCheck={false}
               value={formData.phone}
               onChange={handleChange}
               required
@@ -167,6 +188,7 @@ const MembershipRegister = () => {
               type={showPassword ? "text" : "password"}
               name="password"
               value={formData.password}
+              spellCheck={false}
               onChange={handleChange}
               required
               className="text-white border-neutral-700 pr-10"
@@ -218,6 +240,7 @@ const MembershipRegister = () => {
               // required
               value={formData.accessCode}
               onChange={handleChange}
+              spellCheck={false}
               className="text-white border-neutral-700"
             />
             <p className="text-[#FFFFFFB3] text-sm italic mt-2">
@@ -269,9 +292,9 @@ const MembershipRegister = () => {
             <Button
               type="submit"
               disabled={loading}
-              className="bg-black text-white border border-white px-10 py-3.5 rounded-full hover:bg-white hover:text-black transition"
+              className="bg-black cursor-pointer text-white border border-white px-10 py-3.5 rounded-full hover:bg-white hover:text-black transition"
             >
-              {loading ? "Processing..." : "Proceed to Payment"}
+              {loading ? "Registering..." : "Register"}
             </Button>
           </div>
         </form>
@@ -294,7 +317,7 @@ export default MembershipRegister;
 // import Link from "next/link";
 
 // import { registerUser } from "@/services/auth";
-// import toast from "react-hot-toast";
+// import { toast } from "sonner";
 
 // const MembershipRegister = () => {
 //   const [formData, setFormData] = useState({
