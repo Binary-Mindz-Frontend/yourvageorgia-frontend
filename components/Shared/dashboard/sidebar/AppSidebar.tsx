@@ -61,6 +61,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       url: "/dashboard/admin/access-code",
       show: true,
     },
+    {
+      title: "Change Password",
+      Icon: Key,
+      url: "/dashboard/admin/change-password",
+      show: true,
+    },
   ];
 
   return (

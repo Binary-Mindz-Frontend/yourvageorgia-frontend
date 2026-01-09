@@ -140,10 +140,11 @@ export const changePassword = async (userData: any) => {
   const token = await getValidToken();
 
   try {
+    console.log(userData);
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_API}/auth/change-password`,
+      `${process.env.NEXT_PUBLIC_BASE_API}/user/change-admin-password-dsdkfjdfgndjfdjfnd-asfnsads`,
       {
-        method: "PATCH",
+        method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
