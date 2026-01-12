@@ -1,17 +1,15 @@
-
 'use client'
 
-import { useEffect, useState } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { BeautifulLoader } from "@/components/Shared/Loading/BeautifulLoader";
+import { NetworkSkeleton } from "@/components/Shared/Loading/NetworkSkeleton";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ListFilter } from "lucide-react";
-import { FilterDrawer } from "./FilterDrawer";
-import PartnerDetailsModal from "../NetworkCardModal/PartnerDetailsModal";
-import PartnerCard from "./PartnerCard";
 import { getPartners } from "@/services/partner/getpartner";
 import { Partner, PartnerCategory } from "@/types/partner.types";
-import { NetworkSkeleton } from "@/components/Shared/Loading/NetworkSkeleton";
-import { BeautifulLoader } from "@/components/Shared/Loading/BeautifulLoader";
+import { ChevronDown, ListFilter } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { FilterDrawer } from "./FilterDrawer";
+import PartnerCard from "./PartnerCard";
 
 interface AppliedFilters {
   locations: string[];
@@ -29,8 +27,6 @@ const NetworkFilter = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [displayCount, setDisplayCount] = useState(10); // Display er jonno count
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedPartner, setSelectedPartner] = useState<Partner | null>(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [appliedFilters, setAppliedFilters] = useState<AppliedFilters>({
     locations: [],
@@ -144,15 +140,32 @@ const NetworkFilter = () => {
   // Apply search query filter
   if (searchQuery) {
     filteredPartners = filteredPartners.filter((partner) => {
-      const nameMatches = partner.name.toLowerCase().includes(searchQuery.toLowerCase());
+      const nameMatches = partner.name?.toLowerCase().includes(searchQuery.toLowerCase());
       const categoryTitles = getCategoryTitles(partner);
       const categoryMatches = categoryTitles.some(title =>
-        title.toLowerCase().includes(searchQuery.toLowerCase())
+        title?.toLowerCase().includes(searchQuery.toLowerCase())
       );
 
       return nameMatches || categoryMatches;
     });
   }
+
+  // Safety filtering
+  filteredPartners = filteredPartners.filter(partner => {
+    // Ensure required fields exist
+    if (!partner._id || !partner.name) return false;
+
+    // Validate contacts array if it exists
+    if (partner.contacts && !Array.isArray(partner.contacts)) return false;
+
+    // Validate activity array if it exists
+    if (partner.activity && !Array.isArray(partner.activity)) return false;
+
+    // Validate categories if it exists
+    if (partner.categories && !Array.isArray(partner.categories)) return false;
+
+    return true;
+  });
 
   // PAGINATION: Display only first 'displayCount' items
   const displayedPartners = filteredPartners.slice(0, displayCount);
@@ -219,24 +232,21 @@ const NetworkFilter = () => {
         </div>
       )}
 
-      {!isLoading && (
+      {!isLoading && displayedPartners.length > 0 && (
         <div className="space-y-10">
-          {displayedPartners.length === 0 ? (
-            <div className="text-center py-10">
-              <p className="text-lg opacity-70">No partners found</p>
-            </div>
-          ) : (
-            displayedPartners.map((partner) => (
-              <PartnerCard
-                key={partner._id}
-                partner={partner}
-                onClick={(p) => {
-                  setSelectedPartner(p);
-                  setIsModalOpen(true);
-                }}
-              />
-            ))
-          )}
+          {displayedPartners.map((partner) => (
+            <PartnerCard
+              key={partner._id}
+              partner={partner}
+              onClick={(p) => router.push(`/network/${p._id}`)}
+            />
+          ))}
+        </div>
+      )}
+
+      {!isLoading && displayedPartners.length === 0 && (
+        <div className="text-center py-10">
+          <p className="text-lg opacity-70">No partners found</p>
         </div>
       )}
 
@@ -258,16 +268,6 @@ const NetworkFilter = () => {
       {isLoading && partners.length > 0 && (
         <div className="mt-10 flex justify-center">
           <BeautifulLoader size="sm" text="Loading more partners" />
-        </div>
-      )}
-
-      {/* Partner Modal */}
-      {isModalOpen && selectedPartner && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-999 overflow-y-auto scrollbar-hide">
-          <PartnerDetailsModal
-            onClose={() => setIsModalOpen(false)}
-            partner={selectedPartner}
-          />
         </div>
       )}
 
