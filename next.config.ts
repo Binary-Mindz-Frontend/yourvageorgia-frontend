@@ -33,6 +33,7 @@ images: {
       
     ],
   },
+  compress: true,
 };
 
 export default nextConfig;

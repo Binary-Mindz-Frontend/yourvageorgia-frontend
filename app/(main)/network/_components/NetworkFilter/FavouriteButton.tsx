@@ -3,7 +3,7 @@
 
 import { getCurrentUser } from "@/services/auth";
 import { Heart } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 
 interface FavouriteButtonProps {
@@ -24,6 +24,7 @@ export default function FavouriteButton({
   const [loading, setLoading] = useState(false);
   const [favourited, setFavourited] = useState(initialFavourited);
   const [user, setUser] = useState<any>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   // 🔹 Load user + localStorage favourite
   useEffect(() => {
@@ -52,6 +53,12 @@ export default function FavouriteButton({
     };
 
     init();
+
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
   }, [partnerId, initialFavourited]);
 
   const token = user?.accessToken;
@@ -79,6 +86,12 @@ export default function FavouriteButton({
 
     if (loading) return;
 
+    // Abort previous request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    abortControllerRef.current = new AbortController();
+
     // Optimistic Update
     const previousState = favourited;
     const newState = !previousState;
@@ -86,14 +99,6 @@ export default function FavouriteButton({
     setFavourited(newState);
     updateLocalStorage(newState);
     if (onToggle) onToggle(newState);
-
-    // We don't show toast immediately to avoid spam, or we can show "Processing..." 
-    // But for better UX, let's just assume success and revert on failure.
-    // Or we can keep the toast but make it instant? 
-    // User requested "efficiency", usually implies speed. 
-    // Let's keep toast but maybe less intrusive or just rely on the icon state.
-    // I will keep the toast as it was but maybe debounced or just standard.
-    // Actually, let's keep it simple: Update UI -> API Call -> Revert if error.
 
     try {
       setLoading(true);
@@ -111,6 +116,7 @@ export default function FavouriteButton({
           body: previousState
             ? undefined
             : JSON.stringify({ program: partnerId }),
+          signal: abortControllerRef.current.signal
         }
       );
 
@@ -124,6 +130,8 @@ export default function FavouriteButton({
         newState ? "Added to favourites" : "Removed from favourites"
       );
     } catch (error: any) {
+      if (error.name === 'AbortError') return;
+
       // Revert optimization
       console.error(error);
       setFavourited(previousState);
@@ -131,6 +139,12 @@ export default function FavouriteButton({
       if (onToggle) onToggle(previousState);
       toast.error(error.message || "Failed to update favourite");
     } finally {
+      if (abortControllerRef.current?.signal.aborted) {
+        // If aborted, don't reset loading state if we want to keep it disabled, 
+        // or logic might be complicated. 
+        // But usually finally runs. 
+        // If we start a NEW request, loading will be set to true again.
+      }
       setLoading(false);
     }
   };

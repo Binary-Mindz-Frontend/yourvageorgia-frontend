@@ -1,9 +1,9 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { ChevronDown, X } from "lucide-react";
-import { useEffect, useState, useMemo } from "react";
 import { Partner } from "@/types/partner.types";
+import { ChevronDown, X } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 
 interface FilterDrawerProps {
   isOpen: boolean;
@@ -38,27 +38,27 @@ export function FilterDrawer({
     };
   }, [isOpen]);
 
-// Extract unique areas from partners' contacts
-const locations = useMemo(() => {
-  const locationMap = new Map<string, string>(); // Track lowercase -> original casing
-  
-  partners.forEach((partner) => {
-    if (partner.contacts && Array.isArray(partner.contacts)) {
-      partner.contacts.forEach((contact) => {
-        const area = contact.area || contact.address;
-        if (area) {
-          const lowerArea = area.toLowerCase().trim(); // Added trim() to handle whitespace
-          // Keep the first occurrence's casing
-          if (!locationMap.has(lowerArea)) {
-            locationMap.set(lowerArea, area.trim());
+  // Extract unique areas from partners' contacts
+  const locations = useMemo(() => {
+    const locationMap = new Map<string, string>(); // Track lowercase -> original casing
+
+    partners.forEach((partner) => {
+      if (partner.contacts && Array.isArray(partner.contacts)) {
+        partner.contacts.forEach((contact) => {
+          const area = contact.area || contact.address;
+          if (area) {
+            const lowerArea = area.toLowerCase().trim(); // Added trim() to handle whitespace
+            // Keep the first occurrence's casing
+            if (!locationMap.has(lowerArea)) {
+              locationMap.set(lowerArea, area.trim());
+            }
           }
-        }
-      });
-    }
-  });
-  
-  return ["ALL", ...Array.from(locationMap.values()).sort()];
-}, [partners]);
+        });
+      }
+    });
+
+    return ["ALL", ...Array.from(locationMap.values()).sort()];
+  }, [partners]);
 
   // Extract unique activities from partners (using the activity field)
   const activities = useMemo(() => {
@@ -69,7 +69,12 @@ const locations = useMemo(() => {
         partner.activity.forEach((act) => {
           if (typeof act === 'object' && act !== null && 'title' in act) {
             const activityObj = act as { title: string };
-            uniqueActivities.add(activityObj.title);
+            if (activityObj.title && typeof activityObj.title === 'string') {
+              const trimmed = activityObj.title.trim();
+              if (trimmed) {
+                uniqueActivities.add(trimmed);
+              }
+            }
           }
         });
       }
@@ -169,10 +174,10 @@ const locations = useMemo(() => {
                       key={location}
                       onClick={() => handleLocationToggle(location)}
                       className={`block cursor-pointer w-full text-left px-4 py-3 text-sm font-light tracking-wide transition-colors ${location === "ALL" && selectedLocations.length === 0
+                        ? "bg-[#73737366] text-white"
+                        : selectedLocations.includes(location)
                           ? "bg-[#73737366] text-white"
-                          : selectedLocations.includes(location)
-                            ? "bg-[#73737366] text-white"
-                            : "text-foreground hover:bg-accent/10"
+                          : "text-foreground hover:bg-accent/10"
                         }`}
                     >
                       {location}
@@ -202,10 +207,10 @@ const locations = useMemo(() => {
                       key={activity}
                       onClick={() => handleActivityToggle(activity)}
                       className={`block cursor-pointer w-full text-left px-4 py-3  text-sm font-light tracking-wide transition-colors ${activity === "ALL" && selectedActivities.length === 0
+                        ? "bg-[#73737366] text-white"
+                        : selectedActivities.includes(activity)
                           ? "bg-[#73737366] text-white"
-                          : selectedActivities.includes(activity)
-                            ? "bg-[#73737366] text-white"
-                            : "text-foreground hover:bg-accent/10"
+                          : "text-foreground hover:bg-accent/10"
                         }`}
                     >
                       {activity}

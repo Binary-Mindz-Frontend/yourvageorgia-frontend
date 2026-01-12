@@ -91,3 +91,23 @@ export const getPartners = async (
     return { error: error.message };
   }
 };
+
+export const getPartnerById = async (
+  id: string
+): Promise<{ data: Partner } | { error: string }> => {
+  try {
+    const res = await fetch(`${BASE_URL}/partner/${id}`, {
+      next: { revalidate: 3600 },
+    });
+    const json = await res.json();
+
+    if (!res.ok) {
+      return { error: json.message || "Failed to fetch partner" };
+    }
+
+    return { data: json.data };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    return { error: error.message };
+  }
+};
