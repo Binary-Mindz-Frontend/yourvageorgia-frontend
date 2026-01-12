@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 'use client'
 
@@ -7,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { ChevronDown, ListFilter } from "lucide-react";
 import { FilterDrawer } from "./FilterDrawer";
 import PartnerCard from "./PartnerCard";
-import { getPartners } from "@/services/partner/getpartner";
+import { getPartnerFiltered } from "@/services/partner/getpartner";
 import { Partner, PartnerCategory } from "@/types/partner.types";
 import { NetworkSkeleton } from "@/components/Shared/Loading/NetworkSkeleton";
 import { BeautifulLoader } from "@/components/Shared/Loading/BeautifulLoader";
@@ -26,7 +27,10 @@ const NetworkFilter = () => {
 
   const [partners, setPartners] = useState<Partner[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [displayCount, setDisplayCount] = useState(10); // Display er jonno count
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalPartners, setTotalPartners] = useState(0);
+
 
   // const [isModalOpen, setIsModalOpen] = useState(false);
   // const [selectedPartner, setSelectedPartner] = useState<Partner | null>(null);
@@ -43,30 +47,37 @@ const NetworkFilter = () => {
     const fetchPartners = async () => {
       setIsLoading(true);
       try {
-        // Fetch without limit to get all partners for filtering
-        const result = await getPartners({ limit: 1000 }); // Large limit or modify API to fetch all
-        // console.log(result);
+        const result = await getPartnerFiltered({
+          page: currentPage,
+          category: activeFilter === "All" ? undefined : activeFilter
+        });
+        console.log(result);
 
         if ("error" in result) {
           console.error("Failed to fetch partners:", result.error);
-          setPartners([]);
         } else {
           const sortedPartners = [...(result.data || [])].sort(
             (a, b) => (a.position ?? 0) - (b.position ?? 0)
           );
 
-          setPartners(sortedPartners);
+          // APPEND new data to existing partners
+          setPartners(prev => currentPage === 1 ? sortedPartners : [...prev, ...sortedPartners]);
+
+          // Set total pages from meta
+          const meta = (result as any).meta;
+          if (meta) {
+            setTotalPages(meta.totalPage || 1);
+            setTotalPartners(meta.total || 0);
+          }
         }
       } catch (err) {
         console.error("Failed to fetch partners:", err);
-        setPartners([]);
       } finally {
         setIsLoading(false);
       }
     };
-
     fetchPartners();
-  }, []);
+  }, [currentPage, activeFilter]);
 
   // Set active filter from URL
   useEffect(() => {
@@ -106,13 +117,7 @@ const NetworkFilter = () => {
   };
 
   // COMPLETE FILTERING (on all partners)
-  let filteredPartners =
-    activeFilter === "All"
-      ? partners
-      : partners.filter((p) => {
-        const categoryTitles = getCategoryTitles(p);
-        return categoryTitles.includes(activeFilter);
-      });
+  let filteredPartners = partners;
 
   // Apply drawer filters
   if (appliedFilters.locations.length > 0) {
@@ -154,12 +159,13 @@ const NetworkFilter = () => {
   }
 
   // PAGINATION: Display only first 'displayCount' items
-  const displayedPartners = filteredPartners.slice(0, displayCount);
-  const hasMore = displayCount < filteredPartners.length;
+  const displayedPartners = filteredPartners;
+  const hasMore = currentPage < totalPages;
 
   const handleFilterClick = (filter: string) => {
     setActiveFilter(filter);
-    setDisplayCount(10); // Reset to 10 when filter changes
+    setCurrentPage(1);
+    setPartners([]);
 
     if (filter === "All") {
       router.push("/network");
@@ -170,11 +176,12 @@ const NetworkFilter = () => {
 
   const handleFilterChange = (filters: AppliedFilters) => {
     setAppliedFilters(filters);
-    setDisplayCount(10); // Reset to 10 when drawer filter changes
+    setCurrentPage(1);
+    setPartners([]);
   };
 
   const handleLoadMore = () => {
-    setDisplayCount(prev => prev + 10);
+    setCurrentPage(prev => prev + 1);
   };
 
   return (
@@ -248,7 +255,7 @@ const NetworkFilter = () => {
             <ChevronDown className="lg:w-10 lg:h-10" />
           </button>
           <p className="text-sm opacity-70">
-            Showing {displayedPartners.length} of {filteredPartners.length}
+            Showing {partners.length} of {totalPartners}
           </p>
         </div>
       )}

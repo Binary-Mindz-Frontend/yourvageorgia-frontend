@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use server";
 
 import { Partner } from "@/types/partner.types";
@@ -26,6 +27,18 @@ export interface IPartnerResponse {
     updatedAt: string;
     __v: number;
   };
+}
+
+export interface IGetPartnerFilters {
+  page?: number;
+  limit?: number;
+  search?: string;
+  address?: string;
+  category?: string;  
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+  activity?: string | string[];
+  area?: string;
 }
 
 export interface IPositionUpdateData {
@@ -86,8 +99,49 @@ export const getPartners = async (
       data: json.data,
       meta: json.meta,
     };
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     return { error: error.message };
+  }
+};
+
+export const getPartnerFiltered = async (
+  filters: IGetPartnerFilters = {}
+): Promise<
+  { data: IGetAllPartnersResponse["data"]; meta: IGetAllPartnersResponse["meta"] } | { error: string }
+> => {
+  try {
+    const queryParams = new URLSearchParams();
+
+    (Object.keys(filters) as Array<keyof IGetPartnerFilters>).forEach((key) => {
+      const value = filters[key];
+
+      if (value === undefined || value === null || value === "") return;
+
+      // Handle multiple activities (activity=id1&activity=id2)
+      if (key === "activity" && Array.isArray(value)) {
+        value.forEach((val) => queryParams.append(key, val));
+      } else {
+        queryParams.append(key, String(value));
+      }
+    });
+
+    const url = `${BASE_URL}/partner?${queryParams.toString()}`;
+    
+    const res = await fetch(url, {
+      cache: "no-store", // Often better for filtered results to avoid stale data
+    });
+
+    const json = await res.json();
+
+    if (!res.ok) {
+      return { error: json.message || "Failed to fetch filtered partners" };
+    }
+
+    return {
+      data: json.data,
+      meta: json.meta,
+    };
+  } catch (error: any) {
+    return { error: error.message || "An unexpected error occurred" };
   }
 };
