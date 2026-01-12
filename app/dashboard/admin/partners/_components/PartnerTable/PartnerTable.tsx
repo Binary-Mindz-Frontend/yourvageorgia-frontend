@@ -1,29 +1,29 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
-import { Eye, MoreHorizontal, Pen, Plus, Trash2 } from "lucide-react";
+import CustomPagination from "@/components/Shared/dashboard/custompagination/CustomPagination";
+import CustomTable, { Column } from "@/components/Shared/dashboard/customtable/CustomTable";
 import { Button } from "@/components/ui/button";
 import {
     DropdownMenu,
-    DropdownMenuTrigger,
     DropdownMenuContent,
     DropdownMenuItem,
+    DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import CustomTable, { Column } from "@/components/Shared/dashboard/customtable/CustomTable";
-import CustomPagination from "@/components/Shared/dashboard/custompagination/CustomPagination";
-import { toast } from "sonner";
 import {
-    getPartners,
     deletePartner,
+    getPartners,
     IGetPartnersParams,
 } from "@/services/partner/partner";
+import { Eye, MoreHorizontal, Pen, Plus, Trash2 } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 
 import { getCategoriesForSelect, ICategoryWithId } from "@/services/category/category";
 import { Partner } from "@/types/partner.types";
 import { useRouter } from "next/navigation";
-import UsersSummary from "../UsersSummarySection/UsersSummary";
 import PartnerFilterSection from "../PartnerFilterSection/PartnerFilterSection";
 import PartnerPositionDialog from "../PartnerPositionDialog/PartnerPositionDialog";
+import UsersSummary from "../UsersSummarySection/UsersSummary";
 
 
 type PartnerRow = Partner & {
@@ -38,7 +38,6 @@ export interface IPartnerFilters {
     page: number;
 }
 
-const toastStyle = { background: "#000", color: "#fff", marginTop: "4rem" };
 const pageSize = 10;
 
 const PartnerPage = () => {
@@ -65,11 +64,11 @@ const PartnerPage = () => {
 
     const [isPositionDialogOpen, setIsPositionDialogOpen] = useState(false);
     const [partnerToUpdatePosition, setPartnerToUpdatePosition] = useState<PartnerRow | null>(null);
-    
+
     // Add this before the columns definition
     const getCategoryTitles = (
         categoryData: (ICategoryWithId | string)[] | ICategoryWithId | string | undefined,
-         allCategories: ICategoryWithId[]
+        allCategories: ICategoryWithId[]
     ): string => {
         if (!categoryData) return "N/A";
 
@@ -111,7 +110,7 @@ const PartnerPage = () => {
             const res = await getPartners(params);
 
             if ("error" in res) {
-                toast.error(res.error, { style: toastStyle });
+                toast.error(res.error);
             } else {
                 const allPartners = res.data as PartnerRow[];
                 setGlobalTotalPartners(res.meta.total || allPartners.length);
@@ -124,7 +123,7 @@ const PartnerPage = () => {
             }
         } catch (err) {
             console.error(err);
-            toast.error("Failed to fetch summary stats", { style: toastStyle });
+            toast.error("Failed to fetch summary stats");
         } finally {
             setGlobalLoading(false);
         }
@@ -141,13 +140,13 @@ const PartnerPage = () => {
             const res = await getCategoriesForSelect();
             // console.log(res)
             if ("error" in res) {
-                toast.error(res.error, { style: toastStyle });
+                toast.error(res.error);
             } else {
                 setCategories(res.data);
             }
         } catch (err) {
             console.error(err);
-            toast.error("Failed to fetch categories list", { style: toastStyle });
+            toast.error("Failed to fetch categories list");
         }
     };
 
@@ -165,14 +164,14 @@ const PartnerPage = () => {
             const res = await getPartners(params);
             // console.log(res, "res");
             if ("error" in res) {
-                toast.error(res.error, { style: toastStyle });
+                toast.error(res.error);
             } else {
                 setPartners(res.data as PartnerRow[]);
                 setFilteredTotalItems(res?.meta?.total || 0);
             }
         } catch (err) {
             console.error(err);
-            toast.error("Failed to fetch partners", { style: toastStyle });
+            toast.error("Failed to fetch partners");
         } finally {
             setTableLoading(false);
         }
@@ -217,15 +216,15 @@ const PartnerPage = () => {
         try {
             const res = await deletePartner(partnerId);
             if ("error" in res) {
-                toast.error(res.error, { style: toastStyle });
+                toast.error(res.error);
             } else {
-                toast.success(res.message, { style: toastStyle });
+                toast.success(res.message);
                 fetchPartners();
                 fetchGlobalCounts();
             }
         } catch (err) {
             console.error(err);
-            toast.error("Failed to delete partner", { style: toastStyle });
+            toast.error("Failed to delete partner");
         } finally {
             setDeleting(null);
         }
@@ -324,7 +323,7 @@ const PartnerPage = () => {
 
                 totalPartners={globalTotalPartners}
                 featuredPartners={globalFeaturedPartners}
-                loading={globalLoading}  
+                loading={globalLoading}
             />
 
             <header className="flex justify-between items-center mb-4 flex-wrap gap-5">

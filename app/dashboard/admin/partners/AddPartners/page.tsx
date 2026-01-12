@@ -2,32 +2,32 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useForm, Controller } from "react-hook-form";
+import { useEffect, useRef, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
 
 import { getCategoriesForSelect } from "@/services/category/category";
-import { ICategory } from "@/types/category.types";
 import { createPartner, updatePartner } from "@/services/partner/partner";
+import { ICategory } from "@/types/category.types";
 
+import { BeautifulLoader } from "@/components/Shared/Loading/BeautifulLoader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Upload, X } from "lucide-react";
-import { toast } from "sonner";
-import { BeautifulLoader } from "@/components/Shared/Loading/BeautifulLoader";
 import {
   Select,
-  SelectTrigger,
-  SelectValue,
   SelectContent,
   SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
-import LogoUploadWithCrop from "../_components/LogoUploadWithCrop/LogoUploadWithCrop";
-import { PartnerContact } from "@/types/partner.types";
+import { Textarea } from "@/components/ui/textarea";
 import { getActivitiesForSelect } from "@/services/activity/activity";
+import { PartnerContact } from "@/types/partner.types";
+import { Upload, X } from "lucide-react";
+import { toast } from "sonner";
+import LogoUploadWithCrop from "../_components/LogoUploadWithCrop/LogoUploadWithCrop";
 
 type CategoryOption = { _id: string; title: string };
 
@@ -259,7 +259,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
       try {
         const res = await getActivitiesForSelect();
         if ("error" in res) {
-          toast.error(res.error, { style: { background: "#000", color: "#fff" } });
+          toast.error(res.error);
         } else {
           const list: ActivityOption[] = res.data.map((a) => ({
             _id: a._id,
@@ -269,7 +269,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
         }
       } catch (err) {
         console.error(err);
-        toast.error("Failed to fetch activities", { style: { background: "#000", color: "#fff" } });
+        toast.error("Failed to fetch activities");
       } finally {
         setLoadingActivities(false);
       }
@@ -284,7 +284,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
       try {
         const res = await getCategoriesForSelect();
         if ("error" in res) {
-          toast.error(res.error, { style: { background: "#000", color: "#fff" } });
+          toast.error(res.error);
         } else {
           const list: CategoryOption[] = res.data
             .filter((c: ICategory) => c._id)
@@ -296,7 +296,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
         }
       } catch (err) {
         console.error(err);
-        toast.error("Failed to fetch categories", { style: { background: "#000", color: "#fff" } });
+        toast.error("Failed to fetch categories");
       } finally {
         setLoadingCategories(false);
       }
@@ -310,14 +310,13 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
     setPreview(url);
   };
 
-  const toastStyle = { background: "#000", color: "#fff", marginTop: "4rem" };
 
   const onSubmit = async (data: FormData) => {
     const unauthorizedMessage = "Session expired or unauthorized. Please log in again.";
 
     const handleAuthError = (errorMessage: string) => {
       if (errorMessage.includes(unauthorizedMessage)) {
-        toast.error("Session expired. Redirecting to login...", { style: toastStyle });
+        toast.error("Session expired. Redirecting to login...");
 
         setTimeout(() => {
           router.push("/dashboard/admin/login");
@@ -328,7 +327,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
     };
 
     try {
-      toast.loading("Uploading images...", { id: "upload-images", style: toastStyle });
+      toast.loading("Uploading images...", { id: "upload-images" });
 
       let thumbnailUrl = data.thumbnailUrl;
       if (thumbnailPreview && thumbnailPreview.startsWith('blob:')) {
@@ -363,7 +362,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
       toast.dismiss("upload-images");
 
       const payload = {
-        categories: data.categories, // Changed from category to categories
+        categories: data.categories,
         name: data.name,
         thumbnail: thumbnailUrl,
         activity: data.activity.length > 0 ? data.activity : undefined,
@@ -378,8 +377,8 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
           offerPercentage: o.percentage === "" ? undefined : Number(o.percentage)
         })),
         about: data.about || "",
-        terms: data.terms.filter((t) => t.trim()),
-        contacts: data.contacts.filter((c) => {
+        terms: data.terms.filter((t: string) => t.trim()),
+        contacts: data.contacts.filter((c: any) => {
           return c.officeName || c.phone || c.address || c.area || c.email;
         }),
         socials: {
@@ -388,8 +387,6 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
           whatsapp: data.whatsapp,
         },
       };
-
-      console.log("Full Payload Data:", JSON.stringify(payload, null, 2));
 
       let res;
 
@@ -400,10 +397,10 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
           if (handleAuthError(res.error)) {
             return;
           }
-          toast.error("Failed to update partner: " + res.error, { style: toastStyle });
+          toast.error("Failed to update partner: " + res.error);
           return;
         }
-        toast.success("Partner updated successfully!", { style: toastStyle });
+        toast.success("Partner updated successfully!");
       } else {
         res = await createPartner(payload);
 
@@ -412,11 +409,11 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
             return;
           }
 
-          toast.error("Failed to create partner: " + res.error, { style: toastStyle });
+          toast.error("Failed to create partner: " + res.error);
           return;
         }
 
-        toast.success("Partner created successfully!", { style: toastStyle });
+        toast.success("Partner created successfully!");
       }
 
       setTimeout(() => {
@@ -433,7 +430,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
         return;
       }
 
-      toast.error(errorMessage, { style: toastStyle });
+      toast.error(errorMessage);
     }
   };
 
@@ -953,6 +950,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
                   })}
                   placeholder="Email"
                   type="email"
+                  spellCheck={false}
                   className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
                 />
 

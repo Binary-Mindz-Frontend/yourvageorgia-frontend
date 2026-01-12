@@ -105,6 +105,7 @@ export default function ContactsSection<T extends FieldValues = FieldValues>({
                 })}
                 placeholder="Email"
                 type="email"
+                spellCheck={false}
                 className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
               />
               {errors.contacts && Array.isArray(errors.contacts) && errors.contacts[i]?.email && (

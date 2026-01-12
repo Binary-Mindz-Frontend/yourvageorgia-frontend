@@ -1,19 +1,19 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
-import { MoreHorizontal, Ban, CircleCheck, Eye, Trash2, CirclePlus, CircleMinus, Verified, ShieldBan } from "lucide-react";
+import CustomPagination from "@/components/Shared/dashboard/custompagination/CustomPagination";
+import CustomTable, { Column } from "@/components/Shared/dashboard/customtable/CustomTable";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import {
     DropdownMenu,
-    DropdownMenuTrigger,
     DropdownMenuContent,
     DropdownMenuItem,
+    DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import CustomTable, { Column } from "@/components/Shared/dashboard/customtable/CustomTable";
-import CustomPagination from "@/components/Shared/dashboard/custompagination/CustomPagination";
-import toast from "react-hot-toast";
 import { getAllUsers, IFilters, IUserResponse, updateUserById } from "@/services/users/users";
+import { Ban, CircleCheck, CircleMinus, CirclePlus, Eye, MoreHorizontal, ShieldBan, Trash2, Verified } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 import FilterSection from "../MemberFilter/MemberFilter";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import UserDetailModal from "../userModal/userModal";
 
 // Define all possible action types in one place for better management

@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use server";
 
-import { jwtDecode } from "jwt-decode";
 import { getValidToken } from "@/lib/verifyToken";
+import { jwtDecode } from "jwt-decode";
 import { cookies } from "next/headers";
 import { FieldValues } from "react-hook-form";
 
@@ -20,9 +20,9 @@ export const registerUser = async (userData: Record<string, any>) => {
       }
     );
 
-    if (!res.ok) {
-      throw new Error(`Failed to register: ${res.statusText}`);
-    }
+    // if (!res.ok) {
+    //   throw new Error(`Failed to register: ${res.statusText}`);
+    // }
     const user = await res.json();
 
     return user;
@@ -50,14 +50,16 @@ export const loginUser = async (userData: FieldValues) => {
 
     if (result?.success) {
       // Save token in cookies
-      cookieStore.set("accessToken", result?.data?.accessToken);
+      cookieStore.set("accessToken", result?.data?.accessToken, {
+        path: "/",
+        httpOnly: false, // Middleware needs to read this
+      });
 
       // Save user in cookies
       const decodedUser: any = jwtDecode(result?.data?.accessToken);
       cookieStore.set("user", JSON.stringify(decodedUser), {
-        httpOnly: false,
-        secure: false,
         path: "/",
+        httpOnly: false,
       });
     }
 
@@ -138,8 +140,9 @@ export const changePassword = async (userData: any) => {
   const token = await getValidToken();
 
   try {
+    console.log(userData);
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_API}/auth/change-password`,
+      `${process.env.NEXT_PUBLIC_BASE_API}/user/change-admin-password-dsdkfjdfgndjfdjfnd-asfnsads`,
       {
         method: "POST",
         headers: {
@@ -226,6 +229,50 @@ export const resetPassword = async ({
     return result;
   } catch (error: any) {
     console.log("Reset Password Error:", error);
+    return { success: false, message: error.message };
+  }
+};
+// Verify Registration OTP
+export const verifyRegistrationOtp = async ({
+  email,
+  otp,
+}: {
+  email: string;
+  otp: string;
+}) => {
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_API}/user/verify-otp`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, otp }),
+      }
+    );
+
+    const result = await res.json();
+    return result;
+  } catch (error: any) {
+    console.log("Verify Registration OTP Error:", error);
+    return { success: false, message: error.message };
+  }
+};
+// Generate/Resend OTP
+export const generateOtp = async ({ email }: { email: string }) => {
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_API}/user/generate-otp`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      }
+    );
+
+    const result = await res.json();
+    return result;
+  } catch (error: any) {
+    console.log("Generate OTP Error:", error);
     return { success: false, message: error.message };
   }
 };

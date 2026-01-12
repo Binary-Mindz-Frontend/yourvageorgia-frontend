@@ -1,25 +1,25 @@
-import { useState, useEffect, useRef } from "react";
+import { BeautifulLoader } from "@/components/Shared/Loading/BeautifulLoader";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { Upload, X } from "lucide-react";
-import { toast } from "sonner";
 import {
   createCategory,
-  updateCategory,
-  ICategoryResponse,
   ICategory,
+  ICategoryResponse,
   ICategoryWithId,
+  updateCategory,
 } from "@/services/category/category";
+import { Upload, X } from "lucide-react";
 import Image from "next/image";
-import { BeautifulLoader } from "@/components/Shared/Loading/BeautifulLoader";
+import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 
 // Backend base URL
 const BACKEND_BASE_URL = process.env.NEXT_PUBLIC_BASE_API;
@@ -47,7 +47,6 @@ export default function AddCategoryModal({
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
 
-  const toastStyle = { background: "#000", color: "#fff", marginTop: "4rem" };
 
   // Reset fields when modal opens or initialData changes
   useEffect(() => {
@@ -69,7 +68,7 @@ export default function AddCategoryModal({
       file.type === "image/svg+xml" ||
       file.name.toLowerCase().endsWith(".svg")
     ) {
-      toast.error("Please upload image PNG, JPG, JPEG", { style: toastStyle });
+      toast.error("Please upload image PNG, JPG, JPEG");
 
       // reset input so same file can be selected again
       if (fileInputRef.current) {
@@ -116,7 +115,7 @@ export default function AddCategoryModal({
 
   const handleSubmit = async () => {
     if (!title || !image) {
-      toast.error("Title and Image are required", { style: toastStyle });
+      toast.error("Title and Image are required");
       return;
     }
 
@@ -135,7 +134,7 @@ export default function AddCategoryModal({
       }
 
       if ("error" in res) {
-        toast.error(res.error, { style: toastStyle });
+        toast.error(res.error);
         setLoading(false);
         return;
       }
@@ -143,8 +142,7 @@ export default function AddCategoryModal({
       if (onCategoryAdded) onCategoryAdded(res.data);
 
       toast.success(
-        `${res.data.title} ${isEdit ? "updated" : "added"} successfully!`,
-        { style: toastStyle }
+        `${res.data.title} ${isEdit ? "updated" : "added"} successfully!`
       );
 
       onOpenChange(false);
@@ -157,7 +155,7 @@ export default function AddCategoryModal({
       }
     } catch (err: unknown) {
       console.error("Category error:", err);
-      toast.error("Something went wrong", { style: toastStyle });
+      toast.error("Something went wrong");
     } finally {
       setLoading(false);
     }

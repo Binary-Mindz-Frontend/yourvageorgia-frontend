@@ -64,7 +64,7 @@ export default function TermsAndConditions() {
           <div className="mt-6">
             {sections.map((sec, index) => (
               <div key={index} className="text-center mb-12">
-                <h3 className="text-xl lg:text-2xlfont-medium pb-2  border-b-2 border-neutral-700">{sec.title}</h3>
+                <h3 className="text-xl lg:text-2xl font-medium pb-2  border-b-2 border-neutral-700">{sec.title}</h3>
                 <p className="text-sm lg:text-base text-[#FFFFFFB3] leading-relaxed px-4 pt-2">
                   {sec.text}
                 </p>

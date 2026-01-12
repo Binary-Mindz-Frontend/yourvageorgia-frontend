@@ -1,6 +1,15 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import CustomPagination from "@/components/Shared/dashboard/custompagination/CustomPagination";
+import CustomTable, { Column } from "@/components/Shared/dashboard/customtable/CustomTable";
+import { Button } from "@/components/ui/button";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { deleteCategory, getCategories, ICategoryWithId } from "@/services/category/category";
 import {
     Eye,
     MoreHorizontal,
@@ -9,19 +18,10 @@ import {
     Trash2,
     X,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import {
-    DropdownMenu,
-    DropdownMenuTrigger,
-    DropdownMenuContent,
-    DropdownMenuItem,
-} from "@/components/ui/dropdown-menu";
-import AddCategoryModal from "../AddCategory/AddCategory";
-import CustomTable, { Column } from "@/components/Shared/dashboard/customtable/CustomTable";
-import CustomPagination from "@/components/Shared/dashboard/custompagination/CustomPagination";
 import Image from "next/image";
-import { getCategories, deleteCategory, ICategoryWithId } from "@/services/category/category";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import AddCategoryModal from "../AddCategory/AddCategory";
 
 
 import {
@@ -30,8 +30,8 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
-import CategoryView from "../CategoryView/CategoryView";
 import AnalyticsOverviewSection from "../CategoryOverviewSection/CategoryOverviewSection";
+import CategoryView from "../CategoryView/CategoryView";
 
 
 const CategoryPage = () => {
@@ -59,14 +59,14 @@ const CategoryPage = () => {
             try {
                 const res = await getCategories(currentPage, pageSize); // ✅ Pass page and limit
                 if ("error" in res) {
-                    toast.error(res.error, { style: { background: "#000", color: "#fff", marginTop: "4rem" } });
+                    toast.error(res.error);
                 } else {
                     setCategories(res.data);
                     setTotalCategories(res.meta.total);
                 }
             } catch (err: unknown) {
                 console.error(err);
-                toast.error("Failed to fetch categories", { style: { background: "#000", color: "#fff", marginTop: "4rem" } });
+                toast.error("Failed to fetch categories");
             } finally {
                 setLoading(false);
             }
@@ -82,14 +82,14 @@ const CategoryPage = () => {
             const res = await deleteCategory(categoryId);
 
             if ("error" in res) {
-                toast.error(res.error, { style: { background: "#000", color: "#fff", marginTop: "4rem" } });
+                toast.error(res.error);
             } else {
-                toast.success(res.message, { style: { background: "#000", color: "#fff", marginTop: "4rem" } });
+                toast.success(res.message);
                 setCategories(prev => prev.filter(cat => cat._id !== categoryId));
             }
         } catch (err: unknown) {
             console.error(err);
-            toast.error("Failed to delete category", { style: { background: "#000", color: "#fff", marginTop: "4rem" } });
+            toast.error("Failed to delete category");
         } finally {
             setDeleting(null);
         }
