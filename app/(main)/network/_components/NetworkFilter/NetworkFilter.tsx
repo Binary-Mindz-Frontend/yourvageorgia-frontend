@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 'use client'
@@ -45,8 +46,10 @@ const NetworkFilter = () => {
     () => `${appliedFilters.locations.join(',')}-${appliedFilters.activities.join(',')}`,
     [appliedFilters.locations, appliedFilters.activities]
   );
-  // Fetch ALL partners at once (no limit)
+
   useEffect(() => {
+    const controller = new AbortController(); // KILL PREVIOUS CALLS
+
     const fetchPartners = async () => {
       setIsLoading(true);
       try {
@@ -55,45 +58,40 @@ const NetworkFilter = () => {
           category: activeFilter === "All" ? undefined : activeFilter,
           area: appliedFilters.locations.length > 0 ? appliedFilters.locations : undefined,
           activity: appliedFilters.activities.length > 0 ? appliedFilters.activities : undefined,
-
         });
-        console.log(result);
+
+        console.log("Fetched partners for page", result);
+        if (controller.signal.aborted) return;
 
         if ("error" in result) {
-          console.error("Failed to fetch partners:", result.error);
+          console.error(result.error);
         } else {
-          const sortedPartners = [...(result.data || [])].sort(
-            (a, b) => (a.position ?? 0) - (b.position ?? 0)
-          );
+          const sorted = [...(result.data || [])].sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
+          setPartners(prev => (currentPage === 1 ? sorted : [...prev, ...sorted]));
 
-          // APPEND new data to existing partners
-          setPartners(prev => currentPage === 1 ? sortedPartners : [...prev, ...sortedPartners]);
-
-          // Set total pages from meta
           const meta = (result as any).meta;
           if (meta) {
-            setTotalPages(meta.totalPage || 1);
+            setTotalPages(meta.totalPages || meta.totalPage || 1);
             setTotalPartners(meta.total || 0);
           }
         }
       } catch (err) {
-        console.error("Failed to fetch partners:", err);
+        if ((err as any).name !== 'AbortError') console.error(err);
       } finally {
-        setIsLoading(false);
+        if (!controller.signal.aborted) setIsLoading(false);
       }
     };
+
     fetchPartners();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    return () => controller.abort();
   }, [currentPage, activeFilter, appliedFiltersKey]);
 
-  // Set active filter from URL
   useEffect(() => {
     if (filterFromUrl) {
       setActiveFilter(filterFromUrl);
     }
   }, [filterFromUrl]);
 
-  // Update activeFilter if search query matches category
   useEffect(() => {
     if (searchQuery) {
       const matchedCategory = filters.find((filter) => filter.toLowerCase() === searchQuery.toLowerCase());
@@ -105,42 +103,67 @@ const NetworkFilter = () => {
 
   const filters = ["All", "Movement", "Recovery", "Radiance", "Taste"];
 
-  // Helper function to get category titles
+  // const getCategoryTitles = (partner: Partner): string[] => {
+  //   if (partner.categories && Array.isArray(partner.categories)) {
+  //     return partner.categories.map(cat =>
+  //       typeof cat === "string" ? cat : cat.title
+  //     );
+  //   }
+
+  //   if (partner.category) {
+  //     const categoryTitle = typeof partner.category === "string"
+  //       ? partner.category
+  //       : (partner.category as PartnerCategory)?.title;
+  //     return categoryTitle ? [categoryTitle] : [];
+  //   }
+
+  //   return [];
+  // };
+
   const getCategoryTitles = (partner: Partner): string[] => {
-    if (partner.categories && Array.isArray(partner.categories)) {
-      return partner.categories.map(cat =>
-        typeof cat === "string" ? cat : cat.title
-      );
-    }
+  if (partner.categories && Array.isArray(partner.categories)) {
+    return partner.categories.map(cat => typeof cat === "string" ? cat : cat.title);
+  }
+  if (partner.category) {
+    const title = typeof partner.category === "string" ? partner.category : (partner.category as PartnerCategory)?.title;
+    return title ? [title] : [];
+  }
+  return [];
+};
 
-    if (partner.category) {
-      const categoryTitle = typeof partner.category === "string"
-        ? partner.category
-        : (partner.category as PartnerCategory)?.title;
-      return categoryTitle ? [categoryTitle] : [];
-    }
+  // let filteredPartners = partners;
 
-    return [];
-  };
+  // if (searchQuery) {
+  //   filteredPartners = filteredPartners.filter((partner) => {
+  //     const nameMatches = partner.name?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false;
+  //     const categoryTitles = getCategoryTitles(partner);
+  //     const categoryMatches = categoryTitles.some(title =>
+  //       title.toLowerCase().includes(searchQuery.toLowerCase())
+  //     );
 
-  // COMPLETE FILTERING (on all partners)
-  let filteredPartners = partners;
+  //     return nameMatches || categoryMatches;
+  //   });
+  // }
 
-  // Apply search query filter
-  if (searchQuery) {
-    filteredPartners = filteredPartners.filter((partner) => {
-      const nameMatches = partner.name.toLowerCase().includes(searchQuery.toLowerCase());
-      const categoryTitles = getCategoryTitles(partner);
-      const categoryMatches = categoryTitles.some(title =>
-        title.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredPartners = useMemo(() => {
+    if (!searchQuery) return partners;
+
+    const query = searchQuery.toLowerCase();
+
+    return partners.filter((partner) => {
+      const nameMatches =
+        partner.name?.toLowerCase().includes(query) ?? false;
+
+      const categoryMatches = getCategoryTitles(partner).some(title =>
+        title.toLowerCase().includes(query)
       );
 
       return nameMatches || categoryMatches;
     });
-  }
+  }, [partners, searchQuery]);
 
-  // PAGINATION: Display only first 'displayCount' items
-  const displayedPartners = filteredPartners;
+
+  const displayedPartners = filteredPartners ?? [];
   const hasMore = currentPage < totalPages;
 
   const handleFilterClick = (filter: string) => {

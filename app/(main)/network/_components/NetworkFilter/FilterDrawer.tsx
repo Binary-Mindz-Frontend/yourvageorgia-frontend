@@ -4,7 +4,6 @@
 import { Button } from "@/components/ui/button";
 import { ChevronDown, X } from "lucide-react";
 import { useEffect, useState, useMemo } from "react";
-import { Partner } from "@/types/partner.types";
 import { getActivitiesForSelect } from "@/services/activity/activity";
 import { getAllAreas } from "@/services/partner/getpartner";
 

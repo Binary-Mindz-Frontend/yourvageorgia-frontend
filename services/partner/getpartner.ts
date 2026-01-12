@@ -150,7 +150,7 @@ export const getAllAreas = async (): Promise<string[] | { error: string }> => {
     const url = `${BASE_URL}/partner/area`;
 
     const res = await fetch(url, {
-      next: { revalidate: 86400 }, 
+      next: { revalidate: 3600 }, 
     });
 
     const json: IAreaResponse = await res.json();
