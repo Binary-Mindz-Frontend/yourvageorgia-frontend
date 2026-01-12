@@ -6,7 +6,6 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ListFilter } from "lucide-react";
 import { FilterDrawer } from "./FilterDrawer";
-import PartnerDetailsModal from "../NetworkCardModal/PartnerDetailsModal";
 import PartnerCard from "./PartnerCard";
 import { getPartners } from "@/services/partner/getpartner";
 import { Partner, PartnerCategory } from "@/types/partner.types";
@@ -29,8 +28,8 @@ const NetworkFilter = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [displayCount, setDisplayCount] = useState(10); // Display er jonno count
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedPartner, setSelectedPartner] = useState<Partner | null>(null);
+  // const [isModalOpen, setIsModalOpen] = useState(false);
+  // const [selectedPartner, setSelectedPartner] = useState<Partner | null>(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [appliedFilters, setAppliedFilters] = useState<AppliedFilters>({
     locations: [],
@@ -231,8 +230,7 @@ const NetworkFilter = () => {
                 key={partner._id}
                 partner={partner}
                 onClick={(p) => {
-                  setSelectedPartner(p);
-                  setIsModalOpen(true);
+                  router.push(`/network/${p._id}`);
                 }}
               />
             ))
@@ -262,14 +260,14 @@ const NetworkFilter = () => {
       )}
 
       {/* Partner Modal */}
-      {isModalOpen && selectedPartner && (
+      {/* {isModalOpen && selectedPartner && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-999 overflow-y-auto scrollbar-hide">
           <PartnerDetailsModal
             onClose={() => setIsModalOpen(false)}
             partner={selectedPartner}
           />
         </div>
-      )}
+      )} */}
 
       {/* Filter Drawer */}
       <FilterDrawer
