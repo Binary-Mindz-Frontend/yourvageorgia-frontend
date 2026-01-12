@@ -1,19 +1,33 @@
 "use client";
 
+import NetworkCardModal from "@/app/(main)/network/_components/NetworkCardModal/PartnerDetailsModal";
 import { getPartners } from "@/services/partner/getpartner";
 import { ArrowRight } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import PartnersMap from "../PartnersMap/PartnersMap";
 
 export default function SolenneMembership() {
-  const router = useRouter();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [partners, setPartners] = useState<any[]>([]);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [selectedPartner, setSelectedPartner] = useState<any | null>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [hoveredPartner, setHoveredPartner] = useState<any | null>(null);
+  const [showModal, setShowModal] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [isLargeScreen, setIsLargeScreen] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsLargeScreen(window.innerWidth >= 1024);
+    };
+
+    // Set initial value
+    handleResize();
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   // Load partners
   useEffect(() => {
@@ -82,7 +96,7 @@ export default function SolenneMembership() {
 
             <div className="relative z-10 p-12 h-full flex flex-col justify-end min-h-128">
               <button
-                onClick={() => displayPartner && router.push(`/network/${displayPartner._id}`)}
+                onClick={() => displayPartner && setShowModal(true)}
                 className="group inline-flex flex-col cursor-pointer text-left"
               >
                 <h2 className="text-2xl sm:text-3xl font-light mb-3 tracking-wide transition-all duration-300 group-hover:text-white/90">
@@ -149,6 +163,16 @@ export default function SolenneMembership() {
           </p>
         </div>
       </div>
+
+      {/* Partner Modal */}
+      {showModal && displayPartner && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-999 overflow-y-auto scrollbar-hide">
+          <NetworkCardModal
+            onClose={() => setShowModal(false)}
+            partner={displayPartner}
+          />
+        </div>
+      )}
     </div>
   );
 }

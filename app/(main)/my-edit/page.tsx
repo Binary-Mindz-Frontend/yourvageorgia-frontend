@@ -1,13 +1,13 @@
 "use client";
 
-import { BeautifulLoader } from "@/components/Shared/Loading/BeautifulLoader";
-import { getCurrentUser } from "@/services/auth";
-import { Partner } from "@/types/partner.types";
 import { ArrowRight, ChevronDown } from "lucide-react";
-import Link from "next/link"; // Added for navigation to login
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { getCurrentUser } from "@/services/auth";
+import PartnerDetailsModal from "@/app/(main)/network/_components/NetworkCardModal/PartnerDetailsModal";
 import FavouriteButton from "../network/_components/NetworkFilter/FavouriteButton";
+import { Partner } from "@/types/partner.types";
+import Link from "next/link"; // Added for navigation to login
+import { BeautifulLoader } from "@/components/Shared/Loading/BeautifulLoader";
 
 const BASE_API = process.env.NEXT_PUBLIC_BASE_API;
 
@@ -17,10 +17,11 @@ interface FavouriteItem {
 }
 
 const MyEdit = () => {
-  const router = useRouter();
   const [data, setData] = useState<FavouriteItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false); // Track login status
+  const [selectedPartner, setSelectedPartner] = useState<FavouriteItem["partner"] | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchFavourites = async () => {
@@ -55,6 +56,15 @@ const MyEdit = () => {
 
     fetchFavourites();
   }, []);
+
+  const handleCardClick = (partner: FavouriteItem["partner"]) => {
+    setSelectedPartner(partner);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
 
   // 1. LOADING STATE
   if (loading) {
@@ -110,6 +120,7 @@ const MyEdit = () => {
               <ArrowRight className="h-5 w-5" />
             </button>
           </Link>
+
         </div>
       ) : (
         <div className="space-y-5 lg:space-y-10">
@@ -117,7 +128,7 @@ const MyEdit = () => {
             <div
               key={item._id}
               className="relative w-full aspect-video rounded-xl overflow-hidden shadow-2xl cursor-pointer"
-              onClick={() => router.push(`/network/${item.partner._id}`)}
+              onClick={() => handleCardClick(item.partner)}
             >
               <div
                 className="absolute inset-0 bg-cover bg-center"
@@ -168,6 +179,17 @@ const MyEdit = () => {
           <button className="p-3 rounded-full hover:bg-black/50 transition">
             <ChevronDown className="lg:w-10 lg:h-10" />
           </button>
+        </div>
+      )}
+
+      {isModalOpen && selectedPartner && (
+        <div className="fixed top-0 left-0 right-0 bottom-0 z-50 bg-transparent backdrop-blur-2xl bg-opacity-50 flex items-center justify-center">
+          <div className="w-full overflow-hidden max-h-[90vh] overflow-y-auto scrollbar-hide">
+            <PartnerDetailsModal
+              onClose={handleCloseModal}
+              partner={selectedPartner}
+            />
+          </div>
         </div>
       )}
     </div>
