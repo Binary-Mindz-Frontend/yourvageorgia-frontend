@@ -38,7 +38,7 @@ export interface IGetPartnerFilters {
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
   activity?: string | string[];
-  area?: string;
+  area?: string | string[];
 }
 
 export interface IPositionUpdateData {
@@ -61,6 +61,13 @@ export interface IGetAllPartnersResponse {
     prevPage: number | null;
     nextPage: number | null;
   };
+}
+
+export interface IAreaResponse {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  data: string[];
 }
 
 export const getPartners = async (
@@ -117,8 +124,8 @@ export const getPartnerFiltered = async (
 
       if (value === undefined || value === null || value === "") return;
 
-      // Handle multiple activities (activity=id1&activity=id2)
-      if (key === "activity" && Array.isArray(value)) {
+      // UPDATED: Check for ANY array value, not just activity
+      if (Array.isArray(value)) {
         value.forEach((val) => queryParams.append(key, val));
       } else {
         queryParams.append(key, String(value));
@@ -127,20 +134,32 @@ export const getPartnerFiltered = async (
 
     const url = `${BASE_URL}/partner?${queryParams.toString()}`;
     
-    const res = await fetch(url, {
-      cache: "no-store", // Often better for filtered results to avoid stale data
-    });
-
+    const res = await fetch(url, { cache: "no-store" });
     const json = await res.json();
 
+    if (!res.ok) return { error: json.message || "Failed to fetch" };
+
+    return { data: json.data, meta: json.meta };
+  } catch (error: any) {
+    return { error: error.message || "An unexpected error occurred" };
+  }
+};
+
+export const getAllAreas = async (): Promise<string[] | { error: string }> => {
+  try {
+    const url = `${BASE_URL}/partner/area`;
+
+    const res = await fetch(url, {
+      next: { revalidate: 86400 }, 
+    });
+
+    const json: IAreaResponse = await res.json();
+
     if (!res.ok) {
-      return { error: json.message || "Failed to fetch filtered partners" };
+      return { error: json.message || "Failed to fetch areas" };
     }
 
-    return {
-      data: json.data,
-      meta: json.meta,
-    };
+    return json.data;
   } catch (error: any) {
     return { error: error.message || "An unexpected error occurred" };
   }

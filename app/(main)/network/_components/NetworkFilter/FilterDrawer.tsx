@@ -1,9 +1,12 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { Button } from "@/components/ui/button";
 import { ChevronDown, X } from "lucide-react";
 import { useEffect, useState, useMemo } from "react";
 import { Partner } from "@/types/partner.types";
+import { getActivitiesForSelect } from "@/services/activity/activity";
+import { getAllAreas } from "@/services/partner/getpartner";
 
 interface FilterDrawerProps {
   isOpen: boolean;
@@ -25,6 +28,9 @@ export function FilterDrawer({
   const [selectedActivities, setSelectedActivities] = useState<string[]>([]);
   const [isLocationsOpen, setIsLocationsOpen] = useState(true);
   const [isActivityOpen, setIsActivityOpen] = useState(true);
+  const [allLocations, setAllLocations] = useState<string[]>([]);
+  const [allActivities, setAllActivities] = useState<string[]>([]);
+  const [activityIdMap, setActivityIdMap] = useState<Map<string, string>>(new Map());
 
   // Prevent body scroll when drawer is open
   useEffect(() => {
@@ -38,44 +44,38 @@ export function FilterDrawer({
     };
   }, [isOpen]);
 
-// Extract unique areas from partners' contacts
-const locations = useMemo(() => {
-  const locationMap = new Map<string, string>(); // Track lowercase -> original casing
-  
-  partners.forEach((partner) => {
-    if (partner.contacts && Array.isArray(partner.contacts)) {
-      partner.contacts.forEach((contact) => {
-        const area = contact.area || contact.address;
-        if (area) {
-          const lowerArea = area.toLowerCase().trim(); // Added trim() to handle whitespace
-          // Keep the first occurrence's casing
-          if (!locationMap.has(lowerArea)) {
-            locationMap.set(lowerArea, area.trim());
-          }
-        }
-      });
-    }
-  });
-  
-  return ["ALL", ...Array.from(locationMap.values()).sort()];
-}, [partners]);
 
-  // Extract unique activities from partners (using the activity field)
+  const locations = useMemo(() => {
+    return ["ALL", ...allLocations];
+  }, [allLocations]);
+
+
   const activities = useMemo(() => {
-    const uniqueActivities = new Set<string>();
-    partners.forEach((partner) => {
-      // Use the activity field from the API response
-      if (partner.activity && Array.isArray(partner.activity)) {
-        partner.activity.forEach((act) => {
-          if (typeof act === 'object' && act !== null && 'title' in act) {
-            const activityObj = act as { title: string };
-            uniqueActivities.add(activityObj.title);
-          }
-        });
+    return ["ALL", ...allActivities];
+  }, [allActivities]);
+
+
+  // Fetch all areas and activities
+  useEffect(() => {
+    const fetchFilterOptions = async () => {
+      // Fetch areas
+      const areasResult = await getAllAreas();
+      if (!("error" in areasResult)) {
+        setAllLocations(areasResult.sort());
       }
-    });
-    return ["ALL", ...Array.from(uniqueActivities).sort()];
-  }, [partners]);
+
+      // Fetch activities
+      const activitiesResult = await getActivitiesForSelect();
+      if (!("error" in activitiesResult) && activitiesResult.data) {
+        const activityTitles = activitiesResult.data.map((act: any) => act.title);
+        const idMap = new Map(activitiesResult.data.map((act: any) => [act.title, act._id]));
+        setActivityIdMap(idMap);
+        setAllActivities(activityTitles.sort());
+      }
+    };
+
+    fetchFilterOptions();
+  }, []);
 
   const handleLocationToggle = (location: string) => {
     if (location === "ALL") {
@@ -103,13 +103,15 @@ const locations = useMemo(() => {
 
   useEffect(() => {
     if (onFilterChange) {
+      const activityIds = selectedActivities.map(title => activityIdMap.get(title)).filter(Boolean) as string[];
+
       onFilterChange({
         locations: selectedLocations,
-        activities: selectedActivities,
+        activities: activityIds,
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedLocations, selectedActivities]);
+  }, [selectedLocations, selectedActivities, activityIdMap]);
 
   return (
     <>
@@ -169,10 +171,10 @@ const locations = useMemo(() => {
                       key={location}
                       onClick={() => handleLocationToggle(location)}
                       className={`block cursor-pointer w-full text-left px-4 py-3 text-sm font-light tracking-wide transition-colors ${location === "ALL" && selectedLocations.length === 0
+                        ? "bg-[#73737366] text-white"
+                        : selectedLocations.includes(location)
                           ? "bg-[#73737366] text-white"
-                          : selectedLocations.includes(location)
-                            ? "bg-[#73737366] text-white"
-                            : "text-foreground hover:bg-accent/10"
+                          : "text-foreground hover:bg-accent/10"
                         }`}
                     >
                       {location}
@@ -202,10 +204,10 @@ const locations = useMemo(() => {
                       key={activity}
                       onClick={() => handleActivityToggle(activity)}
                       className={`block cursor-pointer w-full text-left px-4 py-3  text-sm font-light tracking-wide transition-colors ${activity === "ALL" && selectedActivities.length === 0
+                        ? "bg-[#73737366] text-white"
+                        : selectedActivities.includes(activity)
                           ? "bg-[#73737366] text-white"
-                          : selectedActivities.includes(activity)
-                            ? "bg-[#73737366] text-white"
-                            : "text-foreground hover:bg-accent/10"
+                          : "text-foreground hover:bg-accent/10"
                         }`}
                     >
                       {activity}

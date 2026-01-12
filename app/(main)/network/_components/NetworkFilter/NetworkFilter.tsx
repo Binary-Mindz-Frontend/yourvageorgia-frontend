@@ -49,7 +49,9 @@ const NetworkFilter = () => {
       try {
         const result = await getPartnerFiltered({
           page: currentPage,
-          category: activeFilter === "All" ? undefined : activeFilter
+          category: activeFilter === "All" ? undefined : activeFilter,
+          area: appliedFilters.locations.length > 0 ? appliedFilters.locations : undefined,
+          activity: appliedFilters.activities.length > 0 ? appliedFilters.activities : undefined,
         });
         console.log(result);
 
@@ -77,7 +79,7 @@ const NetworkFilter = () => {
       }
     };
     fetchPartners();
-  }, [currentPage, activeFilter]);
+  }, [currentPage, activeFilter, appliedFilters]);
 
   // Set active filter from URL
   useEffect(() => {
@@ -118,32 +120,6 @@ const NetworkFilter = () => {
 
   // COMPLETE FILTERING (on all partners)
   let filteredPartners = partners;
-
-  // Apply drawer filters
-  if (appliedFilters.locations.length > 0) {
-    filteredPartners = filteredPartners.filter((p) => {
-      if (!p.contacts || !Array.isArray(p.contacts) || p.contacts.length === 0) return false;
-
-      return p.contacts.some((contact) => {
-        const location = contact.area || contact.address;
-        return location !== undefined && appliedFilters.locations.includes(location);
-      });
-    });
-  }
-
-  if (appliedFilters.activities.length > 0) {
-    filteredPartners = filteredPartners.filter((p) => {
-      if (!p.activity || !Array.isArray(p.activity) || p.activity.length === 0) return false;
-
-      return p.activity.some((act) => {
-        if (typeof act === 'object' && act !== null && 'title' in act) {
-          const activityObj = act as { title: string };
-          return appliedFilters.activities.includes(activityObj.title);
-        }
-        return false;
-      });
-    });
-  }
 
   // Apply search query filter
   if (searchQuery) {
