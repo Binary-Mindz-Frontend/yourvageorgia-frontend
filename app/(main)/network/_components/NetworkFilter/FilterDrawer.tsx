@@ -15,14 +15,13 @@ interface FilterDrawerProps {
     locations: string[];
     activities: string[];
   }) => void;
-  partners: Partner[];
 }
 
 export function FilterDrawer({
   isOpen,
   onClose,
   onFilterChange,
-  partners,
+   
 }: FilterDrawerProps) {
   const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
   const [selectedActivities, setSelectedActivities] = useState<string[]>([]);

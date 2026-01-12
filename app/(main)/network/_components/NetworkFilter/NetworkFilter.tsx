@@ -2,7 +2,7 @@
 
 'use client'
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ListFilter } from "lucide-react";
@@ -12,6 +12,7 @@ import { getPartnerFiltered } from "@/services/partner/getpartner";
 import { Partner, PartnerCategory } from "@/types/partner.types";
 import { NetworkSkeleton } from "@/components/Shared/Loading/NetworkSkeleton";
 import { BeautifulLoader } from "@/components/Shared/Loading/BeautifulLoader";
+import PartnerDetailsModal from "../NetworkCardModal/PartnerDetailsModal";
 
 interface AppliedFilters {
   locations: string[];
@@ -26,14 +27,13 @@ const NetworkFilter = () => {
   const searchQuery = searchParams.get("search");
 
   const [partners, setPartners] = useState<Partner[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedPartner, setSelectedPartner] = useState<Partner | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+
   const [totalPartners, setTotalPartners] = useState(0);
-
-
-  // const [isModalOpen, setIsModalOpen] = useState(false);
-  // const [selectedPartner, setSelectedPartner] = useState<Partner | null>(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [appliedFilters, setAppliedFilters] = useState<AppliedFilters>({
     locations: [],
@@ -41,7 +41,10 @@ const NetworkFilter = () => {
   });
 
   const [activeFilter, setActiveFilter] = useState<string>("All");
-
+  const appliedFiltersKey = useMemo(
+    () => `${appliedFilters.locations.join(',')}-${appliedFilters.activities.join(',')}`,
+    [appliedFilters.locations, appliedFilters.activities]
+  );
   // Fetch ALL partners at once (no limit)
   useEffect(() => {
     const fetchPartners = async () => {
@@ -52,6 +55,7 @@ const NetworkFilter = () => {
           category: activeFilter === "All" ? undefined : activeFilter,
           area: appliedFilters.locations.length > 0 ? appliedFilters.locations : undefined,
           activity: appliedFilters.activities.length > 0 ? appliedFilters.activities : undefined,
+
         });
         console.log(result);
 
@@ -79,7 +83,8 @@ const NetworkFilter = () => {
       }
     };
     fetchPartners();
-  }, [currentPage, activeFilter, appliedFilters]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPage, activeFilter, appliedFiltersKey]);
 
   // Set active filter from URL
   useEffect(() => {
@@ -139,14 +144,15 @@ const NetworkFilter = () => {
   const hasMore = currentPage < totalPages;
 
   const handleFilterClick = (filter: string) => {
+    if (filter === activeFilter) return;
     setActiveFilter(filter);
     setCurrentPage(1);
     setPartners([]);
 
     if (filter === "All") {
-      router.push("/network");
+      router.push("/network", { scroll: false });
     } else {
-      router.push(`/network?filter=${encodeURIComponent(filter)}`);
+      router.push(`/network?filter=${encodeURIComponent(filter)}`, { scroll: false });
     }
   };
 
@@ -195,15 +201,15 @@ const NetworkFilter = () => {
       </div>
 
       {/* Loading State */}
-      {isLoading && partners.length === 0 && (
+      {isLoading && currentPage === 1 && partners.length === 0 && (
         <div className="py-10">
           <NetworkSkeleton />
         </div>
       )}
 
-      {!isLoading && (
+      {(partners.length > 0 || !isLoading) && (
         <div className="space-y-10">
-          {displayedPartners.length === 0 ? (
+          {displayedPartners.length === 0 && !isLoading ? (
             <div className="text-center py-10">
               <p className="text-lg opacity-70">No partners found</p>
             </div>
@@ -213,7 +219,8 @@ const NetworkFilter = () => {
                 key={partner._id}
                 partner={partner}
                 onClick={(p) => {
-                  router.push(`/network/${p._id}`);
+                  setSelectedPartner(p);
+                  setIsModalOpen(true);
                 }}
               />
             ))
@@ -243,21 +250,21 @@ const NetworkFilter = () => {
       )}
 
       {/* Partner Modal */}
-      {/* {isModalOpen && selectedPartner && (
+      {isModalOpen && selectedPartner && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-999 overflow-y-auto scrollbar-hide">
           <PartnerDetailsModal
             onClose={() => setIsModalOpen(false)}
             partner={selectedPartner}
           />
         </div>
-      )} */}
+      )}
 
       {/* Filter Drawer */}
       <FilterDrawer
         isOpen={isFilterOpen}
         onClose={() => setIsFilterOpen(false)}
         onFilterChange={handleFilterChange}
-        partners={partners}
+
       />
     </div>
   );
