@@ -84,7 +84,7 @@ const NetworkFilter = () => {
 
     fetchPartners();
     return () => controller.abort();
-  }, [currentPage, activeFilter, appliedFiltersKey]);
+  }, [currentPage, activeFilter, appliedFiltersKey, appliedFilters.locations, appliedFilters.activities]);
 
   useEffect(() => {
     if (filterFromUrl) {
@@ -111,23 +111,6 @@ const NetworkFilter = () => {
 
   const filters = ["All", "Movement", "Recovery", "Radiance", "Taste"];
 
-  // const getCategoryTitles = (partner: Partner): string[] => {
-  //   if (partner.categories && Array.isArray(partner.categories)) {
-  //     return partner.categories.map(cat =>
-  //       typeof cat === "string" ? cat : cat.title
-  //     );
-  //   }
-
-  //   if (partner.category) {
-  //     const categoryTitle = typeof partner.category === "string"
-  //       ? partner.category
-  //       : (partner.category as PartnerCategory)?.title;
-  //     return categoryTitle ? [categoryTitle] : [];
-  //   }
-
-  //   return [];
-  // };
-
   const getCategoryTitles = (partner: Partner): string[] => {
   if (partner.categories && Array.isArray(partner.categories)) {
     return partner.categories.map(cat => typeof cat === "string" ? cat : cat.title);
@@ -139,19 +122,6 @@ const NetworkFilter = () => {
   return [];
 };
 
-  // let filteredPartners = partners;
-
-  // if (searchQuery) {
-  //   filteredPartners = filteredPartners.filter((partner) => {
-  //     const nameMatches = partner.name?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false;
-  //     const categoryTitles = getCategoryTitles(partner);
-  //     const categoryMatches = categoryTitles.some(title =>
-  //       title.toLowerCase().includes(searchQuery.toLowerCase())
-  //     );
-
-  //     return nameMatches || categoryMatches;
-  //   });
-  // }
 
   const filteredPartners = useMemo(() => {
     if (!searchQuery) return partners;
