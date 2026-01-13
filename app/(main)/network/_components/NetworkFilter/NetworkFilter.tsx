@@ -101,6 +101,14 @@ const NetworkFilter = () => {
     }
   }, [searchQuery]);
 
+
+//No partners found problem solved here
+  useEffect(() => {
+  setPartners([]);        
+  setCurrentPage(1);      
+}, [activeFilter, appliedFiltersKey]);
+
+
   const filters = ["All", "Movement", "Recovery", "Radiance", "Taste"];
 
   // const getCategoryTitles = (partner: Partner): string[] => {
