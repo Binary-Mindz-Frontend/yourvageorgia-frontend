@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-images: {
+  output: 'standalone',
+  images: {
     remotePatterns: [
       {
         protocol: "http",
@@ -26,11 +27,12 @@ images: {
         pathname: "/**",
       },
 
-      {  protocol: "https",
+      {
+        protocol: "https",
         hostname: "maps.google.com",
         pathname: "/**",
       },
-      
+
     ],
   },
 };
