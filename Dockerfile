@@ -1,7 +1,7 @@
 # Base image
-FROM node:24-alpine AS base
+FROM node:25-alpine AS base
 
-# Install dependencies for sharp
+# Sharp & native deps
 RUN apk add --no-cache \
     libc6-compat \
     vips-dev \
@@ -9,7 +9,8 @@ RUN apk add --no-cache \
     gcc \
     g++ \
     make \
-    libc-dev
+    libc-dev \
+    python3
 
 # Dependencies stage
 FROM base AS deps
@@ -35,34 +36,28 @@ ENV NEXT_PUBLIC_ADMIN_PASSWORD=$NEXT_PUBLIC_ADMIN_PASSWORD
 ENV NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=$NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# Build the application
 RUN npm run build
 
 # Production stage
-FROM base AS runner
+FROM node:25-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
+RUN addgroup --system --gid 1001 nodejs \
+ && adduser --system --uid 1001 nextjs
 
-# Copy public folder
 COPY --from=builder /app/public ./public
 
-# Set correct permissions
-RUN mkdir .next
-RUN chown nextjs:nodejs .next
+RUN mkdir .next && chown nextjs:nodejs .next
 
-# Copy standalone output
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 USER nextjs
 
 EXPOSE 3000
-
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
