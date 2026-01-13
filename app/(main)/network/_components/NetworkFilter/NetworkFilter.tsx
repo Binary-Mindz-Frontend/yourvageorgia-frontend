@@ -66,7 +66,7 @@ const NetworkFilter = () => {
         if ("error" in result) {
           console.error(result.error);
         } else {
-          const sorted = [...(result.data || [])].sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
+          const sorted = result.data || [];
           setPartners(prev => (currentPage === 1 ? sorted : [...prev, ...sorted]));
 
           const meta = (result as any).meta;
@@ -100,6 +100,14 @@ const NetworkFilter = () => {
       }
     }
   }, [searchQuery]);
+
+
+//No partners found problem solved here
+  useEffect(() => {
+  setPartners([]);        
+  setCurrentPage(1);      
+}, [activeFilter, appliedFiltersKey]);
+
 
   const filters = ["All", "Movement", "Recovery", "Radiance", "Taste"];
 
