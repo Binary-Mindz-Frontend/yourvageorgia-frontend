@@ -1,7 +1,7 @@
-import React, { useRef } from "react";
-import Image from "next/image";
 import { Label } from "@/components/ui/label";
 import { Upload, X } from "lucide-react";
+import Image from "next/image";
+import { useRef } from "react";
 
 export interface GalleryItem {
   url: string;
@@ -69,7 +69,7 @@ export default function GalleryUpload({
                   alt={`gallery-${index}`}
                   fill
                   className="object-cover"
-                  unoptimized
+
                 />
               )}
               <button

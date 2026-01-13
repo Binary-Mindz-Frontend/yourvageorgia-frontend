@@ -112,7 +112,7 @@ const CategoryPage = () => {
                                 width={48}
                                 height={48}
                                 className="rounded object-cover"
-                                unoptimized
+
                             />
                         ) : (
                             <span className="text-center px-1 truncate">{imageUrl || "-"}</span>

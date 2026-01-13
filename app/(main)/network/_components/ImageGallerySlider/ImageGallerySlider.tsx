@@ -1,8 +1,7 @@
-import Image, { StaticImageData } from "next/image";
-import { ChevronLeft, ChevronRight, X } from "lucide-react";
-import { useState, useEffect } from "react";
 import clsx from "clsx";
-import { Skeleton } from "@/components/ui/skeleton";
+import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import Image, { StaticImageData } from "next/image";
+import { useEffect, useState } from "react";
 
 interface ImageGallerySliderProps {
   images: (string | StaticImageData)[];
@@ -107,7 +106,7 @@ export default function ImageGallerySlider({ images }: ImageGallerySliderProps) 
         >
           <Image
             src={images[index]}
-            unoptimized
+
             alt="Gallery"
             id="gallery-main-image"
             fill
@@ -171,7 +170,7 @@ export default function ImageGallerySlider({ images }: ImageGallerySliderProps) 
               )}
             >
               <Image
-                unoptimized
+
                 src={img}
                 alt={`Thumbnail ${i + 1}`}
                 fill
@@ -238,7 +237,7 @@ export default function ImageGallerySlider({ images }: ImageGallerySliderProps) 
             )}
 
             <Image
-              unoptimized
+
               src={images[zoomIndex]}
               alt="Zoomed Gallery"
               width={1200}

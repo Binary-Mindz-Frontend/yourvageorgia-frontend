@@ -1,16 +1,16 @@
 'use client'
 
-import { Button } from "@/components/ui/button";
-import { ArrowRight, FileQuestion, Menu, Search, X, Loader2 } from "lucide-react";
-import Link from "next/link";
-import { useEffect, useState, useMemo } from "react";
-import { HeaderLogo } from "./icons";
-import { useRouter } from "next/navigation";
-import { NavigationDrawer } from "./navigation-drawer";
-import Image from "next/image";
 import PartnerDetailsModal from "@/app/(main)/network/_components/NetworkCardModal/PartnerDetailsModal";
-import { getPartners } from "@/services/partner/partner";
+import { Button } from "@/components/ui/button";
 import { useDebounce } from "@/hooks/useDebounce";
+import { getPartners } from "@/services/partner/partner";
+import { ArrowRight, FileQuestion, Loader2, Menu, Search, X } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { HeaderLogo } from "./icons";
+import { NavigationDrawer } from "./navigation-drawer";
 
 interface Partner {
   _id: string;
@@ -229,7 +229,7 @@ export function Navbar() {
                         src={partner.thumbnail}
                         alt={partner.name}
                         className="w-10 h-10 object-cover"
-                        unoptimized
+
                       />
                     </div>
                     <div className="flex-1 min-w-0">

@@ -587,7 +587,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
                   alt="thumb"
                   fill
                   className="object-cover"
-                  unoptimized
+
                 />
               </div>
             )}
@@ -711,7 +711,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
                       alt={`gallery-${index}`}
                       fill
                       className="object-cover"
-                      unoptimized
+
                     />
                   )}
                   <button

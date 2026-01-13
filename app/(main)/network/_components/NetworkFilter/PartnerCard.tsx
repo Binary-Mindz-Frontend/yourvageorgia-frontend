@@ -1,10 +1,10 @@
-import { useState } from "react";
-import Image from "next/image";
-import { ArrowRight } from "lucide-react";
-import FavouriteButton from "./FavouriteButton";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Partner } from "@/types/partner.types";
 import { cn } from "@/lib/utils";
+import { Partner } from "@/types/partner.types";
+import { ArrowRight } from "lucide-react";
+import Image from "next/image";
+import { useState } from "react";
+import FavouriteButton from "./FavouriteButton";
 
 interface PartnerCardProps {
     partner: Partner;
@@ -41,7 +41,7 @@ const PartnerCard = ({ partner, onClick }: PartnerCardProps) => {
                     onLoad={() => setIsImageLoading(false)}
                     preload={true}
                     loading="eager"
-                    unoptimized
+
                 />
                 {/* Gradient Overlay */}
                 <div className="absolute inset-0 bg-linear-to-t from-black/10 via-black/10 to-transparent z-0"></div>

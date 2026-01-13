@@ -45,7 +45,7 @@ const CategoryView: React.FC<CategoryViewProps> = ({ categoryId }) => {
             alt={category.title}
             fill
             className="object-cover bg-[#1a1a1a] rounded"
-            unoptimized
+
           />
         </div>
       )}
