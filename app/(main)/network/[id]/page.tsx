@@ -3,9 +3,9 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Partner } from '@/types/partner.types';
-import { getPartners } from '@/services/partner/getpartner';
 import { BeautifulLoader } from '@/components/Shared/Loading/BeautifulLoader';
 import PartnerDetailsModal from '../_components/NetworkCardModal/PartnerDetailsModal';
+import { getPartnerById } from '@/services/partner/partner';
 
 export default function PartnerDetailPage() {
   const params = useParams();
@@ -14,25 +14,28 @@ export default function PartnerDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchPartner = async () => {
-      try {
-        const result = await getPartners({ limit: 1000 });
-        if ('error' in result) {
-          console.error('Failed to fetch partners');
-          return;
-        }
-        
-        const found = result.data?.find((p) => p._id === params.id);
-        setPartner(found || null);
-      } catch (err) {
-        console.error('Error:', err);
-      } finally {
-        setIsLoading(false);
+  const fetchPartner = async () => {
+    try {
+      const result = await getPartnerById(params.id as string);
+      
+      if ('error' in result) {
+        console.error('Failed to fetch partner:', result.error);
+        setPartner(null);
+      } else {
+        setPartner(result as Partner);
       }
-    };
+    } catch (err) {
+      console.error('Error:', err);
+      setPartner(null);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  if (params.id) {
     fetchPartner();
-  }, [params.id]);
+  }
+}, [params.id]);
 
   if (isLoading) {
     return (
@@ -53,7 +56,7 @@ export default function PartnerDetailPage() {
   return (
     <div className="min-h-screen bg-black">
       <PartnerDetailsModal
-        onClose={() => router.back()}
+        onClose={() => router.push('/network')}
         partner={partner}
       />
     </div>
