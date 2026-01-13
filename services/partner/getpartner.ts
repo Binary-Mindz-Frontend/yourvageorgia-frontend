@@ -118,8 +118,12 @@ export const getPartnerFiltered = async (
 > => {
   try {
     const queryParams = new URLSearchParams();
+    queryParams.set("sortBy", "position");
+    queryParams.set("sortOrder", "asc");
 
     (Object.keys(filters) as Array<keyof IGetPartnerFilters>).forEach((key) => {
+      
+      if (key === "sortBy" || key === "sortOrder") return;
       const value = filters[key];
 
       if (value === undefined || value === null || value === "") return;
