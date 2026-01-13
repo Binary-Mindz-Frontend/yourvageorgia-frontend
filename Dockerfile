@@ -1,57 +1,52 @@
-# Base image
-FROM node:25-alpine AS base
+# 1. Base stage: Node version consistently use kora
+FROM node:24-alpine AS base
 
-# Sharp & native deps
-RUN apk add --no-cache \
-    libc6-compat \
-    vips-dev \
-    fftw-dev \
-    gcc \
-    g++ \
-    make \
-    libc-dev \
-    python3
+# Install system dependencies (Sharp-er jonno libc6-compat dorkar hoy Alpine-e)
+RUN apk add --no-cache libc6-compat
 
-# Dependencies stage
+# 2. Dependencies stage
 FROM base AS deps
 WORKDIR /app
-COPY package.json package-lock.json ./
+
+COPY package.json package-lock.json* ./
+
+# Sharp mismatch fix: libc6-compat install thaka obosthay 'npm ci' kora
+# Eta docker environment-er jonno sothik binary download korbe
 RUN npm ci
 
-# Builder stage
+# 3. Builder stage
 FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Build arguments
+# Build-time environment variables
 ARG NEXT_PUBLIC_BASE_API
 ARG NEXT_PUBLIC_ADMIN_EMAIL
 ARG NEXT_PUBLIC_ADMIN_PASSWORD
 ARG NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
 
-ENV NEXT_PUBLIC_BASE_API=$NEXT_PUBLIC_BASE_API
-ENV NEXT_PUBLIC_ADMIN_EMAIL=$NEXT_PUBLIC_ADMIN_EMAIL
-ENV NEXT_PUBLIC_ADMIN_PASSWORD=$NEXT_PUBLIC_ADMIN_PASSWORD
-ENV NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=$NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
-ENV NEXT_TELEMETRY_DISABLED=1
+ENV NEXT_PUBLIC_BASE_API=$NEXT_PUBLIC_BASE_API \
+    NEXT_PUBLIC_ADMIN_EMAIL=$NEXT_PUBLIC_ADMIN_EMAIL \
+    NEXT_PUBLIC_ADMIN_PASSWORD=$NEXT_PUBLIC_ADMIN_PASSWORD \
+    NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=$NEXT_PUBLIC_GOOGLE_MAPS_API_KEY \
+    NEXT_TELEMETRY_DISABLED=1
 
 RUN npm run build
 
-# Production stage
-FROM node:25-alpine AS runner
+# 4. Runner stage (Final light-weight image)
+FROM node:24-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
-RUN addgroup --system --gid 1001 nodejs \
- && adduser --system --uid 1001 nextjs
+# Security update: non-root user use kora
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 nextjs
 
+# Standalone mode use korle shudhu dorkari file-gulo copy kora hoy
 COPY --from=builder /app/public ./public
-
-RUN mkdir .next && chown nextjs:nodejs .next
-
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
@@ -59,6 +54,6 @@ USER nextjs
 
 EXPOSE 3000
 ENV PORT=3000
-ENV HOSTNAME="0.0.0.0"
 
+# server.js standalone folder-e thake
 CMD ["node", "server.js"]
