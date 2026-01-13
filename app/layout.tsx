@@ -1,9 +1,9 @@
 
 
+import Providers from "@/providers/Providers";
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Inter } from "next/font/google";
 import "./globals.css";
-import Providers from "@/providers/Providers";
 
 const inter = Inter({
   variable: "--font-sans",
@@ -32,6 +32,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        {/* Preconnect to API */}
+        <link rel="preconnect" href={process.env.NEXT_PUBLIC_BASE_API} />
+        <link rel="dns-prefetch" href={process.env.NEXT_PUBLIC_BASE_API} />
+      </head>
       <body
         className={`${inter.variable} ${cormorant.variable} font-sans antialiased`}
       >

@@ -1,6 +1,6 @@
+import { BeautifulLoader } from "@/components/Shared/Loading/BeautifulLoader";
 import { Suspense } from "react";
 import NetworkFilter from "./_components/NetworkFilter/NetworkFilter";
-import { BeautifulLoader } from "@/components/Shared/Loading/BeautifulLoader";
 
 
 const NetworkPage = () => {
