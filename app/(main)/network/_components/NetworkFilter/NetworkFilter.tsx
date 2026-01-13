@@ -1,17 +1,19 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 'use client'
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ListFilter } from "lucide-react";
 import { FilterDrawer } from "./FilterDrawer";
-import PartnerDetailsModal from "../NetworkCardModal/PartnerDetailsModal";
 import PartnerCard from "./PartnerCard";
-import { getPartners } from "@/services/partner/getpartner";
+import { getPartnerFiltered } from "@/services/partner/getpartner";
 import { Partner, PartnerCategory } from "@/types/partner.types";
 import { NetworkSkeleton } from "@/components/Shared/Loading/NetworkSkeleton";
 import { BeautifulLoader } from "@/components/Shared/Loading/BeautifulLoader";
+import PartnerDetailsModal from "../NetworkCardModal/PartnerDetailsModal";
 
 interface AppliedFilters {
   locations: string[];
@@ -26,11 +28,13 @@ const NetworkFilter = () => {
   const searchQuery = searchParams.get("search");
 
   const [partners, setPartners] = useState<Partner[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [displayCount, setDisplayCount] = useState(10); // Display er jonno count
-
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPartner, setSelectedPartner] = useState<Partner | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
+  const [totalPartners, setTotalPartners] = useState(0);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [appliedFilters, setAppliedFilters] = useState<AppliedFilters>({
     locations: [],
@@ -38,45 +42,56 @@ const NetworkFilter = () => {
   });
 
   const [activeFilter, setActiveFilter] = useState<string>("All");
+  const appliedFiltersKey = useMemo(
+    () => `${appliedFilters.locations.join(',')}-${appliedFilters.activities.join(',')}`,
+    [appliedFilters.locations, appliedFilters.activities]
+  );
 
-  // Fetch ALL partners at once (no limit)
   useEffect(() => {
+    const controller = new AbortController(); // KILL PREVIOUS CALLS
+
     const fetchPartners = async () => {
       setIsLoading(true);
       try {
-        // Fetch without limit to get all partners for filtering
-        const result = await getPartners({ limit: 1000 }); // Large limit or modify API to fetch all
-        // console.log(result);
+        const result = await getPartnerFiltered({
+          page: currentPage,
+          category: activeFilter === "All" ? undefined : activeFilter,
+          area: appliedFilters.locations.length > 0 ? appliedFilters.locations : undefined,
+          activity: appliedFilters.activities.length > 0 ? appliedFilters.activities : undefined,
+        });
+
+        console.log("Fetched partners for page", result);
+        if (controller.signal.aborted) return;
 
         if ("error" in result) {
-          console.error("Failed to fetch partners:", result.error);
-          setPartners([]);
+          console.error(result.error);
         } else {
-          const sortedPartners = [...(result.data || [])].sort(
-            (a, b) => (a.position ?? 0) - (b.position ?? 0)
-          );
+          const sorted = [...(result.data || [])].sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
+          setPartners(prev => (currentPage === 1 ? sorted : [...prev, ...sorted]));
 
-          setPartners(sortedPartners);
+          const meta = (result as any).meta;
+          if (meta) {
+            setTotalPages(meta.totalPages || meta.totalPage || 1);
+            setTotalPartners(meta.total || 0);
+          }
         }
       } catch (err) {
-        console.error("Failed to fetch partners:", err);
-        setPartners([]);
+        if ((err as any).name !== 'AbortError') console.error(err);
       } finally {
-        setIsLoading(false);
+        if (!controller.signal.aborted) setIsLoading(false);
       }
     };
 
     fetchPartners();
-  }, []);
+    return () => controller.abort();
+  }, [currentPage, activeFilter, appliedFiltersKey]);
 
-  // Set active filter from URL
   useEffect(() => {
     if (filterFromUrl) {
       setActiveFilter(filterFromUrl);
     }
   }, [filterFromUrl]);
 
-  // Update activeFilter if search query matches category
   useEffect(() => {
     if (searchQuery) {
       const matchedCategory = filters.find((filter) => filter.toLowerCase() === searchQuery.toLowerCase());
@@ -88,94 +103,90 @@ const NetworkFilter = () => {
 
   const filters = ["All", "Movement", "Recovery", "Radiance", "Taste"];
 
-  // Helper function to get category titles
+  // const getCategoryTitles = (partner: Partner): string[] => {
+  //   if (partner.categories && Array.isArray(partner.categories)) {
+  //     return partner.categories.map(cat =>
+  //       typeof cat === "string" ? cat : cat.title
+  //     );
+  //   }
+
+  //   if (partner.category) {
+  //     const categoryTitle = typeof partner.category === "string"
+  //       ? partner.category
+  //       : (partner.category as PartnerCategory)?.title;
+  //     return categoryTitle ? [categoryTitle] : [];
+  //   }
+
+  //   return [];
+  // };
+
   const getCategoryTitles = (partner: Partner): string[] => {
-    if (partner.categories && Array.isArray(partner.categories)) {
-      return partner.categories.map(cat =>
-        typeof cat === "string" ? cat : cat.title
-      );
-    }
-
-    if (partner.category) {
-      const categoryTitle = typeof partner.category === "string"
-        ? partner.category
-        : (partner.category as PartnerCategory)?.title;
-      return categoryTitle ? [categoryTitle] : [];
-    }
-
-    return [];
-  };
-
-  // COMPLETE FILTERING (on all partners)
-  let filteredPartners =
-    activeFilter === "All"
-      ? partners
-      : partners.filter((p) => {
-        const categoryTitles = getCategoryTitles(p);
-        return categoryTitles.includes(activeFilter);
-      });
-
-  // Apply drawer filters
-  if (appliedFilters.locations.length > 0) {
-    filteredPartners = filteredPartners.filter((p) => {
-      if (!p.contacts || !Array.isArray(p.contacts) || p.contacts.length === 0) return false;
-
-      return p.contacts.some((contact) => {
-        const location = contact.area || contact.address;
-        return location !== undefined && appliedFilters.locations.includes(location);
-      });
-    });
+  if (partner.categories && Array.isArray(partner.categories)) {
+    return partner.categories.map(cat => typeof cat === "string" ? cat : cat.title);
   }
-
-  if (appliedFilters.activities.length > 0) {
-    filteredPartners = filteredPartners.filter((p) => {
-      if (!p.activity || !Array.isArray(p.activity) || p.activity.length === 0) return false;
-
-      return p.activity.some((act) => {
-        if (typeof act === 'object' && act !== null && 'title' in act) {
-          const activityObj = act as { title: string };
-          return appliedFilters.activities.includes(activityObj.title);
-        }
-        return false;
-      });
-    });
+  if (partner.category) {
+    const title = typeof partner.category === "string" ? partner.category : (partner.category as PartnerCategory)?.title;
+    return title ? [title] : [];
   }
+  return [];
+};
 
-  // Apply search query filter
-  if (searchQuery) {
-    filteredPartners = filteredPartners.filter((partner) => {
-      const nameMatches = partner.name.toLowerCase().includes(searchQuery.toLowerCase());
-      const categoryTitles = getCategoryTitles(partner);
-      const categoryMatches = categoryTitles.some(title =>
-        title.toLowerCase().includes(searchQuery.toLowerCase())
+  // let filteredPartners = partners;
+
+  // if (searchQuery) {
+  //   filteredPartners = filteredPartners.filter((partner) => {
+  //     const nameMatches = partner.name?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false;
+  //     const categoryTitles = getCategoryTitles(partner);
+  //     const categoryMatches = categoryTitles.some(title =>
+  //       title.toLowerCase().includes(searchQuery.toLowerCase())
+  //     );
+
+  //     return nameMatches || categoryMatches;
+  //   });
+  // }
+
+  const filteredPartners = useMemo(() => {
+    if (!searchQuery) return partners;
+
+    const query = searchQuery.toLowerCase();
+
+    return partners.filter((partner) => {
+      const nameMatches =
+        partner.name?.toLowerCase().includes(query) ?? false;
+
+      const categoryMatches = getCategoryTitles(partner).some(title =>
+        title.toLowerCase().includes(query)
       );
 
       return nameMatches || categoryMatches;
     });
-  }
+  }, [partners, searchQuery]);
 
-  // PAGINATION: Display only first 'displayCount' items
-  const displayedPartners = filteredPartners.slice(0, displayCount);
-  const hasMore = displayCount < filteredPartners.length;
+
+  const displayedPartners = filteredPartners ?? [];
+  const hasMore = currentPage < totalPages;
 
   const handleFilterClick = (filter: string) => {
+    if (filter === activeFilter) return;
     setActiveFilter(filter);
-    setDisplayCount(10); // Reset to 10 when filter changes
+    setCurrentPage(1);
+    setPartners([]);
 
     if (filter === "All") {
-      router.push("/network");
+      router.push("/network", { scroll: false });
     } else {
-      router.push(`/network?filter=${encodeURIComponent(filter)}`);
+      router.push(`/network?filter=${encodeURIComponent(filter)}`, { scroll: false });
     }
   };
 
   const handleFilterChange = (filters: AppliedFilters) => {
     setAppliedFilters(filters);
-    setDisplayCount(10); // Reset to 10 when drawer filter changes
+    setCurrentPage(1);
+    setPartners([]);
   };
 
   const handleLoadMore = () => {
-    setDisplayCount(prev => prev + 10);
+    setCurrentPage(prev => prev + 1);
   };
 
   return (
@@ -213,15 +224,15 @@ const NetworkFilter = () => {
       </div>
 
       {/* Loading State */}
-      {isLoading && partners.length === 0 && (
+      {isLoading && currentPage === 1 && partners.length === 0 && (
         <div className="py-10">
           <NetworkSkeleton />
         </div>
       )}
 
-      {!isLoading && (
+      {(partners.length > 0 || !isLoading) && (
         <div className="space-y-10">
-          {displayedPartners.length === 0 ? (
+          {displayedPartners.length === 0 && !isLoading ? (
             <div className="text-center py-10">
               <p className="text-lg opacity-70">No partners found</p>
             </div>
@@ -250,7 +261,7 @@ const NetworkFilter = () => {
             <ChevronDown className="lg:w-10 lg:h-10" />
           </button>
           <p className="text-sm opacity-70">
-            Showing {displayedPartners.length} of {filteredPartners.length}
+            Showing {partners.length} of {totalPartners}
           </p>
         </div>
       )}
@@ -276,7 +287,7 @@ const NetworkFilter = () => {
         isOpen={isFilterOpen}
         onClose={() => setIsFilterOpen(false)}
         onFilterChange={handleFilterChange}
-        partners={partners}
+
       />
     </div>
   );

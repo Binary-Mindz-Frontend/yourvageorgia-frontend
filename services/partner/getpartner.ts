@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use server";
 
 import { Partner } from "@/types/partner.types";
@@ -28,6 +29,18 @@ export interface IPartnerResponse {
   };
 }
 
+export interface IGetPartnerFilters {
+  page?: number;
+  limit?: number;
+  search?: string;
+  address?: string;
+  category?: string;  
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+  activity?: string | string[];
+  area?: string | string[];
+}
+
 export interface IPositionUpdateData {
   position: number; // Assuming 'position' is a number
 }
@@ -48,6 +61,13 @@ export interface IGetAllPartnersResponse {
     prevPage: number | null;
     nextPage: number | null;
   };
+}
+
+export interface IAreaResponse {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  data: string[];
 }
 
 export const getPartners = async (
@@ -86,8 +106,61 @@ export const getPartners = async (
       data: json.data,
       meta: json.meta,
     };
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     return { error: error.message };
+  }
+};
+
+export const getPartnerFiltered = async (
+  filters: IGetPartnerFilters = {}
+): Promise<
+  { data: IGetAllPartnersResponse["data"]; meta: IGetAllPartnersResponse["meta"] } | { error: string }
+> => {
+  try {
+    const queryParams = new URLSearchParams();
+
+    (Object.keys(filters) as Array<keyof IGetPartnerFilters>).forEach((key) => {
+      const value = filters[key];
+
+      if (value === undefined || value === null || value === "") return;
+
+      // UPDATED: Check for ANY array value, not just activity
+      if (Array.isArray(value)) {
+        value.forEach((val) => queryParams.append(key, val));
+      } else {
+        queryParams.append(key, String(value));
+      }
+    });
+
+    const url = `${BASE_URL}/partner?${queryParams.toString()}`;
+    
+    const res = await fetch(url, { cache: "no-store" });
+    const json = await res.json();
+
+    if (!res.ok) return { error: json.message || "Failed to fetch" };
+
+    return { data: json.data, meta: json.meta };
+  } catch (error: any) {
+    return { error: error.message || "An unexpected error occurred" };
+  }
+};
+
+export const getAllAreas = async (): Promise<string[] | { error: string }> => {
+  try {
+    const url = `${BASE_URL}/partner/area`;
+
+    const res = await fetch(url, {
+      next: { revalidate: 3600 }, 
+    });
+
+    const json: IAreaResponse = await res.json();
+
+    if (!res.ok) {
+      return { error: json.message || "Failed to fetch areas" };
+    }
+
+    return json.data;
+  } catch (error: any) {
+    return { error: error.message || "An unexpected error occurred" };
   }
 };
