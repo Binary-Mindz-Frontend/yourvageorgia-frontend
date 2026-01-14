@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import Image, { StaticImageData } from "next/image";
-import { useEffect, useState, useCallback, memo } from "react";
+import { memo, useCallback, useEffect, useState } from "react";
 
 interface ImageGallerySliderProps {
   images: (string | StaticImageData)[];
@@ -14,6 +14,13 @@ const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
   const [zoomIndex, setZoomIndex] = useState(0);
   const [zoomVisible, setZoomVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Touch swipe state
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+
+  // Minimum swipe distance threshold (in px)
+  const minSwipeDistance = 50;
 
   const changeSlide = useCallback((newIndex: number) => {
     setFade(true);
@@ -90,10 +97,69 @@ const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
     setIsLoading(true);
   }, [images]);
 
+  // Touch handlers for swipe gestures (main slider)
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  }, []);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  }, []);
+
+  const handleTouchEnd = useCallback(() => {
+    if (!touchStart || !touchEnd) return;
+
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe) {
+      nextSlide();
+    } else if (isRightSwipe) {
+      prevSlide();
+    }
+
+    setTouchStart(null);
+    setTouchEnd(null);
+  }, [touchStart, touchEnd, minSwipeDistance, nextSlide, prevSlide]);
+
+  // Touch handlers for zoom modal
+  const handleZoomTouchStart = useCallback((e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  }, []);
+
+  const handleZoomTouchMove = useCallback((e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  }, []);
+
+  const handleZoomTouchEnd = useCallback(() => {
+    if (!touchStart || !touchEnd) return;
+
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe) {
+      nextZoomImage();
+    } else if (isRightSwipe) {
+      prevZoomImage();
+    }
+
+    setTouchStart(null);
+    setTouchEnd(null);
+  }, [touchStart, touchEnd, minSwipeDistance, nextZoomImage, prevZoomImage]);
+
   return (
     <div>
       {/* Main Image */}
-      <div className="relative w-full h-60.5 lg:h-108.75 overflow-hidden rounded-xl bg-gray-900/10">
+      <div
+        className="relative w-full h-60.5 lg:h-108.75 overflow-hidden rounded-xl bg-gray-900/10 touch-pan-y"
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
         {isLoading && (
           <div className="absolute inset-0 z-10 flex items-center justify-center bg-transparent">
             <div className="w-8 h-8 border-2 border-white/20 border-t-white rounded-full animate-spin" />
@@ -203,10 +269,13 @@ const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
         >
           <div
             className={clsx(
-              "relative transition-all duration-300 ease-in-out transform",
+              "relative transition-all duration-300 ease-in-out transform touch-pan-y",
               zoomVisible ? "scale-100 opacity-100" : "scale-95 opacity-0"
             )}
             onClick={(e) => e.stopPropagation()}
+            onTouchStart={handleZoomTouchStart}
+            onTouchMove={handleZoomTouchMove}
+            onTouchEnd={handleZoomTouchEnd}
           >
             <button
               onClick={closeZoom}
