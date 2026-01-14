@@ -3,125 +3,192 @@
 
 'use client'
 
-import { useEffect, useMemo, useState } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { BeautifulLoader } from "@/components/Shared/Loading/BeautifulLoader";
+import { NetworkSkeleton } from "@/components/Shared/Loading/NetworkSkeleton";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ListFilter } from "lucide-react";
-import { FilterDrawer } from "./FilterDrawer";
-import PartnerCard from "./PartnerCard";
 import { getPartnerFiltered } from "@/services/partner/getpartner";
 import { Partner, PartnerCategory } from "@/types/partner.types";
-import { NetworkSkeleton } from "@/components/Shared/Loading/NetworkSkeleton";
-import { BeautifulLoader } from "@/components/Shared/Loading/BeautifulLoader";
+import { ChevronDown, ListFilter } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import PartnerDetailsModal from "../NetworkCardModal/PartnerDetailsModal";
+import { FilterDrawer } from "./FilterDrawer";
+import PartnerCard from "./PartnerCard";
 
 interface AppliedFilters {
   locations: string[];
   activities: string[];
 }
 
-const NetworkFilter = () => {
-  const searchParams = useSearchParams();
+interface NetworkFilterProps {
+  initialData: Partner[];
+  initialMeta: {
+    total: number;
+    totalPages?: number;
+    totalPage?: number;
+    page: number;
+    limit: number;
+  };
+  initialFilter?: string;
+  searchQuery?: string;
+}
+
+const NetworkFilter = ({
+  initialData,
+  initialMeta,
+  initialFilter = "All",
+  searchQuery: initialSearchQuery
+}: NetworkFilterProps) => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const [isPending, startTransition] = useTransition();
 
-  const filterFromUrl = searchParams.get("filter");
-  const searchQuery = searchParams.get("search");
-
-  const [partners, setPartners] = useState<Partner[]>([]);
+  const [partners, setPartners] = useState<Partner[]>(initialData);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPartner, setSelectedPartner] = useState<Partner | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-
-  const [totalPartners, setTotalPartners] = useState(0);
+  const [totalPages, setTotalPages] = useState(initialMeta?.totalPages || initialMeta?.totalPage || 1);
+  const [totalPartners, setTotalPartners] = useState(initialMeta?.total || 0);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [appliedFilters, setAppliedFilters] = useState<AppliedFilters>({
     locations: [],
     activities: [],
   });
+  const [activeFilter, setActiveFilter] = useState<string>(initialFilter);
 
-  const [activeFilter, setActiveFilter] = useState<string>("All");
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const filterFromUrl = searchParams.get("filter");
+  const searchQuery = searchParams.get("search") || initialSearchQuery;
+
   const appliedFiltersKey = useMemo(
     () => `${appliedFilters.locations.join(',')}-${appliedFilters.activities.join(',')}`,
-    [appliedFilters.locations, appliedFilters.activities]
+    [appliedFilters]
   );
 
-  useEffect(() => {
-    const controller = new AbortController(); // KILL PREVIOUS CALLS
+  // Track if we should use initial data
+  const shouldUseInitialData = useRef(true);
 
-    const fetchPartners = async () => {
-      setIsLoading(true);
-      try {
-        const result = await getPartnerFiltered({
-          page: currentPage,
-          category: activeFilter === "All" ? undefined : activeFilter,
-          area: appliedFilters.locations.length > 0 ? appliedFilters.locations : undefined,
-          activity: appliedFilters.activities.length > 0 ? appliedFilters.activities : undefined,
-        });
+  // Fetch function
+  const fetchPartners = useCallback(async (
+    page: number,
+    filter: string,
+    filters: AppliedFilters,
+    resetData: boolean = false
+  ) => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
 
-        console.log("Fetched partners for page", result);
-        if (controller.signal.aborted) return;
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
 
-        if ("error" in result) {
-          console.error(result.error);
-        } else {
-          const sorted = result.data || [];
-          setPartners(prev => (currentPage === 1 ? sorted : [...prev, ...sorted]));
+    setIsLoading(true);
 
-          const meta = (result as any).meta;
-          if (meta) {
-            setTotalPages(meta.totalPages || meta.totalPage || 1);
-            setTotalPartners(meta.total || 0);
-          }
-        }
-      } catch (err) {
-        if ((err as any).name !== 'AbortError') console.error(err);
-      } finally {
-        if (!controller.signal.aborted) setIsLoading(false);
+    try {
+      const result = await getPartnerFiltered({
+        page,
+        limit: 10,
+        category: filter === "All" ? undefined : filter,
+        area: filters.locations.length > 0 ? filters.locations : undefined,
+        activity: filters.activities.length > 0 ? filters.activities : undefined,
+      });
+
+      if (controller.signal.aborted) return;
+
+      if ("error" in result) {
+        console.error(result.error);
+        return;
       }
-    };
 
-    fetchPartners();
-    return () => controller.abort();
-  }, [currentPage, activeFilter, appliedFiltersKey, appliedFilters.locations, appliedFilters.activities]);
+      const sorted = result.data || [];
 
+      setPartners(prev => {
+        if (resetData) return sorted;
+        return [...prev, ...sorted];
+      });
+
+      const meta = (result as any).meta;
+      if (meta) {
+        setTotalPages(meta.totalPages || meta.totalPage || 1);
+        setTotalPartners(meta.total || 0);
+      }
+    } catch (err: any) {
+      if (err.name !== 'AbortError') {
+        console.error('Fetch error:', err);
+      }
+    } finally {
+      if (!controller.signal.aborted) {
+        setIsLoading(false);
+      }
+    }
+  }, []);
+
+  // Sync URL filter changes
   useEffect(() => {
-    if (filterFromUrl) {
-      setActiveFilter(filterFromUrl);
+    const filterFromUrlParsed = filterFromUrl || "All";
+    if (filterFromUrlParsed !== activeFilter) {
+      shouldUseInitialData.current = false;
+      setActiveFilter(filterFromUrlParsed);
+      setCurrentPage(1);
+      fetchPartners(1, filterFromUrlParsed, appliedFilters, true);
     }
   }, [filterFromUrl]);
 
+  // Sync search query
   useEffect(() => {
     if (searchQuery) {
-      const matchedCategory = filters.find((filter) => filter.toLowerCase() === searchQuery.toLowerCase());
-      if (matchedCategory) {
+      const filters = ["All", "Movement", "Recovery", "Radiance", "Taste"];
+      const matchedCategory = filters.find(
+        (filter) => filter.toLowerCase() === searchQuery.toLowerCase()
+      );
+      if (matchedCategory && matchedCategory !== activeFilter) {
         setActiveFilter(matchedCategory);
+        setCurrentPage(1);
+        fetchPartners(1, matchedCategory, appliedFilters, true);
       }
     }
   }, [searchQuery]);
 
-
-//No partners found problem solved here
+  // Handle pagination (page > 1)
   useEffect(() => {
-  setPartners([]);        
-  setCurrentPage(1);      
-}, [activeFilter, appliedFiltersKey]);
+    if (currentPage > 1) {
+      shouldUseInitialData.current = false;
+      fetchPartners(currentPage, activeFilter, appliedFilters, false);
+    }
 
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, [currentPage]);
+
+  // Handle filter changes (locations/activities)
+  useEffect(() => {
+    // Skip if it's the first render and we should use initial data
+    if (shouldUseInitialData.current) return;
+
+    setCurrentPage(1);
+    fetchPartners(1, activeFilter, appliedFilters, true);
+  }, [appliedFiltersKey]);
 
   const filters = ["All", "Movement", "Recovery", "Radiance", "Taste"];
 
-  const getCategoryTitles = (partner: Partner): string[] => {
-  if (partner.categories && Array.isArray(partner.categories)) {
-    return partner.categories.map(cat => typeof cat === "string" ? cat : cat.title);
-  }
-  if (partner.category) {
-    const title = typeof partner.category === "string" ? partner.category : (partner.category as PartnerCategory)?.title;
-    return title ? [title] : [];
-  }
-  return [];
-};
-
+  const getCategoryTitles = useCallback((partner: Partner): string[] => {
+    if (partner.categories && Array.isArray(partner.categories)) {
+      return partner.categories.map(cat =>
+        typeof cat === "string" ? cat : cat.title
+      );
+    }
+    if (partner.category) {
+      const title = typeof partner.category === "string"
+        ? partner.category
+        : (partner.category as PartnerCategory)?.title;
+      return title ? [title] : [];
+    }
+    return [];
+  }, []);
 
   const filteredPartners = useMemo(() => {
     if (!searchQuery) return partners;
@@ -129,43 +196,51 @@ const NetworkFilter = () => {
     const query = searchQuery.toLowerCase();
 
     return partners.filter((partner) => {
-      const nameMatches =
-        partner.name?.toLowerCase().includes(query) ?? false;
-
+      const nameMatches = partner.name?.toLowerCase().includes(query) ?? false;
       const categoryMatches = getCategoryTitles(partner).some(title =>
         title.toLowerCase().includes(query)
       );
-
       return nameMatches || categoryMatches;
     });
-  }, [partners, searchQuery]);
-
+  }, [partners, searchQuery, getCategoryTitles]);
 
   const displayedPartners = filteredPartners ?? [];
   const hasMore = currentPage < totalPages;
 
-  const handleFilterClick = (filter: string) => {
+  const handleFilterClick = useCallback((filter: string) => {
     if (filter === activeFilter) return;
-    setActiveFilter(filter);
-    setCurrentPage(1);
-    setPartners([]);
 
-    if (filter === "All") {
-      router.push("/network", { scroll: false });
-    } else {
-      router.push(`/network?filter=${encodeURIComponent(filter)}`, { scroll: false });
-    }
-  };
+    shouldUseInitialData.current = false;
 
-  const handleFilterChange = (filters: AppliedFilters) => {
+    startTransition(() => {
+      setActiveFilter(filter);
+      setCurrentPage(1);
+
+      if (filter === "All") {
+        router.push("/network", { scroll: false });
+      } else {
+        router.push(`/network?filter=${encodeURIComponent(filter)}`, { scroll: false });
+      }
+
+      fetchPartners(1, filter, appliedFilters, true);
+    });
+  }, [activeFilter, router, appliedFilters, fetchPartners]);
+
+  const handleFilterChange = useCallback((filters: AppliedFilters) => {
+    shouldUseInitialData.current = false;
     setAppliedFilters(filters);
-    setCurrentPage(1);
-    setPartners([]);
-  };
+  }, []);
 
-  const handleLoadMore = () => {
-    setCurrentPage(prev => prev + 1);
-  };
+  const handleLoadMore = useCallback(() => {
+    if (!isLoading && hasMore) {
+      setCurrentPage(prev => prev + 1);
+    }
+  }, [isLoading, hasMore]);
+
+  const handlePartnerClick = useCallback((partner: Partner) => {
+    setSelectedPartner(partner);
+    setIsModalOpen(true);
+  }, []);
 
   return (
     <div className="text-white p-4 max-w-4xl mx-auto">
@@ -219,10 +294,7 @@ const NetworkFilter = () => {
               <PartnerCard
                 key={partner._id}
                 partner={partner}
-                onClick={(p) => {
-                  setSelectedPartner(p);
-                  setIsModalOpen(true);
-                }}
+                onClick={handlePartnerClick}
               />
             ))
           )}
@@ -230,7 +302,7 @@ const NetworkFilter = () => {
       )}
 
       {/* Load More Button */}
-      {!isLoading && hasMore && (
+      {!isLoading && hasMore && displayedPartners.length > 0 && (
         <div className="mt-10 flex flex-col items-center gap-2">
           <button
             onClick={handleLoadMore}
@@ -265,7 +337,6 @@ const NetworkFilter = () => {
         isOpen={isFilterOpen}
         onClose={() => setIsFilterOpen(false)}
         onFilterChange={handleFilterChange}
-
       />
     </div>
   );

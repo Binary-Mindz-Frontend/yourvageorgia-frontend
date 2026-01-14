@@ -1,13 +1,13 @@
 import clsx from "clsx";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import Image, { StaticImageData } from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, memo } from "react";
 
 interface ImageGallerySliderProps {
   images: (string | StaticImageData)[];
 }
 
-export default function ImageGallerySlider({ images }: ImageGallerySliderProps) {
+const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
   const [index, setIndex] = useState(0);
   const [fade, setFade] = useState(false);
   const [isZoomed, setIsZoomed] = useState(false);
@@ -15,58 +15,59 @@ export default function ImageGallerySlider({ images }: ImageGallerySliderProps) 
   const [zoomVisible, setZoomVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  const changeSlide = (newIndex: number) => {
+  const changeSlide = useCallback((newIndex: number) => {
     setFade(true);
-
     setTimeout(() => {
       setIndex(newIndex);
       setFade(false);
-      setIsLoading(true); // Reset loading state for new image
+      setIsLoading(true);
     }, 180);
-  };
+  }, []);
 
-  const prevSlide = () => {
+  const prevSlide = useCallback(() => {
     const newIndex = index === 0 ? images.length - 1 : index - 1;
     changeSlide(newIndex);
-  };
+  }, [index, images.length, changeSlide]);
 
-  const nextSlide = () => {
+  const nextSlide = useCallback(() => {
     const newIndex = index === images.length - 1 ? 0 : index + 1;
     changeSlide(newIndex);
-  };
+  }, [index, images.length, changeSlide]);
 
-  const openZoom = (index: number) => {
-    setZoomIndex(index);
+  const openZoom = useCallback((idx: number) => {
+    setZoomIndex(idx);
     setIsZoomed(true);
-    // Use setTimeout to ensure DOM is updated before triggering animation
-    setTimeout(() => {
-      setZoomVisible(true);
-    }, 10);
-  };
+    setTimeout(() => setZoomVisible(true), 10);
+  }, []);
 
-  const closeZoom = () => {
+  const closeZoom = useCallback(() => {
     setZoomVisible(false);
-    // Wait for fade-out animation to complete before removing from DOM
-    setTimeout(() => {
-      setIsZoomed(false);
-    }, 300);
-  };
+    setTimeout(() => setIsZoomed(false), 300);
+  }, []);
 
-  // Handle keyboard navigation
+  const prevZoomImage = useCallback(() => {
+    const newIndex = zoomIndex === 0 ? images.length - 1 : zoomIndex - 1;
+    setZoomIndex(newIndex);
+  }, [zoomIndex, images.length]);
+
+  const nextZoomImage = useCallback(() => {
+    const newIndex = zoomIndex === images.length - 1 ? 0 : zoomIndex + 1;
+    setZoomIndex(newIndex);
+  }, [zoomIndex, images.length]);
+
+  // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (isZoomed) {
-        if (e.key === 'Escape') {
-          closeZoom();
-        } else if (e.key === 'ArrowLeft') {
-          e.preventDefault();
-          const newIndex = zoomIndex === 0 ? images.length - 1 : zoomIndex - 1;
-          setZoomIndex(newIndex);
-        } else if (e.key === 'ArrowRight') {
-          e.preventDefault();
-          const newIndex = zoomIndex === images.length - 1 ? 0 : zoomIndex + 1;
-          setZoomIndex(newIndex);
-        }
+      if (!isZoomed) return;
+
+      if (e.key === 'Escape') {
+        closeZoom();
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        prevZoomImage();
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        nextZoomImage();
       }
     };
 
@@ -81,9 +82,9 @@ export default function ImageGallerySlider({ images }: ImageGallerySliderProps) 
       document.body.style.overflow = 'unset';
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isZoomed, zoomIndex, images.length]);
+  }, [isZoomed, closeZoom, prevZoomImage, nextZoomImage]);
 
-  // Reset when images change
+  // Reset on images change
   useEffect(() => {
     setIndex(0);
     setIsLoading(true);
@@ -91,7 +92,7 @@ export default function ImageGallerySlider({ images }: ImageGallerySliderProps) 
 
   return (
     <div>
-      {/* IMAGE VIEW */}
+      {/* Main Image */}
       <div className="relative w-full h-60.5 lg:h-108.75 overflow-hidden rounded-xl bg-gray-900/10">
         {isLoading && (
           <div className="absolute inset-0 z-10 flex items-center justify-center bg-transparent">
@@ -106,32 +107,36 @@ export default function ImageGallerySlider({ images }: ImageGallerySliderProps) 
         >
           <Image
             src={images[index]}
-
             alt="Gallery"
-            id="gallery-main-image"
             fill
             sizes="(max-width: 768px) 100vw, 800px"
             className="object-cover cursor-pointer hover:scale-105 transition-transform duration-300 ease-in-out"
             onClick={() => openZoom(index)}
             onLoad={() => setIsLoading(false)}
-            preload={true}
-            loading="eager"
+            loading="lazy"
+            quality={75}
           />
         </div>
 
         {/* Mobile Arrows */}
-        <button
-          onClick={prevSlide}
-          className="rounded-full cursor-pointer hover:bg-white/20 transition-all duration-200 ease-in-out absolute left-3 top-1/2 -translate-y-1/2 lg:static lg:hidden z-20 bg-black/30 p-1"
-        >
-          <ChevronLeft className="w-7 h-7" />
-        </button>
-        <button
-          onClick={nextSlide}
-          className="rounded-full cursor-pointer hover:bg-white/20 transition-all duration-200 ease-in-out absolute right-3 top-1/2 -translate-y-1/2 lg:static lg:hidden z-20 bg-black/30 p-1"
-        >
-          <ChevronRight className="w-7 h-7" />
-        </button>
+        {images.length > 1 && (
+          <>
+            <button
+              onClick={prevSlide}
+              className="rounded-full cursor-pointer hover:bg-white/20 transition-all duration-200 ease-in-out absolute left-3 top-1/2 -translate-y-1/2 lg:hidden z-20 bg-black/30 p-1"
+              aria-label="Previous image"
+            >
+              <ChevronLeft className="w-7 h-7" />
+            </button>
+            <button
+              onClick={nextSlide}
+              className="rounded-full cursor-pointer hover:bg-white/20 transition-all duration-200 ease-in-out absolute right-3 top-1/2 -translate-y-1/2 lg:hidden z-20 bg-black/30 p-1"
+              aria-label="Next image"
+            >
+              <ChevronRight className="w-7 h-7" />
+            </button>
+          </>
+        )}
 
         {/* Image counter */}
         {images.length > 1 && (
@@ -141,23 +146,27 @@ export default function ImageGallerySlider({ images }: ImageGallerySliderProps) 
         )}
       </div>
 
-      {/* Desktop Arrows */}
-      <div className="hidden lg:flex justify-between items-center mt-3 px-1">
-        <button
-          onClick={prevSlide}
-          className="pt-2 rounded-full cursor-pointer hover:bg-white/10 transition-all duration-200 ease-in-out p-1"
-        >
-          <ChevronLeft className="w-6 h-6" />
-        </button>
-        <button
-          onClick={nextSlide}
-          className="pt-2 rounded-full cursor-pointer hover:bg-white/10 transition-all duration-200 ease-in-out p-1"
-        >
-          <ChevronRight className="w-6 h-6" />
-        </button>
-      </div>
+      {/* Desktop Controls */}
+      {images.length > 1 && (
+        <div className="hidden lg:flex justify-between items-center mt-3 px-1">
+          <button
+            onClick={prevSlide}
+            className="pt-2 rounded-full cursor-pointer hover:bg-white/10 transition-all duration-200 ease-in-out p-1"
+            aria-label="Previous image"
+          >
+            <ChevronLeft className="w-6 h-6" />
+          </button>
+          <button
+            onClick={nextSlide}
+            className="pt-2 rounded-full cursor-pointer hover:bg-white/10 transition-all duration-200 ease-in-out p-1"
+            aria-label="Next image"
+          >
+            <ChevronRight className="w-6 h-6" />
+          </button>
+        </div>
+      )}
 
-      {/* Thumbnails (optional) */}
+      {/* Thumbnails */}
       {images.length > 1 && (
         <div className="hidden lg:flex gap-2 mt-4 justify-center">
           {images.map((img, i) => (
@@ -168,15 +177,15 @@ export default function ImageGallerySlider({ images }: ImageGallerySliderProps) 
                 "relative w-16 h-16 rounded-md overflow-hidden transition-all duration-200 ease-in-out",
                 i === index ? "ring-2 ring-white" : "opacity-60 hover:opacity-100"
               )}
+              aria-label={`View image ${i + 1}`}
             >
               <Image
-
                 src={img}
                 alt={`Thumbnail ${i + 1}`}
                 fill
                 className="object-cover"
-                preload={true}
-                loading="eager"
+                loading="lazy"
+                quality={60}
               />
             </button>
           ))}
@@ -197,35 +206,35 @@ export default function ImageGallerySlider({ images }: ImageGallerySliderProps) 
               "relative transition-all duration-300 ease-in-out transform",
               zoomVisible ? "scale-100 opacity-100" : "scale-95 opacity-0"
             )}
-            onClick={(e) => e.stopPropagation()} // Prevent closing when clicking on image
+            onClick={(e) => e.stopPropagation()}
           >
             <button
               onClick={closeZoom}
               className="absolute -top-12 right-0 text-white text-3xl cursor-pointer hover:bg-white/20 rounded-full p-2 transition-all duration-200 ease-in-out"
+              aria-label="Close zoom"
             >
               <X className="w-8 h-8" />
             </button>
 
-            {/* Zoomed image navigation */}
             {images.length > 1 && (
               <>
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    const newIndex = zoomIndex === 0 ? images.length - 1 : zoomIndex - 1;
-                    setZoomIndex(newIndex);
+                    prevZoomImage();
                   }}
                   className="absolute left-4 top-1/2 -translate-y-1/2 text-white cursor-pointer hover:bg-white/20 rounded-full p-3 transition-all duration-200 ease-in-out"
+                  aria-label="Previous image"
                 >
                   <ChevronLeft className="w-8 h-8" />
                 </button>
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    const newIndex = zoomIndex === images.length - 1 ? 0 : zoomIndex + 1;
-                    setZoomIndex(newIndex);
+                    nextZoomImage();
                   }}
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-white cursor-pointer hover:bg-white/20 rounded-full p-3 transition-all duration-200 ease-in-out"
+                  aria-label="Next image"
                 >
                   <ChevronRight className="w-8 h-8" />
                 </button>
@@ -237,7 +246,6 @@ export default function ImageGallerySlider({ images }: ImageGallerySliderProps) 
             )}
 
             <Image
-
               src={images[zoomIndex]}
               alt="Zoomed Gallery"
               width={1200}
@@ -250,4 +258,8 @@ export default function ImageGallerySlider({ images }: ImageGallerySliderProps) 
       )}
     </div>
   );
-}
+});
+
+ImageGallerySlider.displayName = 'ImageGallerySlider';
+
+export default ImageGallerySlider;

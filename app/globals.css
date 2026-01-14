@@ -144,7 +144,18 @@
 
 
 input:focus {
-    outline: none !important;
-    box-shadow: none !important;
-    -webkit-tap-highlight-color: transparent;
+  outline: none !important;
+  box-shadow: none !important;
+  -webkit-tap-highlight-color: transparent;
+}
+
+
+
+/* Add to global CSS for better scroll performance */
+* {
+  -webkit-overflow-scrolling: touch;
+}
+
+.overflow-y-auto {
+  overscroll-behavior: contain;
 }
