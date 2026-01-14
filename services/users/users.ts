@@ -34,6 +34,7 @@ export interface IUserResponse {
     isMembership: boolean;
     membershipId?: string;
     membershipExpiry?: number;
+    accessCode?: string;
     isBlocked: boolean;
     isResettingPassword: boolean;
     avatarUrl: string;
