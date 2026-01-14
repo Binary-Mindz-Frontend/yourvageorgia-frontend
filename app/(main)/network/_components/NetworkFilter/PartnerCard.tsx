@@ -26,7 +26,7 @@ const PartnerCard = memo(({ partner, onClick, priority = false }: PartnerCardPro
             className="relative w-full aspect-video rounded-xl overflow-hidden cursor-pointer shadow-lg hover:shadow-2xl transition-shadow duration-300 group"
         >
             {/* Background Image */}
-            <div className="absolute inset-0 w-full h-full bg-gray-900/20">
+            <div className="absolute inset-0 w-full h-full bg-gray-900/20 -z-50">
                 {isImageLoading && (
                     <Skeleton className="w-full h-full absolute inset-0 z-10 flex items-center justify-center bg-background/20">
                         <div className="w-8 h-8 border-2 border-white/20 border-t-white/80 rounded-full animate-spin" />

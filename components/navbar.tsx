@@ -120,7 +120,7 @@ export function Navbar() {
     <>
       <nav
         className={`
-          sticky top-0 z-20 w-full transition-all duration-300 ease-in-out
+          sticky top-0 z-50 w-full transition-all duration-300 ease-in-out
           ${scrolled
             ? "bg-background/50 backdrop-blur-md border-b border-border/40 shadow-sm py-2"
             : "bg-transparent py-4 border-transparent"
