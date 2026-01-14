@@ -1,13 +1,13 @@
 "use client";
 
-import { ArrowRight, ChevronDown } from "lucide-react";
-import { useEffect, useState } from "react";
-import { getCurrentUser } from "@/services/auth";
 import PartnerDetailsModal from "@/app/(main)/network/_components/NetworkCardModal/PartnerDetailsModal";
-import FavouriteButton from "../network/_components/NetworkFilter/FavouriteButton";
-import { Partner } from "@/types/partner.types";
-import Link from "next/link"; // Added for navigation to login
 import { BeautifulLoader } from "@/components/Shared/Loading/BeautifulLoader";
+import { getCurrentUser } from "@/services/auth";
+import { Partner } from "@/types/partner.types";
+import { ArrowRight, ChevronDown } from "lucide-react";
+import Link from "next/link"; // Added for navigation to login
+import { useEffect, useState } from "react";
+import FavouriteButton from "../network/_components/NetworkFilter/FavouriteButton";
 
 const BASE_API = process.env.NEXT_PUBLIC_BASE_API;
 
@@ -176,8 +176,8 @@ const MyEdit = () => {
 
       {data.length > 0 && (
         <div className="mt-10 flex justify-center">
-          <button className="p-3 rounded-full hover:bg-black/50 transition">
-            <ChevronDown className="lg:w-10 lg:h-10" />
+          <button className="p-3 rounded-full hover:bg-black/50 transition" aria-label="Scroll down">
+            <ChevronDown className="lg:w-10 lg:h-10" aria-hidden="true" />
           </button>
         </div>
       )}

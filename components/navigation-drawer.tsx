@@ -3,10 +3,9 @@
 
 import { Button } from "@/components/ui/button";
 import useUser from "@/hooks/useUser";
-import { getCurrentUser } from "@/services/auth";
-import { ArrowRight, CircleUserRound, Heart, LogIn, User, X } from "lucide-react";
+import { ArrowRight, Heart, User, X } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 interface NavigationDrawerProps {
   isOpen: boolean;
@@ -15,7 +14,7 @@ interface NavigationDrawerProps {
 
 export function NavigationDrawer({ isOpen, onClose }: NavigationDrawerProps) {
 
-   const { user } = useUser();
+  const { user } = useUser();
   // const [user, setUser] = useState<any>(null);
   // console.log('user',user)
   // useEffect(() => {
@@ -47,35 +46,31 @@ export function NavigationDrawer({ isOpen, onClose }: NavigationDrawerProps) {
     <>
       {/* Overlay */}
       <div
-        className={`fixed inset-0 z-40 bg-white/10 transition-opacity backdrop-blur-sm duration-300 ${
-          isOpen ? "opacity-100" : "pointer-events-none opacity-0"
-        }`}
+        className={`fixed inset-0 z-40 bg-white/10 transition-opacity backdrop-blur-sm duration-300 ${isOpen ? "opacity-100" : "pointer-events-none opacity-0"
+          }`}
         onClick={onClose}
         aria-hidden="true"
       />
 
       {/* Drawer */}
       <div
-        className={`fixed inset-y-0 left-0 z-50 w-1/2 bg-background/60 transform transition-transform duration-300 ease-out ${
-          isOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+        className={`fixed inset-y-0 left-0 z-50 w-1/2 bg-background/60 transform transition-transform duration-300 ease-out ${isOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
         role="dialog"
         aria-modal="true"
-        aria-labelledby="drawer-title"
+        aria-label="Navigation menu"
       >
         {/* Header */}
         <div
-          className={`absolute top-4 flex items-center justify-between border-b border-border/40 px-6 py-6 ${
-            isOpen ? "-right-16" : "right-0"
-          }`}
+          className={`absolute top-4 flex items-center justify-between border-b border-border/40 px-6 py-6 ${isOpen ? "-right-16" : "right-0"
+            }`}
         >
           <Button
             variant="ghost"
             size="icon"
             onClick={onClose}
-            className={`text-foreground hover:bg-accent/10 [&_svg:not([class*='size-'])]:size-5 cursor-pointer ${
-              isOpen ? "opacity-100" : "pointer-events-none opacity-0"
-            }`}
+            className={`text-foreground hover:bg-accent/10 [&_svg:not([class*='size-'])]:size-5 cursor-pointer ${isOpen ? "opacity-100" : "pointer-events-none opacity-0"
+              }`}
             aria-label="Close menu"
           >
             <X className="h-5 w-5" />
@@ -89,22 +84,24 @@ export function NavigationDrawer({ isOpen, onClose }: NavigationDrawerProps) {
               <button
                 onClick={onClose}
                 className="group cursor-pointer flex w-full items-center justify-between rounded-md px-4 py-4 text-sm font-light tracking-wide text-foreground transition-colors hover:bg-accent/10"
+                aria-label={`Navigate to ${item.label}`}
               >
                 <span>{item.label}</span>
-                <ArrowRight className="h-5 w-5" />
+                <ArrowRight className="h-5 w-5" aria-hidden="true" />
               </button>
             </Link>
           ))}
 
           {/* Icon items as Menu Links */}
           <div className="flex items-center">
-           {!user ? (
+            {!user ? (
               <Link href="/login" passHref>
                 <button
                   onClick={onClose}
                   className="group cursor-pointer flex w-full items-center justify-between rounded-md px-4 py-4 text-sm font-light tracking-wide text-foreground transition-colors hover:bg-accent/10"
+                  aria-label="Login"
                 >
-                  <User className="h-5 w-5" />
+                  <User className="h-5 w-5" aria-hidden="true" />
                 </button>
               </Link>
             ) : (
@@ -112,9 +109,9 @@ export function NavigationDrawer({ isOpen, onClose }: NavigationDrawerProps) {
                 <button
                   onClick={onClose}
                   className="group cursor-pointer flex w-full items-center justify-between rounded-md px-4 py-4 text-sm font-light tracking-wide text-foreground transition-colors hover:bg-accent/10"
+                  aria-label="View profile"
                 >
-                  {/* <User className="h-5 w-5" /> */}
-                  <User className="h-5 w-5" />
+                  <User className="h-5 w-5" aria-hidden="true" />
                 </button>
               </Link>
             )}
@@ -122,8 +119,9 @@ export function NavigationDrawer({ isOpen, onClose }: NavigationDrawerProps) {
               <button
                 onClick={onClose}
                 className="group cursor-pointer flex w-full items-center justify-between rounded-md px-4 py-4 text-sm font-light tracking-wide text-foreground transition-colors hover:bg-accent/10"
+                aria-label="View favorites"
               >
-                <Heart className="h-5 w-5" />
+                <Heart className="h-5 w-5" aria-hidden="true" />
               </button>
             </Link>
           </div>

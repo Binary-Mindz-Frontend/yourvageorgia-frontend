@@ -263,8 +263,9 @@ const NetworkFilter = ({
           size="lg"
           className="text-white focus:outline-none hover:bg-gray-800 p-2 rounded transition [&_svg:not([class*='size-'])]:size-6"
           onClick={() => setIsFilterOpen(true)}
+          aria-label="Open filter options"
         >
-          <ListFilter className="h-6 w-6" />
+          <ListFilter className="h-6 w-6" aria-hidden="true" />
         </Button>
       </header>
 
@@ -320,8 +321,9 @@ const NetworkFilter = ({
           <button
             onClick={handleLoadMore}
             className="p-3 rounded-full hover:bg-black/50 cursor-pointer transition"
+            aria-label="Load more partners"
           >
-            <ChevronDown className="lg:w-10 lg:h-10" />
+            <ChevronDown className="lg:w-10 lg:h-10" aria-hidden="true" />
           </button>
           <p className="text-sm opacity-70">
             Showing {partners.length} of {totalPartners}

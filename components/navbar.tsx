@@ -166,6 +166,7 @@ export function Navbar() {
               <Link
                 href="/"
                 className="transition-opacity hover:opacity-80 duration-200"
+                aria-label="Go to homepage"
               >
                 <HeaderLogo />
               </Link>

@@ -2,10 +2,10 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { ChevronDown, X } from "lucide-react";
-import { useEffect, useState, useMemo } from "react";
 import { getActivitiesForSelect } from "@/services/activity/activity";
 import { getAllAreas } from "@/services/partner/getpartner";
+import { ChevronDown, X } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 
 interface FilterDrawerProps {
   isOpen: boolean;
@@ -20,7 +20,7 @@ export function FilterDrawer({
   isOpen,
   onClose,
   onFilterChange,
-   
+
 }: FilterDrawerProps) {
   const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
   const [selectedActivities, setSelectedActivities] = useState<string[]>([]);
@@ -127,6 +127,7 @@ export function FilterDrawer({
           }`}
         role="dialog"
         aria-modal="true"
+        aria-label="Filter options"
       >
         {/* Close Button */}
         <div
