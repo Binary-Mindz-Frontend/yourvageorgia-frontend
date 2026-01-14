@@ -9,15 +9,16 @@ import FavouriteButton from "./FavouriteButton";
 interface PartnerCardProps {
     partner: Partner;
     onClick: (partner: Partner) => void;
+    priority?: boolean;
 }
 
-const PartnerCard = memo(({ partner, onClick }: PartnerCardProps) => {
+const PartnerCard = memo(({ partner, onClick, priority = false }: PartnerCardProps) => {
     const [isImageLoading, setIsImageLoading] = useState(true);
 
     // Extract location once
-    const location = partner.contacts?.[0]?.area || 
-                     partner.contacts?.[0]?.address || 
-                     "Location not specified";
+    const location = partner.contacts?.[0]?.area ||
+        partner.contacts?.[0]?.address ||
+        "Location not specified";
 
     return (
         <div
@@ -35,16 +36,16 @@ const PartnerCard = memo(({ partner, onClick }: PartnerCardProps) => {
                     src={partner.thumbnail || ""}
                     alt={partner.name}
                     fill
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 800px"
+                    priority={priority}
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                     className={cn(
-                        "object-cover transition-all duration-500",
+                        "object-cover transition-[transform,opacity] duration-500",
                         isImageLoading ? "opacity-0" : "opacity-100 group-hover:scale-105"
                     )}
                     style={{
                         filter: "brightness(1.05) saturate(1.2)",
                     }}
                     onLoad={() => setIsImageLoading(false)}
-                    loading="lazy"
                     quality={75}
                     placeholder="blur"
                     blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNzAwIiBoZWlnaHQ9IjQ3NSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB2ZXJzaW9uPSIxLjEiLz4="

@@ -305,11 +305,12 @@ const NetworkFilter = ({
             <p className="text-lg opacity-70">No partners found</p>
           </div>
         ) : (
-          displayedPartners.map((partner) => (
+          displayedPartners.map((partner, index) => (
             <PartnerCard
               key={partner._id}
               partner={partner}
               onClick={handlePartnerClick}
+              priority={index < 2}
             />
           ))
         )}
