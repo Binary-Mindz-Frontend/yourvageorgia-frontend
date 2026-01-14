@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Globe, Instagram, ChevronLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { WhatsappIcon } from "@/app/(main)/network/_components/NetworkCardModal/Icon/Icons";
 import ImageGallerySlider from "@/app/(main)/network/_components/ImageGallerySlider/ImageGallerySlider";
+import { WhatsappIcon } from "@/app/(main)/network/_components/NetworkCardModal/Icon/Icons";
+import { Button } from "@/components/ui/button";
+import { ChevronLeft, Globe, Instagram } from "lucide-react";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export default function PartnerDetailsModal({
   onClose,
