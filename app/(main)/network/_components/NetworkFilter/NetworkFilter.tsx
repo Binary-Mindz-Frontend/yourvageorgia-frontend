@@ -6,6 +6,7 @@
 import { BeautifulLoader } from "@/components/Shared/Loading/BeautifulLoader";
 import { NetworkSkeleton } from "@/components/Shared/Loading/NetworkSkeleton";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { getPartnerFiltered } from "@/services/partner/getpartner";
 import { Partner, PartnerCategory } from "@/types/partner.types";
 import { ChevronDown, ListFilter } from "lucide-react";
@@ -50,6 +51,10 @@ const NetworkFilter = ({
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(initialMeta?.totalPages || initialMeta?.totalPage || 1);
   const [totalPartners, setTotalPartners] = useState(initialMeta?.total || 0);
+
+  // UX improvement: Track first render to prevent "no partners found" flicker
+  const isFirstRender = useRef(true);
+  const [hasInitialData] = useState(() => initialData.length > 0);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [appliedFilters, setAppliedFilters] = useState<AppliedFilters>({
     locations: [],
@@ -120,6 +125,7 @@ const NetworkFilter = ({
     } finally {
       if (!controller.signal.aborted) {
         setIsLoading(false);
+        isFirstRender.current = false;
       }
     }
   }, []);
@@ -212,10 +218,12 @@ const NetworkFilter = ({
 
     shouldUseInitialData.current = false;
 
-    startTransition(() => {
-      setActiveFilter(filter);
-      setCurrentPage(1);
+    // Update button state immediately for instant feedback
+    setActiveFilter(filter);
+    setCurrentPage(1);
 
+    // Transition only wraps the async operations (URL update + fetch)
+    startTransition(() => {
       if (filter === "All") {
         router.push("/network", { scroll: false });
       } else {
@@ -276,30 +284,35 @@ const NetworkFilter = ({
         ))}
       </div>
 
-      {/* Loading State */}
-      {isLoading && currentPage === 1 && partners.length === 0 && (
+      {/* Loading State - Only show skeleton when truly empty and loading */}
+      {isLoading && partners.length === 0 && !hasInitialData && (
         <div className="py-10">
           <NetworkSkeleton />
         </div>
       )}
 
-      {(partners.length > 0 || !isLoading) && (
-        <div className="space-y-10">
-          {displayedPartners.length === 0 && !isLoading ? (
-            <div className="text-center py-10">
-              <p className="text-lg opacity-70">No partners found</p>
-            </div>
-          ) : (
-            displayedPartners.map((partner) => (
-              <PartnerCard
-                key={partner._id}
-                partner={partner}
-                onClick={handlePartnerClick}
-              />
-            ))
-          )}
-        </div>
-      )}
+      {/* Content with opacity transition for smooth filter changes */}
+      <div
+        className={cn(
+          "space-y-10 transition-opacity duration-200",
+          isLoading && currentPage === 1 && partners.length > 0 ? "opacity-60" : "opacity-100"
+        )}
+      >
+        {/* Only show empty state after loading completes and not first render */}
+        {!isLoading && displayedPartners.length === 0 && !isFirstRender.current ? (
+          <div className="text-center py-10">
+            <p className="text-lg opacity-70">No partners found</p>
+          </div>
+        ) : (
+          displayedPartners.map((partner) => (
+            <PartnerCard
+              key={partner._id}
+              partner={partner}
+              onClick={handlePartnerClick}
+            />
+          ))
+        )}
+      </div>
 
       {/* Load More Button */}
       {!isLoading && hasMore && displayedPartners.length > 0 && (

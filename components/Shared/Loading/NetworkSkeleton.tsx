@@ -4,7 +4,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export const NetworkSkeleton = () => {
     return (
-        <div className="space-y-10 w-full">
+        <div className="space-y-10 w-full animate-in fade-in duration-300">
             {Array.from({ length: 3 }).map((_, i) => (
                 <div
                     key={i}
