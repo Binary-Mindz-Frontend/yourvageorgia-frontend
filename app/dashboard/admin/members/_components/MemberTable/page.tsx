@@ -174,6 +174,14 @@ const MemberPage = () => {
                 </div>
             ),
         },
+    {
+            header: "Access Code",
+            cell: (row) => (
+                <div className="flex justify-center items-center w-full">
+                    <span className="text-white">{row.accessCode ?? "N/A"}</span>
+                </div>
+            ),
+        },
         {
             header: "Role",
             cell: (row) => (
