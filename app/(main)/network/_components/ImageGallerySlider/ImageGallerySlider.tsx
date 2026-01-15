@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import Image, { StaticImageData } from "next/image";
-import { memo, useCallback, useEffect, useState } from "react";
+import { memo, useCallback, useEffect, useState, useRef } from "react";
 
 interface ImageGallerySliderProps {
   images: (string | StaticImageData)[];
@@ -13,23 +13,59 @@ const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
   const [isZoomed, setIsZoomed] = useState(false);
   const [zoomIndex, setZoomIndex] = useState(0);
   const [zoomVisible, setZoomVisible] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  
+  // Separate loading state for each image
+  const [loadingStates, setLoadingStates] = useState<{ [key: number]: boolean }>({ 0: true });
+  const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set());
+  
+  const preloadRefs = useRef<{ [key: number]: HTMLImageElement }>({});
 
   // Touch swipe state
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
-  // Minimum swipe distance threshold (in px)
   const minSwipeDistance = 50;
+
+  // Preload adjacent images
+  const preloadAdjacentImages = useCallback((currentIndex: number) => {
+    const imagesToPreload = [
+      currentIndex - 1 >= 0 ? currentIndex - 1 : images.length - 1,
+      currentIndex + 1 < images.length ? currentIndex + 1 : 0,
+    ];
+
+    imagesToPreload.forEach((imgIndex) => {
+      if (!preloadRefs.current[imgIndex] && !loadedImages.has(imgIndex)) {
+        const img = new window.Image();
+        img.src = typeof images[imgIndex] === 'string' 
+          ? images[imgIndex] as string 
+          : (images[imgIndex] as any).src;
+        
+        img.onload = () => {
+          setLoadedImages(prev => new Set(prev).add(imgIndex));
+        };
+        
+        preloadRefs.current[imgIndex] = img;
+      }
+    });
+  }, [images, loadedImages]);
+
+  useEffect(() => {
+    preloadAdjacentImages(index);
+  }, [index, preloadAdjacentImages]);
 
   const changeSlide = useCallback((newIndex: number) => {
     setFade(true);
+    
+    // Set loading state for new image if not already loaded
+    if (!loadedImages.has(newIndex)) {
+      setLoadingStates(prev => ({ ...prev, [newIndex]: true }));
+    }
+    
     setTimeout(() => {
       setIndex(newIndex);
       setFade(false);
-      setIsLoading(true);
-    }, 180);
-  }, []);
+    }, 150);
+  }, [loadedImages]);
 
   const prevSlide = useCallback(() => {
     const newIndex = index === 0 ? images.length - 1 : index - 1;
@@ -94,10 +130,12 @@ const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
   // Reset on images change
   useEffect(() => {
     setIndex(0);
-    setIsLoading(true);
+    setLoadingStates({ 0: true });
+    setLoadedImages(new Set());
+    preloadRefs.current = {};
   }, [images]);
 
-  // Touch handlers for swipe gestures (main slider)
+  // Touch handlers
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     setTouchEnd(null);
     setTouchStart(e.targetTouches[0].clientX);
@@ -122,9 +160,8 @@ const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
 
     setTouchStart(null);
     setTouchEnd(null);
-  }, [touchStart, touchEnd, minSwipeDistance, nextSlide, prevSlide]);
+  }, [touchStart, touchEnd, nextSlide, prevSlide]);
 
-  // Touch handlers for zoom modal
   const handleZoomTouchStart = useCallback((e: React.TouchEvent) => {
     setTouchEnd(null);
     setTouchStart(e.targetTouches[0].clientX);
@@ -149,7 +186,14 @@ const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
 
     setTouchStart(null);
     setTouchEnd(null);
-  }, [touchStart, touchEnd, minSwipeDistance, nextZoomImage, prevZoomImage]);
+  }, [touchStart, touchEnd, nextZoomImage, prevZoomImage]);
+
+  const handleImageLoad = useCallback(() => {
+    setLoadingStates(prev => ({ ...prev, [index]: false }));
+    setLoadedImages(prev => new Set(prev).add(index));
+  }, [index]);
+
+  const isCurrentImageLoading = loadingStates[index] === true && !loadedImages.has(index);
 
   return (
     <div>
@@ -160,27 +204,30 @@ const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
-        {isLoading && (
-          <div className="absolute inset-0 z-10 flex items-center justify-center bg-transparent">
-            <div className="w-8 h-8 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+        {/* Loading Spinner - Always visible when loading */}
+        {isCurrentImageLoading && (
+          <div className="absolute inset-0 z-10 flex items-center justify-center bg-gray-900/20">
+            <div className="w-10 h-10 border-3 border-white/30 border-t-white rounded-full animate-spin" />
           </div>
         )}
+        
         <div
           className={clsx(
-            "relative w-full h-full transition-opacity duration-300 ease-in-out",
+            "relative w-full h-full transition-opacity duration-150 ease-in-out",
             fade ? "opacity-0" : "opacity-100"
           )}
         >
           <Image
             src={images[index]}
-            alt="Gallery"
+            alt={`Gallery image ${index + 1}`}
             fill
             sizes="(max-width: 768px) 100vw, 800px"
             className="object-cover cursor-pointer hover:scale-105 transition-transform duration-300 ease-in-out"
             onClick={() => openZoom(index)}
-            onLoad={() => setIsLoading(false)}
-            loading="lazy"
-            quality={75}
+            onLoad={handleImageLoad}
+            priority={index === 0}
+            loading={index === 0 ? undefined : "lazy"}
+            quality={85}
           />
         </div>
 
@@ -206,7 +253,7 @@ const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
 
         {/* Image counter */}
         {images.length > 1 && (
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 text-white px-3 py-1 rounded-full text-sm">
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 text-white px-3 py-1 rounded-full text-sm z-20">
             {index + 1} / {images.length}
           </div>
         )}
@@ -232,7 +279,7 @@ const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
         </div>
       )}
 
-      {/* Thumbnails */}
+      {/* Thumbnails - Fixed sizes prop */}
       {images.length > 1 && (
         <div className="hidden lg:flex gap-2 mt-4 justify-center">
           {images.map((img, i) => (
@@ -249,16 +296,17 @@ const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
                 src={img}
                 alt={`Thumbnail ${i + 1}`}
                 fill
+                sizes="64px"
                 className="object-cover"
                 loading="lazy"
-                quality={60}
+                quality={50}
               />
             </button>
           ))}
         </div>
       )}
 
-      {/* Zoom Modal */}
+      {/* Zoom Modal - Fixed aspect ratio warning */}
       {isZoomed && (
         <div
           className={clsx(
@@ -279,7 +327,7 @@ const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
           >
             <button
               onClick={closeZoom}
-              className="absolute -top-12 right-0 text-white text-3xl cursor-pointer hover:bg-white/20 rounded-full p-2 transition-all duration-200 ease-in-out"
+              className="absolute -top-12 right-0 text-white text-3xl cursor-pointer hover:bg-white/20 rounded-full p-2 transition-all duration-200 ease-in-out z-30"
               aria-label="Close zoom"
             >
               <X className="w-8 h-8" />
@@ -292,7 +340,7 @@ const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
                     e.stopPropagation();
                     prevZoomImage();
                   }}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-white cursor-pointer hover:bg-white/20 rounded-full p-3 transition-all duration-200 ease-in-out"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-white cursor-pointer hover:bg-white/20 rounded-full p-3 transition-all duration-200 ease-in-out z-30"
                   aria-label="Previous image"
                 >
                   <ChevronLeft className="w-8 h-8" />
@@ -302,26 +350,30 @@ const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
                     e.stopPropagation();
                     nextZoomImage();
                   }}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-white cursor-pointer hover:bg-white/20 rounded-full p-3 transition-all duration-200 ease-in-out"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-white cursor-pointer hover:bg-white/20 rounded-full p-3 transition-all duration-200 ease-in-out z-30"
                   aria-label="Next image"
                 >
                   <ChevronRight className="w-8 h-8" />
                 </button>
 
-                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/70 text-white px-4 py-2 rounded-full">
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/70 text-white px-4 py-2 rounded-full z-30">
                   {zoomIndex + 1} / {images.length}
                 </div>
               </>
             )}
 
-            <Image
-              src={images[zoomIndex]}
-              alt="Zoomed Gallery"
-              width={1200}
-              height={800}
-              className="object-contain max-w-[90vw] max-h-[80vh] rounded-lg"
-              priority
-            />
+            <div className="relative w-full max-w-[90vw] max-h-[80vh]">
+              <Image
+                src={images[zoomIndex]}
+                alt={`Zoomed gallery image ${zoomIndex + 1}`}
+                width={1200}
+                height={800}
+                sizes="90vw"
+                className="w-auto h-auto max-w-full max-h-[80vh] object-contain rounded-lg"
+                style={{ width: 'auto', height: 'auto' }}
+                priority
+              />
+            </div>
           </div>
         </div>
       )}
