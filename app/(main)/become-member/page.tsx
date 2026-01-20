@@ -1,7 +1,7 @@
-import img from "@/public/assets/member/become-member.svg";
-import TermsAndConditions from "./_components/TermsAndConditions";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import img from "@/public/assets/member/become-member.svg";
+import Link from "next/link";
+import TermsAndConditions from "./_components/TermsAndConditions";
 
 const SolenneMembership = () => {
   return (
@@ -33,7 +33,7 @@ const SolenneMembership = () => {
             <div className="space-y-4">
               <p className="text-center lg:text-lg leading-relaxed text-gray-300">
                 {
-                  "Preferred rates across Dubai's most considered wellness, beauty and lifestyle destinations."
+                  "Preferred rates across Dubai's most considered wellness and lifestyle destinations."
                 }
               </p>
 

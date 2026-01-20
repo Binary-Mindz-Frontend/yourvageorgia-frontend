@@ -19,6 +19,7 @@ import PartnerCard from "./PartnerCard";
 interface AppliedFilters {
   locations: string[];
   activities: string[];
+  gender: 'all' | 'women' | 'mixed';
 }
 
 interface NetworkFilterProps {
@@ -59,6 +60,7 @@ const NetworkFilter = ({
   const [appliedFilters, setAppliedFilters] = useState<AppliedFilters>({
     locations: [],
     activities: [],
+    gender: 'all',
   });
   const [activeFilter, setActiveFilter] = useState<string>(initialFilter);
 
@@ -67,7 +69,7 @@ const NetworkFilter = ({
   const searchQuery = searchParams.get("search") || initialSearchQuery;
 
   const appliedFiltersKey = useMemo(
-    () => `${appliedFilters.locations.join(',')}-${appliedFilters.activities.join(',')}`,
+    () => `${appliedFilters.locations.join(',')}-${appliedFilters.activities.join(',')}-${appliedFilters.gender}`,
     [appliedFilters]
   );
 
@@ -97,6 +99,7 @@ const NetworkFilter = ({
         category: filter === "All" ? undefined : filter,
         area: filters.locations.length > 0 ? filters.locations : undefined,
         activity: filters.activities.length > 0 ? filters.activities : undefined,
+        womenOnly: filters.gender === 'women' ? true : filters.gender === 'mixed' ? false : undefined,
       });
 
       if (controller.signal.aborted) return;
@@ -170,7 +173,7 @@ const NetworkFilter = ({
     };
   }, [currentPage]);
 
-  // Handle filter changes (locations/activities)
+  // Handle filter changes (locations/activities/gender)
   useEffect(() => {
     // Skip if it's the first render and we should use initial data
     if (shouldUseInitialData.current) return;

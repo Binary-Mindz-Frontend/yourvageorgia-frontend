@@ -252,6 +252,7 @@ const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
                 className="object-cover"
                 loading="lazy"
                 quality={60}
+                sizes="(max-width: 768px) 100vw, 800px"
               />
             </button>
           ))}

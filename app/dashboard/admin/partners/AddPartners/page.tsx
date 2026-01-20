@@ -53,6 +53,7 @@ interface FormData {
   activity: string[];
   isFeatured: boolean;
   isFeaturedMap: boolean;
+  womenOnly: boolean;
   offers: Offer[];
   about: string;
   terms: string[];
@@ -106,6 +107,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
       activity: [],
       isFeatured: false,
       isFeaturedMap: false,
+      womenOnly: false,
       offers: [{ title: "", percentage: "", description: "", validUntil: "" }],
       about: "",
       terms: [""],
@@ -184,6 +186,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
         setValue("activity", partner.activity || []);
         setValue("isFeatured", partner.isFeatured === true || partner.isFeatured === "true");
         setValue("isFeaturedMap", partner.isFeaturedMap === true || partner.isFeaturedMap === "true");
+        setValue("womenOnly", partner.womenOnly === true || partner.womenOnly === "true");
         setValue("about", partner.about || "");
         setValue("terms", partner.terms?.length ? partner.terms : [""]);
         setValue(
@@ -370,6 +373,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
         logo: logoUrl,
         isFeatured: data.isFeatured,
         isFeaturedMap: data.isFeaturedMap,
+        womenOnly: data.womenOnly,
         offer: data.offers.map(o => ({
           title: o.title,
           description: o.description,
@@ -1061,6 +1065,24 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
           />
           <Label className="text-white mb-1">isFeaturedMap</Label>
         </div>
+
+        {/* WOMAN ONLY CHECKBOX */}
+        <div className="flex gap-3 items-center">
+          <Controller
+            name="womenOnly"
+            control={control}
+            render={({ field }) => (
+              <input
+                type="checkbox"
+                checked={field.value ?? false}
+                onChange={(e) => field.onChange(e.target.checked)}
+                className="w-4 h-4"
+              />
+            )}
+          />
+          <Label className="text-white mb-1">Woman Only</Label>
+        </div>
+
         {/* BUTTONS */}
         <div className="flex gap-3">
           <Button
