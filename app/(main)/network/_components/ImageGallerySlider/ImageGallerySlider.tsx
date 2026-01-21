@@ -27,7 +27,7 @@ const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
     setTimeout(() => {
       setIndex(newIndex);
       setFade(false);
-      // setIsLoading(true);
+      setIsLoading(true);
     }, 180);
   }, []);
 
@@ -94,7 +94,7 @@ const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
   // Reset on images change
   useEffect(() => {
     setIndex(0);
-    // setIsLoading(true);
+    setIsLoading(true);
   }, [images]);
 
   // Touch handlers for swipe gestures (main slider)
