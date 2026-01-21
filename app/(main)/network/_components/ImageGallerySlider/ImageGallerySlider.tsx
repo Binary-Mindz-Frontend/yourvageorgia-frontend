@@ -27,7 +27,7 @@ const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
     setTimeout(() => {
       setIndex(newIndex);
       setFade(false);
-      setIsLoading(true);
+      // setIsLoading(true);
     }, 180);
   }, []);
 
@@ -94,7 +94,7 @@ const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
   // Reset on images change
   useEffect(() => {
     setIndex(0);
-    setIsLoading(true);
+    // setIsLoading(true);
   }, [images]);
 
   // Touch handlers for swipe gestures (main slider)
@@ -175,12 +175,14 @@ const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
             src={images[index]}
             alt="Gallery"
             fill
-            sizes="(max-width: 768px) 100vw, 800px"
+            // sizes="(max-width: 768px) 100vw, 800px"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 800px"
             className="object-cover cursor-pointer hover:scale-105 transition-transform duration-300 ease-in-out"
             onClick={() => openZoom(index)}
             onLoad={() => setIsLoading(false)}
-            loading="eager"
-            quality={75}
+            // loading="eager"
+            loading={index === 0 ? "eager" : "lazy"}
+            quality={index === 0 ? 80 : 70}
           />
         </div>
 

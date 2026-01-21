@@ -40,6 +40,7 @@ export interface IGetPartnerFilters {
   activity?: string | string[];
   area?: string | string[];
   womenOnly?: boolean;
+  mixed?: boolean;
 }
 
 export interface IGetAllPartnersResponse {
@@ -93,6 +94,7 @@ export const getPartners = async (
       },
     });
     const json = await res.json();
+
 
     if (!res.ok) {
       return { error: json.message || "Failed to fetch partners" };
@@ -150,6 +152,10 @@ export const getPartnerFiltered = async (
     );
 
     const json = await res.json();
+
+    console.log(json);
+    console.log(filters);
+    console.log(url);
 
     if (!res.ok) return { error: json.message || "Failed to fetch" };
 

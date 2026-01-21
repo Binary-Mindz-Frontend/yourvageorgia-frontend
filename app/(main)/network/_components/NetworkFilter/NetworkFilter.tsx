@@ -99,7 +99,8 @@ const NetworkFilter = ({
         category: filter === "All" ? undefined : filter,
         area: filters.locations.length > 0 ? filters.locations : undefined,
         activity: filters.activities.length > 0 ? filters.activities : undefined,
-        womenOnly: filters.gender === 'women' ? true : filters.gender === 'mixed' ? false : undefined,
+        womenOnly: filters.gender === 'women' ? true : undefined,
+        mixed: filters.gender === 'mixed' ? true : undefined,
       });
 
       if (controller.signal.aborted) return;

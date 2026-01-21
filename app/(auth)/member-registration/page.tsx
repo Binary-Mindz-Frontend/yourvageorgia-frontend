@@ -21,7 +21,7 @@ const MembershipRegister = () => {
     password: "",
     confirmPassword: "",
     agreeTerms: false,
-    confirmEligibility: false,
+    // confirmEligibility: false,
     accessCode: "",
   });
 
@@ -58,8 +58,8 @@ const MembershipRegister = () => {
       return;
     }
 
-    if (!formData.agreeTerms || !formData.confirmEligibility) {
-      setApiError("You must accept all required conditions");
+    if (!formData.agreeTerms) {
+      setApiError("You must agree to the Terms & Conditions.");
       return;
     }
 
@@ -235,7 +235,7 @@ const MembershipRegister = () => {
           {/* Access Code */}
           <div>
             <Input
-              placeholder="Access code*"
+              placeholder="Code*"
               name="accessCode"
               // required
               value={formData.accessCode}
@@ -269,7 +269,7 @@ const MembershipRegister = () => {
               </label>
             </div>
 
-            <div className="flex items-center gap-3">
+            {/* <div className="flex items-center gap-3">
               <Checkbox
                 id="confirmEligibility"
                 checked={formData.confirmEligibility}
@@ -284,7 +284,7 @@ const MembershipRegister = () => {
                 Solenne is a women’s-only membership. Please confirm your
                 eligibility.
               </label>
-            </div>
+            </div> */}
           </div>
 
           {/* Submit */}
