@@ -52,7 +52,7 @@ export function FilterDrawer({
     return ["ALL", ...allActivities];
   }, [allActivities]);
 
-  const genderOptions = ["ALL", "Women Only", "Mixed"];
+  const genderOptions = ["ALL", "Women-only", "Mixed"];
 
   // Fetch all areas and activities
   useEffect(() => {
@@ -103,7 +103,7 @@ export function FilterDrawer({
   const handleGenderToggle = (gender: string) => {
     if (gender === "ALL") {
       setSelectedGender('all');
-    } else if (gender === "Women Only") {
+    } else if (gender === "Women-only") {
       setSelectedGender('women');
     } else if (gender === "Mixed") {
       setSelectedGender('mixed');
@@ -247,10 +247,9 @@ export function FilterDrawer({
                     <button
                       key={gender}
                       onClick={() => handleGenderToggle(gender)}
-                      className={`block cursor-pointer w-full text-left px-4 py-3 text-sm font-light tracking-wide transition-colors ${
-                        (gender === "ALL" && selectedGender === 'all') ||
-                        (gender === "Women Only" && selectedGender === 'women') ||
-                        (gender === "Mixed" && selectedGender === 'mixed')
+                      className={`block cursor-pointer w-full text-left px-4 py-3 text-sm font-light tracking-wide transition-colors ${(gender === "ALL" && selectedGender === 'all') ||
+                          (gender === "Women-only" && selectedGender === 'women') ||
+                          (gender === "Mixed" && selectedGender === 'mixed')
                           ? "bg-[#73737366] text-white"
                           : "text-foreground hover:bg-accent/10"
                         }`}
