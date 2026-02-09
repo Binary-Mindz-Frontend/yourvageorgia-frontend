@@ -49,7 +49,7 @@ export default function PartnerDetailsModal({
 
   return (
     <div
-      className={`fixed inset-0 z-60 bg-black min-h-screen w-full overflow-y-auto transition-all duration-500 ease-in-out ${modalVisible ? "opacity-100 scale-100" : "opacity-0 scale-95"
+      className={`fixed inset-0 z-60 bg-black min-h-dvh h-dvh w-full overflow-y-auto transition-all duration-500 ease-in-out ${modalVisible ? "opacity-100 scale-100" : "opacity-0 scale-95"
         }`}
     >
       <div className="container mx-auto px-4 lg:px-0 py-10">
