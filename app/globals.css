@@ -164,3 +164,9 @@ input:focus {
 .overflow-y-auto {
   overscroll-behavior: contain;
 }
+
+input,
+input[type="search"],
+textarea {
+  font-size: 16px;
+}
