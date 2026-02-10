@@ -1,44 +1,151 @@
 import clsx from "clsx";
-import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Maximize2, Minimize2, X } from "lucide-react";
 import Image, { StaticImageData } from "next/image";
-import { memo, useCallback, useEffect, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 interface ImageGallerySliderProps {
   images: (string | StaticImageData)[];
 }
 
+// Tiny dark SVG placeholder for blur effect
+const BLUR_PLACEHOLDER =
+  "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMWExYTFhIi8+PC9zdmc+";
+
 const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
   const [index, setIndex] = useState(0);
   const [fade, setFade] = useState(false);
+  const [slideDirection, setSlideDirection] = useState<'left' | 'right' | null>(null);
   const [isZoomed, setIsZoomed] = useState(false);
   const [zoomIndex, setZoomIndex] = useState(0);
   const [zoomVisible, setZoomVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [loadingProgress, setLoadingProgress] = useState(0);
+
+  // Refs
+  const preloadedRef = useRef<Set<string>>(new Set());
+  const fullscreenRef = useRef<HTMLDivElement>(null);
+  const loadingTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Detect mobile viewport
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 1024);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Check for slow connection (2g/3g)
+  const connectionType = useMemo(() => {
+    if (typeof navigator === 'undefined') return 'fast';
+    const conn = (navigator as any).connection;
+    if (!conn) return 'fast';
+    if (conn.saveData || ['slow-2g', '2g'].includes(conn.effectiveType)) return 'slow';
+    if (conn.effectiveType === '3g') return '3g';
+    return 'fast';
+  }, []);
+
+  const isSlowConnection = connectionType === 'slow';
+
+  // Get adaptive quality based on connection
+  const getQuality = useCallback((base: number) => {
+    if (connectionType === 'slow') return Math.max(base - 30, 30);
+    if (connectionType === '3g') return Math.max(base - 15, 40);
+    return base;
+  }, [connectionType]);
+
+  // Simulated progress bar for slow networks
+  useEffect(() => {
+    if (isLoading && (connectionType === '3g' || connectionType === 'slow')) {
+      setLoadingProgress(0);
+      loadingTimerRef.current = setInterval(() => {
+        setLoadingProgress(prev => {
+          // Asymptotically approach 90% — never hits 100% until actually loaded
+          if (prev >= 90) return prev;
+          return prev + (90 - prev) * 0.08;
+        });
+      }, 100);
+    } else {
+      setLoadingProgress(100);
+      if (loadingTimerRef.current) {
+        clearInterval(loadingTimerRef.current);
+        loadingTimerRef.current = null;
+      }
+    }
+    return () => {
+      if (loadingTimerRef.current) {
+        clearInterval(loadingTimerRef.current);
+      }
+    };
+  }, [isLoading, connectionType]);
 
   // Touch swipe state
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
-
-  // Minimum swipe distance threshold (in px)
   const minSwipeDistance = 50;
 
-  const changeSlide = useCallback((newIndex: number) => {
+  // Preload via Next.js optimizer
+  const preloadImage = useCallback((src: string | StaticImageData) => {
+    if (isSlowConnection) return;
+    const url = typeof src === "string" ? src : (src as StaticImageData).src;
+    if (!url || preloadedRef.current.has(url)) return;
+    preloadedRef.current.add(url);
+
+    const doPreload = () => {
+      const width = isMobile ? 640 : 828;
+      const quality = getQuality(isMobile ? 60 : 75);
+      const optimizedUrl = `/_next/image?url=${encodeURIComponent(url)}&w=${width}&q=${quality}`;
+      const img = new window.Image();
+      img.fetchPriority = 'low';
+      img.src = optimizedUrl;
+    };
+
+    if ('requestIdleCallback' in window) {
+      (window as any).requestIdleCallback(doPreload, { timeout: 500 });
+    } else {
+      setTimeout(doPreload, 200);
+    }
+  }, [isSlowConnection, isMobile, getQuality]);
+
+  // Preload adjacent
+  useEffect(() => {
+    if (images.length <= 1) return;
+    const nextIdx = (index + 1) % images.length;
+    preloadImage(images[nextIdx]);
+    if (!isMobile) {
+      const prevIdx = (index - 1 + images.length) % images.length;
+      preloadImage(images[prevIdx]);
+    }
+  }, [index, images, preloadImage, isMobile]);
+
+  // Initial preload
+  useEffect(() => {
+    const count = Math.min(images.length, isMobile ? 1 : 3);
+    for (let i = 0; i < count; i++) {
+      preloadImage(images[i]);
+    }
+  }, [images, preloadImage, isMobile]);
+
+  const changeSlide = useCallback((newIndex: number, direction?: 'left' | 'right') => {
+    setSlideDirection(direction || (newIndex > index ? 'left' : 'right'));
     setFade(true);
+    setIsLoading(true);
     setTimeout(() => {
       setIndex(newIndex);
       setFade(false);
-      setIsLoading(true);
-    }, 180);
-  }, []);
+      setSlideDirection(null);
+    }, 120);
+  }, [index]);
 
   const prevSlide = useCallback(() => {
     const newIndex = index === 0 ? images.length - 1 : index - 1;
-    changeSlide(newIndex);
+    changeSlide(newIndex, 'right');
   }, [index, images.length, changeSlide]);
 
   const nextSlide = useCallback(() => {
     const newIndex = index === images.length - 1 ? 0 : index + 1;
-    changeSlide(newIndex);
+    changeSlide(newIndex, 'left');
   }, [index, images.length, changeSlide]);
 
   const openZoom = useCallback((idx: number) => {
@@ -53,20 +160,103 @@ const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
   }, []);
 
   const prevZoomImage = useCallback(() => {
-    const newIndex = zoomIndex === 0 ? images.length - 1 : zoomIndex - 1;
-    setZoomIndex(newIndex);
-  }, [zoomIndex, images.length]);
+    setZoomIndex(prev => prev === 0 ? images.length - 1 : prev - 1);
+  }, [images.length]);
 
   const nextZoomImage = useCallback(() => {
-    const newIndex = zoomIndex === images.length - 1 ? 0 : zoomIndex + 1;
-    setZoomIndex(newIndex);
-  }, [zoomIndex, images.length]);
+    setZoomIndex(prev => prev === images.length - 1 ? 0 : prev + 1);
+  }, [images.length]);
+
+  // Fullscreen landscape viewer
+  const enterFullscreen = useCallback(async () => {
+    const el = fullscreenRef.current;
+    if (!el) return;
+
+    try {
+      if (el.requestFullscreen) {
+        await el.requestFullscreen();
+      } else if ((el as any).webkitRequestFullscreen) {
+        await (el as any).webkitRequestFullscreen();
+      }
+
+      // Try to lock to landscape on mobile
+      try {
+        const orientation = (screen as any).orientation;
+        if (orientation?.lock) {
+          await orientation.lock('landscape');
+        }
+      } catch {
+        // Orientation lock may not be supported — that's fine
+      }
+
+      setIsFullscreen(true);
+    } catch {
+      // Fullscreen may be blocked — fall back to zoom
+      openZoom(index);
+    }
+  }, [index, openZoom]);
+
+  const exitFullscreen = useCallback(async () => {
+    try {
+      if (document.fullscreenElement) {
+        await document.exitFullscreen();
+      } else if ((document as any).webkitFullscreenElement) {
+        await (document as any).webkitExitFullscreen();
+      }
+    } catch {
+      // ignore
+    }
+
+    // Unlock orientation
+    try {
+      const orientation = (screen as any).orientation;
+      if (orientation?.unlock) {
+        orientation.unlock();
+      }
+    } catch {
+      // ignore
+    }
+
+    setIsFullscreen(false);
+  }, []);
+
+  // Listen for fullscreen exit (e.g., swipe down, back button)
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      if (!document.fullscreenElement && !(document as any).webkitFullscreenElement) {
+        setIsFullscreen(false);
+        try {
+          const orientation = (screen as any).orientation;
+          if (orientation?.unlock) orientation.unlock();
+        } catch { /* ignore */ }
+      }
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+    };
+  }, []);
 
   // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (!isZoomed) return;
+      if (isFullscreen) {
+        if (e.key === 'Escape') {
+          exitFullscreen();
+        } else if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          prevSlide();
+        } else if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          nextSlide();
+        }
+        return;
+      }
 
+      if (!isZoomed) return;
       if (e.key === 'Escape') {
         closeZoom();
       } else if (e.key === 'ArrowLeft') {
@@ -78,7 +268,7 @@ const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
       }
     };
 
-    if (isZoomed) {
+    if (isZoomed || isFullscreen) {
       document.body.style.overflow = 'hidden';
       window.addEventListener('keydown', handleKeyDown);
     } else {
@@ -89,15 +279,16 @@ const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
       document.body.style.overflow = 'unset';
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isZoomed, closeZoom, prevZoomImage, nextZoomImage]);
+  }, [isZoomed, isFullscreen, closeZoom, exitFullscreen, prevZoomImage, nextZoomImage, prevSlide, nextSlide]);
 
   // Reset on images change
   useEffect(() => {
     setIndex(0);
     setIsLoading(true);
+    preloadedRef.current.clear();
   }, [images]);
 
-  // Touch handlers for swipe gestures (main slider)
+  // Touch handlers for main slider
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     setTouchEnd(null);
     setTouchStart(e.targetTouches[0].clientX);
@@ -109,17 +300,9 @@ const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
 
   const handleTouchEnd = useCallback(() => {
     if (!touchStart || !touchEnd) return;
-
     const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > minSwipeDistance;
-    const isRightSwipe = distance < -minSwipeDistance;
-
-    if (isLeftSwipe) {
-      nextSlide();
-    } else if (isRightSwipe) {
-      prevSlide();
-    }
-
+    if (distance > minSwipeDistance) nextSlide();
+    else if (distance < -minSwipeDistance) prevSlide();
     setTouchStart(null);
     setTouchEnd(null);
   }, [touchStart, touchEnd, minSwipeDistance, nextSlide, prevSlide]);
@@ -136,23 +319,112 @@ const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
 
   const handleZoomTouchEnd = useCallback(() => {
     if (!touchStart || !touchEnd) return;
-
     const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > minSwipeDistance;
-    const isRightSwipe = distance < -minSwipeDistance;
-
-    if (isLeftSwipe) {
-      nextZoomImage();
-    } else if (isRightSwipe) {
-      prevZoomImage();
-    }
-
+    if (distance > minSwipeDistance) nextZoomImage();
+    else if (distance < -minSwipeDistance) prevZoomImage();
     setTouchStart(null);
     setTouchEnd(null);
   }, [touchStart, touchEnd, minSwipeDistance, nextZoomImage, prevZoomImage]);
 
+  // Loading indicator component — adapts to connection speed
+  const LoadingOverlay = useMemo(() => {
+    if (!isLoading) return null;
+
+    const showProgress = connectionType === '3g' || connectionType === 'slow';
+
+    return (
+      <div className="absolute inset-0 z-10 flex flex-col items-center justify-center">
+        {/* Gradient shimmer */}
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.03] to-transparent animate-[shimmer_1.5s_ease-in-out_infinite]" />
+
+        {showProgress && (
+          <div className="z-20 flex flex-col items-center gap-2">
+            {/* Progress bar */}
+            <div className="w-32 h-1 bg-white/10 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-white/40 rounded-full transition-all duration-300 ease-out"
+                style={{ width: `${loadingProgress}%` }}
+              />
+            </div>
+            <span className="text-white/40 text-xs">Loading image...</span>
+          </div>
+        )}
+      </div>
+    );
+  }, [isLoading, connectionType, loadingProgress]);
+
   return (
-    <div>
+    <div ref={fullscreenRef} className={clsx(isFullscreen && "bg-black")}>
+      {/* Fullscreen Landscape Viewer */}
+      {isFullscreen && (
+        <div
+          className="fixed inset-0 z-[100] bg-black flex items-center justify-center touch-pan-y"
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+        >
+          {/* Exit fullscreen button */}
+          <button
+            onClick={exitFullscreen}
+            className="absolute top-4 right-4 z-[110] text-white bg-black/50 rounded-full p-2 hover:bg-white/20 transition-all"
+            aria-label="Exit fullscreen"
+          >
+            <Minimize2 className="w-6 h-6" />
+          </button>
+
+          {/* Fullscreen image */}
+          <div className="relative w-full h-full">
+            <Image
+              src={images[index]}
+              alt="Gallery fullscreen"
+              fill
+              sizes="100vw"
+              className="object-contain"
+              priority
+              quality={getQuality(80)}
+              decoding="async"
+            />
+          </div>
+
+          {/* Fullscreen navigation */}
+          {images.length > 1 && (
+            <>
+              <button
+                onClick={prevSlide}
+                className="absolute left-3 top-1/2 -translate-y-1/2 z-[110] bg-black/40 rounded-full p-2 hover:bg-white/20 transition-all"
+                aria-label="Previous image"
+              >
+                <ChevronLeft className="w-7 h-7 text-white" />
+              </button>
+              <button
+                onClick={nextSlide}
+                className="absolute right-3 top-1/2 -translate-y-1/2 z-[110] bg-black/40 rounded-full p-2 hover:bg-white/20 transition-all"
+                aria-label="Next image"
+              >
+                <ChevronRight className="w-7 h-7 text-white" />
+              </button>
+
+              {/* Dot indicators */}
+              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[110] flex gap-2">
+                {images.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => changeSlide(i)}
+                    className={clsx(
+                      "rounded-full transition-all duration-200",
+                      i === index
+                        ? "w-6 h-2 bg-white"
+                        : "w-2 h-2 bg-white/40 hover:bg-white/60"
+                    )}
+                    aria-label={`Go to image ${i + 1}`}
+                  />
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      )}
+
       {/* Main Image */}
       <div
         className="relative w-full h-60.5 lg:h-108.75 overflow-hidden rounded-xl bg-gray-900/10 touch-pan-y"
@@ -160,45 +432,74 @@ const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
-        {isLoading && (
-          <div className="absolute inset-0 z-10 flex items-center justify-center bg-transparent">
-            <div className="w-8 h-8 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-          </div>
-        )}
+        {LoadingOverlay}
         <div
           className={clsx(
-            "relative w-full h-full transition-opacity duration-300 ease-in-out",
-            fade ? "opacity-0" : "opacity-100"
+            "relative w-full h-full ease-in-out",
+            isMobile
+              ? "transition-transform duration-200"
+              : "transition-opacity duration-200",
+            fade && isMobile && slideDirection === 'left' && "-translate-x-full",
+            fade && isMobile && slideDirection === 'right' && "translate-x-full",
+            !fade && isMobile && "translate-x-0",
+            fade && !isMobile && "opacity-0",
+            !fade && !isMobile && "opacity-100"
           )}
+          style={{ willChange: 'transform, opacity' }}
         >
           <Image
             src={images[index]}
             alt="Gallery"
             fill
-            // sizes="(max-width: 768px) 100vw, 800px"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 800px"
             className="object-cover cursor-pointer hover:scale-105 transition-transform duration-300 ease-in-out"
-            onClick={() => openZoom(index)}
+            onClick={() => isMobile ? enterFullscreen() : openZoom(index)}
             onLoad={() => setIsLoading(false)}
-            // loading="eager"
+            priority={index === 0}
             loading={index === 0 ? "eager" : "lazy"}
-            quality={index === 0 ? 80 : 70}
+            quality={getQuality(isMobile ? 60 : 75)}
+            placeholder="blur"
+            blurDataURL={BLUR_PLACEHOLDER}
+            decoding="async"
           />
         </div>
 
-        {/* Mobile Arrows */}
+        {/* Hidden preload — desktop only */}
+        {images.length > 1 && !isMobile && !isSlowConnection && (
+          <div className="hidden" aria-hidden="true">
+            <Image
+              src={images[(index + 1) % images.length]}
+              alt=""
+              width={1}
+              height={1}
+              quality={getQuality(75)}
+              loading="eager"
+            />
+          </div>
+        )}
+
+        {/* Fullscreen button — mobile */}
+        <button
+          onClick={enterFullscreen}
+          className="absolute top-3 right-3 z-20 lg:hidden bg-black/40 rounded-full p-2 hover:bg-white/20 transition-all active:scale-95"
+          aria-label="View fullscreen"
+        >
+          <Maximize2 className="w-5 h-5 text-white" />
+        </button>
+
+        {/* Navigation arrows — mobile */}
         {images.length > 1 && (
           <>
             <button
               onClick={prevSlide}
-              className="rounded-full cursor-pointer hover:bg-white/20 transition-all duration-200 ease-in-out absolute left-3 top-1/2 -translate-y-1/2 lg:hidden z-20 bg-black/30 p-1"
+              className="rounded-full cursor-pointer hover:bg-white/20 transition-all duration-200 ease-in-out absolute left-3 top-1/2 -translate-y-1/2 lg:hidden z-20 bg-black/30 p-1 active:scale-95"
               aria-label="Previous image"
             >
               <ChevronLeft className="w-7 h-7" />
             </button>
             <button
               onClick={nextSlide}
-              className="rounded-full cursor-pointer hover:bg-white/20 transition-all duration-200 ease-in-out absolute right-3 top-1/2 -translate-y-1/2 lg:hidden z-20 bg-black/30 p-1"
+              className="rounded-full cursor-pointer hover:bg-white/20 transition-all duration-200 ease-in-out absolute right-3 top-1/2 -translate-y-1/2 lg:hidden z-20 bg-black/30 p-1 active:scale-95"
               aria-label="Next image"
             >
               <ChevronRight className="w-7 h-7" />
@@ -206,11 +507,31 @@ const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
           </>
         )}
 
-        {/* Image counter */}
+        {/* Image counter + dot indicators on mobile */}
         {images.length > 1 && (
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 text-white px-3 py-1 rounded-full text-sm">
-            {index + 1} / {images.length}
-          </div>
+          <>
+            {/* Desktop: text counter */}
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 text-white px-3 py-1 rounded-full text-sm hidden lg:block">
+              {index + 1} / {images.length}
+            </div>
+
+            {/* Mobile: dot indicators */}
+            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 lg:hidden">
+              {images.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => changeSlide(i)}
+                  className={clsx(
+                    "rounded-full transition-all duration-200",
+                    i === index
+                      ? "w-5 h-1.5 bg-white"
+                      : "w-1.5 h-1.5 bg-white/40"
+                  )}
+                  aria-label={`Go to image ${i + 1}`}
+                />
+              ))}
+            </div>
+          </>
         )}
       </div>
 
@@ -234,7 +555,7 @@ const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
         </div>
       )}
 
-      {/* Thumbnails */}
+      {/* Thumbnails — desktop only */}
       {images.length > 1 && (
         <div className="hidden lg:flex gap-2 mt-4 justify-center">
           {images.map((img, i) => (
@@ -253,15 +574,15 @@ const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
                 fill
                 className="object-cover"
                 loading="lazy"
-                quality={60}
-                sizes="(max-width: 768px) 100vw, 800px"
+                quality={40}
+                sizes="64px"
               />
             </button>
           ))}
         </div>
       )}
 
-      {/* Zoom Modal */}
+      {/* Zoom Modal — desktop */}
       {isZoomed && (
         <div
           className={clsx(
@@ -320,10 +641,12 @@ const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
             <Image
               src={images[zoomIndex]}
               alt="Zoomed Gallery"
-              width={1200}
-              height={800}
+              width={isMobile ? 600 : 1200}
+              height={isMobile ? 400 : 800}
+              sizes={isMobile ? "95vw" : "90vw"}
               className="object-contain max-w-[90vw] max-h-[80vh] rounded-lg"
               priority
+              quality={getQuality(isMobile ? 70 : 85)}
             />
           </div>
         </div>

@@ -170,3 +170,14 @@ input[type="search"],
 textarea {
   font-size: 16px;
 }
+
+/* Shimmer animation for image loading */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+
+  100% {
+    transform: translateX(100%);
+  }
+}

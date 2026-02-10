@@ -114,7 +114,10 @@ const NetworkFilter = ({
 
       setPartners(prev => {
         if (resetData) return sorted;
-        return [...prev, ...sorted];
+        // Deduplicate by _id when appending paginated results
+        const existingIds = new Set(prev.map(p => p._id));
+        const newPartners = sorted.filter((p: Partner) => !existingIds.has(p._id));
+        return [...prev, ...newPartners];
       });
 
       const meta = (result as any).meta;
@@ -311,7 +314,7 @@ const NetworkFilter = ({
         ) : (
           displayedPartners.map((partner, index) => (
             <PartnerCard
-              key={partner._id}
+              key={`${partner._id}-${index}`}
               partner={partner}
               onClick={handlePartnerClick}
               priority={index < 2}
