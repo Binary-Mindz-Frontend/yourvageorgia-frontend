@@ -20,6 +20,15 @@ const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
   const [isMobile, setIsMobile] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
+  
+  // NEW: Smart loading states
+  const [pendingIndex, setPendingIndex] = useState<number | null>(null);
+  const [imageLoadStates, setImageLoadStates] = useState<Map<number, boolean>>(new Map());
+  const pendingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  
+  // NEW: Real-time speed detection
+  const [actualSpeed, setActualSpeed] = useState<'fast' | 'medium' | 'slow'>('fast');
+  const loadTimeRef = useRef<number[]>([]);
 
   // Touch tracking refs (for performance)
   const isDraggingRef = useRef(false);
@@ -29,9 +38,6 @@ const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
 
   // Element Refs for direct manipulation
   const trackRef = useRef<HTMLDivElement>(null);
-  const prevSlideRef = useRef<HTMLDivElement>(null);
-  const currSlideRef = useRef<HTMLDivElement>(null);
-  const nextSlideRef = useRef<HTMLDivElement>(null);
 
   // Refs
   const preloadedRef = useRef<Set<string>>(new Set());
@@ -47,7 +53,7 @@ const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Check for slow connection (2g/3g)
+  // Check for slow connection (2g/3g) + real-time speed tracking
   const connectionType = useMemo(() => {
     if (typeof navigator === 'undefined') return 'fast';
     const conn = (navigator as any).connection;
@@ -57,7 +63,27 @@ const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
     return 'fast';
   }, []);
 
-  const isSlowConnection = connectionType === 'slow';
+  // Real-time speed detection based on actual image load times
+  useEffect(() => {
+    if (loadTimeRef.current.length < 2) return;
+    
+    // Calculate average load time from last 3 images
+    const recentTimes = loadTimeRef.current.slice(-3);
+    const avgTime = recentTimes.reduce((a, b) => a + b, 0) / recentTimes.length;
+    
+    // Classify speed based on actual performance
+    if (avgTime > 3000) {
+      setActualSpeed('slow');
+    } else if (avgTime > 1500) {
+      setActualSpeed('medium');
+    } else {
+      setActualSpeed('fast');
+    }
+  }, [loadTimeRef.current.length]);
+
+  // Combined slow check: either API says slow OR actual speed is slow
+  const isSlowConnection = connectionType === 'slow' || actualSpeed === 'slow';
+  const shouldWaitForLoad = actualSpeed === 'slow' || actualSpeed === 'medium' || connectionType === 'slow' || connectionType === '3g';
 
   // Get adaptive quality based on connection
   const getQuality = useCallback((base: number) => {
@@ -68,7 +94,7 @@ const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
 
   // Simulated progress bar for all networks (consistent UX)
   useEffect(() => {
-    if (isLoading) {
+    if (isLoading || pendingIndex !== null) {
       setLoadingProgress(0);
       loadingTimerRef.current = setInterval(() => {
         setLoadingProgress(prev => {
@@ -88,11 +114,45 @@ const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
         clearInterval(loadingTimerRef.current);
       }
     };
-  }, [isLoading]);
+  }, [isLoading, pendingIndex]);
 
   const minSwipeDistance = 50;
 
-  // Preload logic (kept same as before)
+  // NEW: Preload with callback for smart navigation
+  const preloadImageWithCallback = useCallback((src: string | StaticImageData, targetIndex: number, onComplete: () => void) => {
+    const url = typeof src === "string" ? src : (src as StaticImageData).src;
+    if (!url) {
+      onComplete();
+      return;
+    }
+
+    // Check if already loaded
+    if (imageLoadStates.get(targetIndex)) {
+      onComplete();
+      return;
+    }
+
+    const width = isMobile ? 640 : 828;
+    const quality = getQuality(isMobile ? 60 : 75);
+    const optimizedUrl = `/_next/image?url=${encodeURIComponent(url)}&w=${width}&q=${quality}`;
+    
+    const img = new window.Image();
+    img.fetchPriority = 'high'; // Changed to high for navigation
+    
+    img.onload = () => {
+      setImageLoadStates(prev => new Map(prev).set(targetIndex, true));
+      onComplete();
+    };
+    
+    img.onerror = () => {
+      // Still complete on error to not block navigation
+      onComplete();
+    };
+    
+    img.src = optimizedUrl;
+  }, [isMobile, getQuality, imageLoadStates]);
+
+  // Preload logic (background preloading)
   const preloadImage = useCallback((src: string | StaticImageData) => {
     if (isSlowConnection) return;
     const url = typeof src === "string" ? src : (src as StaticImageData).src;
@@ -132,66 +192,151 @@ const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
     }
   }, [images, preloadImage, isMobile]);
 
+  // Haptic feedback helper
+  const triggerHaptic = useCallback(() => {
+    if ('vibrate' in navigator) {
+      navigator.vibrate(10);
+    }
+  }, []);
 
-  // Helper to trigger slide animation
-  // Helper to trigger slide animation
+  // Helper to trigger slide animation - Clean slide with subtle fade
   const animateToSlide = useCallback((direction: 'next' | 'prev') => {
     if (isAnimating || !trackRef.current) return;
     const width = trackRef.current.clientWidth;
     const targetOffset = direction === 'next' ? -width : width;
 
     setIsAnimating(true);
+    triggerHaptic();
 
-    // Apply Main Track Animation
+    // Apply Main Track Animation with fade
     if (trackRef.current) {
-      trackRef.current.style.transition = 'transform 300ms ease-out';
+      trackRef.current.style.transition = 'transform 300ms ease-out, opacity 150ms ease-out';
       trackRef.current.style.transform = `translateX(${targetOffset}px)`;
+      trackRef.current.style.opacity = '0.7';
     }
-
-    // Apply Parallax Animation
-    const parallaxTarget = targetOffset * 0.3;
-    [prevSlideRef.current, currSlideRef.current, nextSlideRef.current].forEach(el => {
-      if (el) {
-        el.style.transition = 'transform 300ms ease-out';
-        el.style.transform = `translateX(${parallaxTarget}px)`;
-      }
-    });
 
     setTimeout(() => {
       setIndex((prev) => {
         if (direction === 'next') return prev === images.length - 1 ? 0 : prev + 1;
         return prev === 0 ? images.length - 1 : prev - 1;
       });
-      setIsAnimating(false);
 
-      // Reset styles
+      // Reset instantly then fade in
       if (trackRef.current) {
         trackRef.current.style.transition = 'none';
         trackRef.current.style.transform = 'translateX(0px)';
+        trackRef.current.style.opacity = '1';
       }
-      [prevSlideRef.current, currSlideRef.current, nextSlideRef.current].forEach(el => {
-        if (el) {
-          el.style.transition = 'none';
-          el.style.transform = 'translateX(0px)';
-        }
-      });
+
+      setIsAnimating(false);
       currentTranslateRef.current = 0;
     }, 300);
-  }, [isAnimating, images.length]);
+  }, [isAnimating, images.length, triggerHaptic]);
+
+  // NEW: Smart navigation with loading awareness
+  const navigateToSlide = useCallback((targetIndex: number, direction: 'next' | 'prev') => {
+    // Clear any pending timeout
+    if (pendingTimeoutRef.current) {
+      clearTimeout(pendingTimeoutRef.current);
+      pendingTimeoutRef.current = null;
+    }
+
+    const isLoaded = imageLoadStates.get(targetIndex);
+    
+    // Fast connection/already loaded OR user preference to not wait - instant navigate
+    if (isLoaded || (!shouldWaitForLoad && connectionType === 'fast')) {
+      animateToSlide(direction);
+      return;
+    }
+
+    // Slow connection/medium speed and not loaded - show pending state
+    setPendingIndex(targetIndex);
+    setIsLoading(true);
+    
+    const startTime = performance.now();
+    
+    // Preload with callback
+    preloadImageWithCallback(images[targetIndex], targetIndex, () => {
+      const loadTime = performance.now() - startTime;
+      
+      // Track load time for speed detection
+      loadTimeRef.current.push(loadTime);
+      if (loadTimeRef.current.length > 5) {
+        loadTimeRef.current.shift(); // Keep only last 5
+      }
+      
+      setPendingIndex(null);
+      setIsLoading(false);
+      animateToSlide(direction);
+    });
+    
+    // Adaptive fallback timeout based on detected speed
+    const timeoutDuration = actualSpeed === 'slow' ? 5000 : actualSpeed === 'medium' ? 3000 : 2000;
+    
+    pendingTimeoutRef.current = setTimeout(() => {
+      if (pendingIndex === targetIndex) {
+        setPendingIndex(null);
+        setIsLoading(false);
+        animateToSlide(direction);
+      }
+    }, timeoutDuration);
+  }, [connectionType, shouldWaitForLoad, imageLoadStates, images, animateToSlide, preloadImageWithCallback, pendingIndex, actualSpeed]);
 
   const changeSlide = useCallback((newIndex: number) => {
-    setIsLoading(true);
-    setIndex(newIndex);
-  }, []);
+    if (isAnimating || pendingIndex !== null) return;
+    
+    const direction = newIndex > index ? 'next' : 'prev';
+    
+    // For direct thumbnail clicks, calculate steps and navigate
+    const steps = Math.abs(newIndex - index);
+    
+    if (steps === 1) {
+      navigateToSlide(newIndex, direction);
+    } else {
+      // For multi-step jumps, just check if loaded
+      const isLoaded = imageLoadStates.get(newIndex);
+      
+      if (isLoaded || (!shouldWaitForLoad && connectionType === 'fast')) {
+        setIsLoading(true);
+        setIndex(newIndex);
+      } else {
+        setPendingIndex(newIndex);
+        setIsLoading(true);
+        
+        const startTime = performance.now();
+        
+        preloadImageWithCallback(images[newIndex], newIndex, () => {
+          const loadTime = performance.now() - startTime;
+          loadTimeRef.current.push(loadTime);
+          if (loadTimeRef.current.length > 5) {
+            loadTimeRef.current.shift();
+          }
+          
+          setPendingIndex(null);
+          setIndex(newIndex);
+        });
+        
+        const timeoutDuration = actualSpeed === 'slow' ? 5000 : actualSpeed === 'medium' ? 3000 : 2000;
+        
+        pendingTimeoutRef.current = setTimeout(() => {
+          setPendingIndex(null);
+          setIndex(newIndex);
+        }, timeoutDuration);
+      }
+    }
+  }, [index, isAnimating, pendingIndex, navigateToSlide, connectionType, shouldWaitForLoad, imageLoadStates, images, preloadImageWithCallback, actualSpeed]);
 
   const prevSlide = useCallback(() => {
-    animateToSlide('prev');
-  }, [animateToSlide]);
+    if (isAnimating || pendingIndex !== null) return;
+    const targetIndex = index === 0 ? images.length - 1 : index - 1;
+    navigateToSlide(targetIndex, 'prev');
+  }, [index, images.length, isAnimating, pendingIndex, navigateToSlide]);
 
   const nextSlide = useCallback(() => {
-    animateToSlide('next');
-  }, [animateToSlide]);
-
+    if (isAnimating || pendingIndex !== null) return;
+    const targetIndex = index === images.length - 1 ? 0 : index + 1;
+    navigateToSlide(targetIndex, 'next');
+  }, [index, images.length, isAnimating, pendingIndex, navigateToSlide]);
 
   // Zoom methods
   const openZoom = useCallback((idx: number) => {
@@ -290,13 +435,28 @@ const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
   useEffect(() => {
     setIndex(0);
     setIsLoading(true);
+    setPendingIndex(null);
+    setImageLoadStates(new Map());
     preloadedRef.current.clear();
+    
+    if (pendingTimeoutRef.current) {
+      clearTimeout(pendingTimeoutRef.current);
+      pendingTimeoutRef.current = null;
+    }
   }, [images]);
 
+  // Cleanup pending timeout
+  useEffect(() => {
+    return () => {
+      if (pendingTimeoutRef.current) {
+        clearTimeout(pendingTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Unified Pointer (Touch + Mouse) Tracking Logic using Refs for 60fps performance
   const handlePointerDown = useCallback((e: React.PointerEvent) => {
-    if (isAnimating) return;
+    if (isAnimating || pendingIndex !== null) return;
     if (e.button !== 0) return;
 
     isDraggingRef.current = true;
@@ -310,13 +470,8 @@ const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
       trackRef.current.classList.remove('cursor-grab');
     }
 
-    // Reset parallax transitions
-    [prevSlideRef.current, currSlideRef.current, nextSlideRef.current].forEach(el => {
-      if (el) el.style.transition = 'none';
-    });
-
     (e.target as Element).setPointerCapture(e.pointerId);
-  }, [isAnimating]);
+  }, [isAnimating, pendingIndex]);
 
   const handlePointerMove = useCallback((e: React.PointerEvent) => {
     if (!isDraggingRef.current || startXRef.current === null) return;
@@ -328,12 +483,6 @@ const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
     if (trackRef.current) {
       trackRef.current.style.transform = `translateX(${diff}px)`;
     }
-
-    // Parallax Direct Update
-    const parallax = diff * 0.3;
-    if (prevSlideRef.current) prevSlideRef.current.style.transform = `translateX(${parallax}px)`;
-    if (currSlideRef.current) currSlideRef.current.style.transform = `translateX(${parallax}px)`;
-    if (nextSlideRef.current) nextSlideRef.current.style.transform = `translateX(${parallax}px)`;
   }, []);
 
   const handlePointerUp = useCallback((e: React.PointerEvent) => {
@@ -356,77 +505,84 @@ const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
     // Improved Threshold: 50px velocity-like feel or 25% width
     const threshold = Math.min(width * 0.25, 50);
 
-    let targetOffset = 0;
-    let newIndex = index;
-
     if (dragDist > threshold) {
-      targetOffset = width;
-      newIndex = index === 0 ? images.length - 1 : index - 1;
+      // Swiped right - go to previous
+      prevSlide();
     } else if (dragDist < -threshold) {
-      targetOffset = -width;
-      newIndex = index === images.length - 1 ? 0 : index + 1;
+      // Swiped left - go to next
+      nextSlide();
+    } else {
+      // Not enough swipe - snap back
+      trackRef.current.style.transition = 'transform 200ms ease-out';
+      trackRef.current.style.transform = 'translateX(0px)';
+      setTimeout(() => {
+        if (trackRef.current) {
+          trackRef.current.style.transition = 'none';
+        }
+      }, 200);
     }
 
-    // Animate to target
-    setIsAnimating(true);
+    currentTranslateRef.current = 0;
+  }, [prevSlide, nextSlide]);
 
-    // Apply transitions for smooth snap
-    trackRef.current.style.transition = 'transform 300ms ease-out';
-    trackRef.current.style.transform = `translateX(${targetOffset}px)`;
-
-    // Apply parallax snap
-    const parallaxTarget = targetOffset * 0.3;
-    [prevSlideRef.current, currSlideRef.current, nextSlideRef.current].forEach(el => {
-      if (el) {
-        el.style.transition = 'transform 300ms ease-out';
-        el.style.transform = `translateX(${parallaxTarget}px)`;
-      }
-    });
-
-    // Wait for animation to finish, then silent swap
-    setTimeout(() => {
-      if (newIndex !== index) {
-        setIndex(newIndex);
-      }
-      setIsAnimating(false);
-
-      // Reset styles silently
-      if (trackRef.current) {
-        trackRef.current.style.transition = 'none';
-        trackRef.current.style.transform = 'translateX(0px)';
-      }
-      [prevSlideRef.current, currSlideRef.current, nextSlideRef.current].forEach(el => {
-        if (el) {
-          el.style.transition = 'none';
-          el.style.transform = 'translateX(0px)';
-        }
-      });
-      currentTranslateRef.current = 0;
-    }, 300);
-  }, [index, images.length]);
-
-  // Loading Overlay
+  // NEW: Enhanced Loading Overlay with context
   const LoadingOverlay = useMemo(() => {
-    if (!isLoading) return null;
+    if (!isLoading && pendingIndex === null) return null;
+    
     return (
-      <div className="absolute inset-0 z-10 flex flex-col items-center justify-center pointer-events-none">
+      <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm pointer-events-none">
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.03] to-transparent animate-[shimmer_1.5s_ease-in-out_infinite]" />
-        <div className="z-20 flex flex-col items-center gap-2">
-          <div className="w-32 h-1 bg-white/10 rounded-full overflow-hidden">
-            <div className="h-full bg-white/40 rounded-full transition-all duration-300 ease-out" style={{ width: `${loadingProgress}%` }} />
+        <div className="z-20 flex flex-col items-center gap-3">
+          <div className="w-40 h-1.5 bg-white/10 rounded-full overflow-hidden">
+            <div 
+              className="h-full bg-white/50 rounded-full transition-all duration-300 ease-out" 
+              style={{ width: `${loadingProgress}%` }} 
+            />
           </div>
-          <span className="text-white/40 text-xs">Loading image...</span>
+          <div className="flex flex-col items-center gap-1">
+            <span className="text-white/90 text-sm font-medium">
+              {pendingIndex !== null ? 'Loading next image...' : 'Loading...'}
+            </span>
+            {actualSpeed === 'slow' && (
+              <span className="text-white/60 text-xs">Slow connection - please wait</span>
+            )}
+            {actualSpeed === 'medium' && (
+              <span className="text-white/60 text-xs">Loading optimized image</span>
+            )}
+            {connectionType === 'slow' && actualSpeed === 'fast' && (
+              <span className="text-white/60 text-xs">Detected slow network</span>
+            )}
+          </div>
         </div>
       </div>
     );
-  }, [isLoading, loadingProgress]);
+  }, [isLoading, pendingIndex, loadingProgress, actualSpeed, connectionType]);
 
   // Carousel Indices
   const prevIndex = (index - 1 + images.length) % images.length;
   const nextIndex = (index + 1) % images.length;
 
+  // Check if navigation is disabled
+  const isNavigationDisabled = isAnimating || pendingIndex !== null;
+
   return (
     <div ref={fullscreenRef} className={clsx(isFullscreen && "bg-black")}>
+      {/* Slow Connection Indicator */}
+      {(isSlowConnection || actualSpeed === 'medium') && !isFullscreen && !isZoomed && (
+        <div className="mb-2 px-3 py-1.5 bg-amber-500/10 border border-amber-500/20 rounded-lg">
+          <p className="text-amber-600 dark:text-amber-400 text-xs flex items-center gap-2">
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            {actualSpeed === 'slow' 
+              ? 'Slow connection detected - images may take longer to load'
+              : actualSpeed === 'medium'
+              ? 'Medium speed connection - optimizing image loading'
+              : 'Slow network detected'}
+          </p>
+        </div>
+      )}
+
       {/* Fullscreen Landscape Viewer */}
       {isFullscreen && (
         <div
@@ -439,6 +595,7 @@ const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
           <button
             onClick={exitFullscreen}
             className="absolute top-4 right-4 z-[110] text-white bg-black/50 rounded-full p-2 hover:bg-white/20 transition-all"
+            aria-label="Exit fullscreen"
           >
             <Minimize2 className="w-6 h-6" />
           </button>
@@ -456,10 +613,26 @@ const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
             />
           </div>
 
-          <button onClick={prevSlide} className="absolute left-3 top-1/2 -translate-y-1/2 z-[110] bg-black/40 rounded-full p-2">
+          <button 
+            onClick={prevSlide} 
+            disabled={isNavigationDisabled}
+            className={clsx(
+              "absolute left-3 top-1/2 -translate-y-1/2 z-[110] bg-black/40 rounded-full p-2 transition-all",
+              isNavigationDisabled ? "opacity-50 cursor-not-allowed" : "hover:bg-black/60"
+            )}
+            aria-label="Previous image"
+          >
             <ChevronLeft className="w-7 h-7 text-white" />
           </button>
-          <button onClick={nextSlide} className="absolute right-3 top-1/2 -translate-y-1/2 z-[110] bg-black/40 rounded-full p-2">
+          <button 
+            onClick={nextSlide} 
+            disabled={isNavigationDisabled}
+            className={clsx(
+              "absolute right-3 top-1/2 -translate-y-1/2 z-[110] bg-black/40 rounded-full p-2 transition-all",
+              isNavigationDisabled ? "opacity-50 cursor-not-allowed" : "hover:bg-black/60"
+            )}
+            aria-label="Next image"
+          >
             <ChevronRight className="w-7 h-7 text-white" />
           </button>
         </div>
@@ -467,7 +640,10 @@ const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
 
       {/* Main Image Container */}
       <div
-        className="relative w-full h-60.5 lg:h-108.75 overflow-hidden rounded-xl bg-gray-900/10 touch-none select-none cursor-grab"
+        className={clsx(
+          "relative w-full h-60.5 lg:h-108.75 overflow-hidden rounded-xl bg-gray-900/10 touch-none select-none",
+          !isNavigationDisabled && "cursor-grab"
+        )}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
@@ -494,14 +670,17 @@ const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
                 quality={getQuality(isMobile ? 60 : 75)}
                 placeholder="blur"
                 blurDataURL={BLUR_PLACEHOLDER}
+                onLoad={() => {
+                  setIsLoading(false);
+                  setImageLoadStates(prev => new Map(prev).set(0, true));
+                }}
               />
             </div>
           ) : (
             <>
               {/* Prev Slide (-100%) */}
               <div
-                ref={prevSlideRef}
-                className="absolute top-0 left-0 w-full h-full -translate-x-full will-change-transform"
+                className="absolute top-0 left-0 w-full h-full -translate-x-full"
                 aria-hidden="true"
               >
                 <Image
@@ -513,14 +692,14 @@ const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
                   quality={getQuality(isMobile ? 60 : 75)}
                   loading="eager"
                   decoding="async"
+                  onLoad={() => {
+                    setImageLoadStates(prev => new Map(prev).set(prevIndex, true));
+                  }}
                 />
               </div>
 
               {/* Current Slide (0%) */}
-              <div
-                ref={currSlideRef}
-                className="absolute top-0 left-0 w-full h-full will-change-transform"
-              >
+              <div className="absolute top-0 left-0 w-full h-full">
                 <Image
                   src={images[index]}
                   alt="Gallery"
@@ -528,8 +707,11 @@ const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 800px"
                   className="object-cover"
                   draggable={false}
-                  onClick={() => !isDraggingRef.current && (isMobile ? enterFullscreen() : openZoom(index))}
-                  onLoad={() => setIsLoading(false)}
+                  onClick={() => !isDraggingRef.current && !isNavigationDisabled && (isMobile ? enterFullscreen() : openZoom(index))}
+                  onLoad={() => {
+                    setIsLoading(false);
+                    setImageLoadStates(prev => new Map(prev).set(index, true));
+                  }}
                   priority
                   quality={getQuality(isMobile ? 60 : 75)}
                   placeholder="blur"
@@ -540,8 +722,7 @@ const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
 
               {/* Next Slide (100%) */}
               <div
-                ref={nextSlideRef}
-                className="absolute top-0 left-0 w-full h-full translate-x-full will-change-transform"
+                className="absolute top-0 left-0 w-full h-full translate-x-full"
                 aria-hidden="true"
               >
                 <Image
@@ -553,42 +734,56 @@ const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
                   quality={getQuality(isMobile ? 60 : 75)}
                   loading="eager"
                   decoding="async"
+                  onLoad={() => {
+                    setImageLoadStates(prev => new Map(prev).set(nextIndex, true));
+                  }}
                 />
               </div>
             </>
           )}
         </div>
 
-        {/* ... controls ... */}
+        {/* Fullscreen button */}
         <button
           onClick={enterFullscreen}
           onPointerDown={(e) => e.stopPropagation()}
           className="absolute top-3 right-3 z-30 lg:hidden bg-black/40 rounded-full p-2 active:scale-95 pointer-events-auto"
+          aria-label="Enter fullscreen"
         >
           <Maximize2 className="w-5 h-5 text-white" />
         </button>
 
-        {/* ... arrows ... */}
+        {/* Navigation arrows */}
         {images.length > 1 && (
           <>
             <button
               onClick={prevSlide}
+              disabled={isNavigationDisabled}
               onPointerDown={(e) => e.stopPropagation()}
-              className="absolute left-3 top-1/2 -translate-y-1/2 z-20 bg-black/30 rounded-full p-1 lg:hidden pointer-events-auto"
+              className={clsx(
+                "absolute left-3 top-1/2 -translate-y-1/2 z-20 bg-black/30 rounded-full p-1 lg:hidden pointer-events-auto transition-all",
+                isNavigationDisabled && "opacity-50 cursor-not-allowed"
+              )}
+              aria-label="Previous image"
             >
               <ChevronLeft className="w-7 h-7 text-white" />
             </button>
             <button
               onClick={nextSlide}
+              disabled={isNavigationDisabled}
               onPointerDown={(e) => e.stopPropagation()}
-              className="absolute right-3 top-1/2 -translate-y-1/2 z-20 bg-black/30 rounded-full p-1 lg:hidden pointer-events-auto"
+              className={clsx(
+                "absolute right-3 top-1/2 -translate-y-1/2 z-20 bg-black/30 rounded-full p-1 lg:hidden pointer-events-auto transition-all",
+                isNavigationDisabled && "opacity-50 cursor-not-allowed"
+              )}
+              aria-label="Next image"
             >
               <ChevronRight className="w-7 h-7 text-white" />
             </button>
           </>
         )}
 
-        {/* ... dots ... */}
+        {/* Pagination dots & counter */}
         {images.length > 1 && (
           <>
             <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 text-white px-3 py-1 rounded-full text-sm hidden lg:block pointer-events-none">
@@ -598,8 +793,17 @@ const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
               {images.map((_, i) => (
                 <button
                   key={i}
-                  onClick={(e) => { e.stopPropagation(); changeSlide(i); }}
-                  className={clsx("rounded-full transition-all", i === index ? "w-5 h-1.5 bg-white" : "w-1.5 h-1.5 bg-white/40")}
+                  onClick={(e) => { 
+                    e.stopPropagation(); 
+                    changeSlide(i); 
+                  }}
+                  disabled={isNavigationDisabled}
+                  className={clsx(
+                    "rounded-full transition-all",
+                    i === index ? "w-5 h-1.5 bg-white" : "w-1.5 h-1.5 bg-white/40",
+                    isNavigationDisabled && "opacity-50 cursor-not-allowed"
+                  )}
+                  aria-label={`Go to image ${i + 1}`}
                 />
               ))}
             </div>
@@ -611,42 +815,108 @@ const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
       {images.length > 1 && (
         <>
           <div className="hidden lg:flex justify-between items-center mt-3 px-1">
-            <button onClick={prevSlide} className="pt-2 rounded-full cursor-pointer hover:bg-white/10 p-1">
+            <button 
+              onClick={prevSlide}
+              disabled={isNavigationDisabled}
+              className={clsx(
+                "pt-2 rounded-full cursor-pointer p-1 transition-all",
+                isNavigationDisabled ? "opacity-50 cursor-not-allowed" : "hover:bg-white/10"
+              )}
+              aria-label="Previous image"
+            >
               <ChevronLeft className="w-6 h-6" />
             </button>
-            <button onClick={nextSlide} className="pt-2 rounded-full cursor-pointer hover:bg-white/10 p-1">
+            <button 
+              onClick={nextSlide}
+              disabled={isNavigationDisabled}
+              className={clsx(
+                "pt-2 rounded-full cursor-pointer p-1 transition-all",
+                isNavigationDisabled ? "opacity-50 cursor-not-allowed" : "hover:bg-white/10"
+              )}
+              aria-label="Next image"
+            >
               <ChevronRight className="w-6 h-6" />
             </button>
           </div>
           {/* Scrollable Thumbnails */}
-          <div className="hidden lg:flex gap-2 mt-4 overflow-x-auto snap-x scrollbar-hide py-1">
+          {/* <div className="hidden lg:flex gap-2 mt-4 overflow-x-auto snap-x scrollbar-hide py-1"> */}
+          <div className="hidden lg:flex gap-2 mt-4 justify-center">
             {images.map((img, i) => (
               <button
                 key={i}
                 onClick={() => changeSlide(i)}
+                disabled={isNavigationDisabled}
                 className={clsx(
                   "relative w-16 h-16 shrink-0 rounded-md overflow-hidden transition-all duration-200 snap-start",
-                  i === index ? "ring-2 ring-white opacity-100 scale-105" : "opacity-60 hover:opacity-100 hover:scale-105"
+                  i === index ? "ring-2 ring-white opacity-100 scale-105" : "opacity-60 hover:opacity-100 hover:scale-105",
+                  isNavigationDisabled && i !== index && "cursor-not-allowed opacity-40"
                 )}
+                aria-label={`Go to image ${i + 1}`}
               >
-                <Image src={img} alt="" fill className="object-cover" sizes="64px" quality={40} draggable={false} />
+                <Image 
+                  src={img} 
+                  alt={`Thumbnail ${i + 1}`} 
+                  fill 
+                  className="object-cover" 
+                  sizes="64px" 
+                  quality={40} 
+                  draggable={false}
+                  onLoad={() => {
+                    setImageLoadStates(prev => new Map(prev).set(i, true));
+                  }}
+                />
               </button>
             ))}
           </div>
         </>
       )}
 
-      {/* Zoom Modal - Kept same */}
+      {/* Zoom Modal */}
       {isZoomed && (
         <div
-          className={clsx("fixed inset-0 flex justify-center items-center z-50 transition-all duration-300", zoomVisible ? "bg-black/95" : "bg-black/0")}
+          className={clsx(
+            "fixed inset-0 flex justify-center items-center z-50 transition-all duration-300",
+            zoomVisible ? "bg-black/95" : "bg-black/0"
+          )}
           onClick={closeZoom}
         >
-          <div className={clsx("relative transition-all duration-300 transform", zoomVisible ? "scale-100 opacity-100" : "scale-95 opacity-0")} onClick={(e) => e.stopPropagation()}>
-            <button onClick={closeZoom} className="absolute -top-12 right-0 text-white text-3xl"><X className="w-8 h-8" /></button>
-            <button onClick={prevZoomImage} className="absolute left-4 top-1/2 -translate-y-1/2 text-white p-3"><ChevronLeft className="w-8 h-8" /></button>
-            <button onClick={nextZoomImage} className="absolute right-4 top-1/2 -translate-y-1/2 text-white p-3"><ChevronRight className="w-8 h-8" /></button>
-            <Image src={images[zoomIndex]} alt="" width={1200} height={800} className="object-contain max-w-[90vw] max-h-[80vh] rounded-lg" priority />
+          <div
+            className={clsx(
+              "relative transition-all duration-300 transform",
+              zoomVisible ? "scale-100 opacity-100" : "scale-95 opacity-0"
+            )}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button 
+              onClick={closeZoom} 
+              className="absolute -top-12 right-0 text-white text-3xl hover:scale-110 transition-transform"
+              aria-label="Close zoom"
+            >
+              <X className="w-8 h-8" />
+            </button>
+            <button 
+              onClick={prevZoomImage} 
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-white p-3 hover:scale-110 transition-transform"
+              aria-label="Previous image"
+            >
+              <ChevronLeft className="w-8 h-8" />
+            </button>
+            <button 
+              onClick={nextZoomImage} 
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-white p-3 hover:scale-110 transition-transform"
+              aria-label="Next image"
+            >
+              <ChevronRight className="w-8 h-8" />
+            </button>
+            <Image
+              src={images[zoomIndex]}
+              alt="Zoomed image"
+              width={1200}
+              height={800}
+              className="object-contain max-w-[90vw] max-h-[80vh] rounded-lg"
+              priority
+              quality={90}
+            />
           </div>
         </div>
       )}
