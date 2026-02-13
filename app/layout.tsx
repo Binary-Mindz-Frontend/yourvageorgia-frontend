@@ -23,6 +23,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     title: "Solenne",
   },
+  viewport: "width=device-width, initial-scale=1",
 };
 
 export default function RootLayout({

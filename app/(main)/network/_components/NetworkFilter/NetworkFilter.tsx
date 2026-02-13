@@ -19,6 +19,7 @@ import PartnerCard from "./PartnerCard";
 interface AppliedFilters {
   locations: string[];
   activities: string[];
+  gender: 'all' | 'women' | 'mixed';
 }
 
 interface NetworkFilterProps {
@@ -59,6 +60,7 @@ const NetworkFilter = ({
   const [appliedFilters, setAppliedFilters] = useState<AppliedFilters>({
     locations: [],
     activities: [],
+    gender: 'all',
   });
   const [activeFilter, setActiveFilter] = useState<string>(initialFilter);
 
@@ -67,7 +69,7 @@ const NetworkFilter = ({
   const searchQuery = searchParams.get("search") || initialSearchQuery;
 
   const appliedFiltersKey = useMemo(
-    () => `${appliedFilters.locations.join(',')}-${appliedFilters.activities.join(',')}`,
+    () => `${appliedFilters.locations.join(',')}-${appliedFilters.activities.join(',')}-${appliedFilters.gender}`,
     [appliedFilters]
   );
 
@@ -97,6 +99,8 @@ const NetworkFilter = ({
         category: filter === "All" ? undefined : filter,
         area: filters.locations.length > 0 ? filters.locations : undefined,
         activity: filters.activities.length > 0 ? filters.activities : undefined,
+        womenOnly: filters.gender === 'women' ? true : undefined,
+        mixed: filters.gender === 'mixed' ? true : undefined,
       });
 
       if (controller.signal.aborted) return;
@@ -110,7 +114,10 @@ const NetworkFilter = ({
 
       setPartners(prev => {
         if (resetData) return sorted;
-        return [...prev, ...sorted];
+        // Deduplicate by _id when appending paginated results
+        const existingIds = new Set(prev.map(p => p._id));
+        const newPartners = sorted.filter((p: Partner) => !existingIds.has(p._id));
+        return [...prev, ...newPartners];
       });
 
       const meta = (result as any).meta;
@@ -170,7 +177,7 @@ const NetworkFilter = ({
     };
   }, [currentPage]);
 
-  // Handle filter changes (locations/activities)
+  // Handle filter changes (locations/activities/gender)
   useEffect(() => {
     // Skip if it's the first render and we should use initial data
     if (shouldUseInitialData.current) return;
@@ -263,8 +270,9 @@ const NetworkFilter = ({
           size="lg"
           className="text-white focus:outline-none hover:bg-gray-800 p-2 rounded transition [&_svg:not([class*='size-'])]:size-6"
           onClick={() => setIsFilterOpen(true)}
+          aria-label="Open filter options"
         >
-          <ListFilter className="h-6 w-6" />
+          <ListFilter className="h-6 w-6" aria-hidden="true" />
         </Button>
       </header>
 
@@ -304,11 +312,12 @@ const NetworkFilter = ({
             <p className="text-lg opacity-70">No partners found</p>
           </div>
         ) : (
-          displayedPartners.map((partner) => (
+          displayedPartners.map((partner, index) => (
             <PartnerCard
-              key={partner._id}
+              key={`${partner._id}-${index}`}
               partner={partner}
               onClick={handlePartnerClick}
+              priority={index < 2}
             />
           ))
         )}
@@ -320,8 +329,9 @@ const NetworkFilter = ({
           <button
             onClick={handleLoadMore}
             className="p-3 rounded-full hover:bg-black/50 cursor-pointer transition"
+            aria-label="Load more partners"
           >
-            <ChevronDown className="lg:w-10 lg:h-10" />
+            <ChevronDown className="lg:w-10 lg:h-10" aria-hidden="true" />
           </button>
           <p className="text-sm opacity-70">
             Showing {partners.length} of {totalPartners}

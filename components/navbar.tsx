@@ -120,7 +120,7 @@ export function Navbar() {
     <>
       <nav
         className={`
-          sticky top-0 z-20 w-full transition-all duration-300 ease-in-out
+          sticky top-0 z-50 w-full transition-all duration-300 ease-in-out
           ${scrolled
             ? "bg-background/50 backdrop-blur-md border-b border-border/40 shadow-sm py-2"
             : "bg-transparent py-4 border-transparent"
@@ -149,7 +149,7 @@ export function Navbar() {
                   autoFocus
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-6 pr-14 py-3 rounded-full bg-background/80 backdrop-blur-sm border-2 border-border/50 hover:border-border focus:outline-none focus:ring-[1px] focus:ring-primary/15 focus:border-primary text-sm transition-all duration-200 shadow-lg shadow-black/5"
+                  className="w-full pl-6 pr-14 py-3 rounded-full bg-background/80 backdrop-blur-sm border-2 border-border/50 hover:border-border focus:outline-none focus:ring-[1px] focus:ring-primary/15 focus:border-primary text-base sm:text-sm transition-all duration-200 shadow-lg shadow-black/5"
                   onKeyDown={(e) => {
                     if (e.key === "Escape") setIsSearchOpen(false);
                     if (e.key === "Enter") handleSearch();
@@ -166,6 +166,7 @@ export function Navbar() {
               <Link
                 href="/"
                 className="transition-opacity hover:opacity-80 duration-200"
+                aria-label="Go to homepage"
               >
                 <HeaderLogo />
               </Link>

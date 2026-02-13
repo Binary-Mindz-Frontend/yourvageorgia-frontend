@@ -52,8 +52,7 @@ export default function WellnessHero() {
         {/* Text */}
         <div className="text-center space-y-6 lg:space-y-8 lg:pr-8">
           <h1 className="text-white text-2xl md:text-3xl lg:text-5xl max-w-3xl mx-auto font-semibold font-serif leading-tight">
-            A lifestyle membership redefining how women experience wellness in
-            Dubai.
+            A private lifestyle membership <br /> for living well in Dubai.
           </h1>
         </div>
       </div>

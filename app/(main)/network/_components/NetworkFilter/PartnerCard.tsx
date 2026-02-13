@@ -9,15 +9,16 @@ import FavouriteButton from "./FavouriteButton";
 interface PartnerCardProps {
     partner: Partner;
     onClick: (partner: Partner) => void;
+    priority?: boolean;
 }
 
-const PartnerCard = memo(({ partner, onClick }: PartnerCardProps) => {
+const PartnerCard = memo(({ partner, onClick, priority = false }: PartnerCardProps) => {
     const [isImageLoading, setIsImageLoading] = useState(true);
 
     // Extract location once
-    const location = partner.contacts?.[0]?.area || 
-                     partner.contacts?.[0]?.address || 
-                     "Location not specified";
+    const location = partner.contacts?.[0]?.area ||
+        partner.contacts?.[0]?.address ||
+        "Location not specified";
 
     return (
         <div
@@ -25,7 +26,7 @@ const PartnerCard = memo(({ partner, onClick }: PartnerCardProps) => {
             className="relative w-full aspect-video rounded-xl overflow-hidden cursor-pointer shadow-lg hover:shadow-2xl transition-shadow duration-300 group"
         >
             {/* Background Image */}
-            <div className="absolute inset-0 w-full h-full bg-gray-900/20">
+            <div className="absolute inset-0 w-full h-full bg-gray-900/20 -z-50">
                 {isImageLoading && (
                     <Skeleton className="w-full h-full absolute inset-0 z-10 flex items-center justify-center bg-background/20">
                         <div className="w-8 h-8 border-2 border-white/20 border-t-white/80 rounded-full animate-spin" />
@@ -35,7 +36,8 @@ const PartnerCard = memo(({ partner, onClick }: PartnerCardProps) => {
                     src={partner.thumbnail || ""}
                     alt={partner.name}
                     fill
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 800px"
+                    priority={priority}
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                     className={cn(
                         "object-cover transition-all duration-500",
                         isImageLoading ? "opacity-0" : "opacity-100 group-hover:scale-105"
@@ -44,7 +46,6 @@ const PartnerCard = memo(({ partner, onClick }: PartnerCardProps) => {
                         filter: "brightness(1.05) saturate(1.2)",
                     }}
                     onLoad={() => setIsImageLoading(false)}
-                    loading="lazy"
                     quality={75}
                     placeholder="blur"
                     blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNzAwIiBoZWlnaHQ9IjQ3NSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB2ZXJzaW9uPSIxLjEiLz4="

@@ -32,6 +32,7 @@ export interface IUserResponse {
     isVerified: boolean;
     isPartner: boolean;
     isMembership: boolean;
+    accessCode?: string;
     membershipId?: string;
     membershipExpiry?: number;
     accessCode?: string;
@@ -54,7 +55,7 @@ export interface IUserUpdatePayload {
   phone?: string | null;
   dateOfBirth?: string | null;
   role?: "user" | "admin";
-    membershipId?: string;      // <-- add this
+  membershipId?: string;      // <-- add this
   membershipExpiry?: number;
   isVerified?: boolean;
   isMembership?: boolean;
