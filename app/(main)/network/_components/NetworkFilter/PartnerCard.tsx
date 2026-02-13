@@ -20,6 +20,11 @@ const PartnerCard = memo(({ partner, onClick, priority = false }: PartnerCardPro
         partner.contacts?.[0]?.address ||
         "Location not specified";
 
+    const locationText =
+        (partner.contacts?.length ?? 0) > 1
+            ? "Multiple Location"
+            : location;
+
     return (
         <div
             onClick={() => onClick(partner)}
@@ -71,7 +76,7 @@ const PartnerCard = memo(({ partner, onClick, priority = false }: PartnerCardPro
                 </div>
 
                 <div className="flex items-center text-sm lg:text-lg gap-2 italic opacity-80">
-                    <span className="truncate">{location}</span>
+                    <span className="truncate">{locationText}</span>
                     <ArrowRight className="w-4 h-4 shrink-0" />
                 </div>
             </div>

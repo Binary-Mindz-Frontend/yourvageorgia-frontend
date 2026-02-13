@@ -153,9 +153,9 @@ export const getPartnerFiltered = async (
 
     const json = await res.json();
 
-    console.log(json);
-    console.log(filters);
-    console.log(url);
+    // console.log(json);
+    // console.log(filters);
+    // console.log(url);
 
     if (!res.ok) return { error: json.message || "Failed to fetch" };
 
