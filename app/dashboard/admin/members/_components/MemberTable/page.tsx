@@ -48,7 +48,7 @@ const MemberPage = () => {
     useEffect(() => {
         const fetchUsers = async () => {
             const response = await getAllUsers(filters);
-            console.log(response);
+            // console.log(response);
             if ("data" in response && "meta" in response) {
                 setUsers(response.data);
                 setTotalItems(response.meta.total);
