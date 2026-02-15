@@ -44,8 +44,8 @@ const SolenneMembership = () => {
             <div className="space-y-4 pl-5">
               <ul className="list-disc space-y-3 text-gray-300 lg:text-lg">
                 <li>
-                  <span className="font-semibold">Preferred rates</span> across
-                  {`Dubai's most considered wellness & lifestyle destinations`}
+                  <span className="font-semibold">Preferred rates </span> 
+                  {`across Dubai's most considered wellness & lifestyle destinations`}
                 </li>
 
                 <li>
