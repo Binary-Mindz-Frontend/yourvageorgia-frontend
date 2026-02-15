@@ -1,16 +1,16 @@
 'use client'
 
-import { Button } from "@/components/ui/button";
-import { ArrowRight, FileQuestion, Menu, Search, X, Loader2 } from "lucide-react";
-import Link from "next/link";
-import { useEffect, useState, useMemo } from "react";
-import { HeaderLogo } from "./icons";
-import { useRouter } from "next/navigation";
-import { NavigationDrawer } from "./navigation-drawer";
-import Image from "next/image";
 import PartnerDetailsModal from "@/app/(main)/network/_components/NetworkCardModal/PartnerDetailsModal";
-import { getPartners } from "@/services/partner/partner";
+import { Button } from "@/components/ui/button";
 import { useDebounce } from "@/hooks/useDebounce";
+import { getPartners } from "@/services/partner/partner";
+import { ArrowRight, FileQuestion, Loader2, Menu, Search, X } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { HeaderLogo } from "./icons";
+import { NavigationDrawer } from "./navigation-drawer";
 
 interface Partner {
   _id: string;
@@ -120,7 +120,7 @@ export function Navbar() {
     <>
       <nav
         className={`
-          sticky top-0 z-20 w-full transition-all duration-300 ease-in-out
+          sticky top-0 z-50 w-full transition-all duration-300 ease-in-out
           ${scrolled
             ? "bg-background/50 backdrop-blur-md border-b border-border/40 shadow-sm py-2"
             : "bg-transparent py-4 border-transparent"
@@ -149,7 +149,7 @@ export function Navbar() {
                   autoFocus
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-6 pr-14 py-3 rounded-full bg-background/80 backdrop-blur-sm border-2 border-border/50 hover:border-border focus:outline-none focus:ring-[1px] focus:ring-primary/15 focus:border-primary text-sm transition-all duration-200 shadow-lg shadow-black/5"
+                  className="w-full pl-6 pr-14 py-3 rounded-full bg-background/80 backdrop-blur-sm border-2 border-border/50 hover:border-border focus:outline-none focus:ring-[1px] focus:ring-primary/15 focus:border-primary text-base sm:text-sm transition-all duration-200 shadow-lg shadow-black/5"
                   onKeyDown={(e) => {
                     if (e.key === "Escape") setIsSearchOpen(false);
                     if (e.key === "Enter") handleSearch();
@@ -166,6 +166,7 @@ export function Navbar() {
               <Link
                 href="/"
                 className="transition-opacity hover:opacity-80 duration-200"
+                aria-label="Go to homepage"
               >
                 <HeaderLogo />
               </Link>
@@ -229,7 +230,7 @@ export function Navbar() {
                         src={partner.thumbnail}
                         alt={partner.name}
                         className="w-10 h-10 object-cover"
-                        unoptimized
+
                       />
                     </div>
                     <div className="flex-1 min-w-0">

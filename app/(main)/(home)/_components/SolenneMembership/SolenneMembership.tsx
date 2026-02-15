@@ -107,15 +107,15 @@ export default function SolenneMembership() {
                   <span className="transition-all duration-300 group-hover:text-white/90">
                     {displayPartner
                       ? (() => {
-                          const fullText =
-                            displayPartner.about ||
-                            getActivityTitle(displayPartner) ||
-                            "Exclusive member benefits";
-                          // Use the reactive state instead of window.innerWidth
-                          return isExpanded || isLargeScreen
-                            ? fullText
-                            : truncateText(fullText, 10);
-                        })()
+                        const fullText =
+                          displayPartner.about ||
+                          getActivityTitle(displayPartner) ||
+                          "Exclusive member benefits";
+                        // Use the reactive state instead of window.innerWidth
+                        return isExpanded || isLargeScreen
+                          ? fullText
+                          : truncateText(fullText, 10);
+                      })()
                       : "15% off facial and rejuvenation treatments"}
 
                     {/* Keep your "see more" logic as is */}
@@ -158,7 +158,9 @@ export default function SolenneMembership() {
         <div className="mt-12 lg:mt-38 text-center">
           <p className="text-gray-300 text-lg lg:text-2xl leading-relaxed font-light">
             {
-              "Solenne is an invitation-only lifestyle membership for women in Dubai, centred on a curated network of the city's most considered wellness, beauty and lifestyle destinations. Members are extended preferred access and partner privileges, shaping a more elevated everyday."
+              `Solenne is an invitation-only lifestyle membership in Dubai, centred on a network of the city’s
+                most considered wellness and lifestyle destinations. Members are extended preferred access
+                and partner privileges, shaping a more elevated everyday.`
             }
           </p>
         </div>

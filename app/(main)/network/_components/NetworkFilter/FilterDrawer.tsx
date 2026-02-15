@@ -2,10 +2,10 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { ChevronDown, X } from "lucide-react";
-import { useEffect, useState, useMemo } from "react";
 import { getActivitiesForSelect } from "@/services/activity/activity";
 import { getAllAreas } from "@/services/partner/getpartner";
+import { ChevronDown, X } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 
 interface FilterDrawerProps {
   isOpen: boolean;
@@ -13,6 +13,7 @@ interface FilterDrawerProps {
   onFilterChange?: (filters: {
     locations: string[];
     activities: string[];
+    gender: 'all' | 'women' | 'mixed';
   }) => void;
 }
 
@@ -20,12 +21,13 @@ export function FilterDrawer({
   isOpen,
   onClose,
   onFilterChange,
-   
 }: FilterDrawerProps) {
   const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
   const [selectedActivities, setSelectedActivities] = useState<string[]>([]);
+  const [selectedGender, setSelectedGender] = useState<'all' | 'women' | 'mixed'>('all');
   const [isLocationsOpen, setIsLocationsOpen] = useState(true);
   const [isActivityOpen, setIsActivityOpen] = useState(true);
+  const [isGenderOpen, setIsGenderOpen] = useState(true);
   const [allLocations, setAllLocations] = useState<string[]>([]);
   const [allActivities, setAllActivities] = useState<string[]>([]);
   const [activityIdMap, setActivityIdMap] = useState<Map<string, string>>(new Map());
@@ -42,16 +44,15 @@ export function FilterDrawer({
     };
   }, [isOpen]);
 
-
   const locations = useMemo(() => {
     return ["ALL", ...allLocations];
   }, [allLocations]);
-
 
   const activities = useMemo(() => {
     return ["ALL", ...allActivities];
   }, [allActivities]);
 
+  const genderOptions = ["ALL", "Women-only", "Mixed"];
 
   // Fetch all areas and activities
   useEffect(() => {
@@ -99,6 +100,16 @@ export function FilterDrawer({
     }
   };
 
+  const handleGenderToggle = (gender: string) => {
+    if (gender === "ALL") {
+      setSelectedGender('all');
+    } else if (gender === "Women-only") {
+      setSelectedGender('women');
+    } else if (gender === "Mixed") {
+      setSelectedGender('mixed');
+    }
+  };
+
   useEffect(() => {
     if (onFilterChange) {
       const activityIds = selectedActivities.map(title => activityIdMap.get(title)).filter(Boolean) as string[];
@@ -106,10 +117,11 @@ export function FilterDrawer({
       onFilterChange({
         locations: selectedLocations,
         activities: activityIds,
+        gender: selectedGender,
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedLocations, selectedActivities, activityIdMap]);
+  }, [selectedLocations, selectedActivities, selectedGender, activityIdMap]);
 
   return (
     <>
@@ -127,6 +139,7 @@ export function FilterDrawer({
           }`}
         role="dialog"
         aria-modal="true"
+        aria-label="Filter options"
       >
         {/* Close Button */}
         <div
@@ -183,7 +196,7 @@ export function FilterDrawer({
             </div>
 
             {/* Activity Section */}
-            <div className="pb-4">
+            <div className="pb-6">
               <button
                 onClick={() => setIsActivityOpen(!isActivityOpen)}
                 className="flex items-center justify-between w-full text-foreground font-medium text-sm tracking-wider mb-4 px-4 py-2"
@@ -201,7 +214,7 @@ export function FilterDrawer({
                     <button
                       key={activity}
                       onClick={() => handleActivityToggle(activity)}
-                      className={`block cursor-pointer w-full text-left px-4 py-3  text-sm font-light tracking-wide transition-colors ${activity === "ALL" && selectedActivities.length === 0
+                      className={`block cursor-pointer w-full text-left px-4 py-3 text-sm font-light tracking-wide transition-colors ${activity === "ALL" && selectedActivities.length === 0
                         ? "bg-[#73737366] text-white"
                         : selectedActivities.includes(activity)
                           ? "bg-[#73737366] text-white"
@@ -209,6 +222,39 @@ export function FilterDrawer({
                         }`}
                     >
                       {activity}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Gender Section */}
+            <div className="pb-4">
+              <button
+                onClick={() => setIsGenderOpen(!isGenderOpen)}
+                className="flex items-center justify-between w-full text-foreground font-medium text-sm tracking-wider mb-4 px-4 py-2"
+              >
+                GENDER
+                <ChevronDown
+                  className={`h-5 w-5 transition-transform ${isGenderOpen ? "rotate-180" : ""
+                    }`}
+                />
+              </button>
+
+              {isGenderOpen && (
+                <div className="space-y-1">
+                  {genderOptions.map((gender) => (
+                    <button
+                      key={gender}
+                      onClick={() => handleGenderToggle(gender)}
+                      className={`block cursor-pointer w-full text-left px-4 py-3 text-sm font-light tracking-wide transition-colors ${(gender === "ALL" && selectedGender === 'all') ||
+                          (gender === "Women-only" && selectedGender === 'women') ||
+                          (gender === "Mixed" && selectedGender === 'mixed')
+                          ? "bg-[#73737366] text-white"
+                          : "text-foreground hover:bg-accent/10"
+                        }`}
+                    >
+                      {gender}
                     </button>
                   ))}
                 </div>

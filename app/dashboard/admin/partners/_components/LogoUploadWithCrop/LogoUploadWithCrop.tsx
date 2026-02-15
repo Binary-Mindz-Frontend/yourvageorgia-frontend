@@ -1,10 +1,10 @@
-import { useState, useCallback, useRef } from 'react';
 import { Upload } from 'lucide-react';
 import Image from 'next/image';
+import { useCallback, useRef, useState } from 'react';
 import Cropper, { Area } from 'react-easy-crop';
 
-import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 interface LogoUploadWithCropProps {
   value: string;
@@ -165,7 +165,7 @@ export default function LogoUploadWithCrop({
             alt="logo"
             fill
             className="object-cover"
-            unoptimized
+
           />
         </div>
       )}

@@ -48,6 +48,7 @@ const MemberPage = () => {
     useEffect(() => {
         const fetchUsers = async () => {
             const response = await getAllUsers(filters);
+            // console.log(response);
             if ("data" in response && "meta" in response) {
                 setUsers(response.data);
                 setTotalItems(response.meta.total);
@@ -170,6 +171,14 @@ const MemberPage = () => {
             cell: (row) => (
                 <div className="flex justify-center items-center w-full">
                     <span className="text-white">{row.email}</span>
+                </div>
+            ),
+        },
+    {
+            header: "Access Code",
+            cell: (row) => (
+                <div className="flex justify-center items-center w-full">
+                    <span className="text-white">{row.accessCode ?? "N/A"}</span>
                 </div>
             ),
         },

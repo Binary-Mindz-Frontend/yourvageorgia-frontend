@@ -12,7 +12,7 @@ export default function TermsAndConditions() {
     },
     {
       title: "Membership Eligibility",
-      text: "Membership is strictly for women only and open to individuals aged 21 and over."
+      text: "Open to individuals aged 21 and over."
     },
     {
       title: "Member Use",
@@ -41,9 +41,9 @@ export default function TermsAndConditions() {
   ];
 
   return (
-    <div className="min-h-screen text-white lg:py-10 px-4">
+    <div className="min-h-screen text-white py-6 lg:py-10 px-4">
       <div className="container mx-auto">
-        
+
         {/* Title */}
         <button
           onClick={() => setOpen(!open)}
@@ -51,9 +51,8 @@ export default function TermsAndConditions() {
         >
           Terms & Conditions
           <span
-            className={`transition-transform duration-300 inline-block ${
-              open ? "rotate-180" : "rotate-0"
-            }`}
+            className={`transition-transform duration-300 inline-block ${open ? "rotate-180" : "rotate-0"
+              }`}
           >
             <ChevronDown />
           </span>

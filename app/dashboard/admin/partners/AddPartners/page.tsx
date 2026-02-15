@@ -53,6 +53,7 @@ interface FormData {
   activity: string[];
   isFeatured: boolean;
   isFeaturedMap: boolean;
+  genderPreference: 'mixed' | 'womenOnly';
   offers: Offer[];
   about: string;
   terms: string[];
@@ -106,6 +107,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
       activity: [],
       isFeatured: false,
       isFeaturedMap: false,
+      genderPreference: 'mixed',
       offers: [{ title: "", percentage: "", description: "", validUntil: "" }],
       about: "",
       terms: [""],
@@ -184,6 +186,17 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
         setValue("activity", partner.activity || []);
         setValue("isFeatured", partner.isFeatured === true || partner.isFeatured === "true");
         setValue("isFeaturedMap", partner.isFeaturedMap === true || partner.isFeaturedMap === "true");
+
+        // Handle gender preference
+        if (partner.womenOnly === true || partner.womenOnly === "true") {
+          setValue("genderPreference", 'womenOnly');
+        } else if (partner.mixed === true || partner.mixed === "true") {
+          setValue("genderPreference", 'mixed');
+        } else {
+          setValue("genderPreference", 'mixed'); // default
+        }
+
+
         setValue("about", partner.about || "");
         setValue("terms", partner.terms?.length ? partner.terms : [""]);
         setValue(
@@ -370,6 +383,8 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
         logo: logoUrl,
         isFeatured: data.isFeatured,
         isFeaturedMap: data.isFeaturedMap,
+        womenOnly: data.genderPreference === 'womenOnly',
+        mixed: data.genderPreference === 'mixed',
         offer: data.offers.map(o => ({
           title: o.title,
           description: o.description,
@@ -587,7 +602,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
                   alt="thumb"
                   fill
                   className="object-cover"
-                  unoptimized
+
                 />
               </div>
             )}
@@ -711,7 +726,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
                       alt={`gallery-${index}`}
                       fill
                       className="object-cover"
-                      unoptimized
+
                     />
                   )}
                   <button
@@ -1061,6 +1076,40 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
           />
           <Label className="text-white mb-1">isFeaturedMap</Label>
         </div>
+
+        {/* GENDER PREFERENCE */}
+        <div>
+          <Label className="text-white mb-4">Gender Preference *</Label>
+          <Controller
+            name="genderPreference"
+            control={control}
+            render={({ field }) => (
+              <div className="flex gap-6">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    value="mixed"
+                    checked={field.value === 'mixed'}
+                    onChange={() => field.onChange('mixed')}
+                    className="w-4 h-4"
+                  />
+                  <span className="text-white">Mixed</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    value="womenOnly"
+                    checked={field.value === 'womenOnly'}
+                    onChange={() => field.onChange('womenOnly')}
+                    className="w-4 h-4"
+                  />
+                  <span className="text-white">Woman Only</span>
+                </label>
+              </div>
+            )}
+          />
+        </div>
+
         {/* BUTTONS */}
         <div className="flex gap-3">
           <Button

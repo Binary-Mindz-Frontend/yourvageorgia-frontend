@@ -125,6 +125,11 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Prevent layout shift from scrollbar appearing/disappearing */
+  html {
+    scrollbar-gutter: stable;
+  }
 }
 
 .scrollbar-hide::-webkit-scrollbar {
@@ -144,7 +149,35 @@
 
 
 input:focus {
-    outline: none !important;
-    box-shadow: none !important;
-    -webkit-tap-highlight-color: transparent;
+  outline: none !important;
+  box-shadow: none !important;
+  -webkit-tap-highlight-color: transparent;
+}
+
+
+
+/* Add to global CSS for better scroll performance */
+* {
+  -webkit-overflow-scrolling: touch;
+}
+
+.overflow-y-auto {
+  overscroll-behavior: contain;
+}
+
+input,
+input[type="search"],
+textarea {
+  font-size: 16px;
+}
+
+/* Shimmer animation for image loading */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+
+  100% {
+    transform: translateX(100%);
+  }
 }

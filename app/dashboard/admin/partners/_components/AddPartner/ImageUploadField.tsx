@@ -1,8 +1,8 @@
-import React, { useRef } from "react";
-import Image from "next/image";
-import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Upload } from "lucide-react";
+import Image from "next/image";
+import { useRef } from "react";
 
 interface ImageUploadFieldProps {
   label: string;
@@ -75,7 +75,7 @@ export default function ImageUploadField({
             alt={label}
             fill
             className="object-cover"
-            unoptimized
+
           />
         </div>
       )}

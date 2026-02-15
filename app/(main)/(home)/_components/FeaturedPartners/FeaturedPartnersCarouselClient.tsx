@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import PartnerDetailsModal from "@/app/(main)/network/_components/NetworkCardModal/PartnerDetailsModal";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Carousel,
@@ -9,9 +9,9 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import Image from "next/image";
-import PartnerDetailsModal from "@/app/(main)/network/_components/NetworkCardModal/PartnerDetailsModal";
 import { Partner } from "@/types/partner.types";
+import Image from "next/image";
+import { useState } from "react";
 
 export default function FeaturedPartnersCarouselClient({
   partners,
@@ -54,7 +54,7 @@ export default function FeaturedPartnersCarouselClient({
                         height={250}
                         alt={partner.name}
                         className="w-full h-full object-cover"
-                        unoptimized
+
                       />
                     </div>
                   </CardContent>

@@ -210,7 +210,7 @@ export default function AddCategoryModal({
                   alt="Preview"
                   fill
                   className="object-cover"
-                  unoptimized
+
                 />
                 {/* Cross Icon */}
                 <button

@@ -1,18 +1,29 @@
-import { useState } from "react";
-import Image from "next/image";
-import { ArrowRight } from "lucide-react";
-import FavouriteButton from "./FavouriteButton";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Partner } from "@/types/partner.types";
 import { cn } from "@/lib/utils";
+import { Partner } from "@/types/partner.types";
+import { ArrowRight } from "lucide-react";
+import Image from "next/image";
+import { memo, useState } from "react";
+import FavouriteButton from "./FavouriteButton";
 
 interface PartnerCardProps {
     partner: Partner;
     onClick: (partner: Partner) => void;
+    priority?: boolean;
 }
 
-const PartnerCard = ({ partner, onClick }: PartnerCardProps) => {
+const PartnerCard = memo(({ partner, onClick, priority = false }: PartnerCardProps) => {
     const [isImageLoading, setIsImageLoading] = useState(true);
+
+    // Extract location once
+    const location = partner.contacts?.[0]?.area ||
+        partner.contacts?.[0]?.address ||
+        "Location not specified";
+
+    const locationText =
+        (partner.contacts?.length ?? 0) > 1
+            ? "Multiple Location"
+            : location;
 
     return (
         <div
@@ -20,7 +31,7 @@ const PartnerCard = ({ partner, onClick }: PartnerCardProps) => {
             className="relative w-full aspect-video rounded-xl overflow-hidden cursor-pointer shadow-lg hover:shadow-2xl transition-shadow duration-300 group"
         >
             {/* Background Image */}
-            <div className="absolute inset-0 w-full h-full bg-gray-900/20">
+            <div className="absolute inset-0 w-full h-full bg-gray-900/20 -z-50">
                 {isImageLoading && (
                     <Skeleton className="w-full h-full absolute inset-0 z-10 flex items-center justify-center bg-background/20">
                         <div className="w-8 h-8 border-2 border-white/20 border-t-white/80 rounded-full animate-spin" />
@@ -30,7 +41,8 @@ const PartnerCard = ({ partner, onClick }: PartnerCardProps) => {
                     src={partner.thumbnail || ""}
                     alt={partner.name}
                     fill
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    priority={priority}
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                     className={cn(
                         "object-cover transition-all duration-500",
                         isImageLoading ? "opacity-0" : "opacity-100 group-hover:scale-105"
@@ -39,9 +51,9 @@ const PartnerCard = ({ partner, onClick }: PartnerCardProps) => {
                         filter: "brightness(1.05) saturate(1.2)",
                     }}
                     onLoad={() => setIsImageLoading(false)}
-                    preload={true}
-                    loading="eager"
-                    unoptimized
+                    quality={75}
+                    placeholder="blur"
+                    blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNzAwIiBoZWlnaHQ9IjQ3NSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB2ZXJzaW9uPSIxLjEiLz4="
                 />
                 {/* Gradient Overlay */}
                 <div className="absolute inset-0 bg-linear-to-t from-black/10 via-black/10 to-transparent z-0"></div>
@@ -64,17 +76,14 @@ const PartnerCard = ({ partner, onClick }: PartnerCardProps) => {
                 </div>
 
                 <div className="flex items-center text-sm lg:text-lg gap-2 italic opacity-80">
-                    <span className="truncate">
-                        {partner.contacts && partner.contacts.length > 0
-                            ? (partner.contacts[0].area || partner.contacts[0].address || "Location not specified")
-                            : "Location not specified"}
-                    </span>
+                    <span className="truncate">{locationText}</span>
                     <ArrowRight className="w-4 h-4 shrink-0" />
                 </div>
             </div>
-
         </div>
     );
-};
+});
+
+PartnerCard.displayName = 'PartnerCard';
 
 export default PartnerCard;

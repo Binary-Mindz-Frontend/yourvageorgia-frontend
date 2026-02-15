@@ -42,7 +42,7 @@
 // //               <Image
 // //                 src={card?.image}
 // //                 alt={card.title}
-// //                 unoptimized
+// //                 
 // //                 fill
 // //                 className={cn(
 // //                   "object-cover transition-all duration-500 ease-out group-hover:blur-sm group-hover:scale-105",
@@ -179,7 +179,7 @@
 //               <Image
 //                 src={card?.image}
 //                 alt={card.title}
-//                 unoptimized
+//                 
 //                 fill
 //                 className={cn(
 //                   "object-cover transition-all duration-500 ease-out group-hover:blur-sm group-hover:scale-105",
@@ -267,13 +267,13 @@
 
 "use client";
 
-import { useState } from "react";
-import { Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Plus } from "lucide-react";
+import { useState } from "react";
 
+import { ICategory } from "@/types/category.types";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { ICategory } from "@/types/category.types";
 
 interface Props {
   categories: ICategory[];
@@ -309,7 +309,7 @@ export default function WellnessCardsClient({ categories }: Props) {
               <Image
                 src={card?.image}
                 alt={card.title}
-                unoptimized
+
                 fill
                 className={cn(
                   "object-cover transition-all duration-500 ease-out group-hover:blur-sm group-hover:scale-105",

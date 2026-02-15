@@ -1,9 +1,9 @@
 
 
+import Providers from "@/providers/Providers";
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Inter } from "next/font/google";
 import "./globals.css";
-import Providers from "@/providers/Providers";
 
 const inter = Inter({
   variable: "--font-sans",
@@ -18,11 +18,12 @@ const cormorant = Cormorant_Garamond({
 });
 
 export const metadata: Metadata = {
-  title: "Solenne - A Curated Lifestyle & Wellness Membership for Women in Dubai",
-  description: "A considered membership connecting modern women in Dubai to an exclusive network of wellness, beauty and lifestyle destinations.",
+  title: "Solenne | Private Membership for Wellness & Lifestyle in Dubai",
+  description: "A private membership platform offering selective access to leading wellness, hospitality and lifestyle destinations across Dubai. Annual digital membership.",
   appleWebApp: {
     title: "Solenne",
   },
+  viewport: "width=device-width, initial-scale=1",
 };
 
 export default function RootLayout({
@@ -32,6 +33,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        {/* Preconnect to API */}
+        <link rel="preconnect" href={process.env.NEXT_PUBLIC_BASE_API} />
+        <link rel="dns-prefetch" href={process.env.NEXT_PUBLIC_BASE_API} />
+      </head>
       <body
         className={`${inter.variable} ${cormorant.variable} font-sans antialiased`}
       >
