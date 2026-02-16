@@ -41,7 +41,7 @@ export default function TermsAndConditions() {
   ];
 
   return (
-    <div className="min-h-screen text-white lg:py-10 px-4">
+    <div className="min-h-screen text-white py-6 lg:py-10 px-4">
       <div className="container mx-auto">
 
         {/* Title */}
