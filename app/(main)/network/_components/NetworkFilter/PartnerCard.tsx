@@ -22,7 +22,7 @@ const PartnerCard = memo(({ partner, onClick, priority = false }: PartnerCardPro
 
     const locationText =
         (partner.contacts?.length ?? 0) > 1
-            ? "Multiple Location"
+            ? "Multiple Locations"
             : location;
 
     return (
