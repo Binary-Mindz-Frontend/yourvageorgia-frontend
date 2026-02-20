@@ -69,7 +69,7 @@ const SolenneMembership = () => {
             <div className="flex justify-center mt-6 mb-2">
               <Link href="/member-registration">
                 <Button className="border border-[#f0cea2e7] cursor-pointer text-sm lg:text-base px-10 py-3 lg:px-7 lg:py-2.5 rounded-full tracking-widest bg-black text-white hover:bg-white hover:text-black hover:border-black transition-colors duration-200">
-                  Become Member
+                  Become a member
                 </Button>
               </Link>
             </div>
