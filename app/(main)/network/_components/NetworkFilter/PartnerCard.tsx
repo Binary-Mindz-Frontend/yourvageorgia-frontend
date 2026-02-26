@@ -15,6 +15,8 @@ interface PartnerCardProps {
 const PartnerCard = memo(({ partner, onClick, priority = false }: PartnerCardProps) => {
     const [isImageLoading, setIsImageLoading] = useState(true);
 
+    console.log(partner, 'partner');
+
     // Extract location once
     const location = partner.contacts?.[0]?.area ||
         partner.contacts?.[0]?.address ||
@@ -65,12 +67,12 @@ const PartnerCard = memo(({ partner, onClick, priority = false }: PartnerCardPro
             />
 
             <div className="absolute bottom-0 left-0 p-6 text-white z-10 w-full">
-                <div className="flex items-start gap-3 mb-1">
+                <div className="relative flex items-start gap-3 mb-1">
                     <h2 className="text-lg lg:text-3xl font-semibold mb-1 font-serif">
                         {partner.name}
                         <FavouriteButton
                             partnerId={partner._id || ""}
-                            className="absolute ml-4 bottom-14.5 hidden lg:inline-block"
+                            className="absolute ml-4 top-1 hidden lg:inline-block"
                         />
                     </h2>
                 </div>
@@ -78,6 +80,9 @@ const PartnerCard = memo(({ partner, onClick, priority = false }: PartnerCardPro
                 <div className="flex items-center text-sm lg:text-lg gap-2 italic opacity-80">
                     <span className="truncate">{locationText}</span>
                     <ArrowRight className="w-4 h-4 shrink-0" />
+                </div>
+                <div className="flex items-center text-sm lg:text-lg gap-2 italic opacity-80">
+                    <span className="truncate">{partner.offer?.[0]?.title}</span>
                 </div>
             </div>
         </div>
