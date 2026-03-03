@@ -14,7 +14,7 @@ export default function PartnerDetailsModal({
   partner: any;
 }) {
   const [modalVisible, setModalVisible] = useState(false);
-  // console.log(partner);
+  console.log(partner);
 
   const galleryImages =
     partner?.gallery?.length > 0 ? partner.gallery : partner?.thumbnail;

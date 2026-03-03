@@ -51,8 +51,8 @@ export default function WellnessHero() {
       <div className="relative w-full h-full flex items-center justify-center z-10">
         {/* Text */}
         <div className="text-center space-y-6 lg:space-y-8">
-          <h1 className="text-white text-2xl md:text-3xl lg:text-5xl max-w-3xl mx-auto font-semibold font-serif leading-tight">
-            Live exceptionally well. <br /> <span className="text-lg md:text-xl lg:text-2xl">Private membership with preferred privileges.</span>
+          <h1 className="text-white text-2xl md:text-3xl lg:text-6xl max-w-3xl mx-auto font-semibold leading-tight">
+            <span className="font-serif">Live exceptionally well.</span> <br /> <span className=" font-normal text-lg md:text-xl lg:text-2xl">Private membership with preferred privileges.</span>
           </h1>
         </div>
       </div>
