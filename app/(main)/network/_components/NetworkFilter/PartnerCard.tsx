@@ -15,7 +15,7 @@ interface PartnerCardProps {
 const PartnerCard = memo(({ partner, onClick, priority = false }: PartnerCardProps) => {
     const [isImageLoading, setIsImageLoading] = useState(true);
 
-    console.log(partner, 'partner');
+    // console.log(partner, 'partner');
 
     // Extract location once
     const location = partner.contacts?.[0]?.area ||
