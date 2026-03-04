@@ -110,7 +110,7 @@ const UserUpdateModal: React.FC<UserUpdateModalProps> = ({ userId, isOpen, onClo
         if ("error" in result) {
             toast.error(result.error);
         } else {
-            toast.success("User updated successfully!");
+            toast.success("User updated successfully");
             onUpdateSuccess(); // Refresh the parent table
             handleDialogClose(false); // Close the modal
         }

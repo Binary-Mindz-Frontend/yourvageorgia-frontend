@@ -24,7 +24,7 @@ export default function VerifyOtpPage() {
     setLoading(false);
 
     if (res.success) {
-      toast.success("OTP verified!");
+      toast.success("OTP verified");
       router.push(`/forget-password/reset?email=${email}`);
     } else {
       toast.error(res.message || "Invalid OTP");

@@ -418,7 +418,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
           toast.error("Failed to update partner: " + res.error);
           return;
         }
-        toast.success("Partner updated successfully!");
+        toast.success("Partner updated successfully");
       } else {
         res = await createPartner(payload);
 
@@ -431,7 +431,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
           return;
         }
 
-        toast.success("Partner created successfully!");
+        toast.success("Partner created successfully");
       }
 
       setTimeout(() => {

@@ -74,7 +74,7 @@ const PartnerPositionDialog: React.FC<PartnerPositionDialogProps> = ({
             if ("error" in res) {
                 toast.error(res.error);
             } else {
-                toast.success("Partner position updated successfully!");
+                toast.success("Partner position updated successfully");
                 onUpdateSuccess(); // Call the parent's success handler to refresh table/counts
                 onOpenChange(false); // Close the dialog
             }

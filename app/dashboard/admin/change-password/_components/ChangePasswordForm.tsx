@@ -29,7 +29,7 @@ const ChangePasswordForm = () => {
             });
 
             if (res?.success) {
-                toast.success("Password updated successfully!", { id: "change-password" });
+                toast.success("Password updated successfully", { id: "change-password" });
                 setNewPassword("");
                 setConfirmPassword("");
             } else {

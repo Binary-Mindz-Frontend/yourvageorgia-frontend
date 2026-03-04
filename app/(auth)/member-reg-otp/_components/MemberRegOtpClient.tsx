@@ -1,6 +1,5 @@
 "use client";
 
-import { BeautifulLoader } from "@/components/Shared/Loading/BeautifulLoader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { generateOtp, verifyRegistrationOtp } from "@/services/auth";
@@ -29,7 +28,7 @@ export default function MemberRegOtpClient() {
         setLoading(false);
 
         if (res.success) {
-            toast.success("Registration verified successfully!");
+            toast.success("Registration verified successfully");
             // router.push("/login");
             if (res.data?.onBoardingLink) {
                 router.push(res.data?.onBoardingLink);
@@ -50,7 +49,7 @@ export default function MemberRegOtpClient() {
         setResending(false);
 
         if (res.success) {
-            toast.success("OTP resent successfully!");
+            toast.success("OTP resent successfully");
         } else {
             toast.error(res.message || "Failed to resend OTP");
         }

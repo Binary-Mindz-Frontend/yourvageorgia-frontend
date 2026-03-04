@@ -102,7 +102,7 @@ export default function PartnerDetailsModal({
     if (fetchedCoupon) {
       navigator.clipboard.writeText(fetchedCoupon);
       setIsCopied(true);
-      toast.success("Code copied to clipboard!");
+      toast.success("Code copied to clipboard");
 
       setTimeout(() => {
         setIsCopied(false);
