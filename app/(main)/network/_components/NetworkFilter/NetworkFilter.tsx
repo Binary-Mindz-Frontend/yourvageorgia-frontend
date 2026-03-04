@@ -33,13 +33,15 @@ interface NetworkFilterProps {
   };
   initialFilter?: string;
   searchQuery?: string;
+  categories: string[];
 }
 
 const NetworkFilter = ({
   initialData,
   initialMeta,
   initialFilter = "All",
-  searchQuery: initialSearchQuery
+  searchQuery: initialSearchQuery,
+  categories = ["All", "Movement", "Recovery", "Radiance", "Taste"]
 }: NetworkFilterProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -151,8 +153,7 @@ const NetworkFilter = ({
   // Sync search query
   useEffect(() => {
     if (searchQuery) {
-      const filters = ["All", "Movement", "Recovery", "Radiance", "Taste"];
-      const matchedCategory = filters.find(
+      const matchedCategory = categories.find(
         (filter) => filter.toLowerCase() === searchQuery.toLowerCase()
       );
       if (matchedCategory && matchedCategory !== activeFilter) {
@@ -185,8 +186,6 @@ const NetworkFilter = ({
     setCurrentPage(1);
     fetchPartners(1, activeFilter, appliedFilters, true);
   }, [appliedFiltersKey]);
-
-  const filters = ["All", "Movement", "Recovery", "Radiance", "Taste"];
 
   const getCategoryTitles = useCallback((partner: Partner): string[] => {
     if (partner.categories && Array.isArray(partner.categories)) {
@@ -257,6 +256,54 @@ const NetworkFilter = ({
     setIsModalOpen(true);
   }, []);
 
+  // Custom scroll functionality
+ const scrollRef = useRef<HTMLDivElement>(null);
+
+  const [isDragging, setIsDragging] = useState(false);
+
+  const startX = useRef(0);
+  const scrollLeftStart = useRef(0);
+  const hasDragged = useRef(false);
+
+  const dragThreshold = 5;
+
+  // ------------------------
+  // Drag Logic
+  // ------------------------
+  const onMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    const slider = scrollRef.current;
+    if (!slider) return;
+
+    setIsDragging(true);
+    hasDragged.current = false;
+
+    startX.current = e.pageX - slider.offsetLeft;
+    scrollLeftStart.current = slider.scrollLeft;
+  };
+
+  const onMouseLeave = () => setIsDragging(false);
+
+  const onMouseUp = () => {
+    setIsDragging(false);
+    setTimeout(() => (hasDragged.current = false), 50);
+  };
+
+  const onMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isDragging) return;
+
+    const slider = scrollRef.current;
+    if (!slider) return;
+
+    const x = e.pageX - slider.offsetLeft;
+    const walk = x - startX.current;
+
+    if (Math.abs(walk) > dragThreshold) {
+      hasDragged.current = true;
+    }
+
+    slider.scrollLeft = scrollLeftStart.current - walk * 1.5;
+  };
+  
   return (
     <div className="text-white p-4 max-w-4xl mx-auto">
       <h2 className="font-serif text-3xl lg:text-5xl font-bold lg:font-semibold text-center py-4 lg:py-20">
@@ -277,12 +324,12 @@ const NetworkFilter = ({
       </header>
 
       {/* Category Filters */}
-      <div className="flex gap-4 mb-8 overflow-x-auto pb-2 sm:grid sm:grid-cols-5 lg:overflow-visible">
-        {filters.map((filter) => (
+      {/* <div className="flex gap-4 mb-8 overflow-x-auto pb-2 w-full hidden-scrollbar">
+        {categories.map((filter) => (
           <Button
             key={filter}
             onClick={() => handleFilterClick(filter)}
-            className={`md:py-2.5 rounded lg:rounded-lg whitespace-nowrap min-w-max ${activeFilter === filter
+            className={`md:py-2.5 rounded lg:rounded-lg whitespace-nowrap min-w-max lg:min-w-2/12 ${activeFilter === filter
               ? "bg-white text-black hover:bg-white"
               : "text-white"
               }`}
@@ -290,7 +337,48 @@ const NetworkFilter = ({
             {filter}
           </Button>
         ))}
+      </div> */}
+
+
+  <div
+        ref={scrollRef}
+        className="flex gap-4 mb-8 overflow-x-auto pb-2
+        [&::-webkit-scrollbar]:hidden
+        [-ms-overflow-style:none]
+        [scrollbar-width:none]
+        scroll-smooth
+        snap-x snap-mandatory
+        cursor-grab active:cursor-grabbing"
+        onMouseDown={onMouseDown}
+        onMouseLeave={onMouseLeave}
+        onMouseUp={onMouseUp}
+        onMouseMove={onMouseMove}
+      >
+        {categories.map((filter) => (
+          <button
+            key={filter}
+            onClick={(e) => {
+              if (hasDragged.current) {
+                e.preventDefault();
+                return;
+              }
+              handleFilterClick(filter);
+            }}
+            className={`snap-start py-2.5 px-5 rounded-lg whitespace-nowrap
+              border border-white/10
+              transition-all duration-200
+              min-w-max
+              ${
+                activeFilter === filter
+                  ? "bg-white text-black"
+                  : "text-white hover:bg-white/10"
+              }`}
+          >
+            {filter}
+          </button>
+        ))}
       </div>
+
 
       {/* Loading State - Only show skeleton when truly empty and loading */}
       {isLoading && partners.length === 0 && !hasInitialData && (

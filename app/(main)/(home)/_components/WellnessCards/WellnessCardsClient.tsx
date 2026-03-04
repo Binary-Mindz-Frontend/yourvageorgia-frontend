@@ -119,8 +119,8 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { Plus, ChevronRight, ChevronLeft } from "lucide-react";
-import { useState, useRef, useEffect } from "react";
+import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 import { ICategory } from "@/types/category.types";
 import Image from "next/image";
@@ -208,7 +208,7 @@ export default function WellnessCardsClient({ categories }: Props) {
           return (
             <div
               key={card._id}
-              className="group relative h-[330px] overflow-hidden rounded-lg cursor-pointer"
+              className="group relative h-82.5 overflow-hidden rounded-lg cursor-pointer"
               role="button"
               aria-label={`${card.title} - ${card.description}`}
               onClick={() => handleCardClick(card.title)}
@@ -288,7 +288,7 @@ export default function WellnessCardsClient({ categories }: Props) {
               return (
                 <div
                   key={card._id}
-                  className="group relative flex-shrink-0 overflow-hidden rounded-lg cursor-pointer icon-trigger"
+                  className="group relative shrink-0 overflow-hidden rounded-lg cursor-pointer icon-trigger"
                   style={desktopCardStyle}
                   role="button"
                   aria-label={`${card.title} - ${card.description}`}
