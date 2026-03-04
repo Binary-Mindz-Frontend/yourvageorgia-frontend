@@ -81,7 +81,7 @@ const PartnerCard = memo(({ partner, onClick, priority = false }: PartnerCardPro
                     <span className="truncate">{locationText}</span>
                 </div>
                 <div className="flex items-center text-sm lg:text-lg gap-2 italic opacity-80">
-                    <span className="truncate">View Privileges</span>
+                    <span className="truncate">View privileges</span>
                     <ArrowRight className="w-4 h-4 shrink-0" />
                 </div>
             </div>

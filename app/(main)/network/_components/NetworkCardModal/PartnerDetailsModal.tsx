@@ -3,7 +3,7 @@ import ImageGallerySlider from "@/app/(main)/network/_components/ImageGallerySli
 import { WhatsappIcon } from "@/app/(main)/network/_components/NetworkCardModal/Icon/Icons";
 import { Button } from "@/components/ui/button";
 import { getCurrentUser } from "@/services/auth";
-import { Check, ChevronLeft, Copy, Globe, Instagram } from "lucide-react";
+import { ChevronLeft, Copy, Globe, Instagram } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -64,7 +64,7 @@ export default function PartnerDetailsModal({
 
   const handleViewCoupon = async () => {
     if (!user?.accessToken) {
-      toast.error("Please login first to view the coupon code.");
+      toast.error("Available to logged-in members only.");
       return;
     }
 
@@ -86,13 +86,13 @@ export default function PartnerDetailsModal({
 
       if (result?.success) {
         setFetchedCoupon(result.data.coupon);
-        toast.success("Coupon code retrieved successfully.");
+        toast.success("Code retrieved successfully.");
       } else {
-        throw new Error(result?.message || "Failed to fetch coupon.");
+        throw new Error(result?.message || "Failed to fetch code.");
       }
     } catch (error: any) {
-      console.error("Error fetching coupon:", error);
-      toast.error(error.message || "Something went wrong fetching the coupon.");
+      console.error("Error fetching code:", error);
+      toast.error(error.message || "Something went wrong fetching the code.");
     } finally {
       setIsFetchingCoupon(false);
     }
@@ -102,7 +102,7 @@ export default function PartnerDetailsModal({
     if (fetchedCoupon) {
       navigator.clipboard.writeText(fetchedCoupon);
       setIsCopied(true);
-      toast.success("Coupon code copied to clipboard!");
+      toast.success("Code copied to clipboard!");
 
       setTimeout(() => {
         setIsCopied(false);
@@ -153,23 +153,24 @@ export default function PartnerDetailsModal({
                   <Button
                     onClick={handleViewCoupon}
                     disabled={isFetchingCoupon}
-                    className="bg-white/10 hover:bg-white/20 text-white border border-white/30"
+                    className="bg-white/10 hover:bg-white/20 text-white border border-white/30 h-9 px-3 text-sm lg:h-10 lg:px-4 lg:text-base"
                   >
-                    {isFetchingCoupon ? "Loading..." : "View Coupon"}
+                    {isFetchingCoupon ? "Loading..." : "View code"}
                   </Button>
                 ) : (
-                  <div className="flex items-center gap-3">
-                    <div className="bg-white/10 border border-white/30 px-4 py-2 rounded-md font-mono text-lg tracking-wider">
+                  <div className="flex items-center gap-2 lg:gap-3">
+                    <div className="bg-white/10 border border-white/30 px-3 py-1.5 lg:px-4 lg:py-2 rounded-md font-normal text-base lg:text-lg tracking-wider">
                       {fetchedCoupon}
                     </div>
                     <Button
                       onClick={handleCopyCoupon}
                       variant="ghost"
                       size="icon"
-                      className="rounded-full bg-white/5 hover:bg-white/20 text-white border border-white/20 h-10 w-10 shrink-0"
+                      className="rounded-full bg-white/5 hover:bg-white/20 text-white h-8 w-8 lg:h-10 lg:w-10 shrink-0"
                       title="Copy Coupon"
                     >
-                      {isCopied ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
+                      {/* {isCopied ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />} */}
+                      <Copy className="w-3.5 h-3.5 lg:w-4 lg:h-4" />
                     </Button>
                   </div>
                 )}
