@@ -1,4 +1,7 @@
 "use client";
+
+import { fetchWithAuth } from "../admin.auth/admin.auth";
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_API;
 export interface IFilters {
@@ -20,6 +23,7 @@ export interface IUserResponse {
   statusCode: number;
   message: string;
   data: {
+    membership: any;
     _id: string;
     email: string;
     phone: string | null;
@@ -99,7 +103,7 @@ export const getUserById = async (
   userId: string
 ): Promise<IUserResponse["data"] | { error: string }> => {
   try {
-    const res = await fetch(`${BASE_URL}/user/${userId}`);
+    const res = await fetchWithAuth(`/user/${userId}`);
     const json = await res.json();
     if (!res.ok) return { error: json.message || "Failed to fetch user" };
 
