@@ -22,10 +22,10 @@ const SolenneMembership = () => {
               Founding Circle · Limited Capacity
             </h3>
             <p className=" lg:text-lg font-semibold text-center text-white ">
-              900 <span className="lg:text-lg">AED</span>
+              245 <span className="lg:text-lg">USD</span>
             </p>
             <p className=" text-center lg:text-lg mb-6 leading-relaxed text-gray-300">
-              12-month membership
+              Annual membership
             </p>
             <hr
               className="my-4"
@@ -45,24 +45,22 @@ const SolenneMembership = () => {
               <ul className="list-disc space-y-3 text-gray-300 lg:text-lg">
                 <li>
                   <span className="font-semibold">Preferred rates </span> 
-                  {`across Dubai's most considered wellness & lifestyle destinations`}
+                  {`across a global network of considered wellbeing and lifestyle destinations`}
                 </li>
 
                 <li>
                   <span className="font-semibold">
                     Private member gatherings
-                  </span> & curated partner experiences
+                  </span> and partner experiences
                 </li>
 
                 <li>
-                  <span className="font-semibold">Digital membership</span> ID
-                  recognised across our partner network
+                  <span className="font-semibold">Digital membership</span> recognised across our partner network
                 </li>
 
                 <li>
                   <span className="font-semibold">Member newsletter</span>{" "}
-                  featuring online partner privileges — extending beyond our
-                  core destinations
+                  ffeaturing extended partner privileges
                 </li>
               </ul>
             </div>
