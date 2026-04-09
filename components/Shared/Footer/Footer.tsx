@@ -20,7 +20,8 @@ const Footer = () => {
         </Link>
         <div className="flex items-center gap-15">
           <Link
-            href="https://www.instagram.com/solenneuae/"
+            href="https://www.instagram.com/insidesolenne/"
+            // href="https://www.instagram.com/solenneuae/"
             target="_blank"
             className="hover:opacity-80 transition-all"
             aria-label="Instagram"
