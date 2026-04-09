@@ -158,9 +158,8 @@ export default function SolenneMembership() {
         <div className="mt-12 lg:mt-38 text-center">
           <p className="text-gray-300 text-lg lg:text-2xl leading-relaxed font-light">
             {
-              `Solenne is an invitation-only lifestyle membership in Dubai, centred on a network of the city’s
-                most considered wellness and lifestyle destinations. Members are extended preferred access
-                and partner privileges, shaping a more elevated everyday.`
+              `Solenne is a private membership built around a global network of considered places, 
+              with preferred rates and privileges across leading wellbeing and lifestyle destinations.`
             }
           </p>
         </div>
