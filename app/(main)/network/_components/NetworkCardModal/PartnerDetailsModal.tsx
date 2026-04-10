@@ -2,9 +2,11 @@
 import ImageGallerySlider from "@/app/(main)/network/_components/ImageGallerySlider/ImageGallerySlider";
 import { WhatsappIcon } from "@/app/(main)/network/_components/NetworkCardModal/Icon/Icons";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, Globe, Instagram } from "lucide-react";
+import { getCurrentUser } from "@/services/auth";
+import { ChevronLeft, Copy, Globe, Instagram } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 export default function PartnerDetailsModal({
   onClose,
@@ -14,7 +16,12 @@ export default function PartnerDetailsModal({
   partner: any;
 }) {
   const [modalVisible, setModalVisible] = useState(false);
-  // console.log(partner);
+  const [user, setUser] = useState<any>(null);
+
+  // Coupon state
+  const [isFetchingCoupon, setIsFetchingCoupon] = useState(false);
+  const [fetchedCoupon, setFetchedCoupon] = useState<string | null>(null);
+  const [isCopied, setIsCopied] = useState(false);
 
   const galleryImages =
     partner?.gallery?.length > 0 ? partner.gallery : partner?.thumbnail;
@@ -24,6 +31,14 @@ export default function PartnerDetailsModal({
     partner.socials.whatsapp.trim().length > 0;
 
   useEffect(() => {
+    // Check if user is logged in
+    const checkUser = async () => {
+      const currentUser = await getCurrentUser();
+      setUser(currentUser);
+    };
+
+    checkUser();
+
     // Use setTimeout to schedule the state update after mount
     // This avoids synchronous state updates during render
     const timer = setTimeout(() => {
@@ -46,6 +61,54 @@ export default function PartnerDetailsModal({
       document.body.style.overflow = "unset";
     };
   }, [modalVisible]);
+
+  const handleViewCoupon = async () => {
+    if (!user?.accessToken) {
+      toast.error("Available to logged-in members only.");
+      return;
+    }
+
+    try {
+      setIsFetchingCoupon(true);
+
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_API}/partner/coupon/${partner._id}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `${user.accessToken}`,
+          },
+        }
+      );
+
+      const result = await res.json();
+
+      if (result?.success) {
+        setFetchedCoupon(result.data.coupon);
+        toast.success("Code retrieved successfully.");
+      } else {
+        throw new Error(result?.message || "Failed to fetch code.");
+      }
+    } catch (error: any) {
+      console.error("Error fetching code:", error);
+      toast.error(error.message || "Something went wrong fetching the code.");
+    } finally {
+      setIsFetchingCoupon(false);
+    }
+  };
+
+  const handleCopyCoupon = () => {
+    if (fetchedCoupon) {
+      navigator.clipboard.writeText(fetchedCoupon);
+      setIsCopied(true);
+      toast.success("Code copied to clipboard");
+
+      setTimeout(() => {
+        setIsCopied(false);
+      }, 2000);
+    }
+  };
 
   return (
     <div
@@ -81,6 +144,37 @@ export default function PartnerDetailsModal({
 
             {partner.offer?.[0] && (
               <p className="lg:text-lg mb-4 lg:mb-6">{partner.offer[0].title}</p>
+            )}
+
+            {/* coupon section */}
+            {partner.coupon && (
+              <div className="mb-4 lg:mb-6">
+                {!fetchedCoupon ? (
+                  <Button
+                    onClick={handleViewCoupon}
+                    disabled={isFetchingCoupon}
+                    className="bg-white/10 hover:bg-white/20 text-white border border-white/30 h-9 px-3 text-sm lg:h-10 lg:px-4 lg:text-base"
+                  >
+                    {isFetchingCoupon ? "Loading..." : "View code"}
+                  </Button>
+                ) : (
+                  <div className="flex items-center gap-2 lg:gap-3">
+                    <div className="bg-white/10 border border-white/30 px-3 py-1.5 lg:px-4 lg:py-2 rounded-md font-normal text-base lg:text-lg tracking-wider">
+                      {fetchedCoupon}
+                    </div>
+                    <Button
+                      onClick={handleCopyCoupon}
+                      variant="ghost"
+                      size="icon"
+                      className="rounded-full bg-white/5 hover:bg-white/20 text-white h-8 w-8 lg:h-10 lg:w-10 shrink-0"
+                      title="Copy Coupon"
+                    >
+                      {/* {isCopied ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />} */}
+                      <Copy className="w-3.5 h-3.5 lg:w-4 lg:h-4" />
+                    </Button>
+                  </div>
+                )}
+              </div>
             )}
 
             <p className="description leading-relaxed text-sm lg:text-base text-[#FFFFFFB3]">

@@ -34,7 +34,7 @@ const AdminLogin = () => {
         return;
       }
 
-      toast.success("Login successful!", { id: "admin-login" });
+      toast.success("Login successful", { id: "admin-login" });
       setTimeout(() => {
         router.push("/dashboard/admin/overview");
         router.refresh();

@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/sidebar";
 import useScrollTrigger from "@/hooks/useScrollTrigger";
 import { logout } from "@/services/auth";
-import { Key, LogOut, User } from "lucide-react";
+import { LogOut, User } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { ReactNode, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -22,7 +22,7 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
 
   const handleLogout = async () => {
     await logout();
-    toast.success("Logged out successfully!");
+    toast.success("Logged out successfully");
     setShowLogout(false);
     router.push("/dashboard/admin/login");
     router.refresh();

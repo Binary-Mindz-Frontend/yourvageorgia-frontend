@@ -87,7 +87,7 @@ export default function AddAccessCodeModal({
             if ("error" in res) {
                 toast.error(res.error);
             } else {
-                toast.success(`Access code ${isEdit ? "updated" : "created"} successfully!`);
+                toast.success(`Access code ${isEdit ? "updated" : "created"} successfully`);
                 if (onSuccess) onSuccess();
                 onOpenChange(false);
             }

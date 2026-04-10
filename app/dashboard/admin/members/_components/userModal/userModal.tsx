@@ -54,7 +54,12 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({ userId, isOpen, onClo
                     toast.error(result.error);
                     setUser(null);
                 } else {
-                    setUser(result);
+                    setUser({
+                        // @ts-ignore
+                        ...result.user,
+                        // @ts-ignore
+                        membership: result.membership,
+                    });
                 }
                 setLoading(false);
             }

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import NetworkCardModal from "@/app/(main)/network/_components/NetworkCardModal/PartnerDetailsModal";
@@ -7,11 +8,8 @@ import { useEffect, useState } from "react";
 import PartnersMap from "../PartnersMap/PartnersMap";
 
 export default function SolenneMembership() {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [partners, setPartners] = useState<any[]>([]);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [selectedPartner, setSelectedPartner] = useState<any | null>(null);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [hoveredPartner, setHoveredPartner] = useState<any | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -41,7 +39,6 @@ export default function SolenneMembership() {
 
         //  Find the first partner with isFeaturedMap === "true"
         const featuredPartner = res.data.find(
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           (p: any) => p.isFeaturedMap === "true"
         );
 
@@ -60,7 +57,6 @@ export default function SolenneMembership() {
   };
 
   // Helper function to get activity title
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const getActivityTitle = (partner: any) => {
     if (
       partner.activity &&
@@ -158,9 +154,8 @@ export default function SolenneMembership() {
         <div className="mt-12 lg:mt-38 text-center">
           <p className="text-gray-300 text-lg lg:text-2xl leading-relaxed font-light">
             {
-              `Solenne is an invitation-only lifestyle membership in Dubai, centred on a network of the city’s
-                most considered wellness and lifestyle destinations. Members are extended preferred access
-                and partner privileges, shaping a more elevated everyday.`
+              `Solenne is a private membership built around a global network of considered places, 
+              with preferred rates and privileges across leading wellbeing and lifestyle destinations.`
             }
           </p>
         </div>

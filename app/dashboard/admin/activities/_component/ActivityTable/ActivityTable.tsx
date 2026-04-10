@@ -121,7 +121,7 @@ const ActivityPage = () => {
       if ("error" in result) {
         toast.error(result.error);
       } else {
-        toast.success("Activity created successfully!");
+        toast.success("Activity created successfully");
         setInputValue("");
         setOpenAdd(false);
         setCurrentPage(1);
@@ -150,7 +150,7 @@ const ActivityPage = () => {
       if ("error" in result) {
         toast.error(result.error);
       } else {
-        toast.success("Activity updated successfully!");
+        toast.success("Activity updated successfully");
         setSelectedActivity(null);
         setInputValue("");
         setOpenEdit(false);
@@ -174,7 +174,7 @@ const ActivityPage = () => {
       if ("error" in result) {
         toast.error(result.error);
       } else {
-        toast.success("Activity deleted successfully!");
+        toast.success("Activity deleted successfully");
         setSelectedActivity(null);
         setOpenDelete(false);
         await fetchActivities();

@@ -1,6 +1,5 @@
 "use client";
 
-import { BeautifulLoader } from "@/components/Shared/Loading/BeautifulLoader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { resetPassword } from "@/services/auth";
@@ -23,7 +22,7 @@ export default function ResetPasswordPageClient() {
     setLoading(false);
 
     if (res.success) {
-      toast.success("Password reset successfully!");
+      toast.success("Password reset successfully");
       router.push("/login");
     } else {
       toast.error(res.message || "Failed to reset password");

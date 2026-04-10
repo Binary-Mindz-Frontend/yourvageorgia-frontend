@@ -244,7 +244,7 @@ const MembershipRegister = () => {
               className="text-white border-neutral-700"
             />
             <p className="text-[#FFFFFFB3] text-sm italic mt-2">
-              No Code? DM us for access.
+               No code? Message us.
             </p>
           </div>
 

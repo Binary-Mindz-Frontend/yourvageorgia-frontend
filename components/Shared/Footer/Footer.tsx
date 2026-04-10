@@ -3,6 +3,7 @@ import {
   FMailIcon,
   InstaIcon,
   LinkdeinIcon,
+  WhatsappIcon,
 } from "@/components/Icons/Icons";
 import { MailIcon } from "lucide-react";
 import Link from "next/link";
@@ -15,11 +16,12 @@ const Footer = () => {
           href="mailto:info@solenneuae.com"
           className="text-[#FFFFF0] text-base lg:text-xl mb-6 hover:text-white/80 transition-all"
         >
-          info@solenneuae.com
+          Get in touch
         </Link>
         <div className="flex items-center gap-15">
           <Link
-            href="https://www.instagram.com/solenneuae/"
+            href="https://www.instagram.com/insidesolenne/"
+            // href="https://www.instagram.com/solenneuae/"
             target="_blank"
             className="hover:opacity-80 transition-all"
             aria-label="Instagram"
@@ -35,6 +37,14 @@ const Footer = () => {
             <FacebookIcon />
           </Link>
           <Link
+            href="https://wa.me/971551232270"
+            target="_blank"
+            className="hover:opacity-80 transition-all"
+            aria-label="WhatsApp"
+          >
+            <WhatsappIcon />
+          </Link>
+          <Link
             href="https://www.linkedin.com/authwall?trk=bf&trkInfo=AQGXqAcWK4wbswAAAZqxpXEoD4mcJnAGmSM1Msx5d99qgkpMKZ--T61iUJSbaOz0iyhwX0F9XEOcp9Rfrte1i6K5tyS_uziDWNIwwPuixdPMebl2xfa3BztRBl6EjTYv2ZUp2J4=&original_referer=&sessionRedirect=https%3A%2F%2Fwww.linkedin.com%2Fcompany%2Fsolenne-uae%2F"
             target="_blank"
             className=" hover:opacity-80 transition-all"
@@ -43,7 +53,6 @@ const Footer = () => {
             <LinkdeinIcon />
           </Link>
           <Link
-
              href="mailto:info@solenneuae.com"
             className=" hover:opacity-80 transition-all"
             aria-label="Email"

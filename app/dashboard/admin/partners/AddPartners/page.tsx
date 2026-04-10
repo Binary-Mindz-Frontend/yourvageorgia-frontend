@@ -61,7 +61,7 @@ interface FormData {
   website: string;
   instagram: string;
   whatsapp: string;
-
+  coupon: string;
 }
 
 interface AddPartnerPageProps {
@@ -111,10 +111,11 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
       offers: [{ title: "", percentage: "", description: "", validUntil: "" }],
       about: "",
       terms: [""],
-      contacts: [{ officeName: "Head Office" }],
+      contacts: [],
       website: "",
       instagram: "",
       whatsapp: "",
+      coupon: "",
     },
   });
 
@@ -186,6 +187,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
         setValue("activity", partner.activity || []);
         setValue("isFeatured", partner.isFeatured === true || partner.isFeatured === "true");
         setValue("isFeaturedMap", partner.isFeaturedMap === true || partner.isFeaturedMap === "true");
+        setValue("coupon", partner.coupon || "");
 
         // Handle gender preference
         if (partner.womenOnly === true || partner.womenOnly === "true") {
@@ -385,6 +387,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
         isFeaturedMap: data.isFeaturedMap,
         womenOnly: data.genderPreference === 'womenOnly',
         mixed: data.genderPreference === 'mixed',
+        coupon: data.coupon,
         offer: data.offers.map(o => ({
           title: o.title,
           description: o.description,
@@ -415,7 +418,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
           toast.error("Failed to update partner: " + res.error);
           return;
         }
-        toast.success("Partner updated successfully!");
+        toast.success("Partner updated successfully");
       } else {
         res = await createPartner(payload);
 
@@ -428,7 +431,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
           return;
         }
 
-        toast.success("Partner created successfully!");
+        toast.success("Partner created successfully");
       }
 
       setTimeout(() => {
@@ -891,7 +894,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
         {/* CONTACTS */}
         <div>
           <div className="flex justify-between">
-            <Label className="text-white">Contacts *</Label>
+            <Label className="text-white">Contacts</Label>
             <Button
               type="button"
               className="bg-neutral-700 hover:bg-neutral-600"
@@ -932,7 +935,6 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
                 {/* Row 1: Office Name and Phone */}
                 <Input
                   {...register(`contacts.${i}.officeName`, {
-                    required: "Office name is required",
                     minLength: {
                       value: 2,
                       message: "Office name must be at least 2 characters",
@@ -942,9 +944,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
                   className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
                 />
                 <Input
-                  {...register(`contacts.${i}.phone`, {
-                    required: "Phone is required",
-                  })}
+                  {...register(`contacts.${i}.phone`)}
                   placeholder="Phone"
                   className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
                 />
@@ -957,7 +957,6 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
                 />
                 <Input
                   {...register(`contacts.${i}.email`, {
-                    required: "Email is required",
                     pattern: {
                       value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
                       message: "Please enter a valid email address",
@@ -971,16 +970,12 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
 
                 {/* Row 3: Address and Area */}
                 <Input
-                  {...register(`contacts.${i}.address`, {
-                    required: "Address is required",
-                  })}
+                  {...register(`contacts.${i}.address`)}
                   placeholder="Address"
                   className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
                 />
                 <Input
-                  {...register(`contacts.${i}.area`, {
-                    required: "Area is required", // ADD THIS NEW FIELD
-                  })}
+                  {...register(`contacts.${i}.area`)}
                   placeholder="Area"
                   className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
                 />
@@ -990,9 +985,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
                   {" "}
                   {/* THIS MAKES IT FULL WIDTH */}
                   <Input
-                    {...register(`contacts.${i}.addressUrl`, {
-                      required: "Address URL is required",
-                    })}
+                    {...register(`contacts.${i}.addressUrl`)}
                     placeholder="Address URL"
                     className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
                   />
@@ -1044,6 +1037,17 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
             )}
           </div>
         </div>
+
+        {/* COUPON */}
+        <div>
+          <Label className="text-white mb-1">Coupon</Label>
+          <Input
+            {...register("coupon")}
+            className="bg-neutral-900 text-white border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50"
+            placeholder="Coupon Code"
+          />
+        </div>
+
         {/* FEATURED CHECK */}
         <div className="flex gap-3 items-center">
           <Controller

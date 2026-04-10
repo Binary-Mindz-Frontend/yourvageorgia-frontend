@@ -21,7 +21,7 @@ export default function ForgetPasswordPage() {
     setLoading(false);
 
     if (res.success) {
-      toast.success("OTP sent to your email!");
+      toast.success("OTP sent to your email");
       router.push(`/forget-password/verify?email=${email}`);
     } else {
       toast.error(res.message || "Something went wrong");

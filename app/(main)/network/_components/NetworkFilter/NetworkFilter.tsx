@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { getPartnerFiltered } from "@/services/partner/getpartner";
 import { Partner, PartnerCategory } from "@/types/partner.types";
-import { ChevronDown, ListFilter } from "lucide-react";
+import { ArrowUp, ListFilter } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import PartnerDetailsModal from "../NetworkCardModal/PartnerDetailsModal";
@@ -33,13 +33,15 @@ interface NetworkFilterProps {
   };
   initialFilter?: string;
   searchQuery?: string;
+  categories: string[];
 }
 
 const NetworkFilter = ({
   initialData,
   initialMeta,
   initialFilter = "All",
-  searchQuery: initialSearchQuery
+  searchQuery: initialSearchQuery,
+  categories = ["All", "Movement", "Recovery", "Radiance", "Taste"]
 }: NetworkFilterProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -52,6 +54,9 @@ const NetworkFilter = ({
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(initialMeta?.totalPages || initialMeta?.totalPage || 1);
   const [totalPartners, setTotalPartners] = useState(initialMeta?.total || 0);
+  const [showScrollTop, setShowScrollTop] = useState(false);
+
+  const observerTarget = useRef<HTMLDivElement>(null);
 
   // UX improvement: Track first render to prevent "no partners found" flicker
   const isFirstRender = useRef(true);
@@ -151,8 +156,7 @@ const NetworkFilter = ({
   // Sync search query
   useEffect(() => {
     if (searchQuery) {
-      const filters = ["All", "Movement", "Recovery", "Radiance", "Taste"];
-      const matchedCategory = filters.find(
+      const matchedCategory = categories.find(
         (filter) => filter.toLowerCase() === searchQuery.toLowerCase()
       );
       if (matchedCategory && matchedCategory !== activeFilter) {
@@ -185,8 +189,6 @@ const NetworkFilter = ({
     setCurrentPage(1);
     fetchPartners(1, activeFilter, appliedFilters, true);
   }, [appliedFiltersKey]);
-
-  const filters = ["All", "Movement", "Recovery", "Radiance", "Taste"];
 
   const getCategoryTitles = useCallback((partner: Partner): string[] => {
     if (partner.categories && Array.isArray(partner.categories)) {
@@ -252,10 +254,95 @@ const NetworkFilter = ({
     }
   }, [isLoading, hasMore]);
 
+  // Infinite Scroll Observer
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !isLoading) {
+          handleLoadMore();
+        }
+      },
+      { rootMargin: "200px", threshold: 0.1 }
+    );
+
+    const currentTarget = observerTarget.current;
+    if (currentTarget) {
+      observer.observe(currentTarget);
+    }
+
+    return () => {
+      if (currentTarget) {
+        observer.unobserve(currentTarget);
+      }
+    };
+  }, [hasMore, isLoading, handleLoadMore]);
+
+  // Scroll to Top Listener
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 500);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   const handlePartnerClick = useCallback((partner: Partner) => {
     setSelectedPartner(partner);
     setIsModalOpen(true);
   }, []);
+
+  // Custom scroll functionality
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const [isDragging, setIsDragging] = useState(false);
+
+  const startX = useRef(0);
+  const scrollLeftStart = useRef(0);
+  const hasDragged = useRef(false);
+
+  const dragThreshold = 5;
+
+  // ------------------------
+  // Drag Logic
+  // ------------------------
+  const onMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    const slider = scrollRef.current;
+    if (!slider) return;
+
+    setIsDragging(true);
+    hasDragged.current = false;
+
+    startX.current = e.pageX - slider.offsetLeft;
+    scrollLeftStart.current = slider.scrollLeft;
+  };
+
+  const onMouseLeave = () => setIsDragging(false);
+
+  const onMouseUp = () => {
+    setIsDragging(false);
+    setTimeout(() => (hasDragged.current = false), 50);
+  };
+
+  const onMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isDragging) return;
+
+    const slider = scrollRef.current;
+    if (!slider) return;
+
+    const x = e.pageX - slider.offsetLeft;
+    const walk = x - startX.current;
+
+    if (Math.abs(walk) > dragThreshold) {
+      hasDragged.current = true;
+    }
+
+    slider.scrollLeft = scrollLeftStart.current - walk * 1.5;
+  };
 
   return (
     <div className="text-white p-4 max-w-4xl mx-auto">
@@ -276,21 +363,44 @@ const NetworkFilter = ({
         </Button>
       </header>
 
-      {/* Category Filters */}
-      <div className="flex gap-4 mb-8 overflow-x-auto pb-2 sm:grid sm:grid-cols-5 lg:overflow-visible">
-        {filters.map((filter) => (
-          <Button
+      <div
+        ref={scrollRef}
+        className="flex gap-4 mb-8 overflow-x-auto pb-2
+        [&::-webkit-scrollbar]:hidden
+        [-ms-overflow-style:none]
+        [scrollbar-width:none]
+        scroll-smooth
+        snap-x snap-mandatory
+        cursor-grab active:cursor-grabbing"
+        onMouseDown={onMouseDown}
+        onMouseLeave={onMouseLeave}
+        onMouseUp={onMouseUp}
+        onMouseMove={onMouseMove}
+      >
+        {categories.map((filter) => (
+          <button
             key={filter}
-            onClick={() => handleFilterClick(filter)}
-            className={`md:py-2.5 rounded lg:rounded-lg whitespace-nowrap min-w-max ${activeFilter === filter
-              ? "bg-white text-black hover:bg-white"
-              : "text-white"
+            onClick={(e) => {
+              if (hasDragged.current) {
+                e.preventDefault();
+                return;
+              }
+              handleFilterClick(filter);
+            }}
+            className={`snap-start py-2.5 px-5 rounded-lg whitespace-nowrap
+              border border-white/10
+              transition-all duration-200
+              min-w-max
+              ${activeFilter === filter
+                ? "bg-white text-black"
+                : "text-white hover:bg-white/10"
               }`}
           >
             {filter}
-          </Button>
+          </button>
         ))}
       </div>
+
 
       {/* Loading State - Only show skeleton when truly empty and loading */}
       {isLoading && partners.length === 0 && !hasInitialData && (
@@ -323,27 +433,38 @@ const NetworkFilter = ({
         )}
       </div>
 
-      {/* Load More Button */}
-      {!isLoading && hasMore && displayedPartners.length > 0 && (
-        <div className="mt-10 flex flex-col items-center gap-2">
-          <button
-            onClick={handleLoadMore}
-            className="p-3 rounded-full hover:bg-black/50 cursor-pointer transition"
-            aria-label="Load more partners"
-          >
-            <ChevronDown className="lg:w-10 lg:h-10" aria-hidden="true" />
-          </button>
+      {/* Infinite Scroll Trigger */}
+      {hasMore && displayedPartners.length > 0 && (
+        <div ref={observerTarget} className="h-10 w-full" />
+      )}
+
+      {isLoading && partners.length > 0 && (
+        <div className="mt-6 flex justify-center">
+          <BeautifulLoader size="sm" text="Loading more partners" />
+        </div>
+      )}
+
+      {displayedPartners.length > 0 && (
+        <div className="mt-10 mb-8 flex flex-col items-center gap-2">
           <p className="text-sm opacity-70">
-            Showing {partners.length} of {totalPartners}
+            {hasMore
+              ? `Showing ${partners.length} of ${totalPartners}`
+              : `Showing all ${totalPartners} partners`}
           </p>
         </div>
       )}
 
-      {isLoading && partners.length > 0 && (
-        <div className="mt-10 flex justify-center">
-          <BeautifulLoader size="sm" text="Loading more partners" />
-        </div>
-      )}
+      {/* Scroll to Top Button */}
+      <button
+        onClick={scrollToTop}
+        className={cn(
+          "fixed bottom-6 right-6 p-2 md:p-3 rounded-full  bg-white/10 hover:bg-white/20 md:bg-transparent md:hover:bg-white/10 text-white backdrop-blur-md border border-white/20 transition-all duration-300 z-50 group shadow-xl",
+          showScrollTop ? "translate-y-0 opacity-100" : "translate-y-16 opacity-0 pointer-events-none"
+        )}
+        aria-label="Scroll to top"
+      >
+        <ArrowUp className="w-4 h-4 md:w-5 md:h-5 group-hover:-translate-y-1 transition-transform" />
+      </button>
 
       {/* Partner Modal */}
       {isModalOpen && selectedPartner && (

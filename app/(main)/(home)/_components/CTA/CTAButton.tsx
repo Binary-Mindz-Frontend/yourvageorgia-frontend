@@ -52,7 +52,7 @@ const CTAButton = () => {
         href="/network"
         className="text-white mt-6 pb-1 text-sm lg:text-base border-b-2 border-[#565656] hover:opacity-80 transition-opacity inline-block"
       >
-        Discover more
+        Discover all privileges
       </Link>
     </div>
   );
