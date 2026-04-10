@@ -60,7 +60,7 @@ const SolenneMembership = () => {
 
                 <li>
                   <span className="font-semibold">Member newsletter</span>{" "}
-                  ffeaturing extended partner privileges
+                  featuring extended partner privileges
                 </li>
               </ul>
             </div>

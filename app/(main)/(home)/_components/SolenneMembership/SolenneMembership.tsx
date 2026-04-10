@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import NetworkCardModal from "@/app/(main)/network/_components/NetworkCardModal/PartnerDetailsModal";
@@ -7,11 +8,8 @@ import { useEffect, useState } from "react";
 import PartnersMap from "../PartnersMap/PartnersMap";
 
 export default function SolenneMembership() {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [partners, setPartners] = useState<any[]>([]);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [selectedPartner, setSelectedPartner] = useState<any | null>(null);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [hoveredPartner, setHoveredPartner] = useState<any | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -41,7 +39,6 @@ export default function SolenneMembership() {
 
         //  Find the first partner with isFeaturedMap === "true"
         const featuredPartner = res.data.find(
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           (p: any) => p.isFeaturedMap === "true"
         );
 
@@ -60,7 +57,6 @@ export default function SolenneMembership() {
   };
 
   // Helper function to get activity title
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const getActivityTitle = (partner: any) => {
     if (
       partner.activity &&
