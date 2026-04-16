@@ -101,7 +101,7 @@ export default function SolenneMembership() {
             </button>
 
             {isCityOpen && (
-              <div className="absolute top-full left-0 mt-2 w-full min-w-40 bg-black border border-white/10 text-white shadow-2xl rounded-xl overflow-hidden py-1 animate-in fade-in zoom-in duration-200 origin-top-left">
+              <div className="absolute top-full left-0 mt-2 w-full min-w-40 bg-black border border-white/10 text-white shadow-2xl rounded-xl p-1.5 animate-in fade-in zoom-in duration-200 origin-top-left space-y-0.5">
                 {["Dubai", "London"].map((option) => (
                   <button
                     key={option}
@@ -109,7 +109,7 @@ export default function SolenneMembership() {
                       setCity(option);
                       setIsCityOpen(false);
                     }}
-                    className={`w-full text-left px-5 py-2.5 text-sm font-light transition-colors hover:bg-[#2A2A2A] cursor-pointer ${city === option ? 'bg-[#2A2A2A]' : ''}`}
+                    className={`w-full text-left px-4 py-2 text-sm font-light transition-all duration-200 rounded-lg hover:bg-white/10 cursor-pointer text-white/70 hover:text-white ${city === option ? 'text-white font-normal bg-white/5' : ''}`}
                   >
                     {option}
                   </button>
