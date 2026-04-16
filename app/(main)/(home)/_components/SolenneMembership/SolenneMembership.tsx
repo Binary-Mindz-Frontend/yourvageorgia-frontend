@@ -1,7 +1,15 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import NetworkCardModal from "@/app/(main)/network/_components/NetworkCardModal/PartnerDetailsModal";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { getPartners } from "@/services/partner/getpartner";
 import { ArrowRight } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -9,6 +17,7 @@ import PartnersMap from "../PartnersMap/PartnersMap";
 
 export default function SolenneMembership() {
   const [partners, setPartners] = useState<any[]>([]);
+  const [city, setCity] = useState("Dubai");
   const [selectedPartner, setSelectedPartner] = useState<any | null>(null);
   const [hoveredPartner, setHoveredPartner] = useState<any | null>(null);
   const [showModal, setShowModal] = useState(false);
@@ -72,10 +81,27 @@ export default function SolenneMembership() {
   const displayPartner = hoveredPartner || selectedPartner;
 
   return (
-    <div className="text-white flex items-center justify-center my-16 lg:my-38 p-4 lg:px-12">
-      <div className="w-full">
+    <div className="text-white flex flex-col items-center justify-center my-16 lg:my-38 p-4 lg:px-12">
+      <div className="w-full max-w-360">
+        {/* City Selection Dropdown */}
+        <div className="flex justify-start mb-6 lg:mb-10">
+          {/* @ts-ignore */}
+          <Select value={city} onValueChange={setCity} modal={false}>
+            <SelectTrigger className="w-auto min-w-35 bg-black/40 backdrop-blur-md border border-white/10 text-white rounded-full px-5 h-10 focus:ring-0 focus:ring-offset-0 hover:bg-white/5 transition-all font-light tracking-wide shadow-lg">
+              <SelectValue placeholder="Select City" />
+            </SelectTrigger>
+            <SelectContent 
+              onCloseAutoFocus={(e) => e.preventDefault()}
+              className="bg-black border border-white/10 text-white shadow-2xl z-50"
+            >
+              <SelectItem value="Dubai" className="focus:bg-[#2A2A2A] focus:text-white cursor-pointer py-2.5 font-light">Dubai</SelectItem>
+              <SelectItem value="London" className="focus:bg-[#2A2A2A] focus:text-white cursor-pointer py-2.5 font-light">London</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
         {/* Main Grid Container */}
-        <div className="grid grid-cols-1 lg:grid-cols-[40%_60%] gap-0 overflow-hidden rounded-b-xl lg:rounded-none">
+        <div className="grid grid-cols-1 lg:grid-cols-[40%_60%] gap-0 overflow-hidden rounded-b-xl lg:rounded-none border border-white/5">
           {/* Left Section */}
           <div className="relative bg-black order-1 lg:order-0 border-t-2 border-black">
             {/* Background Image */}

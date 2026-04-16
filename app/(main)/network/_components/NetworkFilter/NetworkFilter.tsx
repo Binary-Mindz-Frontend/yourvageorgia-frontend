@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -15,6 +17,13 @@ import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from
 import PartnerDetailsModal from "../NetworkCardModal/PartnerDetailsModal";
 import { FilterDrawer } from "./FilterDrawer";
 import PartnerCard from "./PartnerCard";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface AppliedFilters {
   locations: string[];
@@ -55,6 +64,7 @@ const NetworkFilter = ({
   const [totalPages, setTotalPages] = useState(initialMeta?.totalPages || initialMeta?.totalPage || 1);
   const [totalPartners, setTotalPartners] = useState(initialMeta?.total || 0);
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [city, setCity] = useState("Dubai");
 
   const observerTarget = useRef<HTMLDivElement>(null);
 
@@ -350,8 +360,22 @@ const NetworkFilter = ({
         The Network
       </h2>
 
-      {/* Filter Button */}
-      <header className="flex justify-end mb-8">
+      {/* City Selection & Filter Header */}
+      <header className="flex items-center justify-between mb-8">
+        {/* @ts-ignore */}
+        <Select value={city} onValueChange={setCity} modal={false}>
+          <SelectTrigger className="w-auto min-w-35 bg-black/40 backdrop-blur-md border border-white/10 text-white rounded-full px-5 h-10 focus:ring-0 focus:ring-offset-0 hover:bg-white/5 transition-all font-light tracking-wide shadow-lg">
+            <SelectValue placeholder="Select City" />
+          </SelectTrigger>
+          <SelectContent 
+            onCloseAutoFocus={(e) => e.preventDefault()}
+            className="bg-black border border-white/10 text-white shadow-2xl z-50"
+          >
+            <SelectItem value="Dubai" className="focus:bg-[#2A2A2A] focus:text-white cursor-pointer py-2.5 font-light">Dubai</SelectItem>
+            <SelectItem value="London" className="focus:bg-[#2A2A2A] focus:text-white cursor-pointer py-2.5 font-light">London</SelectItem>
+          </SelectContent>
+        </Select>
+
         <Button
           variant="ghost"
           size="lg"
