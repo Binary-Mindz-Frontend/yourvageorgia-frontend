@@ -90,7 +90,7 @@ export default function SolenneMembership() {
     <div className="text-white flex flex-col items-center justify-center my-16 lg:my-38 p-4 lg:px-12">
       <div className="w-full max-w-360">
         {/* City Selection Dropdown */}
-        <div className="flex justify-start mb-6 lg:mb-10 relative ">
+        <div className="flex justify-start mb-6 lg:mb-10 relative z-30">
           <div className="relative" ref={cityRef}>
             <button
               onClick={() => setIsCityOpen(!isCityOpen)}

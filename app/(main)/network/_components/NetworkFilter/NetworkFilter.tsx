@@ -368,7 +368,7 @@ const NetworkFilter = ({
       </h2>
 
       {/* City Selection & Filter Header */}
-      <header className="flex items-center justify-between mb-8 relative">
+      <header className="flex items-center justify-between mb-8 relative z-30">
         <div className="relative" ref={cityRef}>
           <button
             onClick={() => setIsCityOpen(!isCityOpen)}
