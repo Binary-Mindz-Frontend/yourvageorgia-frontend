@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
+
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -11,19 +11,12 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { getPartnerFiltered } from "@/services/partner/getpartner";
 import { Partner, PartnerCategory } from "@/types/partner.types";
-import { ArrowUp, ListFilter } from "lucide-react";
+import { ArrowUp, ChevronDown, ListFilter } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import PartnerDetailsModal from "../NetworkCardModal/PartnerDetailsModal";
 import { FilterDrawer } from "./FilterDrawer";
 import PartnerCard from "./PartnerCard";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 interface AppliedFilters {
   locations: string[];
@@ -65,6 +58,8 @@ const NetworkFilter = ({
   const [totalPartners, setTotalPartners] = useState(initialMeta?.total || 0);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [city, setCity] = useState("Dubai");
+  const [isCityOpen, setIsCityOpen] = useState(false);
+  const cityRef = useRef<HTMLDivElement>(null);
 
   const observerTarget = useRef<HTMLDivElement>(null);
 
@@ -294,7 +289,19 @@ const NetworkFilter = ({
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (cityRef.current && !cityRef.current.contains(event.target as Node)) {
+        setIsCityOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, []);
 
   const scrollToTop = () => {
@@ -361,20 +368,33 @@ const NetworkFilter = ({
       </h2>
 
       {/* City Selection & Filter Header */}
-      <header className="flex items-center justify-between mb-8">
-        {/* @ts-ignore */}
-        <Select value={city} onValueChange={setCity} modal={false}>
-          <SelectTrigger className="w-auto min-w-35 bg-black/40 backdrop-blur-md border border-white/10 text-white rounded-full px-5 h-10 focus:ring-0 focus:ring-offset-0 hover:bg-white/5 transition-all font-light tracking-wide shadow-lg">
-            <SelectValue placeholder="Select City" />
-          </SelectTrigger>
-          <SelectContent 
-            onCloseAutoFocus={(e) => e.preventDefault()}
-            className="bg-black border border-white/10 text-white shadow-2xl z-50"
+      <header className="flex items-center justify-between mb-8 relative z-50">
+        <div className="relative" ref={cityRef}>
+          <button
+            onClick={() => setIsCityOpen(!isCityOpen)}
+            className="w-auto min-w-35 bg-black/40 backdrop-blur-md border border-white/10 text-white rounded-full px-5 h-10 focus:outline-none hover:bg-white/5 transition-all font-light tracking-wide shadow-lg flex items-center justify-between gap-2 cursor-pointer"
           >
-            <SelectItem value="Dubai" className="focus:bg-[#2A2A2A] focus:text-white cursor-pointer py-2.5 font-light">Dubai</SelectItem>
-            <SelectItem value="London" className="focus:bg-[#2A2A2A] focus:text-white cursor-pointer py-2.5 font-light">London</SelectItem>
-          </SelectContent>
-        </Select>
+            <span className="truncate">{city}</span>
+            <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isCityOpen ? 'rotate-180' : ''}`} />
+          </button>
+
+          {isCityOpen && (
+            <div className="absolute top-full left-0 mt-2 w-full min-w-40 bg-black border border-white/10 text-white shadow-2xl rounded-xl overflow-hidden py-1 animate-in fade-in zoom-in duration-200 origin-top-left">
+              {["Dubai", "London"].map((option) => (
+                <button
+                  key={option}
+                  onClick={() => {
+                    setCity(option);
+                    setIsCityOpen(false);
+                  }}
+                  className={`w-full text-left px-5 py-2.5 text-sm font-light transition-colors hover:bg-[#2A2A2A] cursor-pointer ${city === option ? 'bg-[#2A2A2A]' : ''}`}
+                >
+                  {option}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
 
         <Button
           variant="ghost"

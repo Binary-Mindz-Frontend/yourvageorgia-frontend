@@ -1,19 +1,12 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import NetworkCardModal from "@/app/(main)/network/_components/NetworkCardModal/PartnerDetailsModal";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { getPartners } from "@/services/partner/getpartner";
-import { ArrowRight } from "lucide-react";
-import { useEffect, useState } from "react";
+import { ArrowRight, ChevronDown } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import PartnersMap from "../PartnersMap/PartnersMap";
+import { getPartners } from "@/services/partner/getpartner";
 
 export default function SolenneMembership() {
   const [partners, setPartners] = useState<any[]>([]);
@@ -23,6 +16,8 @@ export default function SolenneMembership() {
   const [showModal, setShowModal] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isLargeScreen, setIsLargeScreen] = useState(false);
+  const [isCityOpen, setIsCityOpen] = useState(false);
+  const cityRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleResize = () => {
@@ -33,7 +28,18 @@ export default function SolenneMembership() {
     handleResize();
 
     window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (cityRef.current && !cityRef.current.contains(event.target as Node)) {
+        setIsCityOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, []);
 
   // Load partners
@@ -84,20 +90,33 @@ export default function SolenneMembership() {
     <div className="text-white flex flex-col items-center justify-center my-16 lg:my-38 p-4 lg:px-12">
       <div className="w-full max-w-360">
         {/* City Selection Dropdown */}
-        <div className="flex justify-start mb-6 lg:mb-10">
-          {/* @ts-ignore */}
-          <Select value={city} onValueChange={setCity} modal={false}>
-            <SelectTrigger className="w-auto min-w-35 bg-black/40 backdrop-blur-md border border-white/10 text-white rounded-full px-5 h-10 focus:ring-0 focus:ring-offset-0 hover:bg-white/5 transition-all font-light tracking-wide shadow-lg">
-              <SelectValue placeholder="Select City" />
-            </SelectTrigger>
-            <SelectContent 
-              onCloseAutoFocus={(e) => e.preventDefault()}
-              className="bg-black border border-white/10 text-white shadow-2xl z-50"
+        <div className="flex justify-start mb-6 lg:mb-10 relative z-50">
+          <div className="relative" ref={cityRef}>
+            <button
+              onClick={() => setIsCityOpen(!isCityOpen)}
+              className="w-auto min-w-35 bg-black/40 backdrop-blur-md border border-white/10 text-white rounded-full px-5 h-10 focus:outline-none hover:bg-white/5 transition-all font-light tracking-wide shadow-lg flex items-center justify-between gap-2 cursor-pointer"
             >
-              <SelectItem value="Dubai" className="focus:bg-[#2A2A2A] focus:text-white cursor-pointer py-2.5 font-light">Dubai</SelectItem>
-              <SelectItem value="London" className="focus:bg-[#2A2A2A] focus:text-white cursor-pointer py-2.5 font-light">London</SelectItem>
-            </SelectContent>
-          </Select>
+              <span className="truncate">{city}</span>
+              <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isCityOpen ? 'rotate-180' : ''}`} />
+            </button>
+
+            {isCityOpen && (
+              <div className="absolute top-full left-0 mt-2 w-full min-w-40 bg-black border border-white/10 text-white shadow-2xl rounded-xl overflow-hidden py-1 animate-in fade-in zoom-in duration-200 origin-top-left">
+                {["Dubai", "London"].map((option) => (
+                  <button
+                    key={option}
+                    onClick={() => {
+                      setCity(option);
+                      setIsCityOpen(false);
+                    }}
+                    className={`w-full text-left px-5 py-2.5 text-sm font-light transition-colors hover:bg-[#2A2A2A] cursor-pointer ${city === option ? 'bg-[#2A2A2A]' : ''}`}
+                  >
+                    {option}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Main Grid Container */}

@@ -39,7 +39,7 @@ export default function RootLayout({
         <link rel="dns-prefetch" href={process.env.NEXT_PUBLIC_BASE_API} />
       </head>
       <body
-        className={`${inter.variable} ${cormorant.variable} font-sans antialiased`}
+        className={`${inter.variable} ${cormorant.variable} font-sans antialiased max-w-screen overflow-x-hidden`}
       >
         <Providers>{children}</Providers>
       </body>
