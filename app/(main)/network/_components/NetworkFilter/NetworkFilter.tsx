@@ -17,6 +17,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from
 import PartnerDetailsModal from "../NetworkCardModal/PartnerDetailsModal";
 import { FilterDrawer } from "./FilterDrawer";
 import PartnerCard from "./PartnerCard";
+import { useCity } from "@/context/CityContext";
 
 interface AppliedFilters {
   locations: string[];
@@ -57,7 +58,7 @@ const NetworkFilter = ({
   const [totalPages, setTotalPages] = useState(initialMeta?.totalPages || initialMeta?.totalPage || 1);
   const [totalPartners, setTotalPartners] = useState(initialMeta?.total || 0);
   const [showScrollTop, setShowScrollTop] = useState(false);
-  const [city, setCity] = useState("Dubai");
+  const { city, setCity } = useCity();
   const [isCityOpen, setIsCityOpen] = useState(false);
   const cityRef = useRef<HTMLDivElement>(null);
 
@@ -111,6 +112,7 @@ const NetworkFilter = ({
         activity: filters.activities.length > 0 ? filters.activities : undefined,
         womenOnly: filters.gender === 'women' ? true : undefined,
         mixed: filters.gender === 'mixed' ? true : undefined,
+        city: city,
       });
 
       if (controller.signal.aborted) return;
@@ -145,7 +147,7 @@ const NetworkFilter = ({
         isFirstRender.current = false;
       }
     }
-  }, []);
+  }, [city]);
 
   // Sync URL filter changes
   useEffect(() => {
@@ -186,14 +188,18 @@ const NetworkFilter = ({
     };
   }, [currentPage]);
 
-  // Handle filter changes (locations/activities/gender)
+  // Handle filter changes (locations/activities/gender) or City Change
   useEffect(() => {
-    // Skip if it's the first render and we should use initial data
-    if (shouldUseInitialData.current) return;
+    // Skip only if it's the first render AND no city change has occurred yet
+    // Actually, we want to trigger fetch if city is different from what might be in initial data
+    if (shouldUseInitialData.current) {
+      shouldUseInitialData.current = false;
+      return;
+    }
 
     setCurrentPage(1);
     fetchPartners(1, activeFilter, appliedFilters, true);
-  }, [appliedFiltersKey]);
+  }, [appliedFiltersKey, city]);
 
   const getCategoryTitles = useCallback((partner: Partner): string[] => {
     if (partner.categories && Array.isArray(partner.categories)) {
@@ -374,20 +380,20 @@ const NetworkFilter = ({
             onClick={() => setIsCityOpen(!isCityOpen)}
             className="w-auto min-w-35 bg-black/40 backdrop-blur-md border border-white/10 text-white rounded-full px-5 h-10 focus:outline-none hover:bg-white/5 transition-all font-light tracking-wide shadow-lg flex items-center justify-between gap-2 cursor-pointer"
           >
-            <span className="truncate">{city}</span>
+            <span className="capitalize">{city}</span>
             <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isCityOpen ? 'rotate-180' : ''}`} />
           </button>
 
           {isCityOpen && (
             <div className="absolute top-full left-0 mt-2 w-full min-w-40 bg-black border border-white/10 text-white shadow-2xl rounded-xl p-1.5 animate-in fade-in zoom-in duration-200 origin-top-left space-y-0.5">
-              {["Dubai", "London"].map((option) => (
+              {["dubai", "london"].map((option) => (
                 <button
                   key={option}
                   onClick={() => {
-                    setCity(option);
+                    setCity(option as any);
                     setIsCityOpen(false);
                   }}
-                  className={`w-full text-left px-4 py-2 text-sm font-light transition-all duration-200 rounded-lg hover:bg-white/10 cursor-pointer text-white/70 hover:text-white ${city === option ? 'text-white font-normal bg-white/5' : ''}`}
+                  className={`w-full text-left px-4 py-2 text-sm font-light transition-all duration-200 rounded-lg hover:bg-white/10 cursor-pointer text-white/70 hover:text-white capitalize ${city === option ? 'text-white font-normal bg-white/5' : ''}`}
                 >
                   {option}
                 </button>

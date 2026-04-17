@@ -15,6 +15,7 @@ export interface IGetPartnersParams {
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
   womenOnly?: boolean;
+  city?: string;
 }
 
 export interface IPartnerResponse {
@@ -41,6 +42,7 @@ export interface IGetPartnerFilters {
   area?: string | string[];
   womenOnly?: boolean;
   mixed?: boolean;
+  city?: string;
 }
 
 export interface IGetAllPartnersResponse {

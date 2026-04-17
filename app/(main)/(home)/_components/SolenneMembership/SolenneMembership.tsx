@@ -7,10 +7,11 @@ import { ArrowRight, ChevronDown } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import PartnersMap from "../PartnersMap/PartnersMap";
 import { getPartners } from "@/services/partner/getpartner";
+import { useCity } from "@/context/CityContext";
 
 export default function SolenneMembership() {
+  const { city, setCity } = useCity();
   const [partners, setPartners] = useState<any[]>([]);
-  const [city, setCity] = useState("Dubai");
   const [selectedPartner, setSelectedPartner] = useState<any | null>(null);
   const [hoveredPartner, setHoveredPartner] = useState<any | null>(null);
   const [showModal, setShowModal] = useState(false);
@@ -51,14 +52,6 @@ export default function SolenneMembership() {
       });
       if ("data" in res) {
         setPartners(res.data);
-
-        //  Find the first partner with isFeaturedMap === "true"
-        const featuredPartner = res.data.find(
-          (p: any) => p.isFeaturedMap === "true"
-        );
-
-        // If found, set as default selected partner; otherwise fallback to first
-        setSelectedPartner(featuredPartner || res.data[0]);
       }
     };
 
@@ -83,6 +76,26 @@ export default function SolenneMembership() {
     return "";
   };
 
+  // Filter partners based on city
+  const filteredPartners = partners.filter((p: any) => p.city === city);
+
+  // Handle default selection when city or data changes without triggering cascading effects
+  const [selectionMetadata, setSelectionMetadata] = useState({ prevCity: city, prevPartners: partners });
+
+  if (selectionMetadata.prevCity !== city || selectionMetadata.prevPartners !== partners) {
+    setSelectionMetadata({ prevCity: city, prevPartners: partners });
+
+    if (filteredPartners.length > 0) {
+      const featured = filteredPartners.find(
+        (p: any) => p.isFeaturedMap === true || p.isFeaturedMap === "true"
+      );
+      setSelectedPartner(featured || filteredPartners[0]);
+    } else {
+      setSelectedPartner(null);
+    }
+    setHoveredPartner(null);
+  }
+
   // Use hovered partner if available, otherwise use selected partner
   const displayPartner = hoveredPartner || selectedPartner;
 
@@ -96,20 +109,20 @@ export default function SolenneMembership() {
               onClick={() => setIsCityOpen(!isCityOpen)}
               className="w-auto min-w-35 bg-black/40 backdrop-blur-md border border-white/10 text-white rounded-full px-5 h-10 focus:outline-none hover:bg-white/5 transition-all font-light tracking-wide shadow-lg flex items-center justify-between gap-2 cursor-pointer"
             >
-              <span className="truncate">{city}</span>
+              <span className="capitalize">{city}</span>
               <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isCityOpen ? 'rotate-180' : ''}`} />
             </button>
 
             {isCityOpen && (
               <div className="absolute top-full left-0 mt-2 w-full min-w-40 bg-black border border-white/10 text-white shadow-2xl rounded-xl p-1.5 animate-in fade-in zoom-in duration-200 origin-top-left space-y-0.5">
-                {["Dubai", "London"].map((option) => (
+                {["dubai", "london"].map((option) => (
                   <button
                     key={option}
                     onClick={() => {
-                      setCity(option);
+                      setCity(option as any);
                       setIsCityOpen(false);
                     }}
-                    className={`w-full text-left px-4 py-2 text-sm font-light transition-all duration-200 rounded-lg hover:bg-white/10 cursor-pointer text-white/70 hover:text-white ${city === option ? 'text-white font-normal bg-white/5' : ''}`}
+                    className={`w-full text-left px-4 py-2 text-sm font-light transition-all duration-200 rounded-lg hover:bg-white/10 cursor-pointer text-white/70 hover:text-white capitalize ${city === option ? 'text-white font-normal bg-white/5' : ''}`}
                   >
                     {option}
                   </button>
@@ -140,8 +153,8 @@ export default function SolenneMembership() {
                 onClick={() => displayPartner && setShowModal(true)}
                 className="group inline-flex flex-col cursor-pointer text-left"
               >
-                <h2 className="text-2xl sm:text-3xl font-light mb-3 tracking-wide transition-all duration-300 group-hover:text-white/90">
-                  {displayPartner ? displayPartner.name : "Lumé Aesthetics"}
+                <h2 className="text-2xl sm:text-3xl font-light mb-3 tracking-wide transition-all duration-300 group-hover:text-white/90 capitalize">
+                  {displayPartner ? displayPartner.name : `Solenne ${city}`}
                 </h2>
 
                 <div className="flex items-center gap-2 text-sm lg:text-base text-white">
@@ -188,7 +201,7 @@ export default function SolenneMembership() {
           {/* Right Section */}
           <div className="relative bg-gray-100 min-h-128 rounded-xl lg:rounded-none">
             <PartnersMap
-              partners={partners}
+              partners={filteredPartners}
               onMarkerClick={(partner) => setSelectedPartner(partner)}
               onMarkerHover={(partner: any) => setHoveredPartner(partner)}
             />
