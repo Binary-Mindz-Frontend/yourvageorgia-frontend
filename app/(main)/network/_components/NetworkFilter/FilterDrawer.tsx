@@ -6,6 +6,7 @@ import { getActivitiesForSelect } from "@/services/activity/activity";
 import { getAllAreas } from "@/services/partner/getpartner";
 import { ChevronDown, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { useCity } from "@/context/CityContext";
 
 interface FilterDrawerProps {
   isOpen: boolean;
@@ -15,12 +16,14 @@ interface FilterDrawerProps {
     activities: string[];
     gender: 'all' | 'women' | 'mixed';
   }) => void;
+  city?: string;
 }
 
 export function FilterDrawer({
   isOpen,
   onClose,
   onFilterChange,
+  city: cityFromProps,
 }: FilterDrawerProps) {
   const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
   const [selectedActivities, setSelectedActivities] = useState<string[]>([]);
@@ -31,6 +34,8 @@ export function FilterDrawer({
   const [allLocations, setAllLocations] = useState<string[]>([]);
   const [allActivities, setAllActivities] = useState<string[]>([]);
   const [activityIdMap, setActivityIdMap] = useState<Map<string, string>>(new Map());
+  const { city: cityFromContext } = useCity();
+  const city = cityFromProps || cityFromContext;
 
   // Prevent body scroll when drawer is open
   useEffect(() => {
@@ -57,13 +62,23 @@ export function FilterDrawer({
   // Fetch all areas and activities
   useEffect(() => {
     const fetchFilterOptions = async () => {
+      // Clear locations to avoid stale data transition
+      setAllLocations([]);
+
       // Fetch areas
-      const areasResult = await getAllAreas();
+      const areasResult = await getAllAreas(city);
+      // console.log(`[FilterDrawer] City: ${city}, Areas:`, areasResult);
       if (!("error" in areasResult)) {
         setAllLocations(areasResult.sort());
       }
+    };
 
-      // Fetch activities
+    fetchFilterOptions();
+  }, [city]);
+
+  // Fetch activities once on mount
+  useEffect(() => {
+    const fetchActivities = async () => {
       const activitiesResult = await getActivitiesForSelect();
       if (!("error" in activitiesResult) && activitiesResult.data) {
         const activityTitles = activitiesResult.data.map((act: any) => act.title);
@@ -72,9 +87,13 @@ export function FilterDrawer({
         setAllActivities(activityTitles.sort());
       }
     };
-
-    fetchFilterOptions();
+    fetchActivities();
   }, []);
+
+  // Reset selected locations when city changes
+  useEffect(() => {
+    setSelectedLocations([]);
+  }, [city]);
 
   const handleLocationToggle = (location: string) => {
     if (location === "ALL") {
