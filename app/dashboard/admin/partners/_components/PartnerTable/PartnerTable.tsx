@@ -10,6 +10,16 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
     deletePartner,
     getPartners,
     IGetPartnersParams,
@@ -64,6 +74,9 @@ const PartnerPage = () => {
 
     const [isPositionDialogOpen, setIsPositionDialogOpen] = useState(false);
     const [partnerToUpdatePosition, setPartnerToUpdatePosition] = useState<PartnerRow | null>(null);
+
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+    const [partnerToDelete, setPartnerToDelete] = useState<string | null>(null);
 
     // Add this before the columns definition
     const getCategoryTitles = (
@@ -227,7 +240,14 @@ const PartnerPage = () => {
             toast.error("Failed to delete partner");
         } finally {
             setDeleting(null);
+            setIsDeleteDialogOpen(false);
+            setPartnerToDelete(null);
         }
+    };
+
+    const confirmDelete = (partnerId: string) => {
+        setPartnerToDelete(partnerId);
+        setIsDeleteDialogOpen(true);
     };
 
     // Columns Definition
@@ -303,7 +323,7 @@ const PartnerPage = () => {
                             </DropdownMenuItem>
                             <DropdownMenuItem
                                 className="flex items-center gap-2 text-red-600"
-                                onClick={() => row._id && handleDelete(row._id)}
+                                onClick={() => row._id && confirmDelete(row._id)}
                                 disabled={deleting === row._id || !row._id}
                             >
                                 <Trash2 size={16} />
@@ -361,6 +381,27 @@ const PartnerPage = () => {
                 onOpenChange={setIsPositionDialogOpen}
                 onUpdateSuccess={handlePositionUpdateSuccess}
             />
+
+            <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Are you sure you want to delete this partner?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This action cannot be undone. This will permanently delete the partner
+                            and remove their data from our servers.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel onClick={() => setPartnerToDelete(null)}>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={() => partnerToDelete && handleDelete(partnerToDelete)}
+                            className="bg-red-600 hover:bg-red-700 text-white"
+                        >
+                            Delete
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 };

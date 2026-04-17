@@ -180,7 +180,7 @@ export const getAllAreas = async (city?: string): Promise<string[] | { error: st
     const json: IAreaResponse = await res.json();
     
     // Debug log for checking city-based area filtering
-    console.log(`[getAllAreas] URL: ${url}`, json.data);
+    // console.log(`[getAllAreas] URL: ${url}`, json.data);
 
     if (!res.ok) {
       return { error: json.message || "Failed to fetch areas" };

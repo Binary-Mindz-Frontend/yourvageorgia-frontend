@@ -67,7 +67,7 @@ export function FilterDrawer({
 
       // Fetch areas
       const areasResult = await getAllAreas(city);
-      console.log(`[FilterDrawer] City: ${city}, Areas:`, areasResult);
+      // console.log(`[FilterDrawer] City: ${city}, Areas:`, areasResult);
       if (!("error" in areasResult)) {
         setAllLocations(areasResult.sort());
       }
