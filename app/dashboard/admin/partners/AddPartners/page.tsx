@@ -62,6 +62,7 @@ interface FormData {
   instagram: string;
   whatsapp: string;
   coupon: string;
+  city: string;
 }
 
 interface AddPartnerPageProps {
@@ -116,6 +117,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
       instagram: "",
       whatsapp: "",
       coupon: "",
+      city: "dubai",
     },
   });
 
@@ -188,6 +190,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
         setValue("isFeatured", partner.isFeatured === true || partner.isFeatured === "true");
         setValue("isFeaturedMap", partner.isFeaturedMap === true || partner.isFeaturedMap === "true");
         setValue("coupon", partner.coupon || "");
+        setValue("city", partner.city || "dubai");
 
         // Handle gender preference
         if (partner.womenOnly === true || partner.womenOnly === "true") {
@@ -404,6 +407,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
           instagram: data.instagram,
           whatsapp: data.whatsapp,
         },
+        city: data.city,
       };
 
       let res;
@@ -889,6 +893,30 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
           >
             + Add Term
           </Button>
+        </div>
+ 
+        {/* CITY */}
+        <div>
+          <Label className="text-white mb-1">City *</Label>
+          <Controller
+            name="city"
+            control={control}
+            rules={{ required: "City is required" }}
+            render={({ field }) => (
+              <Select onValueChange={field.onChange} value={field.value}>
+                <SelectTrigger className="mt-1 w-full bg-neutral-900 border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50 text-white h-auto min-h-12 py-3">
+                  <SelectValue placeholder="Select City" />
+                </SelectTrigger>
+                <SelectContent className="bg-neutral-900 text-white border border-primary/50">
+                  <SelectItem value="dubai" className="cursor-pointer">Dubai</SelectItem>
+                  <SelectItem value="london" className="cursor-pointer">London</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
+          />
+          {errors.city && (
+            <p className="text-red-500 text-sm mt-1">{errors.city.message}</p>
+          )}
         </div>
 
         {/* CONTACTS */}

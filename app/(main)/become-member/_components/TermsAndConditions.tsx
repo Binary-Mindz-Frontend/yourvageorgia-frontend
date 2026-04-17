@@ -8,7 +8,7 @@ export default function TermsAndConditions() {
   const sections = [
     {
       title: "Membership",
-      text: "Solenne membership is AED 900 annually and provides exclusive access to partner offers and experiences. Memberships are non-transferable and non-refundable."
+      text: "Solenne membership is billed annually and provides access to partner offers and experiences across our network. Memberships are non-transferable and non-refundable."
     },
     {
       title: "Membership Eligibility",
@@ -37,6 +37,10 @@ export default function TermsAndConditions() {
     {
       title: "Updates",
       text: "Solenne may update these terms without prior notice. Continued use of the website implies acceptance of any changes."
+    },
+    {
+      title: "Governing Law",
+      text: "These terms are governed by and construed in accordance with applicable laws and regulations of the jurisdiction in which Solenne operates."
     }
   ];
 

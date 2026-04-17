@@ -15,6 +15,7 @@ export interface IGetPartnersParams {
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
   womenOnly?: boolean;
+  city?: string;
 }
 
 export interface IPartnerResponse {
@@ -41,6 +42,7 @@ export interface IGetPartnerFilters {
   area?: string | string[];
   womenOnly?: boolean;
   mixed?: boolean;
+  city?: string;
 }
 
 export interface IGetAllPartnersResponse {
@@ -165,18 +167,20 @@ export const getPartnerFiltered = async (
   }
 };
 
-export const getAllAreas = async (): Promise<string[] | { error: string }> => {
+export const getAllAreas = async (city?: string): Promise<string[] | { error: string }> => {
   try {
-    const url = `${BASE_URL}/partner/area`;
+    const url = city 
+      ? `${BASE_URL}/partner/area?city=${city}`
+      : `${BASE_URL}/partner/area`;
 
     const res = await fetch(url, {
-      next: {
-        revalidate: 3600, // Cache for 1 hour
-        tags: ['areas']
-      },
+      cache: 'no-store', // Disable caching to ensure fresh data for city-based areas
     });
 
     const json: IAreaResponse = await res.json();
+    
+    // Debug log for checking city-based area filtering
+    // console.log(`[getAllAreas] URL: ${url}`, json.data);
 
     if (!res.ok) {
       return { error: json.message || "Failed to fetch areas" };

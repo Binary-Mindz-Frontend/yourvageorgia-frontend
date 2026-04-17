@@ -1,10 +1,11 @@
 
 "use client";
-import { GrLocationPin } from "react-icons/gr";
-import { GoogleMap, Marker, LoadScript } from "@react-google-maps/api";
-import { useMemo, useState, useCallback, useEffect } from "react";
+import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
 import { Maximize, Map as MapIcon } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
+import { GrLocationPin } from "react-icons/gr";
+import { useCity } from "@/context/CityContext";
 
 interface Partner {
   _id: string;
@@ -32,9 +33,15 @@ interface PartnersMapProps {
   onMarkerHover?: (partner: Partner | null) => void;
 }
 
-export const DEFAULT_MAP_CENTER = {
-  lat: 25.1257824,
-  lng: 55.2279979,
+export const MAP_CENTERS = {
+  dubai: {
+    lat: 25.1257824,
+    lng: 55.2279979,
+  },
+  london: {
+    lat: 51.5074,
+    lng: -0.1278,
+  }
 };
 
 export default function PartnersMap({
@@ -42,8 +49,11 @@ export default function PartnersMap({
   onMarkerClick,
   onMarkerHover,
 }: PartnersMapProps) {
+  const { city } = useCity();
   const [mapLoaded, setMapLoaded] = useState(false);
   const [map, setMap] = useState<google.maps.Map | null>(null);
+
+  const currentCenter = useMemo(() => MAP_CENTERS[city], [city]);
 
   const locations = useMemo(() => {
     return partners.flatMap((partner) =>
@@ -55,6 +65,14 @@ export default function PartnersMap({
       }))
     );
   }, [partners]);
+
+  // Sync map center when city changes
+  useEffect(() => {
+    if (map && currentCenter) {
+      map.panTo(currentCenter);
+      map.setZoom(11);
+    }
+  }, [map, currentCenter]);
 
   const markerIcon = useMemo(() => {
     if (!mapLoaded || typeof window === "undefined" || !window.google) {
@@ -98,9 +116,9 @@ export default function PartnersMap({
   // Function to reset to initial view
   const handleResetView = useCallback(() => {
     if (!map) return;
-    map.setCenter(DEFAULT_MAP_CENTER);
-    map.setZoom(11);
-  }, [map]);
+    map.setCenter(currentCenter);
+    map.setZoom(city === 'london' ? 12 : 11);
+  }, [map, currentCenter, city]);
 
   return (
     <div className="relative w-full h-full">
@@ -118,8 +136,8 @@ export default function PartnersMap({
             fullscreenControl: false,
           }}
           mapContainerStyle={{ width: "100%", height: "100%" }}
-          center={DEFAULT_MAP_CENTER}
-          zoom={11}
+          center={currentCenter}
+          zoom={city === 'london' ? 12 : 11}
           onLoad={onMapLoad}
         >
           {locations.map((location, idx) => (
