@@ -531,6 +531,7 @@ const NetworkFilter = ({
         isOpen={isFilterOpen}
         onClose={() => setIsFilterOpen(false)}
         onFilterChange={handleFilterChange}
+        city={city}
       />
     </div>
   );
