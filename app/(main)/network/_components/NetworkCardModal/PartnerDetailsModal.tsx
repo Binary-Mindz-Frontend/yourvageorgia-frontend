@@ -3,7 +3,7 @@ import ImageGallerySlider from "@/app/(main)/network/_components/ImageGallerySli
 import { WhatsappIcon } from "@/app/(main)/network/_components/NetworkCardModal/Icon/Icons";
 import { Button } from "@/components/ui/button";
 import { getCurrentUser } from "@/services/auth";
-import { ChevronLeft, Copy, Globe, Instagram } from "lucide-react";
+import { ChevronLeft, Copy, Globe, Instagram, Mail } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -23,12 +23,16 @@ export default function PartnerDetailsModal({
   const [fetchedCoupon, setFetchedCoupon] = useState<string | null>(null);
   const [isCopied, setIsCopied] = useState(false);
 
+  // console.log("partner in modal", partner)
+
   const galleryImages =
     partner?.gallery?.length > 0 ? partner.gallery : partner?.thumbnail;
 
   const hasWhatsapp =
     typeof partner?.socials?.whatsapp === "string" &&
     partner.socials.whatsapp.trim().length > 0;
+
+  const partnerEmail = partner?.contacts?.[0]?.email;
 
   useEffect(() => {
     // Check if user is logged in
@@ -216,7 +220,6 @@ export default function PartnerDetailsModal({
             {/* Contact & Locations */}
             <div className="mt-10 ">
               <h2 className="lg:text-xl mb-6">Contact & Locations</h2>
-
               <div className="space-y-3 text-[#FFFFFFB3] text-sm lg:text-base">
                 {partner.contacts?.map((contact: any, index: number) => (
                   <p key={index} className="flex items-center gap-2">
@@ -249,13 +252,21 @@ export default function PartnerDetailsModal({
                 )}
 
                 {hasWhatsapp && (
-
                   <Link
                     href={`https://wa.me/${partner.socials.whatsapp}`}
                     target="_blank"
                     className="p-3 rounded-full hover:bg-white/10 transition"
                   >
-                    <WhatsappIcon />
+                    <WhatsappIcon className="lg:w-10 lg:h-10" />
+                  </Link>
+                )}
+
+                {partnerEmail && (
+                  <Link
+                    href={`mailto:${partnerEmail}`}
+                    className="p-3 rounded-full hover:bg-white/10 transition"
+                  >
+                    <Mail className="lg:w-10 lg:h-10" />
                   </Link>
                 )}
               </div>
