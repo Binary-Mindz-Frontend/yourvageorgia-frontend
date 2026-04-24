@@ -247,7 +247,7 @@ export default function PartnerDetailsModal({
                     target="_blank"
                     className="p-3 rounded-full hover:bg-white/10 transition"
                   >
-                    <Instagram className="lg:w-10 lg:h-10" />
+                     <Instagram className="lg:w-10 lg:h-10" />
                   </Link>
                 )}
 
@@ -257,7 +257,7 @@ export default function PartnerDetailsModal({
                     target="_blank"
                     className="p-3 rounded-full hover:bg-white/10 transition"
                   >
-                    <WhatsappIcon className="lg:w-10 lg:h-10" />
+                     <WhatsappIcon className="lg:w-10 lg:h-10" />
                   </Link>
                 )}
 
