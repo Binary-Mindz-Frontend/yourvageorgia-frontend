@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react";
 
-type City = "dubai" | "london";
+type City = "dubai" | "london" | "international";
 
 interface CityContextType {
   city: City;
@@ -17,7 +17,7 @@ export const CityProvider = ({ children }: { children: React.ReactNode }) => {
   // Load from localStorage on mount
   useEffect(() => {
     const savedCity = localStorage.getItem("selectedCity") as City;
-    if (savedCity && (savedCity === "dubai" || savedCity === "london")) {
+    if (savedCity && (savedCity === "dubai" || savedCity === "london" || savedCity === "international")) {
       setCityState(savedCity);
     }
   }, []);

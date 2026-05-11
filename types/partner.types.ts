@@ -47,6 +47,8 @@ export interface Partner {
   terms?: string[];
   contacts?: PartnerContact[];
   socials?: PartnerSocials;
+  city?: string;
+  cities?: string[];
 }
 
 

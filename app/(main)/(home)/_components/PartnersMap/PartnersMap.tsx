@@ -41,6 +41,10 @@ export const MAP_CENTERS = {
   london: {
     lat: 51.5074,
     lng: -0.1278,
+  },
+  international: {
+    lat: 25.0,
+    lng: 15.0,
   }
 };
 
@@ -70,7 +74,7 @@ export default function PartnersMap({
   useEffect(() => {
     if (map && currentCenter) {
       map.panTo(currentCenter);
-      map.setZoom(11);
+      map.setZoom(city === 'international' ? 3 : 11);
     }
   }, [map, currentCenter]);
 
@@ -117,7 +121,7 @@ export default function PartnersMap({
   const handleResetView = useCallback(() => {
     if (!map) return;
     map.setCenter(currentCenter);
-    map.setZoom(city === 'london' ? 12 : 11);
+    map.setZoom(city === 'london' ? 12 : city === 'international' ? 3 : 11);
   }, [map, currentCenter, city]);
 
   return (
@@ -137,7 +141,7 @@ export default function PartnersMap({
           }}
           mapContainerStyle={{ width: "100%", height: "100%" }}
           center={currentCenter}
-          zoom={city === 'london' ? 12 : 11}
+          zoom={city === 'london' ? 12 : city === 'international' ? 3 : 11}
           onLoad={onMapLoad}
         >
           {locations.map((location, idx) => (

@@ -77,7 +77,10 @@ export default function SolenneMembership() {
   };
 
   // Filter partners based on city
-  const filteredPartners = partners.filter((p: any) => p.city === city);
+  const filteredPartners = partners.filter((p: any) => 
+    (p.cities && Array.isArray(p.cities) && p.cities.includes(city)) || 
+    p.city === city
+  );
 
   // Handle default selection when city or data changes without triggering cascading effects
   const [selectionMetadata, setSelectionMetadata] = useState({ prevCity: city, prevPartners: partners });
@@ -115,7 +118,7 @@ export default function SolenneMembership() {
 
             {isCityOpen && (
               <div className="absolute top-full left-0 mt-2 w-full min-w-40 bg-black border border-white/10 text-white shadow-2xl rounded-xl p-1.5 animate-in fade-in zoom-in duration-200 origin-top-left space-y-0.5">
-                {["dubai", "london"].map((option) => (
+              {["dubai", "london", "international"].map((option) => (
                   <button
                     key={option}
                     onClick={() => {
