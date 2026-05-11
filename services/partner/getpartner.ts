@@ -170,7 +170,7 @@ export const getPartnerFiltered = async (
 export const getAllAreas = async (cities?: string): Promise<string[] | { error: string }> => {
   try {
     const url = cities 
-      ? `${BASE_URL}/partner/area?cities=${cities}`
+      ? `${BASE_URL}/partner/area?city=${cities}`
       : `${BASE_URL}/partner/area`;
 
     const res = await fetch(url, {
