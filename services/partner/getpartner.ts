@@ -15,7 +15,7 @@ export interface IGetPartnersParams {
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
   womenOnly?: boolean;
-  city?: string;
+  cities?: string;
 }
 
 export interface IPartnerResponse {
@@ -42,7 +42,7 @@ export interface IGetPartnerFilters {
   area?: string | string[];
   womenOnly?: boolean;
   mixed?: boolean;
-  city?: string;
+  cities?: string;
 }
 
 export interface IGetAllPartnersResponse {
@@ -167,10 +167,10 @@ export const getPartnerFiltered = async (
   }
 };
 
-export const getAllAreas = async (city?: string): Promise<string[] | { error: string }> => {
+export const getAllAreas = async (cities?: string): Promise<string[] | { error: string }> => {
   try {
-    const url = city 
-      ? `${BASE_URL}/partner/area?city=${city}`
+    const url = cities 
+      ? `${BASE_URL}/partner/area?city=${cities}`
       : `${BASE_URL}/partner/area`;
 
     const res = await fetch(url, {

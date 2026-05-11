@@ -62,7 +62,7 @@ interface FormData {
   instagram: string;
   whatsapp: string;
   coupon: string;
-  city: string;
+  cities: string[];
 }
 
 interface AddPartnerPageProps {
@@ -117,7 +117,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
       instagram: "",
       whatsapp: "",
       coupon: "",
-      city: "dubai",
+      cities: ["dubai"],
     },
   });
 
@@ -190,7 +190,16 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
         setValue("isFeatured", partner.isFeatured === true || partner.isFeatured === "true");
         setValue("isFeaturedMap", partner.isFeaturedMap === true || partner.isFeaturedMap === "true");
         setValue("coupon", partner.coupon || "");
-        setValue("city", partner.city || "dubai");
+        
+        // Handle cities array
+        if (partner.cities && Array.isArray(partner.cities)) {
+          setValue("cities", partner.cities);
+        } else if (partner.city) {
+          // Fallback for old single city
+          setValue("cities", [partner.city]);
+        } else {
+          setValue("cities", ["dubai"]);
+        }
 
         // Handle gender preference
         if (partner.womenOnly === true || partner.womenOnly === "true") {
@@ -407,7 +416,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
           instagram: data.instagram,
           whatsapp: data.whatsapp,
         },
-        city: data.city,
+        cities: data.cities,
       };
 
       let res;
@@ -895,27 +904,74 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
           </Button>
         </div>
  
-        {/* CITY */}
+        {/* CITIES Multi-Select */}
         <div>
-          <Label className="text-white mb-1">City *</Label>
+          <Label className="text-white mb-1">Cities *</Label>
           <Controller
-            name="city"
+            name="cities"
             control={control}
-            rules={{ required: "City is required" }}
+            rules={{ required: "At least one city is required" }}
             render={({ field }) => (
-              <Select onValueChange={field.onChange} value={field.value}>
-                <SelectTrigger className="mt-1 w-full bg-neutral-900 border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50 text-white h-auto min-h-12 py-3">
-                  <SelectValue placeholder="Select City" />
-                </SelectTrigger>
-                <SelectContent className="bg-neutral-900 text-white border border-primary/50">
-                  <SelectItem value="dubai" className="cursor-pointer">Dubai</SelectItem>
-                  <SelectItem value="london" className="cursor-pointer">London</SelectItem>
-                </SelectContent>
-              </Select>
+              <div>
+                <Select
+                  onValueChange={(value) => {
+                    if (!field.value.includes(value)) {
+                      field.onChange([...field.value, value]);
+                    }
+                  }}
+                >
+                  <SelectTrigger className="mt-1 w-full bg-neutral-900 border border-primary/50 focus:outline-none focus:ring-0 focus:border-primary/50 text-white h-auto min-h-12 py-3 items-start">
+                    <SelectValue placeholder="Select Cities" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-neutral-900 text-white border border-primary/50 max-h-60 overflow-y-auto">
+                    {[
+                      { id: "dubai", title: "Dubai" },
+                      { id: "london", title: "London" },
+                      { id: "international", title: "International" }
+                    ]
+                      .filter(c => !field.value.includes(c.id))
+                      .map((c) => (
+                        <SelectItem key={c.id} value={c.id} className="cursor-pointer">
+                          {c.title}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+
+                {/* Selected Cities Display */}
+                {field.value.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {field.value.map((cityId) => {
+                      const cityName = 
+                        cityId === "dubai" ? "Dubai" : 
+                        cityId === "london" ? "London" : 
+                        cityId === "international" ? "International" : 
+                        cityId;
+                      return (
+                        <div
+                          key={cityId}
+                          className="flex items-center gap-2 bg-black border text-white px-3 py-1 rounded-full text-sm"
+                        >
+                          <span>{cityName}</span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              field.onChange(field.value.filter(id => id !== cityId));
+                            }}
+                            className="hover:bg-primary/80 cursor-pointer rounded-full"
+                          >
+                            <X size={14} />
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
             )}
           />
-          {errors.city && (
-            <p className="text-red-500 text-sm mt-1">{errors.city.message}</p>
+          {errors.cities && (
+            <p className="text-red-500 text-sm mt-1">{errors.cities.message}</p>
           )}
         </div>
 
