@@ -17,13 +17,17 @@ const cormorant = Cormorant_Garamond({
   style: ["normal", "italic"],
 });
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+};
+
 export const metadata: Metadata = {
   title: "Solenne | One Membership. Global Privileges.",
   description: "A private membership offering preferred rates and privileges across a global network of considered longevity and beauty destinations.",
   appleWebApp: {
     title: "Solenne",
   },
-  viewport: "width=device-width, initial-scale=1",
 };
 
 export default function RootLayout({
