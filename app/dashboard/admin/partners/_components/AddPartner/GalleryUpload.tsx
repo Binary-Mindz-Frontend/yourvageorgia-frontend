@@ -68,6 +68,7 @@ export default function GalleryUpload({
                   src={item.preview}
                   alt={`gallery-${index}`}
                   fill
+                  sizes="200px"
                   className="object-cover"
 
                 />

@@ -44,6 +44,7 @@ const CategoryView: React.FC<CategoryViewProps> = ({ categoryId }) => {
             src={category.image}
             alt={category.title}
             fill
+            sizes="100vw"
             className="object-cover bg-[#1a1a1a] rounded"
 
           />

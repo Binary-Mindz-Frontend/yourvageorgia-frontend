@@ -217,6 +217,7 @@ export default function WellnessCardsClient({ categories }: Props) {
                 src={card?.image}
                 alt={card.title}
                 fill
+                sizes="100vw"
                 className={cn(
                   "object-cover transition-all duration-500 ease-out",
                   isActive && "blur-sm scale-105"
@@ -298,6 +299,7 @@ export default function WellnessCardsClient({ categories }: Props) {
                     src={card?.image}
                     alt={card.title}
                     fill
+                    sizes="(max-width: 1024px) 100vw, 25vw"
                     className={cn(
                       "object-cover transition-all duration-500 ease-out group-hover:blur-sm group-hover:scale-105",
                       isActive && "blur-sm scale-105"

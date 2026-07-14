@@ -1,6 +1,7 @@
 
 "use client";
-import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
+import { GoogleMap, Marker } from "@react-google-maps/api";
+import Script from "next/script";
 import { Maximize, Map as MapIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
@@ -126,15 +127,17 @@ export default function PartnersMap({
 
   return (
     <div className="relative w-full h-full">
-      <LoadScript
-        googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!}
+      <Script
+        src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`}
+        strategy="afterInteractive"
         onLoad={() => setMapLoaded(true)}
-      >
+      />
+      {mapLoaded && (
         <GoogleMap
           options={{
             mapId: "DEMO_MAP_ID",
-            disableDefaultUI: false, // Keep default UI or set to true if you want total custom control
-            zoomControl: false, // We can hide default zoom if we want our own, or keep it. Let's keep it simple.
+            disableDefaultUI: false,
+            zoomControl: false,
             streetViewControl: false,
             mapTypeControl: false,
             fullscreenControl: false,
@@ -155,7 +158,7 @@ export default function PartnersMap({
             />
           ))}
         </GoogleMap>
-      </LoadScript>
+      )}
 
       {/* Floating Control Buttons */}
       <div className="absolute top-4 right-4 flex flex-col gap-2">

@@ -1,7 +1,8 @@
 import clsx from "clsx";
-import { ChevronLeft, ChevronRight, Maximize2, Minimize2, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Maximize2, Minimize2 } from "lucide-react";
 import Image, { StaticImageData } from "next/image";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import ZoomModal from "./ZoomModal";
 
 interface ImageGallerySliderProps {
   images: (string | StaticImageData)[];
@@ -15,7 +16,6 @@ const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
   const [index, setIndex] = useState(0);
   const [isZoomed, setIsZoomed] = useState(false);
   const [zoomIndex, setZoomIndex] = useState(0);
-  const [zoomVisible, setZoomVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -85,13 +85,6 @@ const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
   const isSlowConnection = connectionType === 'slow' || actualSpeed === 'slow';
   const shouldWaitForLoad = actualSpeed === 'slow' || actualSpeed === 'medium' || connectionType === 'slow' || connectionType === '3g';
 
-  // Get adaptive quality based on connection
-  const getQuality = useCallback((base: number) => {
-    if (connectionType === 'slow') return Math.max(base - 30, 30);
-    if (connectionType === '3g') return Math.max(base - 15, 40);
-    return base;
-  }, [connectionType]);
-
   // Simulated progress bar for all networks (consistent UX)
   useEffect(() => {
     if (isLoading || pendingIndex !== null) {
@@ -116,8 +109,6 @@ const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
     };
   }, [isLoading, pendingIndex]);
 
-  const minSwipeDistance = 50;
-
   // NEW: Preload with callback for smart navigation
   const preloadImageWithCallback = useCallback((src: string | StaticImageData, targetIndex: number, onComplete: () => void) => {
     const url = typeof src === "string" ? src : (src as StaticImageData).src;
@@ -132,12 +123,8 @@ const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
       return;
     }
 
-    const width = isMobile ? 640 : 828;
-    const quality = getQuality(isMobile ? 60 : 75);
-    const optimizedUrl = `/_next/image?url=${encodeURIComponent(url)}&w=${width}&q=${quality}`;
-    
     const img = new window.Image();
-    img.fetchPriority = 'high'; // Changed to high for navigation
+    img.fetchPriority = 'high';
     
     img.onload = () => {
       setImageLoadStates(prev => new Map(prev).set(targetIndex, true));
@@ -145,12 +132,11 @@ const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
     };
     
     img.onerror = () => {
-      // Still complete on error to not block navigation
       onComplete();
     };
     
-    img.src = optimizedUrl;
-  }, [isMobile, getQuality, imageLoadStates]);
+    img.src = url;
+  }, [imageLoadStates]);
 
   // Preload logic (background preloading)
   const preloadImage = useCallback((src: string | StaticImageData) => {
@@ -160,12 +146,9 @@ const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
     preloadedRef.current.add(url);
 
     const doPreload = () => {
-      const width = isMobile ? 640 : 828;
-      const quality = getQuality(isMobile ? 60 : 75);
-      const optimizedUrl = `/_next/image?url=${encodeURIComponent(url)}&w=${width}&q=${quality}`;
       const img = new window.Image();
       img.fetchPriority = 'low';
-      img.src = optimizedUrl;
+      img.src = url;
     };
 
     if ('requestIdleCallback' in window) {
@@ -173,7 +156,7 @@ const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
     } else {
       setTimeout(doPreload, 200);
     }
-  }, [isSlowConnection, isMobile, getQuality]);
+  }, [isSlowConnection]);
 
   useEffect(() => {
     if (images.length <= 1) return;
@@ -342,17 +325,11 @@ const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
   const openZoom = useCallback((idx: number) => {
     setZoomIndex(idx);
     setIsZoomed(true);
-    setTimeout(() => setZoomVisible(true), 10);
   }, []);
 
   const closeZoom = useCallback(() => {
-    setZoomVisible(false);
-    setTimeout(() => setIsZoomed(false), 300);
+    setIsZoomed(false);
   }, []);
-
-  const prevZoomImage = useCallback(() => {
-    setZoomIndex(prev => prev === 0 ? images.length - 1 : prev - 1);
-  }, [images.length]);
 
   const nextZoomImage = useCallback(() => {
     setZoomIndex(prev => prev === images.length - 1 ? 0 : prev + 1);
@@ -416,8 +393,6 @@ const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
       }
       if (!isZoomed) return;
       if (e.key === 'Escape') closeZoom();
-      else if (e.key === 'ArrowLeft') prevZoomImage();
-      else if (e.key === 'ArrowRight') nextZoomImage();
     };
     if (isZoomed || isFullscreen) {
       document.body.style.overflow = 'hidden';
@@ -429,7 +404,7 @@ const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
       document.body.style.overflow = 'unset';
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isZoomed, isFullscreen, closeZoom, exitFullscreen, prevZoomImage, nextZoomImage, prevSlide, nextSlide]);
+  }, [isZoomed, isFullscreen, closeZoom, exitFullscreen, prevSlide, nextSlide]);
 
   // Reset
   useEffect(() => {
@@ -607,8 +582,7 @@ const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
               fill
               sizes="100vw"
               className="object-contain pointer-events-none"
-              priority
-              quality={getQuality(80)}
+              preload
               decoding="async"
             />
           </div>
@@ -665,9 +639,9 @@ const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
                 src={images[0]}
                 alt="Gallery"
                 fill
+                sizes="100vw"
                 className="object-cover pointer-events-none"
-                priority
-                quality={getQuality(isMobile ? 60 : 75)}
+                preload
                 placeholder="blur"
                 blurDataURL={BLUR_PLACEHOLDER}
                 onLoad={() => {
@@ -688,8 +662,8 @@ const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
                   alt="Previous"
                   fill
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 800px"
+    
                   className="object-cover pointer-events-none"
-                  quality={getQuality(isMobile ? 60 : 75)}
                   loading="eager"
                   decoding="async"
                   onLoad={() => {
@@ -712,8 +686,7 @@ const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
                     setIsLoading(false);
                     setImageLoadStates(prev => new Map(prev).set(index, true));
                   }}
-                  priority
-                  quality={getQuality(isMobile ? 60 : 75)}
+                  preload
                   placeholder="blur"
                   blurDataURL={BLUR_PLACEHOLDER}
                   decoding="async"
@@ -730,8 +703,8 @@ const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
                   alt="Next"
                   fill
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 800px"
+    
                   className="object-cover pointer-events-none"
-                  quality={getQuality(isMobile ? 60 : 75)}
                   loading="eager"
                   decoding="async"
                   onLoad={() => {
@@ -857,9 +830,9 @@ const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
                   src={img} 
                   alt={`Thumbnail ${i + 1}`} 
                   fill 
+    
                   className="object-cover" 
                   sizes="64px" 
-                  quality={40} 
                   draggable={false}
                   onLoad={() => {
                     setImageLoadStates(prev => new Map(prev).set(i, true));
@@ -872,54 +845,12 @@ const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
       )}
 
       {/* Zoom Modal */}
-      {isZoomed && (
-        <div
-          className={clsx(
-            "fixed inset-0 flex justify-center items-center z-50 transition-all duration-300",
-            zoomVisible ? "bg-black/95" : "bg-black/0"
-          )}
-          onClick={closeZoom}
-        >
-          <div
-            className={clsx(
-              "relative transition-all duration-300 transform",
-              zoomVisible ? "scale-100 opacity-100" : "scale-95 opacity-0"
-            )}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button 
-              onClick={closeZoom} 
-              className="absolute -top-12 right-0 text-white text-3xl hover:scale-110 transition-transform"
-              aria-label="Close zoom"
-            >
-              <X className="w-8 h-8" />
-            </button>
-            <button 
-              onClick={prevZoomImage} 
-              className="absolute left-4 top-1/2 -translate-y-1/2 text-white p-3 hover:scale-110 transition-transform"
-              aria-label="Previous image"
-            >
-              <ChevronLeft className="w-8 h-8" />
-            </button>
-            <button 
-              onClick={nextZoomImage} 
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-white p-3 hover:scale-110 transition-transform"
-              aria-label="Next image"
-            >
-              <ChevronRight className="w-8 h-8" />
-            </button>
-            <Image
-              src={images[zoomIndex]}
-              alt="Zoomed image"
-              width={1200}
-              height={800}
-              className="object-contain max-w-[90vw] max-h-[80vh] rounded-lg"
-              priority
-              quality={90}
-            />
-          </div>
-        </div>
-      )}
+      <ZoomModal
+        images={images}
+        initialIndex={zoomIndex}
+        isOpen={isZoomed}
+        onClose={closeZoom}
+      />
     </div>
   );
 });

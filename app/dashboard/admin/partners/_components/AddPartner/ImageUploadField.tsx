@@ -74,6 +74,7 @@ export default function ImageUploadField({
             src={preview || value}
             alt={label}
             fill
+            sizes="200px"
             className="object-cover"
 
           />

@@ -209,6 +209,7 @@ export default function AddCategoryModal({
                   src={image}
                   alt="Preview"
                   fill
+                  sizes="200px"
                   className="object-cover"
 
                 />

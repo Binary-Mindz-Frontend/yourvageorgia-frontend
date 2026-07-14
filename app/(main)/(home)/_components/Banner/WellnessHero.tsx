@@ -43,7 +43,8 @@ export default function WellnessHero() {
           alt="Infrared sauna wellness therapy"
           className="object-cover"
           fill
-          priority
+          preload
+          sizes="100vw"
         />
         <div className="absolute inset-0 bg-black opacity-50"></div>
       </div>

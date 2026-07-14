@@ -164,6 +164,7 @@ export default function LogoUploadWithCrop({
             src={logoPreview || value}
             alt="logo"
             fill
+            sizes="200px"
             className="object-cover"
 
           />

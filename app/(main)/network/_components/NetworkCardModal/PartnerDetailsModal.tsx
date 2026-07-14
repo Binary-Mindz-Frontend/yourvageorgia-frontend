@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+"use client";
 import ImageGallerySlider from "@/app/(main)/network/_components/ImageGallerySlider/ImageGallerySlider";
 import { WhatsappIcon } from "@/app/(main)/network/_components/NetworkCardModal/Icon/Icons";
 import { Button } from "@/components/ui/button";
-import { getCurrentUser } from "@/services/auth";
+import useUser from "@/hooks/useUser";
 import { ChevronLeft, Copy, Globe, Instagram, Mail } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -16,7 +17,7 @@ export default function PartnerDetailsModal({
   partner: any;
 }) {
   const [modalVisible, setModalVisible] = useState(false);
-  const [user, setUser] = useState<any>(null);
+  const { user } = useUser();
 
   // Coupon state
   const [isFetchingCoupon, setIsFetchingCoupon] = useState(false);
@@ -35,14 +36,6 @@ export default function PartnerDetailsModal({
   const partnerEmail = partner?.contacts?.[0]?.email;
 
   useEffect(() => {
-    // Check if user is logged in
-    const checkUser = async () => {
-      const currentUser = await getCurrentUser();
-      setUser(currentUser);
-    };
-
-    checkUser();
-
     // Use setTimeout to schedule the state update after mount
     // This avoids synchronous state updates during render
     const timer = setTimeout(() => {

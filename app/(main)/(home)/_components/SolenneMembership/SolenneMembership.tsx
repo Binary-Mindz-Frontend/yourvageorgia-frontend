@@ -4,6 +4,7 @@
 
 import NetworkCardModal from "@/app/(main)/network/_components/NetworkCardModal/PartnerDetailsModal";
 import { ArrowRight, ChevronDown } from "lucide-react";
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import PartnersMap from "../PartnersMap/PartnersMap";
 import { getPartners } from "@/services/partner/getpartner";
@@ -140,16 +141,15 @@ export default function SolenneMembership() {
           {/* Left Section */}
           <div className="relative bg-black order-1 lg:order-0 border-t-2 border-black">
             {/* Background Image */}
-            <div
-              className="absolute inset-0 bg-cover bg-center transition-all duration-500"
-              style={{
-                backgroundImage: displayPartner
-                  ? `url(${displayPartner.thumbnail})`
-                  : "url('/assets/home/map_bg.svg')",
-              }}
-            >
-              <div className="absolute inset-0 bg-linear-to-b from-black/60 via-transparent to-black/80"></div>
-            </div>
+            <Image
+              src={displayPartner?.thumbnail || "/assets/home/map_bg.svg"}
+              alt={displayPartner ? `${displayPartner.name} background` : "Partner background"}
+              fill
+              preload
+              sizes="(max-width: 1024px) 100vw, 40vw"
+              className="object-cover transition-all duration-500"
+            />
+            <div className="absolute inset-0 bg-linear-to-b from-black/60 via-transparent to-black/80"></div>
 
             <div className="relative z-10 p-12 h-full flex flex-col justify-end min-h-128">
               <button

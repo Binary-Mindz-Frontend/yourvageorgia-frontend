@@ -43,7 +43,7 @@ const PartnerCard = memo(({ partner, onClick, priority = false }: PartnerCardPro
                     src={partner.thumbnail || ""}
                     alt={partner.name}
                     fill
-                    priority={priority}
+                    preload={priority}
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                     className={cn(
                         "object-cover transition-all duration-500",
