@@ -19,6 +19,8 @@ const ZoomModal = memo(({ images, initialIndex, isOpen, onClose }: ZoomModalProp
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [scale, setScale] = useState(1);
   const [isReady, setIsReady] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [hasError, setHasError] = useState(false);
 
   // Touch tracking
   const touchStartRef = useRef<{ x: number; y: number; time: number } | null>(null);
@@ -34,10 +36,36 @@ const ZoomModal = memo(({ images, initialIndex, isOpen, onClose }: ZoomModalProp
       setCurrentIndex(initialIndex);
       setScale(1);
       setIsReady(false);
+      setIsLoaded(false);
+      setHasError(false);
       // Small delay for entrance animation
       requestAnimationFrame(() => requestAnimationFrame(() => setIsReady(true)));
     }
   }, [isOpen, initialIndex]);
+
+  // Reset loaded/error state when current image changes
+  useEffect(() => {
+    setIsLoaded(false);
+    setHasError(false);
+  }, [currentIndex]);
+
+  // Preload adjacent images
+  useEffect(() => {
+    if (!isOpen || images.length <= 1) return;
+
+    const prev = (currentIndex - 1 + images.length) % images.length;
+    const next = (currentIndex + 1) % images.length;
+
+    [prev, next].forEach(i => {
+      if (i !== currentIndex) {
+        const src = typeof images[i] === 'string' ? images[i] : images[i].src;
+        if (src) {
+          const img = new window.Image();
+          img.src = src;
+        }
+      }
+    });
+  }, [isOpen, currentIndex, images]);
 
   // Lock body scroll
   useEffect(() => {
@@ -242,6 +270,7 @@ const ZoomModal = memo(({ images, initialIndex, isOpen, onClose }: ZoomModalProp
                 className="object-cover"
                 placeholder="blur"
                 blurDataURL={BLUR_PLACEHOLDER}
+                loading="lazy"
               />
             </button>
           ))}
@@ -261,21 +290,30 @@ const ZoomModal = memo(({ images, initialIndex, isOpen, onClose }: ZoomModalProp
         onTouchEnd={handleTouchEnd}
         onWheel={handleWheel}
       >
-        <Image
-          src={images[currentIndex]}
-          alt={`Image ${currentIndex + 1} of ${images.length}`}
-          fill
-          sizes="95vw"
-          className={clsx(
-            "object-contain transition-transform duration-200",
-            isZoomed && "cursor-grab"
-          )}
-          style={{ transform: `scale(${scale})` }}
-          placeholder="blur"
-          blurDataURL={BLUR_PLACEHOLDER}
-          priority
-          draggable={false}
-        />
+        {hasError ? (
+          <div className="flex items-center justify-center h-full text-white/60">
+            <p>Failed to load image</p>
+          </div>
+        ) : (
+          <Image
+            src={images[currentIndex]}
+            alt={`Image ${currentIndex + 1} of ${images.length}`}
+            fill
+            sizes="(max-width: 768px) 95vw, 85vh"
+            loading="eager"
+            fetchPriority="high"
+            placeholder="blur"
+            blurDataURL={BLUR_PLACEHOLDER}
+            decoding="async"
+            onLoad={() => setIsLoaded(true)}
+            onError={() => setHasError(true)}
+            style={{ transform: `scale(${scale})` }}
+            className={clsx(
+              "object-contain transition-transform duration-200",
+              isZoomed && "cursor-grab"
+            )}
+          />
+        )}
       </div>
     </div>
   );

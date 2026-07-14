@@ -253,11 +253,133 @@ If images are served from a CDN with built-in optimization (e.g., Cloudinary, Im
 8. Consider per-image LQIP generation if blur placeholder upgrade is needed
 9. Add `loading="eager"` fallback for browsers that don't support `fetchPriority`
 
-### Validation Plan
+## ZoomModal Implementation Plan
 
-1. **Build check**: Run `next build` and verify no `priority` deprecation warnings
-2. **Lighthouse audit**: Measure LCP, image load times before/after (use existing `npm run lighthouse` script)
-3. **Network throttling test**: Simulate Slow 3G in DevTools, verify preloading reduces blank time
-4. **Bundle size check**: Ensure preload logic adds <5KB gzipped
-5. **Visual regression**: Confirm blur placeholders, loading states, and error fallbacks render correctly
-6. **Error case test**: Verify broken images show fallback, not empty space
+**Target file:** `app/(main)/network/_components/ImageGallerySlider/ZoomModal.tsx`  
+**Estimated changes:** Single file, ~50 lines changed/added
+
+### Phase 1 — Critical Fixes (no behavior change)
+
+**Step 1.1:** Replace deprecated `priority` prop with `preload={true}` on main modal Image (line 277)  
+```tsx
+// Before
+priority
+
+// After  
+preload
+```
+
+**Step 1.2:** Add `fetchPriority="high"` and `loading="eager"` to main modal Image (line 264-278)  
+```tsx
+<Image
+  src={images[currentIndex]}
+  alt={`Image ${currentIndex + 1} of ${images.length}`}
+  fill
+  sizes="(max-width: 768px) 95vw, 85vh"
+  loading="eager"
+  fetchPriority="high"
+  placeholder="blur"
+  blurDataURL={BLUR_PLACEHOLDER}
+  decoding="async"
+  onLoad={() => setIsLoaded(true)}
+  onError={() => setHasError(true)}
+/>
+```
+
+**Step 1.3:** Add loading/error state variables (after line 21)  
+```tsx
+const [isLoaded, setIsLoaded] = useState(false);
+const [hasError, setHasError] = useState(false);
+```
+
+**Step 1.4:** Add error fallback UI (after main image, before closing div)  
+```tsx
+{hasError && (
+  <div className="flex items-center justify-center h-full text-white/60">
+    <p>Failed to load image</p>
+  </div>
+)}
+```
+
+**Step 1.5:** Reset `isLoaded` and `hasError` when `currentIndex` changes (in `navigate` function or useEffect)  
+```tsx
+useEffect(() => {
+  setIsLoaded(false);
+  setHasError(false);
+}, [currentIndex]);
+```
+
+**Step 1.6:** Add `loading="lazy"` to thumbnail strip Images (line 237)  
+```tsx
+<Image
+  src={img}
+  alt=""
+  fill
+  sizes="48px"
+  className="object-cover"
+  placeholder="blur"
+  blurDataURL={BLUR_PLACEHOLDER}
+  loading="lazy"
+/>
+```
+
+### Phase 2 — Performance (requires testing)
+
+**Step 2.1:** Add adjacent image preloading useEffect (after line 50)  
+```tsx
+useEffect(() => {
+  if (!isOpen || images.length <= 1) return;
+  
+  const prev = (currentIndex - 1 + images.length) % images.length;
+  const next = (currentIndex + 1) % images.length;
+  
+  [prev, next].forEach(i => {
+    if (i !== currentIndex) {
+      const src = typeof images[i] === 'string' ? images[i] : images[i].src;
+      if (src) {
+        const img = new window.Image();
+        img.src = src;
+      }
+    }
+  });
+}, [isOpen, currentIndex, images]);
+```
+
+**Step 2.2:** Add `loading="lazy"` to fullscreen Image (line 579)  
+```tsx
+<Image
+  src={images[index]}
+  alt="Gallery fullscreen"
+  fill
+  sizes="100vw"
+  className="object-contain pointer-events-none"
+  preload
+  decoding="async"
+  loading="lazy"
+/>
+```
+
+### Phase 3 — Validation
+
+1. Run `next build` and verify no `priority` deprecation warnings
+2. Run `npm run lighthouse` and compare LCP before/after
+3. Test in DevTools Slow 3G: verify adjacent images preload on navigation
+4. Verify error state shows fallback UI for broken image URLs
+5. Verify blur placeholder appears while images load
+
+### Rollout
+
+- All changes are in a single file (`ZoomModal.tsx`)
+- No breaking API changes
+- Backward compatible: works with existing `ImageGallerySlider` props
+- Can be deployed without database or config changes
+
+### Risks & Mitigations
+
+| Risk | Mitigation |
+|------|------------|
+| `preload` increases initial payload | Only one image preloaded; offset by faster LCP |
+| `fetchPriority="high"` may starve other resources | Modal is overlay; acceptable priority boost |
+| Adjacent preload wastes bandwidth on short galleries | Only triggers for `images.length > 1` |
+| `onLoad` fires multiple times for same image | Use `isLoaded` state guard or check `currentIndex` in effect |
+

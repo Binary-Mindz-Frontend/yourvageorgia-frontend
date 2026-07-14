@@ -584,6 +584,7 @@ const ImageGallerySlider = memo(({ images }: ImageGallerySliderProps) => {
               className="object-contain pointer-events-none"
               preload
               decoding="async"
+              loading="lazy"
             />
           </div>
 
