@@ -1,11 +1,13 @@
 
 "use client";
-import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
+import { GoogleMap, Marker } from "@react-google-maps/api";
+import Script from "next/script";
 import { Maximize, Map as MapIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { renderToStaticMarkup } from "react-dom/server";
-import { GrLocationPin } from "react-icons/gr";
 import { useCity } from "@/context/CityContext";
+
+const LOCATION_PIN_SVG =
+  '<svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 24 24" style="color:#000000;width:30px;height:30px" height="30" width="30" xmlns="http://www.w3.org/2000/svg"><path fill="none" stroke-width="2" d="M12,10 C14.209139,10 16,8.209139 16,6 C16,3.790861 14.209139,2 12,2 C9.790861,2 8,3.790861 8,6 C8,8.209139 9.790861,10 12,10 Z M12,10 L12,22"></path></svg>';
 
 interface Partner {
   _id: string;
@@ -83,17 +85,7 @@ export default function PartnersMap({
       return undefined;
     }
 
-    const iconMarkup = renderToStaticMarkup(
-      <GrLocationPin
-        style={{
-          width: '30px',
-          height: '30px',
-          color: '#000000'
-        }}
-      />
-    );
-
-    const svgString = encodeURIComponent(iconMarkup);
+    const svgString = encodeURIComponent(LOCATION_PIN_SVG);
 
     return {
       url: `data:image/svg+xml;utf8, ${svgString}`,
@@ -126,15 +118,17 @@ export default function PartnersMap({
 
   return (
     <div className="relative w-full h-full">
-      <LoadScript
-        googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!}
+      <Script
+        src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`}
+        strategy="afterInteractive"
         onLoad={() => setMapLoaded(true)}
-      >
+      />
+      {mapLoaded && (
         <GoogleMap
           options={{
             mapId: "DEMO_MAP_ID",
-            disableDefaultUI: false, // Keep default UI or set to true if you want total custom control
-            zoomControl: false, // We can hide default zoom if we want our own, or keep it. Let's keep it simple.
+            disableDefaultUI: false,
+            zoomControl: false,
             streetViewControl: false,
             mapTypeControl: false,
             fullscreenControl: false,
@@ -155,7 +149,7 @@ export default function PartnersMap({
             />
           ))}
         </GoogleMap>
-      </LoadScript>
+      )}
 
       {/* Floating Control Buttons */}
       <div className="absolute top-4 right-4 flex flex-col gap-2">

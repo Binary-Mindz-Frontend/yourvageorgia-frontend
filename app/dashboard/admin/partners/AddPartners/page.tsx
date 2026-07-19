@@ -617,6 +617,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
                   src={thumbnailPreview || watch("thumbnailUrl")}
                   alt="thumb"
                   fill
+                  sizes="200px"
                   className="object-cover"
 
                 />
@@ -741,6 +742,7 @@ export default function AddPartnerPage({ partnerId, initialCategoryId }: AddPart
                       src={item.preview}
                       alt={`gallery-${index}`}
                       fill
+                      sizes="200px"
                       className="object-cover"
 
                     />

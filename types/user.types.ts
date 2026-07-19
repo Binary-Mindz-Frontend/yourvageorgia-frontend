@@ -14,6 +14,7 @@ export interface IUser {
   signUpMethod: 'EMAIL' | 'GOOGLE' | 'GITHUB' | 'FACEBOOK';
   createdAt: string;
   updatedAt: string;
+  accessToken?: string;
 }
 
 // export enum AuthProvider {

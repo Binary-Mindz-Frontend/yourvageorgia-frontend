@@ -1,11 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+"use client";
 import ImageGallerySlider from "@/app/(main)/network/_components/ImageGallerySlider/ImageGallerySlider";
 import { WhatsappIcon } from "@/app/(main)/network/_components/NetworkCardModal/Icon/Icons";
 import { Button } from "@/components/ui/button";
-import { getCurrentUser } from "@/services/auth";
+import useUser from "@/hooks/useUser";
 import { ChevronLeft, Copy, Globe, Instagram, Mail } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { ViewTransition } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 export default function PartnerDetailsModal({
@@ -15,18 +17,36 @@ export default function PartnerDetailsModal({
   onClose: () => void;
   partner: any;
 }) {
+  // Unique name for the React 19 <ViewTransition> shared-element morph.
+  // The originating PartnerCard (or carousel item) passes the same name so
+  // the browser animates the thumbnail → hero image smoothly.
+  const vtName = partner?._id ? `partner-${partner._id}` : undefined;
+
+  // Start invisible, animate in after mount to avoid black flash
   const [modalVisible, setModalVisible] = useState(false);
-  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setModalVisible(true));
+    return () => cancelAnimationFrame(id);
+  }, []);
+  const { user } = useUser();
 
   // Coupon state
   const [isFetchingCoupon, setIsFetchingCoupon] = useState(false);
   const [fetchedCoupon, setFetchedCoupon] = useState<string | null>(null);
   const [isCopied, setIsCopied] = useState(false);
 
-  // console.log("partner in modal", partner)
-
-  const galleryImages =
-    partner?.gallery?.length > 0 ? partner.gallery : partner?.thumbnail;
+  // Normalize galleryImages into an Array<string>. A common upstream shape
+  // is `partner.thumbnail` (string) when gallery is empty — a single string
+  // would otherwise iterate as one-character fragments. Always wrap.
+  const galleryImages: string[] = useMemo(() => {
+    const g = partner?.gallery;
+    if (Array.isArray(g) && g.length > 0) return g;
+    if (typeof partner?.thumbnail === "string" && partner.thumbnail) {
+      return [partner.thumbnail];
+    }
+    return [];
+  }, [partner?.gallery, partner?.thumbnail]);
 
   const hasWhatsapp =
     typeof partner?.socials?.whatsapp === "string" &&
@@ -34,37 +54,13 @@ export default function PartnerDetailsModal({
 
   const partnerEmail = partner?.contacts?.[0]?.email;
 
+  // Body-scroll lock while the modal is visible. Cleanup on close only.
   useEffect(() => {
-    // Check if user is logged in
-    const checkUser = async () => {
-      const currentUser = await getCurrentUser();
-      setUser(currentUser);
-    };
-
-    checkUser();
-
-    // Use setTimeout to schedule the state update after mount
-    // This avoids synchronous state updates during render
-    const timer = setTimeout(() => {
-      setModalVisible(true);
-    }, 0); // Using 0ms delay ensures it runs after the initial render
-
-    return () => {
-      clearTimeout(timer);
-      setModalVisible(false);
-    };
-  }, []); // Empty dependency array means this runs once on mount
-
-  useEffect(() => {
-    if (modalVisible) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
-    }
+    document.body.style.overflow = "hidden";
     return () => {
       document.body.style.overflow = "unset";
     };
-  }, [modalVisible]);
+  }, []);
 
   const handleViewCoupon = async () => {
     if (!user?.accessToken) {
@@ -195,7 +191,10 @@ export default function PartnerDetailsModal({
 
           {/* Left Section */}
           <div className="order-2 lg:order-0">
-            <ImageGallerySlider images={galleryImages} />
+            {/* Directional enter: partners open with a forward nav-style slide-up */}
+            <ViewTransition enter="slide-up" default="none">
+              <ImageGallerySlider images={galleryImages} viewTransitionName={vtName} />
+            </ViewTransition>
 
             {/* About Section */}
             <div className="mt-10">

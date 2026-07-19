@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use server";
 
+import { cacheLife, cacheTag } from "next/cache";
 import { Partner } from "@/types/partner.types";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_API;
@@ -116,6 +117,9 @@ export const getPartnerFiltered = async (
 ): Promise<
   { data: IGetAllPartnersResponse["data"]; meta: IGetAllPartnersResponse["meta"] } | { error: string }
 > => {
+  'use cache'
+  cacheLife('hours')
+  
   try {
     const queryParams = new URLSearchParams();
     queryParams.set("sortBy", "position");
@@ -135,29 +139,24 @@ export const getPartnerFiltered = async (
     });
 
     const url = `${BASE_URL}/partner?${queryParams.toString()}`;
+    
+    // Create cache tag from filters for granular invalidation
+    const filterTag = filters.category 
+      ? `category:${filters.category}` 
+      : 'category:all';
+    const areaTag = filters.area 
+      ? `area:${Array.isArray(filters.area) ? filters.area.join(',') : filters.area}`
+      : 'area:all';
+    
+    cacheTag('partners', filterTag, areaTag, `page:${filters.page || 1}`)
 
-    // Server-side: aggressive caching for better performance
-    // Client-side: no cache (will use for dynamic filtering)
-    const isServer = typeof window === 'undefined';
-
-    const res = await fetch(url,
-      isServer
-        ? {
-          next: {
-            revalidate: 180, // Cache for 3 minutes on server
-            tags: ['partners-filtered']
-          }
-        }
-        : {
-          cache: 'no-store' // No cache on client for fresh data
-        }
-    );
+    const res = await fetch(url, {
+      next: { 
+        tags: ['partners', filterTag, areaTag, `page:${filters.page || 1}`]
+      },
+    });
 
     const json = await res.json();
-
-    // console.log(json);
-    // console.log(filters);
-    // console.log(url);
 
     if (!res.ok) return { error: json.message || "Failed to fetch" };
 

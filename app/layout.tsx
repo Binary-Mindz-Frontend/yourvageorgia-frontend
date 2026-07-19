@@ -1,8 +1,8 @@
 
-
 import Providers from "@/providers/Providers";
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Inter } from "next/font/google";
+import { Suspense } from "react";
 import "./globals.css";
 
 const inter = Inter({
@@ -17,13 +17,17 @@ const cormorant = Cormorant_Garamond({
   style: ["normal", "italic"],
 });
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+};
+
 export const metadata: Metadata = {
   title: "Solenne | One Membership. Global Privileges.",
   description: "A private membership offering preferred rates and privileges across a global network of considered longevity and beauty destinations.",
   appleWebApp: {
     title: "Solenne",
   },
-  viewport: "width=device-width, initial-scale=1",
 };
 
 export default function RootLayout({
@@ -41,7 +45,9 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${cormorant.variable} font-sans antialiased max-w-screen overflow-x-hidden`}
       >
-        <Providers>{children}</Providers>
+        <Suspense fallback={null}>
+          <Providers>{children}</Providers>
+        </Suspense>
       </body>
     </html>
   );

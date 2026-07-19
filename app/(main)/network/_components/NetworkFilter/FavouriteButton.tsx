@@ -155,7 +155,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { getCurrentUser } from "@/services/auth";
+import useUser from "@/hooks/useUser";
 import { Heart } from "lucide-react";
 import { useEffect, useState, useCallback, memo, useRef } from "react";
 import { toast } from "sonner";
@@ -187,35 +187,25 @@ const FavouriteButton = memo(({
   initialFavourited = false,
   onToggle,
 }: FavouriteButtonProps) => {
+  const { user } = useUser();
   const [loading, setLoading] = useState(false);
   const [favourited, setFavourited] = useState(initialFavourited);
-  const [user, setUser] = useState<any>(null);
   const mountedRef = useRef(true);
 
   // Initialize once
   useEffect(() => {
     mountedRef.current = true;
 
-    const init = async () => {
-      const currentUser = await getCurrentUser();
-      if (!mountedRef.current) return;
-      
-      setUser(currentUser);
+    // Check localStorage
+    const favourites = getFavourites();
+    const isFavourited = favourites.includes(partnerId);
 
-      // Check localStorage
-      const favourites = getFavourites();
-      const isFavourited = favourites.includes(partnerId);
-
-      if (initialFavourited && !isFavourited) {
-        // Sync localStorage with initial state
-        setFavourites([...favourites, partnerId]);
-        setFavourited(true);
-      } else {
-        setFavourited(isFavourited);
-      }
-    };
-
-    init();
+    if (initialFavourited && !isFavourited) {
+      setFavourites([...favourites, partnerId]);
+      setFavourited(true);
+    } else {
+      setFavourited(isFavourited);
+    }
 
     return () => {
       mountedRef.current = false;

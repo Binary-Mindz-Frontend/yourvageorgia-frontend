@@ -11,9 +11,11 @@ export const NetworkSkeleton = () => {
                     className="relative w-full aspect-video rounded-xl overflow-hidden shadow-lg"
                 >
                     <Skeleton className="absolute inset-0 w-full h-full bg-white/5" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
                     <div className="absolute bottom-0 left-0 p-6 w-full space-y-3">
-                        <Skeleton className="h-8 w-1/3 bg-white/10" />
-                        <Skeleton className="h-4 w-1/4 bg-white/5" />
+                        <Skeleton className="h-8 w-1/3 bg-white/15" />
+                        <Skeleton className="h-4 w-1/4 bg-white/10" />
+                        <Skeleton className="h-4 w-1/5 bg-white/10" />
                     </div>
                 </div>
             ))}

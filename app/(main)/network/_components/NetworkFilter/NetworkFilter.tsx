@@ -315,8 +315,12 @@ const NetworkFilter = ({
   };
 
   const handlePartnerClick = useCallback((partner: Partner) => {
-    setSelectedPartner(partner);
-    setIsModalOpen(true);
+    // Wrapped in startTransition so React 19 fires a View Transition, which
+    // the PartnerCard ↔ slider images use for the shared-element morph.
+    startTransition(() => {
+      setSelectedPartner(partner);
+      setIsModalOpen(true);
+    });
   }, []);
 
   // Custom scroll functionality
@@ -520,7 +524,7 @@ const NetworkFilter = ({
       {isModalOpen && selectedPartner && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-999 overflow-y-auto scrollbar-hide">
           <PartnerDetailsModal
-            onClose={() => setIsModalOpen(false)}
+            onClose={() => startTransition(() => setIsModalOpen(false))}
             partner={selectedPartner}
           />
         </div>
