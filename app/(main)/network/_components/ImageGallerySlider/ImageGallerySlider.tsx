@@ -42,12 +42,6 @@ const SingleImageSlider = memo(
 
     return (
       <div className="relative w-full h-60.5 lg:h-108.75 overflow-hidden rounded-xl select-none bg-white/[0.03]">
-        {/* Loading indicator — minimal pulsing dot */}
-        {!loaded && (
-          <div className="absolute inset-0 flex items-center justify-center z-10">
-            <div className="w-2 h-2 rounded-full bg-white/30 animate-pulse" />
-          </div>
-        )}
         <Image
           src={image}
           alt="Gallery"
@@ -56,8 +50,8 @@ const SingleImageSlider = memo(
           className={clsx(
             "object-cover transition-all duration-500 ease-out",
             loaded
-              ? "opacity-100 scale-100"
-              : "opacity-0 scale-[1.02]"
+              ? "opacity-100 scale-100 blur-0"
+              : "opacity-20 scale-[1.02] blur-sm"
           )}
           priority
           decoding="async"
@@ -66,6 +60,19 @@ const SingleImageSlider = memo(
           onLoad={() => setLoaded(true)}
           onClick={() => setIsZoomed(true)}
         />
+        {/* Frosted overlay while loading */}
+        <div
+          className={clsx(
+            "absolute inset-0 bg-black/40 transition-opacity duration-500 ease-out pointer-events-none",
+            loaded ? "opacity-0" : "opacity-100"
+          )}
+        />
+        {/* Loading dot */}
+        {!loaded && (
+          <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
+            <div className="w-2 h-2 rounded-full bg-white/40 animate-pulse" />
+          </div>
+        )}
         <ZoomModal
           images={[image]}
           initialIndex={0}
@@ -286,13 +293,6 @@ const MultiImageSlider = memo(
                       !isDraggingRef.current && openZoom(i)
                     }
                   >
-                    {/* Loading indicator — minimal pulsing dot */}
-                    {!isLoaded && (
-                      <div className="absolute inset-0 flex items-center justify-center z-10">
-                        <div className="w-2 h-2 rounded-full bg-white/30 animate-pulse" />
-                      </div>
-                    )}
-
                     <Image
                       src={img}
                       alt={`Gallery image ${i + 1}`}
@@ -301,8 +301,8 @@ const MultiImageSlider = memo(
                       className={clsx(
                         "object-cover transition-all duration-500 ease-out",
                         isLoaded
-                          ? "opacity-100 scale-100"
-                          : "opacity-0 scale-[1.02]"
+                          ? "opacity-100 scale-100 blur-0"
+                          : "opacity-20 scale-[1.02] blur-sm"
                       )}
                       priority={i === 0}
                       loading={i <= 2 ? "eager" : "lazy"}
@@ -311,6 +311,19 @@ const MultiImageSlider = memo(
                       style={isSelected ? vtStyle : undefined}
                       onLoad={() => markLoaded(i)}
                     />
+                    {/* Frosted overlay while loading */}
+                    <div
+                      className={clsx(
+                        "absolute inset-0 bg-black/40 transition-opacity duration-500 ease-out pointer-events-none",
+                        isLoaded ? "opacity-0" : "opacity-100"
+                      )}
+                    />
+                    {/* Loading dot */}
+                    {!isLoaded && (
+                      <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
+                        <div className="w-2 h-2 rounded-full bg-white/40 animate-pulse" />
+                      </div>
+                    )}
                   </div>
                 );
               })}
@@ -405,24 +418,27 @@ const MultiImageSlider = memo(
                 )}
                 aria-label={`Go to image ${i + 1}`}
               >
-                {/* Thumbnail loading — minimal pulse */}
-                {!isThumbLoaded && (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-1.5 h-1.5 rounded-full bg-white/30 animate-pulse" />
-                  </div>
-                )}
                 <Image
                   src={img}
                   alt={`Thumbnail ${i + 1}`}
                   fill
                   sizes="64px"
                   className={clsx(
-                    "object-cover transition-opacity duration-300",
-                    isThumbLoaded ? "opacity-100" : "opacity-0"
+                    "object-cover transition-all duration-300",
+                    isThumbLoaded
+                      ? "opacity-100 blur-0"
+                      : "opacity-30 blur-[2px]"
                   )}
                   loading="lazy"
                   decoding="async"
                   onLoad={() => markThumbLoaded(i)}
+                />
+                {/* Frosted overlay */}
+                <div
+                  className={clsx(
+                    "absolute inset-0 bg-black/30 transition-opacity duration-300 pointer-events-none",
+                    isThumbLoaded ? "opacity-0" : "opacity-100"
+                  )}
                 />
               </button>
             );
