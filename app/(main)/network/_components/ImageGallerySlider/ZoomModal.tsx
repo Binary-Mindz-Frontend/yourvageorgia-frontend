@@ -77,18 +77,6 @@ const ZoomModal = memo(({ images, initialIndex, isOpen, onClose }: ZoomModalProp
     return () => { document.body.style.overflow = ""; };
   }, [isOpen]);
 
-  // Keyboard navigation
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-      else if (e.key === "ArrowLeft") navigate(-1);
-      else if (e.key === "ArrowRight") navigate(1);
-    };
-    window.addEventListener("keydown", handleKey);
-    return () => window.removeEventListener("keydown", handleKey);
-  }, [isOpen, currentIndex, isZoomed]);
-
   const navigate = useCallback((delta: number) => {
     if (isZoomed) return; // Don't navigate while zoomed in
     setCurrentIndex((prev) => {
@@ -99,6 +87,18 @@ const ZoomModal = memo(({ images, initialIndex, isOpen, onClose }: ZoomModalProp
     });
     setScale(1);
   }, [images.length, isZoomed]);
+
+  // Keyboard navigation
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+      else if (e.key === "ArrowLeft") navigate(-1);
+      else if (e.key === "ArrowRight") navigate(1);
+    };
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [isOpen, currentIndex, isZoomed, navigate]);
 
   const toggleZoom = useCallback(() => {
     setScale((prev) => (prev > 1 ? 1 : 2));

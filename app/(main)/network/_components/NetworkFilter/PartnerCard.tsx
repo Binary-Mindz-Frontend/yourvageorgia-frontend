@@ -15,6 +15,10 @@ interface PartnerCardProps {
 const PartnerCard = memo(({ partner, onClick, priority = false }: PartnerCardProps) => {
     const [isImageLoading, setIsImageLoading] = useState(true);
 
+    // Unique name used by React 19 <ViewTransition> to morph this thumbnail
+    // into the hero image when the user opens the partner detail modal.
+    const vtName = partner?._id ? `partner-${partner._id}` : undefined;
+
     // console.log(partner, 'partner');
 
     // Extract location once
@@ -51,6 +55,7 @@ const PartnerCard = memo(({ partner, onClick, priority = false }: PartnerCardPro
                     )}
                     style={{
                         filter: "brightness(1.05) saturate(1.2)",
+                        viewTransitionName: vtName,
                     }}
                     onLoad={() => setIsImageLoading(false)}
                     quality={75}

@@ -3,17 +3,22 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   output: 'standalone',
 
-  // Experimental features for better performance
+  // Next.js 16: Cache Components (PPR + use cache) — static shell streamed instantly,
+  // dynamic content streams in via Suspense. SPA-like navigation courtesy of <Activity>.
+  cacheComponents: true,
+
+  turbopack: {},
+
   experimental: {
     optimizePackageImports: [
       'lucide-react',
       '@/components',
       '@/services',
     ],
+    turbopackFileSystemCacheForBuild: true,
+    // Enable React <ViewTransition> integration. Native View Transitions API.
+    viewTransition: true,
   },
-
-  // IMPORTANT: Empty turbopack config to silence error
-  turbopack: {},
 
   // Image optimization
   images: {

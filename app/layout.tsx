@@ -1,8 +1,8 @@
 
-
 import Providers from "@/providers/Providers";
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Inter } from "next/font/google";
+import { Suspense } from "react";
 import "./globals.css";
 
 const inter = Inter({
@@ -45,7 +45,9 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${cormorant.variable} font-sans antialiased max-w-screen overflow-x-hidden`}
       >
-        <Providers>{children}</Providers>
+        <Suspense fallback={null}>
+          <Providers>{children}</Providers>
+        </Suspense>
       </body>
     </html>
   );
