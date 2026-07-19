@@ -87,6 +87,17 @@ const NetworkFilter = ({
   // Track if we should use initial data
   const shouldUseInitialData = useRef(true);
 
+  // Prevent browser scroll restoration loop on reload
+  useEffect(() => {
+    if (typeof window !== "undefined" && "scrollRestoration" in window.history) {
+      const originalScrollRestoration = window.history.scrollRestoration;
+      window.history.scrollRestoration = "manual";
+      return () => {
+        window.history.scrollRestoration = originalScrollRestoration;
+      };
+    }
+  }, []);
+
   // Fetch function
   const fetchPartners = useCallback(async (
     page: number,

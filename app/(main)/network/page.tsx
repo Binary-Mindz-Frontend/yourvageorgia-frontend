@@ -55,6 +55,28 @@ function NetworkSkeletonShell() {
       <h2 className="font-serif text-3xl lg:text-5xl font-bold lg:font-semibold text-center py-4 lg:py-20">
         The Network
       </h2>
+
+      {/* Header Placeholder to prevent layout shift */}
+      <header className="flex items-center justify-between mb-8">
+        <div className="w-32 bg-white/5 border border-white/10 rounded-full h-10 animate-pulse" />
+        <div className="w-10 h-10 bg-white/5 rounded-lg animate-pulse" />
+      </header>
+
+      {/* Categories Placeholder to prevent layout shift */}
+      <div
+        className="flex gap-4 mb-8 overflow-x-auto pb-2
+        [&::-webkit-scrollbar]:hidden
+        [-ms-overflow-style:none]
+        [scrollbar-width:none]"
+      >
+        {Array.from({ length: 6 }).map((_, idx) => (
+          <div
+            key={idx}
+            className="py-2.5 px-5 rounded-lg border border-white/10 h-[46px] min-w-[100px] bg-white/5 animate-pulse"
+          />
+        ))}
+      </div>
+
       <NetworkSkeleton />
     </div>
   );
