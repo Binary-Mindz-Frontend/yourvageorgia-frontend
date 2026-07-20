@@ -263,7 +263,7 @@ export const getCategoriesForSelect = async (
 ): Promise<ICategoriesListResponse | { error: string }> => {
   try {
     const res = await fetch(`${BASE_URL}/category?page=${page}&limit=${limit}`, {
-      cache: "no-store",
+      next: { revalidate: 3600 },
     });
     const json = await res.json();
 

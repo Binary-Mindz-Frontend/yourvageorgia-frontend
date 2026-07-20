@@ -1,9 +1,10 @@
 import { getCategoriesForSelect } from "@/services/category/category";
 import { getPartnerFiltered } from "@/services/partner/getpartner";
-import { ViewTransition } from "react";
 import { Suspense } from "react";
 import NetworkFilter from "./_components/NetworkFilter/NetworkFilter";
 import { NetworkSkeleton } from "@/components/Shared/Loading/NetworkSkeleton";
+import { ChevronDown, ListFilter } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface NetworkPageProps {
   searchParams: Promise<{
@@ -30,16 +31,8 @@ export default async function NetworkPage({ searchParams }: NetworkPageProps) {
   const search = params.search;
 
   return (
-    <Suspense
-      fallback={
-        <ViewTransition exit="slide-down">
-          <NetworkSkeletonShell />
-        </ViewTransition>
-      }
-    >
-      <ViewTransition enter="slide-up" default="none">
-        <NetworkFilterContent filter={filter} search={search} />
-      </ViewTransition>
+    <Suspense fallback={<NetworkSkeletonShell activeFilter={filter} />}>
+      <NetworkFilterContent filter={filter} search={search} />
     </Suspense>
   );
 }
@@ -48,32 +41,62 @@ export default async function NetworkPage({ searchParams }: NetworkPageProps) {
  * Static-shell wrapper for the skeleton. Mirrors the NetworkFilter layout so
  * the skeleton matches the final content's outer container (prevents layout
  * shift when the stream resolves).
+ * Renders static header and categories UI without pulsing skeleton boxes.
  */
-function NetworkSkeletonShell() {
+function NetworkSkeletonShell({ activeFilter = "All" }: { activeFilter?: string }) {
+  const categories = ["All", "Movement", "Recovery", "Radiance", "Taste"];
+
   return (
     <div className="text-white p-4 max-w-4xl mx-auto">
       <h2 className="font-serif text-3xl lg:text-5xl font-bold lg:font-semibold text-center py-4 lg:py-20">
         The Network
       </h2>
 
-      {/* Header Placeholder to prevent layout shift */}
-      <header className="flex items-center justify-between mb-8">
-        <div className="w-32 bg-white/5 border border-white/10 rounded-full h-10 animate-pulse" />
-        <div className="w-10 h-10 bg-white/5 rounded-lg animate-pulse" />
+      {/* City Selection & Filter Header (Rendered statically, no pulsing skeleton) */}
+      <header className="flex items-center justify-between mb-8 relative z-30">
+        <div className="relative">
+          <button
+            tabIndex={-1}
+            className="w-auto min-w-35 bg-black/40 backdrop-blur-md border border-white/10 text-white rounded-full px-5 h-10 font-light tracking-wide shadow-lg flex items-center justify-between gap-2 cursor-default"
+          >
+            <span className="capitalize">dubai</span>
+            <ChevronDown className="w-4 h-4" />
+          </button>
+        </div>
+
+        <Button
+          variant="ghost"
+          size="lg"
+          className="text-white focus:outline-none p-2 rounded [&_svg:not([class*='size-'])]:size-6 cursor-default"
+          aria-label="Open filter options"
+          tabIndex={-1}
+        >
+          <ListFilter className="h-6 w-6" aria-hidden="true" />
+        </Button>
       </header>
 
-      {/* Categories Placeholder to prevent layout shift */}
+      {/* Categories Header (Rendered statically, no pulsing skeleton) */}
       <div
         className="flex gap-4 mb-8 overflow-x-auto pb-2
         [&::-webkit-scrollbar]:hidden
         [-ms-overflow-style:none]
         [scrollbar-width:none]"
       >
-        {Array.from({ length: 6 }).map((_, idx) => (
-          <div
-            key={idx}
-            className="py-2.5 px-5 rounded-lg border border-white/10 h-[46px] min-w-[100px] bg-white/5 animate-pulse"
-          />
+        {categories.map((filter) => (
+          <button
+            key={filter}
+            tabIndex={-1}
+            className={`snap-start py-2.5 px-5 rounded-lg whitespace-nowrap
+              border border-white/10
+              transition-all duration-200
+              min-w-max cursor-default
+              ${activeFilter === filter
+                ? "bg-white text-black"
+                : "text-white"
+              }`}
+          >
+            {filter}
+          </button>
         ))}
       </div>
 
