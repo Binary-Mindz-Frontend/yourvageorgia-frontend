@@ -60,8 +60,10 @@ export default function AddAccessCodeModal({
     }, [isEdit, initialData, open]);
 
     const handleSubmit = async () => {
+        const normalizedCode = code.replace(/\s+/g, "");
+
         // Validation for create
-        if (!isEdit && (!code || !expiresAt)) {
+        if (!isEdit && (!normalizedCode || !expiresAt)) {
             toast.error("Code and Expiry Date are required");
             return;
         }
@@ -78,7 +80,7 @@ export default function AddAccessCodeModal({
             } else {
                 // Create body: { code, expiresAt, maxUses? }
                 res = await createAccessCode({
-                    code,
+                    code: normalizedCode,
                     expiresAt: new Date(expiresAt).toISOString(),
                     maxUses: maxUses === "" ? undefined : Number(maxUses),
                 });

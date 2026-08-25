@@ -47,8 +47,10 @@ const MembershipRegister = () => {
     e.preventDefault();
     setApiError("");
 
+    const accessCode = formData.accessCode.replace(/\s+/g, "");
+
     // Access code required
-    if (!formData.accessCode.trim()) {
+    if (!accessCode) {
       setApiError("Access code is required");
       return;
     }
@@ -77,7 +79,7 @@ const MembershipRegister = () => {
       password: formData.password,
       dateOfBirth: formData.dob,
       phone: formData.phone,
-      accessCode: formData.accessCode,
+      accessCode,
     };
 
     try {
