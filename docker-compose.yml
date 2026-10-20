@@ -7,6 +7,7 @@ services:
       - .env
     image: softvence/${PACKAGE_NAME}:latest
     container_name: georgia_app
+    restart: unless-stopped
     networks:
       - georgia_app_network
 
